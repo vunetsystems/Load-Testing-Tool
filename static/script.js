@@ -1,18 +1,23 @@
 // vuDataSim Cluster Manager - Frontend JavaScript
 class VuDataSimManager {
     constructor() {
+        console.log('VuDataSimManager constructor called');
         this.isSimulationRunning = false;
         this.simulationInterval = null;
         this.currentProfile = 'medium';
-        this.apiBaseUrl = '/api'; // Backend API base URL
+        this.apiBaseUrl = ''; // Backend API base URL (empty for same origin)
         this.wsConnection = null;
+        this.nodes = {}; // Store node data
         
         this.initializeComponents();
         this.bindEvents();
+        this.loadNodes(); // Load nodes from API
         this.startRealTimeUpdates();
+        console.log('VuDataSimManager initialization complete');
     }
 
     initializeComponents() {
+        console.log('Initializing components...');
         // Cache DOM elements for better performance
         this.elements = {
             profileButton: document.getElementById('profile-button'),
@@ -27,6 +32,20 @@ class VuDataSimManager {
             logNodeFilter: document.getElementById('log-node'),
             logModuleFilter: document.getElementById('log-module'),
             logsContainer: document.getElementById('logs-container'),
+
+            // Node management elements
+            nodeManagementBtn: document.getElementById('node-management-btn'),
+            nodeManagementSection: document.getElementById('node-management-section'),
+            nodeName: document.getElementById('node-name'),
+            nodeHost: document.getElementById('node-host'),
+            nodeUser: document.getElementById('node-user'),
+            nodeKeypath: document.getElementById('node-keypath'),
+            nodeConfdir: document.getElementById('node-confdir'),
+            nodeBindir: document.getElementById('node-bindir'),
+            nodeDescription: document.getElementById('node-description'),
+            nodeEnabled: document.getElementById('node-enabled'),
+            addNodeBtn: document.getElementById('add-node-btn'),
+            nodesTableBody: document.getElementById('nodes-table-body'),
             
             // Dashboard elements
             nodeStatusIndicators: {
@@ -56,14 +75,8 @@ class VuDataSimManager {
             etaRuntime: document.getElementById('eta-runtime')
         };
 
-        // Initialize node data
-        this.nodeData = {
-            node1: { eps: 9800, kafka: 4900, ch: 1950, cpu: 65, memory: 70, status: 'active' },
-            node2: { eps: 9900, kafka: 4950, ch: 1980, cpu: 70, memory: 75, status: 'active' },
-            node3: { eps: 10100, kafka: 5050, ch: 2020, cpu: 60, memory: 65, status: 'active' },
-            node4: { eps: 0, kafka: 0, ch: 0, cpu: 0, memory: 0, status: 'inactive' },
-            node5: { eps: 10000, kafka: 5000, ch: 2000, cpu: 75, memory: 80, status: 'active' }
-        };
+        // Initialize node data (will be loaded from API)
+        this.nodeData = {};
 
         // Log entries for demonstration
         this.logEntries = [
@@ -107,6 +120,21 @@ class VuDataSimManager {
         this.elements.stopBtn?.addEventListener('click', () => this.stopSimulation());
         this.elements.syncBtn?.addEventListener('click', () => this.syncConfiguration());
 
+        // Node management event listeners
+        console.log('Node Management Button element:', this.elements.nodeManagementBtn);
+        console.log('Node Management Section element:', this.elements.nodeManagementSection);
+        
+        if (this.elements.nodeManagementBtn) {
+            this.elements.nodeManagementBtn.addEventListener('click', () => {
+                console.log('Node Management button clicked!');
+                this.toggleNodeManagement();
+            });
+        } else {
+            console.error('Node Management button not found!');
+        }
+        
+        this.elements.addNodeBtn?.addEventListener('click', () => this.addNode());
+
         // Input validation
         [this.elements.targetEps, this.elements.targetKafka, this.elements.targetCh].forEach(input => {
             input?.addEventListener('input', (e) => this.validateInput(e.target));
@@ -124,6 +152,33 @@ class VuDataSimManager {
                 this.addRandomLog();
             }
         }, 2000);
+    }
+
+    async loadNodes() {
+        try {
+            // Load nodes from the integrated API
+            const response = await this.callAPI('/api/nodes');
+            if (response.success && response.data) {
+                // Convert API data to nodeData format
+                this.nodeData = {};
+                response.data.forEach(node => {
+                    const nodeId = node.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    this.nodeData[nodeId] = {
+                        eps: Math.floor(Math.random() * 10000) + 5000, // Mock metrics for now
+                        kafka: Math.floor(Math.random() * 5000) + 2500,
+                        ch: Math.floor(Math.random() * 2000) + 1000,
+                        cpu: Math.floor(Math.random() * 50) + 30,
+                        memory: Math.floor(Math.random() * 50) + 30,
+                        status: node.enabled ? 'active' : 'inactive'
+                    };
+                });
+
+                this.updateDashboardDisplay();
+                this.updateNodeStatusIndicators();
+            }
+        } catch (error) {
+            console.error('Error loading nodes:', error);
+        }
     }
 
     toggleDropdown() {
@@ -483,6 +538,8 @@ class VuDataSimManager {
     startRealTimeUpdates() {
         // Initial display
         this.updateDashboardDisplay();
+        this.updateNodeStatusIndicators();
+        this.refreshNodesTable();
         this.updateProfileSummary();
         this.displayLogs(this.logEntries);
         
@@ -529,14 +586,193 @@ class VuDataSimManager {
 
     async refreshDashboard() {
         try {
-            const response = await this.callAPI('/dashboard/refresh');
-            if (response.success && response.data) {
-                // Update with fresh data from backend
-                Object.assign(this.nodeData, response.data.nodes || {});
-                this.updateDashboardDisplay();
+            // Reload nodes from API
+            await this.loadNodes();
+            // Also refresh the nodes table if it's visible
+            if (!this.elements.nodeManagementSection.classList.contains('hidden')) {
+                this.refreshNodesTable();
             }
         } catch (error) {
             console.error('Error refreshing dashboard:', error);
+        }
+    }
+
+    updateNodeStatusIndicators() {
+        // Update node status indicators based on real node data
+        Object.keys(this.nodeData).forEach((nodeId, index) => {
+            const node = this.nodeData[nodeId];
+            const statusElement = this.elements.nodeStatusIndicators[`node${index + 1}`];
+
+            if (statusElement) {
+                if (node.status === 'active') {
+                    statusElement.className = 'h-4 w-4 rounded-full bg-success animate-node-pulse';
+                    statusElement.title = `${nodeId.charAt(0).toUpperCase() + nodeId.slice(1)}: Active`;
+                } else {
+                    statusElement.className = 'h-4 w-4 rounded-full bg-danger';
+                    statusElement.title = `${nodeId.charAt(0).toUpperCase() + nodeId.slice(1)}: Inactive`;
+                }
+            }
+        });
+    }
+
+    toggleNodeManagement() {
+        console.log('toggleNodeManagement called');
+        const section = this.elements.nodeManagementSection;
+        console.log('Node management section:', section);
+        
+        if (!section) {
+            console.error('Node management section not found!');
+            return;
+        }
+        
+        const isHidden = section.classList.contains('hidden');
+        console.log('Section is hidden:', isHidden);
+
+        if (isHidden) {
+            console.log('Showing node management section');
+            section.classList.remove('hidden');
+            this.refreshNodesTable();
+        } else {
+            console.log('Hiding node management section');
+            section.classList.add('hidden');
+        }
+    }
+
+    async addNode() {
+        const nodeData = {
+            host: this.elements.nodeHost.value,
+            user: this.elements.nodeUser.value,
+            key_path: this.elements.nodeKeypath.value,
+            conf_dir: this.elements.nodeConfdir.value,
+            binary_dir: this.elements.nodeBindir.value,
+            description: this.elements.nodeDescription.value,
+            enabled: this.elements.nodeEnabled.checked
+        };
+
+        if (!nodeData.host || !nodeData.user || !nodeData.key_path || !nodeData.conf_dir || !nodeData.binary_dir) {
+            this.showNotification('Please fill in all required fields', 'error');
+            return;
+        }
+
+        this.setButtonLoading(this.elements.addNodeBtn, true);
+
+        try {
+            const nodeName = this.elements.nodeName.value || `node-${Date.now()}`;
+            const response = await this.callAPI(`/api/nodes/${nodeName}`, 'POST', nodeData);
+
+            if (response.success) {
+                this.showNotification(`Node ${nodeName} added successfully`, 'success');
+                this.clearNodeForm();
+                this.refreshNodesTable();
+                this.loadNodes(); // Refresh the dashboard nodes too
+            } else {
+                throw new Error(response.message || 'Failed to add node');
+            }
+        } catch (error) {
+            console.error('Error adding node:', error);
+            this.showNotification('Failed to add node: ' + error.message, 'error');
+        } finally {
+            this.setButtonLoading(this.elements.addNodeBtn, false);
+        }
+    }
+
+    clearNodeForm() {
+        this.elements.nodeName.value = '';
+        this.elements.nodeHost.value = '';
+        this.elements.nodeUser.value = '';
+        this.elements.nodeKeypath.value = '';
+        this.elements.nodeConfdir.value = '';
+        this.elements.nodeBindir.value = '';
+        this.elements.nodeDescription.value = '';
+        this.elements.nodeEnabled.checked = true;
+    }
+
+    async refreshNodesTable() {
+        try {
+            const response = await this.callAPI('/api/nodes');
+            if (response.success && response.data) {
+                this.displayNodesTable(response.data);
+            }
+        } catch (error) {
+            console.error('Error refreshing nodes table:', error);
+        }
+    }
+
+    displayNodesTable(nodes) {
+        const tbody = this.elements.nodesTableBody;
+        tbody.innerHTML = '';
+
+        if (nodes.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="5" class="p-4 text-center text-text-secondary-light dark:text-text-secondary-dark">No nodes configured</td>';
+            tbody.appendChild(row);
+            return;
+        }
+
+        nodes.forEach(node => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200';
+
+            const statusBadge = node.enabled
+                ? '<div class="inline-flex items-center gap-2 rounded-full bg-success/20 dark:bg-success-dark/20 px-3 py-1 text-xs font-medium text-success dark:text-success-dark"><span class="h-2 w-2 rounded-full bg-success"></span>Enabled</div>'
+                : '<div class="inline-flex items-center gap-2 rounded-full bg-danger/20 dark:bg-danger-dark/20 px-3 py-1 text-xs font-medium text-danger dark:text-danger-dark"><span class="h-2 w-2 rounded-full bg-danger"></span>Disabled</div>';
+
+            row.innerHTML = `
+                <td class="p-4 font-medium">${node.name}</td>
+                <td class="p-4">${node.host}</td>
+                <td class="p-4">${statusBadge}</td>
+                <td class="p-4">${node.description || '-'}</td>
+                <td class="p-4">
+                    <div class="flex items-center gap-2">
+                        <button onclick="window.vuDataSimManager.toggleNode('${node.name}', ${!node.enabled})" class="px-3 py-1 text-xs rounded ${node.enabled ? 'bg-danger/20 text-danger hover:bg-danger/30' : 'bg-success/20 text-success hover:bg-success/30'} transition-colors">
+                            ${node.enabled ? 'Disable' : 'Enable'}
+                        </button>
+                        <button onclick="window.vuDataSimManager.removeNode('${node.name}')" class="px-3 py-1 text-xs rounded bg-danger/20 text-danger hover:bg-danger/30 transition-colors">
+                            Remove
+                        </button>
+                    </div>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+        });
+    }
+
+    async toggleNode(nodeName, enable) {
+        try {
+            const response = await this.callAPI(`/api/nodes/${nodeName}`, 'PUT', { enabled: enable });
+
+            if (response.success) {
+                this.showNotification(`Node ${nodeName} ${enable ? 'enabled' : 'disabled'} successfully`, 'success');
+                this.refreshNodesTable();
+                this.loadNodes(); // Refresh the dashboard nodes too
+            } else {
+                throw new Error(response.message || 'Failed to update node');
+            }
+        } catch (error) {
+            console.error('Error toggling node:', error);
+            this.showNotification('Failed to update node: ' + error.message, 'error');
+        }
+    }
+
+    async removeNode(nodeName) {
+        if (!confirm(`Are you sure you want to remove node "${nodeName}"?`)) {
+            return;
+        }
+
+        try {
+            const response = await this.callAPI(`/api/nodes/${nodeName}`, 'DELETE');
+
+            if (response.success) {
+                this.showNotification(`Node ${nodeName} removed successfully`, 'success');
+                this.refreshNodesTable();
+                this.loadNodes(); // Refresh the dashboard nodes too
+            } else {
+                throw new Error(response.message || 'Failed to remove node');
+            }
+        } catch (error) {
+            console.error('Error removing node:', error);
+            this.showNotification('Failed to remove node: ' + error.message, 'error');
         }
     }
 
@@ -564,6 +800,16 @@ class VuDataSimManager {
 document.addEventListener('DOMContentLoaded', () => {
     window.vuDataSimManager = new VuDataSimManager();
 });
+
+// Test function to manually toggle node management
+window.testNodeManagement = function() {
+    console.log('Test function called');
+    if (window.vuDataSimManager) {
+        window.vuDataSimManager.toggleNodeManagement();
+    } else {
+        console.error('vuDataSimManager not initialized');
+    }
+};
 
 // Export for potential module usage
 if (typeof module !== 'undefined' && module.exports) {

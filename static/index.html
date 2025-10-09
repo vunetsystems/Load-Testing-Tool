@@ -9,7 +9,7 @@
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/static/styles.css">
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -150,6 +150,10 @@
             <div class="flex items-center justify-between mb-8">
                 <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2>
                 <div class="flex items-center gap-4">
+                    <button id="node-management-btn" class="group flex items-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 px-4 py-2 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
+                        <span class="material-symbols-outlined">dns</span>
+                        <span>Node Management</span>
+                    </button>
                     <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Node Status:</span>
                     <div class="flex items-center gap-2">
                         <span id="node1-status" class="h-4 w-4 rounded-full bg-success animate-node-pulse" title="Node 1: Active"></span>
@@ -384,6 +388,77 @@
                     </div>
                 </div>
 
+                <!-- Node Management Section -->
+                <div id="node-management-section" class="hidden">
+                    <h3 class="text-xl font-semibold mb-4">Node Management</h3>
+
+                    <!-- Add Node Form -->
+                    <div class="mb-8">
+                        <h4 class="text-lg font-semibold mb-4">Add New Node</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Node Name</label>
+                                <input id="node-name" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="e.g., prod-node-1">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Host/IP</label>
+                                <input id="node-host" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="192.168.1.100">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">SSH User</label>
+                                <input id="node-user" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="admin">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">SSH Key Path</label>
+                                <input id="node-keypath" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="~/.ssh/id_rsa">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Remote Conf Dir</label>
+                                <input id="node-confdir" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="/opt/vu-data-sim/conf.d">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Remote Binary Dir</label>
+                                <input id="node-bindir" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="/opt/vu-data-sim/bin">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Description</label>
+                                <input id="node-description" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="Optional description">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <button id="add-node-btn" class="group flex items-center gap-2 rounded-lg bg-primary dark:bg-primary-dark px-6 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100">
+                                <span class="material-symbols-outlined">add</span>
+                                <span>Add Node</span>
+                            </button>
+                            <label class="flex items-center gap-2">
+                                <input id="node-enabled" type="checkbox" checked class="rounded border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark text-primary dark:text-primary-dark focus:ring-primary dark:focus:ring-primary-dark">
+                                <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Enable node after creation</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Nodes List -->
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Configured Nodes</h4>
+                        <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
+                                    <tr>
+                                        <th class="p-4 font-semibold">Node Name</th>
+                                        <th class="p-4 font-semibold">Host</th>
+                                        <th class="p-4 font-semibold">Status</th>
+                                        <th class="p-4 font-semibold">Description</th>
+                                        <th class="p-4 font-semibold">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="nodes-table-body" class="divide-y divide-subtle-light dark:divide-subtle-dark">
+                                    <!-- Nodes will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Logs Preview -->
                 <div>
                     <h3 class="text-xl font-semibold my-4">Logs Preview</h3>
@@ -469,6 +544,6 @@
         </main>
     </div>
 
-    <script src="script.js"></script>
+    <script src="/static/script.js"></script>
 </body>
 </html>

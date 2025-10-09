@@ -6,8 +6,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -15,6 +18,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
+	"gopkg.in/yaml.v3"
 )
 
 // Application version and configuration
@@ -83,6 +87,342 @@ var appState = &AppState{
 	clients:             make(map[*websocket.Conn]bool),
 	broadcast:           make(chan []byte, 256),
 }
+
+// Node Management Structures and Types
+
+// ClusterSettings represents cluster-wide configuration
+type ClusterSettings struct {
+	BackupRetentionDays int    `yaml:"backup_retention_days"`
+	ConflictResolution  string `yaml:"conflict_resolution"`
+	ConnectionTimeout   int    `yaml:"connection_timeout"`
+	MaxRetries          int    `yaml:"max_retries"`
+	SyncTimeout         int    `yaml:"sync_timeout"`
+}
+
+// NodeConfig represents a single node configuration
+type NodeConfig struct {
+	Host        string `yaml:"host"`
+	User        string `yaml:"user"`
+	KeyPath     string `yaml:"key_path"`
+	ConfDir     string `yaml:"conf_dir"`
+	BinaryDir   string `yaml:"binary_dir"`
+	Description string `yaml:"description"`
+	Enabled     bool   `yaml:"enabled"`
+}
+
+// NodesConfig represents the entire nodes configuration
+type NodesConfig struct {
+	ClusterSettings ClusterSettings       `yaml:"cluster_settings"`
+	Nodes           map[string]NodeConfig `yaml:"nodes"`
+}
+
+// NodeManager handles node operations
+type NodeManager struct {
+	nodesConfigPath string
+	snapshotsDir    string
+	backupsDir      string
+	logsDir         string
+	nodesConfig     NodesConfig
+}
+
+// NewNodeManager creates a new node manager instance
+func NewNodeManager() *NodeManager {
+	return &NodeManager{
+		nodesConfigPath: "src/node_control/nodes.yaml",
+		snapshotsDir:    "src/node_control/node_snapshots",
+		backupsDir:      "src/node_control/node_backups",
+		logsDir:         "src/node_control/logs",
+		nodesConfig: NodesConfig{
+			ClusterSettings: ClusterSettings{
+				BackupRetentionDays: 30,
+				ConflictResolution:  "manual",
+				ConnectionTimeout:   10,
+				MaxRetries:          3,
+				SyncTimeout:         60,
+			},
+			Nodes: make(map[string]NodeConfig),
+		},
+	}
+}
+
+// LoadNodesConfig loads the nodes configuration from YAML file
+func (nm *NodeManager) LoadNodesConfig() error {
+	if _, err := os.Stat(nm.nodesConfigPath); os.IsNotExist(err) {
+		// Create default config if file doesn't exist
+		return nm.SaveNodesConfig()
+	}
+
+	data, err := os.ReadFile(nm.nodesConfigPath)
+	if err != nil {
+		return fmt.Errorf("failed to read nodes config file: %v", err)
+	}
+
+	err = yaml.Unmarshal(data, &nm.nodesConfig)
+	if err != nil {
+		return fmt.Errorf("failed to parse nodes config file: %v", err)
+	}
+
+	return nil
+}
+
+// SaveNodesConfig saves the nodes configuration to YAML file
+func (nm *NodeManager) SaveNodesConfig() error {
+	data, err := yaml.Marshal(nm.nodesConfig)
+	if err != nil {
+		return fmt.Errorf("failed to marshal nodes config: %v", err)
+	}
+
+	err = os.WriteFile(nm.nodesConfigPath, data, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write nodes config file: %v", err)
+	}
+
+	return nil
+}
+
+// AddNode adds a new node to the configuration and copies files via SSH
+func (nm *NodeManager) AddNode(name, host, user, keyPath, confDir, binaryDir, description string, enabled bool) error {
+	if _, exists := nm.nodesConfig.Nodes[name]; exists {
+		return fmt.Errorf("node %s already exists", name)
+	}
+
+	nodeConfig := NodeConfig{
+		Host:        host,
+		User:        user,
+		KeyPath:     keyPath,
+		ConfDir:     confDir,
+		BinaryDir:   binaryDir,
+		Description: description,
+		Enabled:     enabled,
+	}
+
+	nm.nodesConfig.Nodes[name] = nodeConfig
+
+	// Save configuration first
+	err := nm.SaveNodesConfig()
+	if err != nil {
+		return fmt.Errorf("failed to save nodes config: %v", err)
+	}
+
+	// Copy files to remote node
+	err = nm.copyFilesToNode(name, nodeConfig)
+	if err != nil {
+		// Rollback configuration on copy failure
+		delete(nm.nodesConfig.Nodes, name)
+		nm.SaveNodesConfig()
+		return fmt.Errorf("failed to copy files to node: %v", err)
+	}
+
+	log.Printf("Successfully added node %s", name)
+	return nil
+}
+
+// RemoveNode removes a node from configuration and cleans up files
+func (nm *NodeManager) RemoveNode(name string) error {
+	_, exists := nm.nodesConfig.Nodes[name]
+	if !exists {
+		return fmt.Errorf("node %s not found", name)
+	}
+
+	// Remove from configuration
+	delete(nm.nodesConfig.Nodes, name)
+	err := nm.SaveNodesConfig()
+	if err != nil {
+		return fmt.Errorf("failed to save config: %v", err)
+	}
+
+	// Clean up snapshots and backups
+	err = nm.cleanupNodeFiles(name)
+	if err != nil {
+		log.Printf("Warning: failed to cleanup files for node %s: %v", name, err)
+	}
+
+	log.Printf("Successfully removed node %s", name)
+	return nil
+}
+
+// EnableNode enables a node
+func (nm *NodeManager) EnableNode(name string) error {
+	nodeConfig, exists := nm.nodesConfig.Nodes[name]
+	if !exists {
+		return fmt.Errorf("node %s not found", name)
+	}
+
+	nodeConfig.Enabled = true
+	nm.nodesConfig.Nodes[name] = nodeConfig
+
+	err := nm.SaveNodesConfig()
+	if err != nil {
+		return fmt.Errorf("failed to save config: %v", err)
+	}
+
+	log.Printf("Successfully enabled node %s", name)
+	return nil
+}
+
+// DisableNode disables a node
+func (nm *NodeManager) DisableNode(name string) error {
+	nodeConfig, exists := nm.nodesConfig.Nodes[name]
+	if !exists {
+		return fmt.Errorf("node %s not found", name)
+	}
+
+	nodeConfig.Enabled = false
+	nm.nodesConfig.Nodes[name] = nodeConfig
+
+	err := nm.SaveNodesConfig()
+	if err != nil {
+		return fmt.Errorf("failed to save config: %v", err)
+	}
+
+	log.Printf("Successfully disabled node %s", name)
+	return nil
+}
+
+// GetNodes returns all nodes
+func (nm *NodeManager) GetNodes() map[string]NodeConfig {
+	return nm.nodesConfig.Nodes
+}
+
+// GetEnabledNodes returns only enabled nodes
+func (nm *NodeManager) GetEnabledNodes() map[string]NodeConfig {
+	enabledNodes := make(map[string]NodeConfig)
+	for name, config := range nm.nodesConfig.Nodes {
+		if config.Enabled {
+			enabledNodes[name] = config
+		}
+	}
+	return enabledNodes
+}
+
+// copyFilesToNode copies the binary and conf.d directory to the remote node
+func (nm *NodeManager) copyFilesToNode(nodeName string, nodeConfig NodeConfig) error {
+	localBinary := "src/finalvudatasim"
+	localConfDir := "src/conf.d"
+
+	// Check if local files exist
+	if _, err := os.Stat(localBinary); os.IsNotExist(err) {
+		return fmt.Errorf("local binary file %s not found", localBinary)
+	}
+
+	if _, err := os.Stat(localConfDir); os.IsNotExist(err) {
+		return fmt.Errorf("local conf.d directory %s not found", localConfDir)
+	}
+
+	// Create remote directories
+	err := nm.sshExec(nodeConfig, fmt.Sprintf("mkdir -p %s %s", nodeConfig.BinaryDir, nodeConfig.ConfDir))
+	if err != nil {
+		return fmt.Errorf("failed to create remote directories: %v", err)
+	}
+
+	// Copy binary file
+	err = nm.scpCopy(nodeConfig, localBinary, filepath.Join(nodeConfig.BinaryDir, "finalvudatasim"))
+	if err != nil {
+		return fmt.Errorf("failed to copy binary: %v", err)
+	}
+
+	// Copy conf.d directory recursively
+	err = nm.scpCopyDir(nodeConfig, localConfDir, nodeConfig.ConfDir)
+	if err != nil {
+		return fmt.Errorf("failed to copy conf.d directory: %v", err)
+	}
+
+	log.Printf("Successfully copied files to node %s", nodeName)
+	return nil
+}
+
+// cleanupNodeFiles removes snapshots and backups for a node
+func (nm *NodeManager) cleanupNodeFiles(nodeName string) error {
+	nodeSnapshotDir := filepath.Join(nm.snapshotsDir, nodeName)
+	nodeBackupDir := filepath.Join(nm.backupsDir, nodeName)
+
+	if _, err := os.Stat(nodeSnapshotDir); !os.IsNotExist(err) {
+		err := os.RemoveAll(nodeSnapshotDir)
+		if err != nil {
+			return fmt.Errorf("failed to remove snapshot directory: %v", err)
+		}
+	}
+
+	if _, err := os.Stat(nodeBackupDir); !os.IsNotExist(err) {
+		err := os.RemoveAll(nodeBackupDir)
+		if err != nil {
+			return fmt.Errorf("failed to remove backup directory: %v", err)
+		}
+	}
+
+	return nil
+}
+
+// sshExec executes a command on the remote node via SSH
+func (nm *NodeManager) sshExec(nodeConfig NodeConfig, command string) error {
+	args := []string{
+		"-i", nodeConfig.KeyPath,
+		"-o", "StrictHostKeyChecking=no",
+		"-o", "UserKnownHostsFile=/dev/null",
+		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
+		command,
+	}
+
+	cmd := exec.Command("ssh", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("SSH command failed: %v", err)
+	}
+
+	return nil
+}
+
+// scpCopy copies a single file to the remote node
+func (nm *NodeManager) scpCopy(nodeConfig NodeConfig, localPath, remotePath string) error {
+	args := []string{
+		"-i", nodeConfig.KeyPath,
+		"-o", "StrictHostKeyChecking=no",
+		"-o", "UserKnownHostsFile=/dev/null",
+		"-r", // recursive for directories
+		localPath,
+		fmt.Sprintf("%s@%s:%s", nodeConfig.User, nodeConfig.Host, remotePath),
+	}
+
+	cmd := exec.Command("scp", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("SCP copy failed: %v", err)
+	}
+
+	return nil
+}
+
+// scpCopyDir copies a directory recursively to the remote node
+func (nm *NodeManager) scpCopyDir(nodeConfig NodeConfig, localDir, remoteDir string) error {
+	args := []string{
+		"-i", nodeConfig.KeyPath,
+		"-o", "StrictHostKeyChecking=no",
+		"-o", "UserKnownHostsFile=/dev/null",
+		"-r",
+		localDir,
+		fmt.Sprintf("%s@%s:%s", nodeConfig.User, nodeConfig.Host, remoteDir),
+	}
+
+	cmd := exec.Command("scp", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("SCP directory copy failed: %v", err)
+	}
+
+	return nil
+}
+
+// Global node manager instance
+var nodeManager = NewNodeManager()
 
 // Initialize node data
 func init() {
@@ -554,7 +894,361 @@ func minFloat(a, b float64) float64 {
 	return b
 }
 
-// Serve static files
+// Node Management API Handlers
+
+// sendJSONResponse sends a JSON response
+func sendJSONResponse(w http.ResponseWriter, status int, response APIResponse) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(response)
+}
+
+// handleAPINodes handles GET /api/nodes (list all nodes)
+func handleAPINodes(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		sendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
+			Success: false,
+			Message: "Method not allowed",
+		})
+		return
+	}
+
+	nodes := nodeManager.GetNodes()
+	nodeList := make([]map[string]interface{}, 0)
+
+	for name, config := range nodes {
+		status := "Disabled"
+		if config.Enabled {
+			status = "Enabled"
+		}
+
+		nodeList = append(nodeList, map[string]interface{}{
+			"name":        name,
+			"host":        config.Host,
+			"user":        config.User,
+			"status":      status,
+			"description": config.Description,
+			"binary_dir":  config.BinaryDir,
+			"conf_dir":    config.ConfDir,
+			"enabled":     config.Enabled,
+		})
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Data:    nodeList,
+	})
+}
+
+// handleAPINodeActions handles POST/PUT/DELETE /api/nodes/{name}
+func handleAPINodeActions(w http.ResponseWriter, r *http.Request) {
+	// Extract node name from URL path
+	vars := mux.Vars(r)
+	nodeName := vars["name"]
+
+	if nodeName == "" {
+		sendJSONResponse(w, http.StatusBadRequest, APIResponse{
+			Success: false,
+			Message: "Node name is required",
+		})
+		return
+	}
+
+	switch r.Method {
+	case http.MethodPost:
+		handleCreateNode(w, r, nodeName)
+	case http.MethodPut:
+		handleUpdateNode(w, r, nodeName)
+	case http.MethodDelete:
+		handleDeleteNode(w, r, nodeName)
+	default:
+		sendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
+			Success: false,
+			Message: "Method not allowed",
+		})
+	}
+}
+
+// handleCreateNode handles POST /api/nodes/{name}
+func handleCreateNode(w http.ResponseWriter, r *http.Request, nodeName string) {
+	var nodeData struct {
+		Host        string `json:"host"`
+		User        string `json:"user"`
+		KeyPath     string `json:"key_path"`
+		ConfDir     string `json:"conf_dir"`
+		BinaryDir   string `json:"binary_dir"`
+		Description string `json:"description"`
+		Enabled     bool   `json:"enabled"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&nodeData); err != nil {
+		sendJSONResponse(w, http.StatusBadRequest, APIResponse{
+			Success: false,
+			Message: "Invalid JSON data",
+		})
+		return
+	}
+
+	err := nodeManager.AddNode(nodeName, nodeData.Host, nodeData.User, nodeData.KeyPath,
+		nodeData.ConfDir, nodeData.BinaryDir, nodeData.Description, nodeData.Enabled)
+
+	if err != nil {
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	sendJSONResponse(w, http.StatusCreated, APIResponse{
+		Success: true,
+		Message: fmt.Sprintf("Node %s created successfully", nodeName),
+	})
+}
+
+// handleUpdateNode handles PUT /api/nodes/{name}
+func handleUpdateNode(w http.ResponseWriter, r *http.Request, nodeName string) {
+	var nodeData struct {
+		Enabled *bool `json:"enabled,omitempty"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&nodeData); err != nil {
+		sendJSONResponse(w, http.StatusBadRequest, APIResponse{
+			Success: false,
+			Message: "Invalid JSON data",
+		})
+		return
+	}
+
+	if nodeData.Enabled != nil {
+		if *nodeData.Enabled {
+			err := nodeManager.EnableNode(nodeName)
+			if err != nil {
+				sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+					Success: false,
+					Message: err.Error(),
+				})
+				return
+			}
+		} else {
+			err := nodeManager.DisableNode(nodeName)
+			if err != nil {
+				sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+					Success: false,
+					Message: err.Error(),
+				})
+				return
+			}
+		}
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: fmt.Sprintf("Node %s updated successfully", nodeName),
+	})
+}
+
+// handleDeleteNode handles DELETE /api/nodes/{name}
+func handleDeleteNode(w http.ResponseWriter, r *http.Request, nodeName string) {
+	err := nodeManager.RemoveNode(nodeName)
+	if err != nil {
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: fmt.Sprintf("Node %s deleted successfully", nodeName),
+	})
+}
+
+// handleAPIClusterSettings handles GET/PUT /api/cluster-settings
+func handleAPIClusterSettings(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		sendJSONResponse(w, http.StatusOK, APIResponse{
+			Success: true,
+			Data:    nodeManager.nodesConfig.ClusterSettings,
+		})
+	case http.MethodPut:
+		var settings ClusterSettings
+		if err := json.NewDecoder(r.Body).Decode(&settings); err != nil {
+			sendJSONResponse(w, http.StatusBadRequest, APIResponse{
+				Success: false,
+				Message: "Invalid JSON data",
+			})
+			return
+		}
+
+		nodeManager.nodesConfig.ClusterSettings = settings
+		err := nodeManager.SaveNodesConfig()
+		if err != nil {
+			sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+				Success: false,
+				Message: err.Error(),
+			})
+			return
+		}
+
+		sendJSONResponse(w, http.StatusOK, APIResponse{
+			Success: true,
+			Message: "Cluster settings updated successfully",
+		})
+	default:
+		sendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
+			Success: false,
+			Message: "Method not allowed",
+		})
+	}
+}
+
+// CLI Node Management Functions
+
+// handleNodeManagementCLI handles CLI commands for node management
+func handleNodeManagementCLI(command string, args []string) bool {
+	switch command {
+	case "add":
+		handleAddNodeCLI(args)
+		return true
+	case "remove":
+		handleRemoveNodeCLI(args)
+		return true
+	case "enable":
+		handleEnableNodeCLI(args)
+		return true
+	case "disable":
+		handleDisableNodeCLI(args)
+		return true
+	case "list":
+		handleListNodesCLI()
+		return true
+	case "list-enabled":
+		handleListEnabledNodesCLI()
+		return true
+	case "web":
+		// Continue to web server mode
+		return false
+	default:
+		return false // Not a node management command
+	}
+}
+
+func handleAddNodeCLI(args []string) {
+	if len(args) < 6 {
+		log.Fatal("Usage: vuDataSim-manager add <name> <host> <user> <key_path> <conf_dir> <binary_dir> [description] [enabled]")
+	}
+
+	name := args[0]
+	host := args[1]
+	user := args[2]
+	keyPath := args[3]
+	confDir := args[4]
+	binaryDir := args[5]
+
+	description := ""
+	if len(args) > 6 {
+		description = strings.Join(args[6:len(args)-1], " ")
+	}
+
+	enabled := true
+	if len(args) > 7 {
+		enabled = args[len(args)-1] == "true"
+	}
+
+	err := nodeManager.AddNode(name, host, user, keyPath, confDir, binaryDir, description, enabled)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func handleRemoveNodeCLI(args []string) {
+	if len(args) != 1 {
+		log.Fatal("Usage: vuDataSim-manager remove <name>")
+	}
+
+	name := args[0]
+	err := nodeManager.RemoveNode(name)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func handleEnableNodeCLI(args []string) {
+	if len(args) != 1 {
+		log.Fatal("Usage: vuDataSim-manager enable <name>")
+	}
+
+	name := args[0]
+	err := nodeManager.EnableNode(name)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func handleDisableNodeCLI(args []string) {
+	if len(args) != 1 {
+		log.Fatal("Usage: vuDataSim-manager disable <name>")
+	}
+
+	name := args[0]
+	err := nodeManager.DisableNode(name)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func handleListNodesCLI() {
+	nodes := nodeManager.GetNodes()
+	if len(nodes) == 0 {
+		fmt.Println("No nodes configured")
+		return
+	}
+
+	fmt.Println("Configured Nodes:")
+	fmt.Println("================")
+
+	for name, config := range nodes {
+		status := "Disabled"
+		if config.Enabled {
+			status = "Enabled"
+		}
+
+		fmt.Printf("Node: %s\n", name)
+		fmt.Printf("  Host: %s\n", config.Host)
+		fmt.Printf("  User: %s\n", config.User)
+		fmt.Printf("  Status: %s\n", status)
+		fmt.Printf("  Description: %s\n", config.Description)
+		fmt.Printf("  Binary Dir: %s\n", config.BinaryDir)
+		fmt.Printf("  Conf Dir: %s\n", config.ConfDir)
+		fmt.Println()
+	}
+}
+
+func handleListEnabledNodesCLI() {
+	enabledNodes := nodeManager.GetEnabledNodes()
+	if len(enabledNodes) == 0 {
+		fmt.Println("No enabled nodes")
+		return
+	}
+
+	fmt.Println("Enabled Nodes:")
+	fmt.Println("==============")
+
+	for name, config := range enabledNodes {
+		fmt.Printf("Node: %s\n", name)
+		fmt.Printf("  Host: %s\n", config.Host)
+		fmt.Printf("  User: %s\n", config.User)
+		fmt.Printf("  Description: %s\n", config.Description)
+		fmt.Printf("  Binary Dir: %s\n", config.BinaryDir)
+		fmt.Printf("  Conf Dir: %s\n", config.ConfDir)
+		fmt.Println()
+	}
+}
+
+// Serve static files with proper MIME types
 func serveStatic(w http.ResponseWriter, r *http.Request) {
 	// Serve index.html for root path
 	if r.URL.Path == "/" {
@@ -562,8 +1256,30 @@ func serveStatic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Serve other static files
+	// Serve other static files with proper MIME types
 	staticPath := StaticDir + r.URL.Path
+
+	// Set proper MIME types based on file extension
+	ext := filepath.Ext(r.URL.Path)
+	switch ext {
+	case ".css":
+		w.Header().Set("Content-Type", "text/css")
+	case ".js":
+		w.Header().Set("Content-Type", "application/javascript")
+	case ".html":
+		w.Header().Set("Content-Type", "text/html")
+	case ".json":
+		w.Header().Set("Content-Type", "application/json")
+	case ".ico":
+		w.Header().Set("Content-Type", "image/x-icon")
+	case ".png":
+		w.Header().Set("Content-Type", "image/png")
+	case ".jpg", ".jpeg":
+		w.Header().Set("Content-Type", "image/jpeg")
+	case ".svg":
+		w.Header().Set("Content-Type", "image/svg+xml")
+	}
+
 	http.ServeFile(w, r, staticPath)
 }
 
@@ -573,6 +1289,21 @@ func main() {
 
 	// Initialize start time
 	appState.StartTime = time.Now()
+
+	// Initialize node manager
+	err := nodeManager.LoadNodesConfig()
+	if err != nil {
+		log.Printf("Warning: Failed to load nodes config: %v", err)
+		log.Println("Node management features may not be available")
+	}
+
+	// Check for CLI node management commands
+	if len(os.Args) > 1 {
+		command := os.Args[1]
+		if handleNodeManagementCLI(command, os.Args[2:]) {
+			return // Exit after handling CLI command
+		}
+	}
 
 	log.Printf("Starting vuDataSim Cluster Manager v%s", AppVersion)
 	log.Printf("Serving static files from: %s", StaticDir)
@@ -584,8 +1315,19 @@ func main() {
 	router.Use(loggingMiddleware)
 	router.Use(corsMiddleware)
 
-	// Static file serving
-	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(StaticDir+"/"))))
+	// Static file serving with proper MIME types
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set proper MIME types for static files
+		if strings.HasSuffix(r.URL.Path, ".css") {
+			w.Header().Set("Content-Type", "text/css")
+		} else if strings.HasSuffix(r.URL.Path, ".js") {
+			w.Header().Set("Content-Type", "application/javascript")
+		} else if strings.HasSuffix(r.URL.Path, ".html") {
+			w.Header().Set("Content-Type", "text/html")
+		}
+
+		http.ServeFile(w, r, StaticDir+"/"+r.URL.Path)
+	})))
 	router.HandleFunc("/", serveStatic)
 
 	// WebSocket endpoint
@@ -600,6 +1342,11 @@ func main() {
 	api.HandleFunc("/logs", getLogs).Methods("GET")
 	api.HandleFunc("/nodes/{nodeId}/metrics", updateNodeMetrics).Methods("PUT")
 	api.HandleFunc("/health", healthCheck).Methods("GET")
+
+	// Node management API endpoints
+	api.HandleFunc("/nodes", handleAPINodes).Methods("GET")
+	api.HandleFunc("/nodes/{name}", handleAPINodeActions).Methods("POST", "PUT", "DELETE")
+	api.HandleFunc("/cluster-settings", handleAPIClusterSettings).Methods("GET", "PUT")
 
 	// Start background simulation
 	go simulateMetrics()
