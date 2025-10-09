@@ -5,12 +5,12 @@ cluster_settings:
     max_retries: 3
     sync_timeout: 60
 nodes:
-    184-testing:
+    184_Testing:
         host: 164.52.214.184
         user: vunet
         key_path: ~/.ssh/id_rsa
-        conf_dir: /home/vunet/NewTEST
-        binary_dir: /home/vunet/NewTEST
+        conf_dir: /home/vunet/NEWTESTING
+        binary_dir: /home/vunet/NEWTESTING
         description: ""
         enabled: true
     e2e-108-10:
