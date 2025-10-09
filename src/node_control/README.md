@@ -212,6 +212,7 @@ The tool includes comprehensive error handling for:
 src/node_control/
 ├── node_manager.go    # Main Go source file with web server
 ├── node_manager       # Compiled binary (CLI + Web UI)
+../configs/
 ├── nodes.yaml         # Node configurations and cluster settings
 ├── config.yaml        # Application configuration
 ├── static/           # Frontend files

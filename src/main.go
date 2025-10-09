@@ -128,7 +128,7 @@ type NodeManager struct {
 // NewNodeManager creates a new node manager instance
 func NewNodeManager() *NodeManager {
 	return &NodeManager{
-		nodesConfigPath: "src/node_control/nodes.yaml",
+		nodesConfigPath: "src/configs/nodes.yaml",
 		snapshotsDir:    "src/node_control/node_snapshots",
 		backupsDir:      "src/node_control/node_backups",
 		logsDir:         "src/node_control/logs",
