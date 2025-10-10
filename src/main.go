@@ -435,6 +435,21 @@ func (nm *NodeManager) copyFilesToNode(nodeName string, nodeConfig NodeConfig) e
 	return nil
 }
 
+// readMetricsPort reads the port from the metrics.port file on the remote node
+func (nm *NodeManager) readMetricsPort(nodeConfig NodeConfig) (string, error) {
+	portFilePath := fmt.Sprintf("%s/metrics.port", nodeConfig.BinaryDir)
+	cmd := fmt.Sprintf("cat %s", portFilePath)
+	portStr, err := nm.sshExecWithOutput(nodeConfig, cmd)
+	if err != nil {
+		return "", fmt.Errorf("failed to read port file: %v", err)
+	}
+	portStr = strings.TrimSpace(portStr)
+	if portStr == "" {
+		return "", fmt.Errorf("port file is empty")
+	}
+	return portStr, nil
+}
+
 // startNodeMetricsBinary starts the node metrics API binary on the remote node
 func (nm *NodeManager) startNodeMetricsBinary(nodeName string, nodeConfig NodeConfig) error {
 	logger.LogWithNode(nodeName, "Metrics", "Starting node metrics binary...", "info")
@@ -454,8 +469,8 @@ func (nm *NodeManager) startNodeMetricsBinary(nodeName string, nodeConfig NodeCo
 		logger.LogWarning(nodeName, "Metrics", fmt.Sprintf("Failed to set execute permissions: %v", err))
 	}
 
-	// Start the metrics binary in the background on port 8085
-	startCmd := fmt.Sprintf("cd %s && nohup %s --port 8085 > metrics.log 2>&1 & echo $! > metrics.pid", nodeConfig.BinaryDir, metricsPath)
+	// Start the metrics binary in the background (will find available port)
+	startCmd := fmt.Sprintf("cd %s && nohup %s > metrics.log 2>&1 & echo $! > metrics.pid", nodeConfig.BinaryDir, metricsPath)
 	logger.LogWithNode(nodeName, "Metrics", fmt.Sprintf("Executing start command: %s", startCmd), "info")
 
 	err = nm.sshExec(nodeConfig, startCmd)
@@ -480,9 +495,21 @@ func (nm *NodeManager) startNodeMetricsBinary(nodeName string, nodeConfig NodeCo
 		logger.LogWarning(nodeName, "Metrics", "PID file not found or empty")
 	}
 
+	// Wait for the port file to be created
+	time.Sleep(2 * time.Second)
+
+	// Read the port from the metrics.port file
+	port, err := nm.readMetricsPort(nodeConfig)
+	if err != nil {
+		logger.LogError(nodeName, "Metrics", fmt.Sprintf("Failed to read metrics port: %v", err))
+		return fmt.Errorf("failed to read metrics port: %v", err)
+	}
+
+	logger.LogWithNode(nodeName, "Metrics", fmt.Sprintf("Metrics API is running on port %s", port), "info")
+
 	// Verify the metrics server is running by making a test request
 	client := &http.Client{Timeout: 5 * time.Second}
-	healthURL := fmt.Sprintf("http://%s:8085/api/system/health", nodeConfig.Host)
+	healthURL := fmt.Sprintf("http://%s:%s/api/system/health", nodeConfig.Host, port)
 	logger.LogWithNode(nodeName, "Metrics", fmt.Sprintf("Checking health endpoint: %s", healthURL), "info")
 
 	resp, err := client.Get(healthURL)
@@ -1783,13 +1810,20 @@ func getNodeTotalMemory(nodeConfig NodeConfig) (float64, error) {
 
 // pollNodeMetrics performs HTTP GET request to node's metrics endpoint
 func pollNodeMetrics(nodeConfig NodeConfig) (*HTTPMetricsResponse, error) {
+	// Read the port from the metrics.port file
+	port, err := nodeManager.readMetricsPort(nodeConfig)
+	if err != nil {
+		logger.LogError(nodeConfig.Host, "HTTP", fmt.Sprintf("Failed to read metrics port: %v", err))
+		return nil, fmt.Errorf("failed to read metrics port: %v", err)
+	}
+
 	// Create HTTP client with timeout
 	client := &http.Client{
 		Timeout: 2 * time.Second,
 	}
 
 	// Build metrics URL
-	metricsURL := fmt.Sprintf("http://%s:8085/api/system/metrics", nodeConfig.Host)
+	metricsURL := fmt.Sprintf("http://%s:%s/api/system/metrics", nodeConfig.Host, port)
 
 	logger.LogWithNode(nodeConfig.Host, "HTTP", fmt.Sprintf("Making GET request to %s", metricsURL), "info")
 

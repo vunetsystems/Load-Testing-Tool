@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -344,25 +346,57 @@ func getNodeIDFromEnv() string {
 	return hostname
 }
 
+// findAvailablePort finds the first available port starting from the default port
+func findAvailablePort(startPort int) (int, error) {
+	for port := startPort; port < startPort+100; port++ { // Try up to 100 ports
+		addr := fmt.Sprintf(":%d", port)
+		listener, err := net.Listen("tcp", addr)
+		if err == nil {
+			listener.Close()
+			return port, nil
+		}
+		// If error is not "address already in use", might be other issue, but for now assume it's occupied
+	}
+	return 0, fmt.Errorf("no available ports found starting from %d", startPort)
+}
+
 func main() {
 	// Parse command line flags
-	portFlag := flag.String("port", "", "Port to listen on")
+	portFlag := flag.String("port", "", "Port to listen on (optional, will find available if not specified)")
 	flag.Parse()
 
-	// Get configuration from command line flag, then environment variable, then default
-	port := *portFlag
-	if port == "" {
-		port = os.Getenv("METRICS_PORT")
+	// Determine starting port
+	startPortStr := *portFlag
+	if startPortStr == "" {
+		startPortStr = os.Getenv("METRICS_PORT")
 	}
-	if port == "" {
-		port = DefaultPort
+	if startPortStr == "" {
+		startPortStr = DefaultPort
 	}
+
+	startPort, err := strconv.Atoi(startPortStr)
+	if err != nil {
+		log.Fatalf("Invalid port: %s", startPortStr)
+	}
+
+	// Find available port starting from the specified port
+	port, err := findAvailablePort(startPort)
+	if err != nil {
+		log.Fatalf("Failed to find available port: %v", err)
+	}
+
+	portStr := strconv.Itoa(port)
 
 	nodeID := getNodeIDFromEnv()
 
 	log.Printf("Starting Node Metrics API server...")
 	log.Printf("Node ID: %s", nodeID)
-	log.Printf("Port: %s", port)
+	log.Printf("Port: %s", portStr)
+
+	// Write the port to a file for the master node to read
+	if err := os.WriteFile("metrics.port", []byte(portStr), 0644); err != nil {
+		log.Printf("Warning: Failed to write port to file: %v", err)
+	}
 
 	// Create metrics collector
 	collector := NewMetricsCollector(nodeID)
@@ -385,11 +419,11 @@ func main() {
 	})
 
 	// Start server
-	log.Printf("Server listening on port %s", port)
-	log.Printf("Metrics endpoint: http://localhost:%s/api/system/metrics", port)
-	log.Printf("Health endpoint: http://localhost:%s/api/system/health", port)
+	log.Printf("Server listening on port %s", portStr)
+	log.Printf("Metrics endpoint: http://localhost:%s/api/system/metrics", portStr)
+	log.Printf("Health endpoint: http://localhost:%s/api/system/health", portStr)
 
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	if err := http.ListenAndServe(":"+portStr, nil); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }
