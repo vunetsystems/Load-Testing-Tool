@@ -20,4 +20,4 @@ nodes:
         conf_dir: /home/vunet/vuDataSim/vuDataSim/conf.d
         binary_dir: /home/vunet/vuDataSim/vuDataSim/bin
         description: Primary vuDataSim node
-        enabled: true
+        enabled: false
