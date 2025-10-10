@@ -5,19 +5,12 @@ cluster_settings:
     max_retries: 3
     sync_timeout: 60
 nodes:
-    184_Testing:
+    prod 11:
         host: 164.52.214.184
         user: vunet
         key_path: ~/.ssh/id_rsa
-        conf_dir: /home/vunet/NEWTESTING
-        binary_dir: /home/vunet/NEWTESTING/bin
-        description: ""
+        conf_dir: /home/vunet/TEST11
+        binary_dir: /home/vunet/TEST11/bin
+        metrics_port: 0
+        description: /home/vunet/TEST11
         enabled: true
-    e2e-108-10:
-        host: 216.48.191.10
-        user: vunet
-        key_path: ~/.ssh/id_rsa
-        conf_dir: /home/vunet/vuDataSim/vuDataSim/conf.d
-        binary_dir: /home/vunet/vuDataSim/vuDataSim/bin
-        description: Primary vuDataSim node
-        enabled: false

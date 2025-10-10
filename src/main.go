@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,6 +17,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"vuDataSim/src/logger"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -65,6 +68,32 @@ type NodeMetrics struct {
 	LastUpdate  time.Time `json:"lastUpdate"`
 }
 
+// HTTPMetricsResponse represents the response from node metrics API
+type HTTPMetricsResponse struct {
+	NodeID    string    `json:"nodeId"`
+	Timestamp time.Time `json:"timestamp"`
+	System    struct {
+		CPU    HTTPNodeCPUInfo    `json:"cpu"`
+		Memory HTTPNodeMemoryInfo `json:"memory"`
+		Uptime int64              `json:"uptime_seconds"`
+	} `json:"system"`
+}
+
+// HTTPNodeCPUInfo represents CPU metrics from HTTP API
+type HTTPNodeCPUInfo struct {
+	UsedPercent float64 `json:"used_percent"`
+	Cores       int     `json:"cores"`
+	Load1M      float64 `json:"load_1m"`
+}
+
+// HTTPNodeMemoryInfo represents memory metrics from HTTP API
+type HTTPNodeMemoryInfo struct {
+	UsedGB      float64 `json:"used_gb"`
+	AvailableGB float64 `json:"available_gb"`
+	TotalGB     float64 `json:"total_gb"`
+	UsedPercent float64 `json:"used_percent"`
+}
+
 // APIResponse represents a standard API response
 type APIResponse struct {
 	Success bool        `json:"success"`
@@ -110,6 +139,7 @@ type NodeConfig struct {
 	KeyPath     string `yaml:"key_path"`
 	ConfDir     string `yaml:"conf_dir"`
 	BinaryDir   string `yaml:"binary_dir"`
+	MetricsPort int    `yaml:"metrics_port"`
 	Description string `yaml:"description"`
 	Enabled     bool   `yaml:"enabled"`
 }
@@ -164,6 +194,11 @@ func (nm *NodeManager) LoadNodesConfig() error {
 	err = yaml.Unmarshal(data, &nm.nodesConfig)
 	if err != nil {
 		return fmt.Errorf("failed to parse nodes config file: %v", err)
+	}
+
+	// Ensure Nodes map is initialized
+	if nm.nodesConfig.Nodes == nil {
+		nm.nodesConfig.Nodes = make(map[string]NodeConfig)
 	}
 
 	return nil
@@ -260,7 +295,24 @@ func (nm *NodeManager) EnableNode(name string) error {
 		return fmt.Errorf("failed to save config: %v", err)
 	}
 
-	log.Printf("Successfully enabled node %s", name)
+	logger.LogSuccess(name, "Node", "Node enabled successfully")
+
+	// Copy files to the node
+	err = nm.copyFilesToNode(name, nodeConfig)
+	if err != nil {
+		logger.LogError(name, "Deployment", fmt.Sprintf("Failed to copy files: %v", err))
+		return fmt.Errorf("failed to copy files to node: %v", err)
+	}
+
+	// Start the node metrics binary
+	err = nm.startNodeMetricsBinary(name, nodeConfig)
+	if err != nil {
+		logger.LogWarning(name, "Metrics", fmt.Sprintf("Failed to start metrics binary: %v", err))
+		// Don't fail the enable operation if metrics binary fails to start
+	} else {
+		logger.LogSuccess(name, "Metrics", "Node metrics binary started successfully")
+	}
+
 	return nil
 }
 
@@ -299,14 +351,26 @@ func (nm *NodeManager) GetEnabledNodes() map[string]NodeConfig {
 	return enabledNodes
 }
 
-// copyFilesToNode copies the binary and conf.d directory to the remote node
+// copyFilesToNode copies the binaries and conf.d directory to the remote node
 func (nm *NodeManager) copyFilesToNode(nodeName string, nodeConfig NodeConfig) error {
-	localBinary := "src/finalvudatasim"
+	localMainBinary := "src/finalvudatasim"
+	localMetricsBinary := "src/node_metrics_api/build/node_metrics_api"
 	localConfDir := "src/conf.d"
 
+	logger.Debug().
+		Str("node", nodeName).
+		Str("main_binary", localMainBinary).
+		Str("metrics_binary", localMetricsBinary).
+		Str("conf_dir", localConfDir).
+		Msg("Deployment paths")
+
 	// Check if local files exist
-	if _, err := os.Stat(localBinary); os.IsNotExist(err) {
-		return fmt.Errorf("local binary file %s not found", localBinary)
+	if _, err := os.Stat(localMainBinary); os.IsNotExist(err) {
+		return fmt.Errorf("local main binary file %s not found", localMainBinary)
+	}
+
+	if _, err := os.Stat(localMetricsBinary); os.IsNotExist(err) {
+		return fmt.Errorf("local metrics binary file %s not found", localMetricsBinary)
 	}
 
 	if _, err := os.Stat(localConfDir); os.IsNotExist(err) {
@@ -319,19 +383,121 @@ func (nm *NodeManager) copyFilesToNode(nodeName string, nodeConfig NodeConfig) e
 		return fmt.Errorf("failed to create remote directories: %v", err)
 	}
 
-	// Copy binary file
-	err = nm.scpCopy(nodeConfig, localBinary, filepath.Join(nodeConfig.BinaryDir, "finalvudatasim"))
+	// Copy main binary file
+	logger.Info().
+		Str("node", nodeName).
+		Str("from", localMainBinary).
+		Str("to", filepath.Join(nodeConfig.BinaryDir, "finalvudatasim")).
+		Msg("Copying main binary")
+	err = nm.scpCopy(nodeConfig, localMainBinary, filepath.Join(nodeConfig.BinaryDir, "finalvudatasim"))
 	if err != nil {
-		return fmt.Errorf("failed to copy binary: %v", err)
+		logger.Error().
+			Str("node", nodeName).
+			Err(err).
+			Msg("Failed to copy main binary")
+		return fmt.Errorf("failed to copy main binary: %v", err)
 	}
+	logger.LogSuccess(nodeName, "Deployment", "Main binary copied successfully")
+
+	// Copy metrics API binary
+	logger.Info().
+		Str("node", nodeName).
+		Str("from", localMetricsBinary).
+		Str("to", filepath.Join(nodeConfig.BinaryDir, "node_metrics_api")).
+		Msg("Copying metrics binary")
+	err = nm.scpCopy(nodeConfig, localMetricsBinary, filepath.Join(nodeConfig.BinaryDir, "node_metrics_api"))
+	if err != nil {
+		logger.Error().
+			Str("node", nodeName).
+			Err(err).
+			Msg("Failed to copy metrics binary")
+		return fmt.Errorf("failed to copy metrics binary: %v", err)
+	}
+	logger.LogSuccess(nodeName, "Deployment", "Metrics binary copied successfully")
 
 	// Copy conf.d directory recursively
+	logger.Info().
+		Str("node", nodeName).
+		Str("from", localConfDir).
+		Str("to", nodeConfig.ConfDir).
+		Msg("Copying conf.d directory")
 	err = nm.scpCopyDir(nodeConfig, localConfDir, nodeConfig.ConfDir)
 	if err != nil {
+		logger.Error().
+			Str("node", nodeName).
+			Err(err).
+			Msg("Failed to copy conf.d directory")
 		return fmt.Errorf("failed to copy conf.d directory: %v", err)
 	}
+	logger.LogSuccess(nodeName, "Deployment", "Conf.d directory copied successfully")
 
-	log.Printf("Successfully copied files to node %s", nodeName)
+	logger.LogSuccess(nodeName, "Deployment", "Successfully copied all files to node")
+	return nil
+}
+
+// startNodeMetricsBinary starts the node metrics API binary on the remote node
+func (nm *NodeManager) startNodeMetricsBinary(nodeName string, nodeConfig NodeConfig) error {
+	logger.LogWithNode(nodeName, "Metrics", "Starting node metrics binary...", "info")
+
+	// Kill any existing metrics processes
+	killCmd := fmt.Sprintf("pkill -f node_metrics_api || true")
+	err := nm.sshExec(nodeConfig, killCmd)
+	if err != nil {
+		logger.LogWarning(nodeName, "Metrics", fmt.Sprintf("Failed to kill existing metrics processes: %v", err))
+	}
+
+	// Make sure the binary has execute permissions
+	metricsPath := fmt.Sprintf("%s/node_metrics_api", nodeConfig.BinaryDir)
+	chmodCmd := fmt.Sprintf("chmod +x %s", metricsPath)
+	err = nm.sshExec(nodeConfig, chmodCmd)
+	if err != nil {
+		logger.LogWarning(nodeName, "Metrics", fmt.Sprintf("Failed to set execute permissions: %v", err))
+	}
+
+	// Start the metrics binary in the background on port 8085
+	startCmd := fmt.Sprintf("cd %s && nohup %s --port 8085 > metrics.log 2>&1 & echo $! > metrics.pid", nodeConfig.BinaryDir, metricsPath)
+	logger.LogWithNode(nodeName, "Metrics", fmt.Sprintf("Executing start command: %s", startCmd), "info")
+
+	err = nm.sshExec(nodeConfig, startCmd)
+	if err != nil {
+		logger.LogError(nodeName, "Metrics", fmt.Sprintf("Failed to execute start command: %v", err))
+		return fmt.Errorf("failed to start metrics binary: %v", err)
+	}
+
+	logger.LogWithNode(nodeName, "Metrics", "Start command executed, waiting for startup...", "info")
+
+	// Wait a moment for the binary to start
+	time.Sleep(3 * time.Second)
+
+	// Check if the process is running by checking the PID file
+	checkPidCmd := fmt.Sprintf("cat %s/metrics.pid 2>/dev/null || echo 'no pid'", nodeConfig.BinaryDir)
+	pidOutput, err := nm.sshExecWithOutput(nodeConfig, checkPidCmd)
+	if err != nil {
+		logger.LogWarning(nodeName, "Metrics", fmt.Sprintf("Could not check PID file: %v", err))
+	} else if strings.TrimSpace(pidOutput) != "no pid" && strings.TrimSpace(pidOutput) != "" {
+		logger.LogSuccess(nodeName, "Metrics", fmt.Sprintf("Metrics binary started with PID: %s", strings.TrimSpace(pidOutput)))
+	} else {
+		logger.LogWarning(nodeName, "Metrics", "PID file not found or empty")
+	}
+
+	// Verify the metrics server is running by making a test request
+	client := &http.Client{Timeout: 5 * time.Second}
+	healthURL := fmt.Sprintf("http://%s:8085/api/system/health", nodeConfig.Host)
+	logger.LogWithNode(nodeName, "Metrics", fmt.Sprintf("Checking health endpoint: %s", healthURL), "info")
+
+	resp, err := client.Get(healthURL)
+	if err != nil {
+		logger.LogError(nodeName, "Metrics", fmt.Sprintf("Health check failed: %v", err))
+		return fmt.Errorf("metrics server health check failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		logger.LogError(nodeName, "Metrics", fmt.Sprintf("Health check returned status %d", resp.StatusCode))
+		return fmt.Errorf("metrics server returned status %d", resp.StatusCode)
+	}
+
+	logger.LogSuccess(nodeName, "Metrics", "Health check passed - metrics binary is running successfully")
 	return nil
 }
 
@@ -379,6 +545,25 @@ func (nm *NodeManager) sshExec(nodeConfig NodeConfig, command string) error {
 	return nil
 }
 
+// sshExecWithOutput executes a command on the remote node via SSH and returns the output
+func (nm *NodeManager) sshExecWithOutput(nodeConfig NodeConfig, command string) (string, error) {
+	args := []string{
+		"-i", nodeConfig.KeyPath,
+		"-o", "StrictHostKeyChecking=no",
+		"-o", "UserKnownHostsFile=/dev/null",
+		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
+		command,
+	}
+
+	cmd := exec.Command("ssh", args...)
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("SSH command failed: %v", err)
+	}
+
+	return strings.TrimSpace(string(output)), nil
+}
+
 // scpCopy copies a single file to the remote node
 func (nm *NodeManager) scpCopy(nodeConfig NodeConfig, localPath, remotePath string) error {
 	args := []string{
@@ -391,11 +576,40 @@ func (nm *NodeManager) scpCopy(nodeConfig NodeConfig, localPath, remotePath stri
 	}
 
 	cmd := exec.Command("scp", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 
-	err := cmd.Run()
+	// Capture stdout and stderr
+	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
+		return fmt.Errorf("failed to create stdout pipe: %v", err)
+	}
+	stderrPipe, err := cmd.StderrPipe()
+	if err != nil {
+		return fmt.Errorf("failed to create stderr pipe: %v", err)
+	}
+
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("failed to start SCP command: %v", err)
+	}
+
+	// Read and log stdout
+	go func() {
+		scanner := bufio.NewScanner(stdoutPipe)
+		for scanner.Scan() {
+			line := scanner.Text()
+			logger.LogMetric("System", "SCP", fmt.Sprintf("STDOUT: %s", line))
+		}
+	}()
+
+	// Read and log stderr
+	go func() {
+		scanner := bufio.NewScanner(stderrPipe)
+		for scanner.Scan() {
+			line := scanner.Text()
+			logger.LogMetric("System", "SCP", fmt.Sprintf("STDERR: %s", line))
+		}
+	}()
+
+	if err := cmd.Wait(); err != nil {
 		return fmt.Errorf("SCP copy failed: %v", err)
 	}
 
@@ -414,11 +628,40 @@ func (nm *NodeManager) scpCopyDir(nodeConfig NodeConfig, localDir, remoteDir str
 	}
 
 	cmd := exec.Command("scp", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 
-	err := cmd.Run()
+	// Capture stdout and stderr
+	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
+		return fmt.Errorf("failed to create stdout pipe: %v", err)
+	}
+	stderrPipe, err := cmd.StderrPipe()
+	if err != nil {
+		return fmt.Errorf("failed to create stderr pipe: %v", err)
+	}
+
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("failed to start SCP command: %v", err)
+	}
+
+	// Read and log stdout
+	go func() {
+		scanner := bufio.NewScanner(stdoutPipe)
+		for scanner.Scan() {
+			line := scanner.Text()
+			logger.LogMetric("System", "SCP", fmt.Sprintf("STDOUT: %s", line))
+		}
+	}()
+
+	// Read and log stderr
+	go func() {
+		scanner := bufio.NewScanner(stderrPipe)
+		for scanner.Scan() {
+			line := scanner.Text()
+			logger.LogMetric("System", "SCP", fmt.Sprintf("STDERR: %s", line))
+		}
+	}()
+
+	if err := cmd.Wait(); err != nil {
 		return fmt.Errorf("SCP directory copy failed: %v", err)
 	}
 
@@ -763,15 +1006,15 @@ func init() {
 	// Load nodes from configuration
 	err := nodeManager.LoadNodesConfig()
 	if err != nil {
-		log.Printf("Warning: Failed to load nodes config: %v", err)
-		log.Println("Using default node configuration")
+		logger.Error().Err(err).Msg("Failed to load nodes config")
+		logger.Warn().Msg("Using default node configuration")
 		initializeDefaultNodes()
 		// Initialize binary control with default config
 		binaryControl = NewBinaryControl()
 		return
 	}
 
-	log.Printf("Loaded nodes from config: %v", nodeManager.GetNodes())
+	logger.Info().Interface("nodes", nodeManager.GetNodes()).Msg("Loaded nodes from config")
 
 	// Initialize binary control with loaded config
 	binaryControl = NewBinaryControl()
@@ -790,26 +1033,20 @@ func init() {
 		totalMemory := 8.0 // Default fallback
 		totalCPU := 4.0    // Default fallback
 
-		// Try to detect real values if node is enabled
+		// Use HTTP-based metrics for real values if node is enabled
 		if nodeConfig.Enabled {
-			log.Printf("Detecting real system resources for node %s", nodeID)
+			logger.LogSuccess(nodeID, "System", "Node enabled - will use HTTP metrics collection")
 
-			// Detect total memory
-			realMemory, err := getNodeTotalMemory(nodeConfig)
+			// Try to get initial metrics via HTTP
+			metrics, err := pollNodeMetrics(nodeConfig)
 			if err != nil {
-				log.Printf("Warning: Failed to detect total memory for node %s: %v", nodeID, err)
+				logger.LogWarning(nodeID, "System", fmt.Sprintf("Failed to get initial HTTP metrics: %v", err))
+				logger.LogWarning(nodeID, "System", "Will use default values until HTTP metrics are available")
 			} else {
-				totalMemory = realMemory
-				log.Printf("SUCCESS: Node %s has %.1f GB total memory", nodeID, totalMemory)
-			}
-
-			// Detect total CPU cores
-			realCPU, err := getNodeTotalCPU(nodeConfig)
-			if err != nil {
-				log.Printf("Warning: Failed to detect CPU cores for node %s: %v", nodeID, err)
-			} else {
-				totalCPU = realCPU
-				log.Printf("SUCCESS: Node %s has %.1f CPU cores", nodeID, totalCPU)
+				totalMemory = metrics.System.Memory.TotalGB
+				totalCPU = float64(metrics.System.CPU.Cores)
+				logger.LogSuccess(nodeID, "System", fmt.Sprintf("Initialized with HTTP metrics - CPU: %.1f cores, Memory: %.1f GB",
+					totalCPU, totalMemory))
 			}
 		}
 
@@ -889,15 +1126,15 @@ func initializeDefaultNodes() {
 			status = "inactive"
 		}
 
-		// Use system resource detection for local node (when config is not available)
+		// Use local system resource detection for local node (when config is not available)
 		totalMemory := 8.0
 		totalCPU := 4.0
 
-		// Try to detect local system resources
+		// Try to detect local system resources using local methods only
 		if nodeID == "node1" { // For the first node, try to detect local system resources
 			log.Printf("Detecting local system resources for fallback node %s", nodeID)
 
-			// Detect local memory
+			// Detect local memory using existing local function
 			localMemory, err := getLocalSystemMemory()
 			if err != nil {
 				log.Printf("Warning: Failed to detect local memory: %v", err)
@@ -906,7 +1143,7 @@ func initializeDefaultNodes() {
 				log.Printf("SUCCESS: Local system has %.1f GB total memory", totalMemory)
 			}
 
-			// Detect local CPU cores
+			// Detect local CPU cores using existing local function
 			localCPU, err := getLocalSystemCPU()
 			if err != nil {
 				log.Printf("Warning: Failed to detect local CPU cores: %v", err)
@@ -1162,8 +1399,8 @@ func getLogs(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Generate real-time logs based on actual system status
-	logs := generateRealTimeLogs()
+	// Read logs from the log file
+	logs := readLogsFromFile()
 
 	// Apply filters
 	filteredLogs := logs
@@ -1204,100 +1441,89 @@ func getLogs(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-// generateRealTimeLogs creates realistic logs based on actual node data
-func generateRealTimeLogs() []map[string]interface{} {
-	logs := make([]map[string]interface{}, 0)
+// readLogsFromFile reads and parses logs from the zerolog file
+func readLogsFromFile() []map[string]interface{} {
+	logFilePath := "logs/vuDataSim.log"
+	file, err := os.Open(logFilePath)
+	if err != nil {
+		// If log file doesn't exist yet, return empty slice
+		return []map[string]interface{}{}
+	}
+	defer file.Close()
 
-	// Add logs for each active node based on real metrics
-	for nodeID, node := range appState.NodeData {
-		if node.Status == "active" {
-			// CPU usage log
-			cpuLog := map[string]interface{}{
-				"timestamp": time.Now().Add(-time.Minute * time.Duration(len(logs)+1)).Format("2006-01-02 15:04:05"),
-				"node":      nodeID,
-				"module":    "System Monitor",
-				"message":   fmt.Sprintf("CPU Availability: %.1f%% (Available: %.1f/%d cores)", node.CPU, node.TotalCPU-(node.TotalCPU*node.CPU/100), int(node.TotalCPU)),
-				"type":      "metric",
-			}
-			logs = append(logs, cpuLog)
+	var logs []map[string]interface{}
+	scanner := bufio.NewScanner(file)
 
-			// Memory usage log
-			usedMemory := node.TotalMemory * (node.Memory / 100)
-			memLog := map[string]interface{}{
-				"timestamp": time.Now().Add(-time.Minute * time.Duration(len(logs)+1)).Format("2006-01-02 15:04:05"),
-				"node":      nodeID,
-				"module":    "System Monitor",
-				"message":   fmt.Sprintf("Memory usage: %.1f%% (Used: %.1f/%.1f GB)", node.Memory, usedMemory, node.TotalMemory),
-				"type":      "metric",
-			}
-			logs = append(logs, memLog)
+	for scanner.Scan() {
+		line := scanner.Text()
+		var logEntry map[string]interface{}
+		if err := json.Unmarshal([]byte(line), &logEntry); err != nil {
+			continue // Skip malformed lines
+		}
 
-			// Status logs based on load
-			if node.CPU > 90 {
-				statusLog := map[string]interface{}{
-					"timestamp": time.Now().Add(-time.Minute * time.Duration(len(logs)+1)).Format("2006-01-02 15:04:05"),
-					"node":      nodeID,
-					"module":    "Load Balancer",
-					"message":   "High CPU usage detected, redistributing load...",
-					"type":      "warning",
-				}
-				logs = append(logs, statusLog)
-			}
+		// Convert zerolog format to frontend format
+		frontendLog := map[string]interface{}{
+			"timestamp": parseZerologTimestamp(logEntry["time"]),
+			"node":      getLogField(logEntry, "node", "System"),
+			"module":    getLogField(logEntry, "module", "System"),
+			"message":   getLogField(logEntry, "message", ""),
+			"type":      getLogType(logEntry),
+		}
 
-			if node.Memory > 80 {
-				statusLog := map[string]interface{}{
-					"timestamp": time.Now().Add(-time.Minute * time.Duration(len(logs)+1)).Format("2006-01-02 15:04:05"),
-					"node":      nodeID,
-					"module":    "Memory Manager",
-					"message":   "High memory usage detected, optimizing allocations...",
-					"type":      "warning",
-				}
-				logs = append(logs, statusLog)
-			}
+		logs = append(logs, frontendLog)
+	}
 
-			// Heartbeat logs
-			heartbeatLog := map[string]interface{}{
-				"timestamp": time.Now().Add(-time.Minute * time.Duration(len(logs)+1)).Format("2006-01-02 15:04:05"),
-				"node":      nodeID,
-				"module":    "Heartbeat",
-				"message":   "Node heartbeat OK - System operational",
-				"type":      "success",
-			}
-			logs = append(logs, heartbeatLog)
-		} else {
-			// Inactive node log
-			inactiveLog := map[string]interface{}{
-				"timestamp": time.Now().Add(-time.Minute * time.Duration(len(logs)+1)).Format("2006-01-02 15:04:05"),
-				"node":      nodeID,
-				"module":    "System",
-				"message":   "Node is inactive. No monitoring data available.",
-				"type":      "error",
-			}
-			logs = append(logs, inactiveLog)
+	// Reverse to show newest first
+	for i, j := 0, len(logs)-1; i < j; i, j = i+1, j-1 {
+		logs[i], logs[j] = logs[j], logs[i]
+	}
+
+	return logs
+}
+
+// parseZerologTimestamp parses the timestamp from zerolog format
+func parseZerologTimestamp(timeInterface interface{}) string {
+	if timeStr, ok := timeInterface.(string); ok {
+		if t, err := time.Parse(time.RFC3339, timeStr); err == nil {
+			return t.Format("2006-01-02 15:04:05")
+		}
+	}
+	return time.Now().Format("2006-01-02 15:04:05")
+}
+
+// getLogField safely extracts a field from the log entry
+func getLogField(entry map[string]interface{}, field, defaultValue string) string {
+	if value, ok := entry[field]; ok {
+		if str, ok := value.(string); ok {
+			return str
+		}
+	}
+	return defaultValue
+}
+
+// getLogType determines the log type based on zerolog level
+func getLogType(entry map[string]interface{}) string {
+	if level, ok := entry["level"]; ok {
+		switch level {
+		case "error":
+			return "error"
+		case "warn":
+			return "warning"
+		case "info":
+			return "info"
+		case "debug":
+			return "info"
 		}
 	}
 
-	// Add some general system logs
-	systemLogs := []map[string]interface{}{
-		{
-			"timestamp": time.Now().Add(-time.Minute * 5).Format("2006-01-02 15:04:05"),
-			"node":      "System",
-			"module":    "Cluster Manager",
-			"message":   "Cluster monitoring active - Real-time data collection enabled",
-			"type":      "info",
-		},
-		{
-			"timestamp": time.Now().Add(-time.Minute * 3).Format("2006-01-02 15:04:05"),
-			"node":      "System",
-			"module":    "WebSocket",
-			"message":   "WebSocket server started - Real-time updates enabled",
-			"type":      "success",
-		},
+	// Check for type field if set by our logging functions
+	if logType, ok := entry["type"]; ok {
+		if str, ok := logType.(string); ok {
+			return str
+		}
 	}
 
-	logs = append(logs, systemLogs...)
-
-	return logs
+	return "info"
 }
 
 // API endpoint to update node metrics (for simulation)
@@ -1384,83 +1610,62 @@ func corsMiddleware(next http.Handler) http.Handler {
 	return c.Handler(next)
 }
 
-// Background goroutine to collect real-time metrics from actual nodes
+// Background goroutine to collect real-time metrics from nodes via HTTP
 func collectRealMetrics() {
-	log.Printf("Starting real metrics collection...")
-	ticker := time.NewTicker(3 * time.Second) // Slightly longer interval for real data collection
+	logger.LogWithNode("System", "Metrics", "Starting HTTP-based real metrics collection", "info")
+	ticker := time.NewTicker(5 * time.Second) // Poll every 5 seconds
 	defer ticker.Stop()
 
 	for range ticker.C {
-		log.Printf("Real metrics collection tick...")
+		logger.LogWithNode("System", "Metrics", "HTTP metrics collection tick", "info")
 		appState.mutex.Lock()
 
 		// Load current node configurations
 		err := nodeManager.LoadNodesConfig()
 		if err != nil {
-			log.Printf("Warning: Failed to load nodes config for metrics collection: %v", err)
+			logger.LogWarning("System", "Metrics", fmt.Sprintf("Failed to load nodes config for metrics collection: %v", err))
 			appState.mutex.Unlock()
 			continue
 		}
 
-		// Collect real metrics for each active node
+		// Collect real metrics for each active node via HTTP
 		for nodeID, node := range appState.NodeData {
 			if node.Status == "active" {
-				// Get node configuration for SSH connection
+				// Get node configuration for HTTP connection
 				nodeConfig, exists := nodeManager.GetNodes()[nodeID]
 				if !exists {
-					log.Printf("Warning: Node %s not found in configuration", nodeID)
+					logger.LogWarning(nodeID, "Metrics", "Node not found in configuration")
+					node.Status = "error"
 					continue
 				}
 
-				// Collect real CPU usage
-				log.Printf("Collecting CPU metrics for node %s", nodeID)
-				cpuUsage, err := getNodeCPUUsage(nodeConfig)
+				// Poll metrics via HTTP
+				logger.LogWithNode(nodeID, "Metrics", "Polling HTTP metrics", "info")
+				metrics, err := pollNodeMetrics(nodeConfig)
 				if err != nil {
-					log.Printf("Warning: Failed to get CPU usage for node %s: %v", nodeID, err)
-					// Keep previous value on error
+					logger.LogError(nodeID, "Metrics", fmt.Sprintf("Failed to get HTTP metrics: %v", err))
+					node.Status = "error"
 				} else {
-					log.Printf("SUCCESS: Node %s CPU usage: %.1f%%", nodeID, cpuUsage)
-					node.CPU = cpuUsage
+					// Log the received metrics data
+					logger.LogMetric(nodeID, "Metrics", fmt.Sprintf("CPU: %.1f%% (%d cores), Memory: %.1f%% (%.1f/%.1f GB), Load: %.2f",
+						metrics.System.CPU.UsedPercent, metrics.System.CPU.Cores,
+						metrics.System.Memory.UsedPercent, metrics.System.Memory.UsedGB, metrics.System.Memory.TotalGB,
+						metrics.System.CPU.Load1M))
+
+					logger.LogSuccess(nodeID, "Metrics", "Metrics collection successful")
+
+					// Update node metrics with HTTP data (maintaining compatibility with frontend)
+					node.CPU = metrics.System.CPU.UsedPercent
+					node.Memory = metrics.System.Memory.UsedPercent
+					node.TotalCPU = float64(metrics.System.CPU.Cores)
+					node.TotalMemory = metrics.System.Memory.TotalGB
+					node.Status = "active"
+
+					// Update load metrics (keep existing simulation data for now)
+					// In a real implementation, you might want to get these from the binary itself
+					// For now, we'll maintain the existing demo values
 				}
 
-				// Collect real memory usage
-				log.Printf("Collecting memory metrics for node %s", nodeID)
-				memUsage, err := getNodeMemoryUsage(nodeConfig)
-				if err != nil {
-					log.Printf("Warning: Failed to get memory usage for node %s: %v", nodeID, err)
-					// Keep previous value on error
-				} else {
-					log.Printf("SUCCESS: Node %s Memory usage: %.1f%%", nodeID, memUsage)
-					node.Memory = memUsage
-				}
-
-				// Collect real total memory (only if not already set or if it's the default 8GB)
-				if node.TotalMemory == 8.0 {
-					log.Printf("Collecting total memory for node %s", nodeID)
-					totalMemory, err := getNodeTotalMemory(nodeConfig)
-					if err != nil {
-						log.Printf("Warning: Failed to get total memory for node %s: %v", nodeID, err)
-						// Keep default 8GB on error
-					} else {
-						log.Printf("SUCCESS: Node %s Total memory: %.1f GB", nodeID, totalMemory)
-						node.TotalMemory = totalMemory
-					}
-				}
-
-				// Collect real total CPU cores (only if not already set or if it's the default 4 cores)
-				if node.TotalCPU == 4.0 {
-					log.Printf("Collecting total CPU cores for node %s", nodeID)
-					totalCPU, err := getNodeTotalCPU(nodeConfig)
-					if err != nil {
-						log.Printf("Warning: Failed to get CPU cores for node %s: %v", nodeID, err)
-						// Keep default 4 cores on error
-					} else {
-						log.Printf("SUCCESS: Node %s Total CPU cores: %.1f", nodeID, totalCPU)
-						node.TotalCPU = totalCPU
-					}
-				}
-
-				// Only update real metrics - no simulation
 				node.LastUpdate = time.Now()
 			}
 		}
@@ -1576,7 +1781,46 @@ func getNodeTotalMemory(nodeConfig NodeConfig) (float64, error) {
 	return totalMemory, nil
 }
 
-// Get total CPU cores from node via SSH
+// pollNodeMetrics performs HTTP GET request to node's metrics endpoint
+func pollNodeMetrics(nodeConfig NodeConfig) (*HTTPMetricsResponse, error) {
+	// Create HTTP client with timeout
+	client := &http.Client{
+		Timeout: 2 * time.Second,
+	}
+
+	// Build metrics URL
+	metricsURL := fmt.Sprintf("http://%s:8085/api/system/metrics", nodeConfig.Host)
+
+	logger.LogWithNode(nodeConfig.Host, "HTTP", fmt.Sprintf("Making GET request to %s", metricsURL), "info")
+
+	// Make HTTP request
+	resp, err := client.Get(metricsURL)
+	if err != nil {
+		logger.LogError(nodeConfig.Host, "HTTP", fmt.Sprintf("Request failed: %v", err))
+		return nil, fmt.Errorf("HTTP request failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	logger.LogWithNode(nodeConfig.Host, "HTTP", fmt.Sprintf("Response status: %d", resp.StatusCode), "info")
+
+	// Check HTTP status code
+	if resp.StatusCode != http.StatusOK {
+		logger.LogError(nodeConfig.Host, "HTTP", fmt.Sprintf("Bad status: %d %s", resp.StatusCode, resp.Status))
+		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
+	}
+
+	// Parse JSON response
+	var metrics HTTPMetricsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&metrics); err != nil {
+		logger.LogError(nodeConfig.Host, "HTTP", fmt.Sprintf("JSON decode failed: %v", err))
+		return nil, fmt.Errorf("JSON decode failed: %v", err)
+	}
+
+	logger.LogSuccess(nodeConfig.Host, "HTTP", "Metrics response parsed successfully")
+	return &metrics, nil
+}
+
+// Get total CPU cores from node via SSH (legacy function - kept for compatibility)
 func getNodeTotalCPU(nodeConfig NodeConfig) (float64, error) {
 	// Use 'nproc' command to get CPU count
 	cmd := "nproc"
@@ -2285,8 +2529,11 @@ func serveStatic(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// Set up logging
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	// Initialize logger
+	logFilePath := "logs/vuDataSim.log"
+	if err := logger.InitLogger(logFilePath); err != nil {
+		log.Fatalf("Failed to initialize logger: %v", err)
+	}
 
 	// Initialize start time
 	appState.StartTime = time.Now()
@@ -2294,8 +2541,8 @@ func main() {
 	// Initialize node manager
 	err := nodeManager.LoadNodesConfig()
 	if err != nil {
-		log.Printf("Warning: Failed to load nodes config: %v", err)
-		log.Println("Node management features may not be available")
+		logger.Warn().Err(err).Msg("Failed to load nodes config")
+		logger.Warn().Msg("Node management features may not be available")
 	}
 
 	// Check for CLI node management commands
@@ -2306,8 +2553,8 @@ func main() {
 		}
 	}
 
-	log.Printf("Starting vuDataSim Cluster Manager v%s", AppVersion)
-	log.Printf("Serving static files from: %s", StaticDir)
+	logger.Info().Str("version", AppVersion).Msg("Starting vuDataSim Cluster Manager")
+	logger.Info().Str("static_dir", StaticDir).Msg("Serving static files")
 
 	// Create router
 	router := mux.NewRouter()
@@ -2374,8 +2621,8 @@ func main() {
 	}()
 
 	// Start server
-	log.Printf("Server starting on port %s", Port)
-	log.Printf("Open http://localhost%s in your browser", Port)
+	logger.Info().Str("port", Port).Msg("Server starting")
+	logger.Info().Str("url", "http://localhost"+Port).Msg("Open in browser")
 
 	srv := &http.Server{
 		Addr:         Port,
