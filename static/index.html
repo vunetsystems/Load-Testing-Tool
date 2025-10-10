@@ -4,6 +4,9 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>vuDataSim Cluster Manager</title>
+    <!-- TODO: For production, install Tailwind CSS locally instead of using CDN -->
+    <!-- Run: npm install -D tailwindcss postcss autoprefixer -->
+    <!-- Then: npx tailwindcss -i ./src/input.css -o ./static/styles.css --watch -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -67,81 +70,28 @@
             <h2 class="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">Controls</h2>
 
             <div class="space-y-6">
-                <!-- Load Profile Selector -->
-                <div>
-                    <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2" for="load-profile">Load Profile Selector</label>
-                    <div class="relative">
-                        <button id="profile-button" class="flex w-full items-center justify-between rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark px-4 py-2.5 text-left focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark transition-all duration-300">
-                            <span class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-primary dark:text-primary-dark">insights</span>
-                                <span id="selected-profile">Medium</span>
-                            </span>
-                            <span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark">expand_more</span>
-                        </button>
-                        <div id="profile-dropdown" class="absolute z-10 mt-2 w-full rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-lg animate-fade-in hidden">
-                            <ul class="py-2">
-                                <li data-value="low" class="flex items-center gap-2 px-4 py-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-subtle-light dark:hover:bg-subtle-dark cursor-pointer transition-colors duration-200">
-                                    <span class="material-symbols-outlined text-sm">battery_low</span>Low
-                                </li>
-                                <li data-value="medium" class="flex items-center gap-2 px-4 py-2 bg-primary/10 dark:bg-primary-dark/20 text-primary dark:text-primary-dark font-semibold cursor-pointer transition-colors duration-200">
-                                    <span class="material-symbols-outlined text-sm">battery_horiz_050</span>Medium
-                                </li>
-                                <li data-value="high" class="flex items-center gap-2 px-4 py-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-subtle-light dark:hover:bg-subtle-dark cursor-pointer transition-colors duration-200">
-                                    <span class="material-symbols-outlined text-sm">battery_full</span>High
-                                </li>
-                                <li data-value="custom1" class="flex items-center gap-2 px-4 py-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-subtle-light dark:hover:bg-subtle-dark cursor-pointer transition-colors duration-200">
-                                    <span class="material-symbols-outlined text-sm">edit_note</span>Custom1
-                                </li>
-                                <li data-value="custom2" class="flex items-center gap-2 px-4 py-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-subtle-light dark:hover:bg-subtle-dark cursor-pointer transition-colors duration-200">
-                                    <span class="material-symbols-outlined text-sm">edit_note</span>Custom2
-                                </li>
-                            </ul>
-                        </div>
+                <div class="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-primary dark:text-primary-dark">info</span>
+                        <span class="font-medium">Real-time Monitoring</span>
                     </div>
-                </div>
-
-                <!-- Target EPS -->
-                <div>
-                    <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2" for="target-eps">Target EPS</label>
-                    <div class="relative">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark">speed</span>
-                        <input id="target-eps" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark pl-10 number-animate" type="number" value="10000" min="1" max="100000"/>
-                    </div>
-                </div>
-
-                <!-- Target Kafka Load -->
-                <div>
-                    <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2" for="target-kafka">Target Kafka Load</label>
-                    <div class="relative">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark">topic</span>
-                        <input id="target-kafka" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark pl-10 number-animate" type="number" value="5000" min="1" max="50000"/>
-                    </div>
-                </div>
-
-                <!-- Target ClickHouse Load -->
-                <div>
-                    <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2" for="target-ch">Target ClickHouse Load</label>
-                    <div class="relative">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark">database</span>
-                        <input id="target-ch" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark pl-10 number-animate" type="number" value="2000" min="1" max="20000"/>
-                    </div>
+                    <p class="text-xs leading-relaxed">
+                        Displaying live CPU and memory metrics collected directly from your configured nodes via SSH.
+                        <br><br>
+                        Updates every 3 seconds with real system data.
+                    </p>
                 </div>
             </div>
 
             <!-- Action Buttons -->
             <div class="mt-auto space-y-3">
-                <button id="start-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg bg-primary dark:bg-primary-dark py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100 shadow-lg shadow-primary/20">
-                    <span class="material-symbols-outlined transition-transform group-hover:rotate-180">play_circle</span>
-                    <span>Start Simulation</span>
-                </button>
-                <button id="stop-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg bg-danger/80 dark:bg-danger-dark/80 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100 shadow-lg shadow-danger/20">
-                    <span class="material-symbols-outlined transition-transform group-hover:rotate-180">stop_circle</span>
-                    <span>Stop Simulation</span>
-                </button>
                 <button id="sync-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 py-3 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
                     <span class="material-symbols-outlined transition-transform group-hover:rotate-180">sync</span>
-                    <span>Sync Config</span>
+                    <span>Refresh Real Data</span>
                 </button>
+                <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark text-center">
+                    Showing real metrics from your nodes
+                </div>
             </div>
         </aside>
 
@@ -155,12 +105,8 @@
                         <span>Node Management</span>
                     </button>
                     <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Node Status:</span>
-                    <div class="flex items-center gap-2">
-                        <span id="node1-status" class="h-4 w-4 rounded-full bg-success animate-node-pulse" title="Node 1: Active"></span>
-                        <span id="node2-status" class="h-4 w-4 rounded-full bg-success animate-node-pulse" style="animation-delay: 0.2s;" title="Node 2: Active"></span>
-                        <span id="node3-status" class="h-4 w-4 rounded-full bg-success animate-node-pulse" style="animation-delay: 0.4s;" title="Node 3: Active"></span>
-                        <span id="node4-status" class="h-4 w-4 rounded-full bg-danger" title="Node 4: Inactive"></span>
-                        <span id="node5-status" class="h-4 w-4 rounded-full bg-success animate-node-pulse" style="animation-delay: 0.6s;" title="Node 5: Active"></span>
+                    <div class="flex items-center gap-2" id="node-status-indicators">
+                        <!-- Node status indicators will be populated dynamically -->
                     </div>
                 </div>
             </div>
@@ -168,86 +114,28 @@
             <div class="space-y-8">
                 <!-- Cluster Overview Table -->
                 <div>
-                    <h3 class="text-xl font-semibold mb-4">Cluster Overview</h3>
+                    <div class="flex items-center gap-2 mb-4">
+                        <h3 class="text-xl font-semibold">Cluster Overview</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+                            </span>
+                            <span class="text-xs text-success font-medium">LIVE</span>
+                        </div>
+                    </div>
                     <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
                                 <tr>
                                     <th class="p-4 font-semibold">Node Name</th>
                                     <th class="p-4 font-semibold">Status</th>
-                                    <th class="p-4 font-semibold text-right">EPS</th>
-                                    <th class="p-4 font-semibold text-right">Kafka Load</th>
-                                    <th class="p-4 font-semibold text-right">CH Load</th>
-                                    <th class="p-4 font-semibold text-right">CPU</th>
-                                    <th class="p-4 font-semibold text-right">Memory</th>
+                                    <th class="p-4 font-semibold text-right">CPU (Used/Total)</th>
+                                    <th class="p-4 font-semibold text-right">Memory (Used/Total)</th>
                                 </tr>
                             </thead>
                             <tbody id="cluster-table-body" class="divide-y divide-subtle-light dark:divide-subtle-dark">
-                                <tr class="hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200">
-                                    <td class="p-4 font-medium">Node 1</td>
-                                    <td class="p-4">
-                                        <div class="inline-flex items-center gap-2 rounded-full bg-success/20 dark:bg-success-dark/20 px-3 py-1 text-xs font-medium text-success dark:text-success-dark">
-                                            <span class="h-2 w-2 rounded-full bg-success"></span>Active
-                                        </div>
-                                    </td>
-                                    <td class="p-4 text-right number-animate" data-field="eps">9,800</td>
-                                    <td class="p-4 text-right number-animate" data-field="kafka">4,900</td>
-                                    <td class="p-4 text-right number-animate" data-field="ch">1,950</td>
-                                    <td class="p-4 text-right number-animate" data-field="cpu">65%</td>
-                                    <td class="p-4 text-right number-animate" data-field="memory">70%</td>
-                                </tr>
-                                <tr class="hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200">
-                                    <td class="p-4 font-medium">Node 2</td>
-                                    <td class="p-4">
-                                        <div class="inline-flex items-center gap-2 rounded-full bg-success/20 dark:bg-success-dark/20 px-3 py-1 text-xs font-medium text-success dark:text-success-dark">
-                                            <span class="h-2 w-2 rounded-full bg-success"></span>Active
-                                        </div>
-                                    </td>
-                                    <td class="p-4 text-right number-animate" data-field="eps">9,900</td>
-                                    <td class="p-4 text-right number-animate" data-field="kafka">4,950</td>
-                                    <td class="p-4 text-right number-animate" data-field="ch">1,980</td>
-                                    <td class="p-4 text-right number-animate" data-field="cpu">70%</td>
-                                    <td class="p-4 text-right number-animate" data-field="memory">75%</td>
-                                </tr>
-                                <tr class="hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200">
-                                    <td class="p-4 font-medium">Node 3</td>
-                                    <td class="p-4">
-                                        <div class="inline-flex items-center gap-2 rounded-full bg-success/20 dark:bg-success-dark/20 px-3 py-1 text-xs font-medium text-success dark:text-success-dark">
-                                            <span class="h-2 w-2 rounded-full bg-success"></span>Active
-                                        </div>
-                                    </td>
-                                    <td class="p-4 text-right number-animate" data-field="eps">10,100</td>
-                                    <td class="p-4 text-right number-animate" data-field="kafka">5,050</td>
-                                    <td class="p-4 text-right number-animate" data-field="ch">2,020</td>
-                                    <td class="p-4 text-right number-animate" data-field="cpu">60%</td>
-                                    <td class="p-4 text-right number-animate" data-field="memory">65%</td>
-                                </tr>
-                                <tr class="opacity-60">
-                                    <td class="p-4 font-medium">Node 4</td>
-                                    <td class="p-4">
-                                        <div class="inline-flex items-center gap-2 rounded-full bg-danger/20 dark:bg-danger-dark/20 px-3 py-1 text-xs font-medium text-danger dark:text-danger-dark">
-                                            <span class="h-2 w-2 rounded-full bg-danger"></span>Inactive
-                                        </div>
-                                    </td>
-                                    <td class="p-4 text-right number-animate" data-field="eps">0</td>
-                                    <td class="p-4 text-right number-animate" data-field="kafka">0</td>
-                                    <td class="p-4 text-right number-animate" data-field="ch">0</td>
-                                    <td class="p-4 text-right number-animate" data-field="cpu">0%</td>
-                                    <td class="p-4 text-right number-animate" data-field="memory">0%</td>
-                                </tr>
-                                <tr class="hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200">
-                                    <td class="p-4 font-medium">Node 5</td>
-                                    <td class="p-4">
-                                        <div class="inline-flex items-center gap-2 rounded-full bg-success/20 dark:bg-success-dark/20 px-3 py-1 text-xs font-medium text-success dark:text-success-dark">
-                                            <span class="h-2 w-2 rounded-full bg-success"></span>Active
-                                        </div>
-                                    </td>
-                                    <td class="p-4 text-right number-animate" data-field="eps">10,000</td>
-                                    <td class="p-4 text-right number-animate" data-field="kafka">5,000</td>
-                                    <td class="p-4 text-right number-animate" data-field="ch">2,000</td>
-                                    <td class="p-4 text-right number-animate" data-field="cpu">75%</td>
-                                    <td class="p-4 text-right number-animate" data-field="memory">80%</td>
-                                </tr>
+                                <!-- Node data will be populated dynamically by JavaScript -->
                             </tbody>
                         </table>
                     </div>
@@ -257,88 +145,17 @@
                 <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
                     <div class="lg:col-span-2">
                         <h3 class="text-xl font-semibold mb-4">Live Charts</h3>
-                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                            <!-- EPS Chart -->
+                        <div class="grid grid-cols-1 gap-6">
+                            <!-- Real-time System Resources Chart -->
                             <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                                 <p class="font-medium flex items-center gap-2 text-text-secondary-light dark:text-text-secondary-dark">
-                                    <span class="material-symbols-outlined text-lg">speed</span>EPS Over Time
+                                    <span class="material-symbols-outlined text-lg">memory</span>Real-time System Resources
                                 </p>
-                                <p id="eps-value" class="text-4xl font-bold mt-2 number-animate">9,960</p>
+                                <div class="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-2">Live data from your actual nodes</div>
+                                <p id="cpu-memory-value" class="text-4xl font-bold mt-2 number-animate">2.3<span class="text-text-secondary-light dark:text-text-secondary-dark">/</span>4.0<span class="text-text-secondary-light dark:text-text-secondary-dark"> cores / </span>2.0<span class="text-text-secondary-light dark:text-text-secondary-dark">/</span>8.0<span class="text-text-secondary-light dark:text-text-secondary-dark"> GB</span></p>
                                 <div class="flex items-center gap-1 text-sm text-success dark:text-success-dark mt-1">
-                                    <span class="material-symbols-outlined text-base">trending_up</span>
-                                    <span id="eps-trend">+1.2%</span>
-                                </div>
-                                <div class="h-32 mt-4">
-                                    <svg id="eps-chart" class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 35">
-                                        <defs>
-                                            <linearGradient id="chartGradient1" x1="0%" x2="0%" y1="0%" y2="100%">
-                                                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"></stop>
-                                                <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"></stop>
-                                            </linearGradient>
-                                        </defs>
-                                        <path d="M0 35 L0 20 L10 10 L20 15 L30 5 L40 12 L50 25 L60 22 L70 18 L80 28 L90 20 L100 24 L100 35 Z" fill="url(#chartGradient1)"></path>
-                                        <path class="chart-path" d="M0 20 L10 10 L20 15 L30 5 L40 12 L50 25 L60 22 L70 18 L80 28 L90 20 L100 24" fill="none" stroke="#3b82f6" stroke-width="2.5"></path>
-                                    </svg>
-                                </div>
-                            </div>
-
-                            <!-- Kafka Load Chart -->
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                <p class="font-medium flex items-center gap-2 text-text-secondary-light dark:text-text-secondary-dark">
-                                    <span class="material-symbols-outlined text-lg">topic</span>Kafka Load
-                                </p>
-                                <p id="kafka-value" class="text-4xl font-bold mt-2 number-animate">4,975</p>
-                                <div class="flex items-center gap-1 text-sm text-danger dark:text-danger-dark mt-1">
-                                    <span class="material-symbols-outlined text-base">trending_down</span>
-                                    <span id="kafka-trend">-0.5%</span>
-                                </div>
-                                <div class="h-32 mt-4">
-                                    <svg id="kafka-chart" class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 35">
-                                        <defs>
-                                            <linearGradient id="chartGradient2" x1="0%" x2="0%" y1="0%" y2="100%">
-                                                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"></stop>
-                                                <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"></stop>
-                                            </linearGradient>
-                                        </defs>
-                                        <path d="M0 35 L0 15 L10 25 L20 20 L30 30 L40 23 L50 10 L60 13 L70 17 L80 7 L90 15 L100 11 L100 35 Z" fill="url(#chartGradient2)"></path>
-                                        <path class="chart-path" d="M0 15 L10 25 L20 20 L30 30 L40 23 L50 10 L60 13 L70 17 L80 7 L90 15 L100 11" fill="none" stroke="#3b82f6" stroke-width="2.5"></path>
-                                    </svg>
-                                </div>
-                            </div>
-
-                            <!-- ClickHouse Load Chart -->
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                <p class="font-medium flex items-center gap-2 text-text-secondary-light dark:text-text-secondary-dark">
-                                    <span class="material-symbols-outlined text-lg">database</span>ClickHouse Load
-                                </p>
-                                <p id="ch-value" class="text-4xl font-bold mt-2 number-animate">1,985</p>
-                                <div class="flex items-center gap-1 text-sm text-success dark:text-success-dark mt-1">
-                                    <span class="material-symbols-outlined text-base">trending_up</span>
-                                    <span id="ch-trend">+0.8%</span>
-                                </div>
-                                <div class="h-32 mt-4">
-                                    <svg id="ch-chart" class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 35">
-                                        <defs>
-                                            <linearGradient id="chartGradient3" x1="0%" x2="0%" y1="0%" y2="100%">
-                                                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"></stop>
-                                                <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"></stop>
-                                            </linearGradient>
-                                        </defs>
-                                        <path d="M0 35 L0 22 L10 12 L20 17 L30 7 L40 14 L50 27 L60 24 L70 20 L80 30 L90 22 L100 26 L100 35 Z" fill="url(#chartGradient3)"></path>
-                                        <path class="chart-path" d="M0 22 L10 12 L20 17 L30 7 L40 14 L50 27 L60 24 L70 20 L80 30 L90 22 L100 26" fill="none" stroke="#3b82f6" stroke-width="2.5"></path>
-                                    </svg>
-                                </div>
-                            </div>
-
-                            <!-- CPU/Memory Chart -->
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                <p class="font-medium flex items-center gap-2 text-text-secondary-light dark:text-text-secondary-dark">
-                                    <span class="material-symbols-outlined text-lg">memory</span>CPU/Memory Usage
-                                </p>
-                                <p id="cpu-memory-value" class="text-4xl font-bold mt-2 number-animate">70%<span class="text-text-secondary-light dark:text-text-secondary-dark">/</span>75%</p>
-                                <div class="flex items-center gap-1 text-sm text-success dark:text-success-dark mt-1">
-                                    <span class="material-symbols-outlined text-base">trending_up</span>
-                                    <span id="cpu-memory-trend">+2%/+3%</span>
+                                    <span class="material-symbols-outlined text-base">sync</span>
+                                    <span>Updated every 3 seconds</span>
                                 </div>
                                 <div class="h-32 mt-4">
                                     <svg id="cpu-memory-chart" class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 35">
@@ -356,105 +173,94 @@
                         </div>
                     </div>
 
-                    <!-- Profile Summary -->
-                    <div>
-                        <h3 class="text-xl font-semibold mb-4">Profile Summary</h3>
-                        <div class="space-y-4 rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
-                            <div class="flex justify-between items-center text-sm animate-fade-in" style="animation-delay: 100ms;">
-                                <span class="text-text-secondary-light dark:text-text-secondary-dark flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-lg">app_registration</span>Selected Modules
-                                </span>
-                                <span id="selected-modules" class="font-medium text-right">Module A, Module B</span>
-                            </div>
-                            <div class="flex justify-between items-center text-sm animate-fade-in" style="animation-delay: 200ms;">
-                                <span class="text-text-secondary-light dark:text-text-secondary-dark flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-lg">track_changes</span>Target Values
-                                </span>
-                                <span id="target-values" class="font-medium text-right">EPS: 10k, Kafka: 5k...</span>
-                            </div>
-                            <div class="flex justify-between items-center text-sm animate-fade-in" style="animation-delay: 300ms;">
-                                <span class="text-text-secondary-light dark:text-text-secondary-dark flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-lg">rocket_launch</span>Projected EPS
-                                </span>
-                                <span id="projected-eps" class="font-medium text-right number-animate">9,960</span>
-                            </div>
-                            <div class="flex justify-between items-center text-sm animate-fade-in" style="animation-delay: 400ms;">
-                                <span class="text-text-secondary-light dark:text-text-secondary-dark flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-lg">hourglass_top</span>ETA / Runtime
-                                </span>
-                                <span id="eta-runtime" class="font-medium text-right">2 hours</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Node Management Section -->
-                <div id="node-management-section" class="hidden">
-                    <h3 class="text-xl font-semibold mb-4">Node Management</h3>
+                <!-- Node Management Modal -->
+                <div id="node-management-modal" class="fixed inset-0 z-50 hidden">
+                    <!-- Modal Backdrop -->
+                    <div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
 
-                    <!-- Add Node Form -->
-                    <div class="mb-8">
-                        <h4 class="text-lg font-semibold mb-4">Add New Node</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Node Name</label>
-                                <input id="node-name" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="e.g., prod-node-1">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Host/IP</label>
-                                <input id="node-host" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="192.168.1.100">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">SSH User</label>
-                                <input id="node-user" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="admin">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">SSH Key Path</label>
-                                <input id="node-keypath" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="~/.ssh/id_rsa">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Remote Conf Dir</label>
-                                <input id="node-confdir" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="/opt/vu-data-sim/conf.d">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Remote Binary Dir</label>
-                                <input id="node-bindir" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="/opt/vu-data-sim/bin">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Description</label>
-                                <input id="node-description" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="Optional description">
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <button id="add-node-btn" class="group flex items-center gap-2 rounded-lg bg-primary dark:bg-primary-dark px-6 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100">
-                                <span class="material-symbols-outlined">add</span>
-                                <span>Add Node</span>
-                            </button>
-                            <label class="flex items-center gap-2">
-                                <input id="node-enabled" type="checkbox" checked class="rounded border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark text-primary dark:text-primary-dark focus:ring-primary dark:focus:ring-primary-dark">
-                                <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Enable node after creation</span>
-                            </label>
-                        </div>
-                    </div>
+                    <!-- Modal Content -->
+                    <div class="fixed inset-0 overflow-hidden">
+                        <div class="flex min-h-full items-center justify-center p-4">
+                            <div class="relative w-full max-w-6xl bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl transform transition-all">
+                                <!-- Modal Header -->
+                                <div class="flex items-center justify-between p-6 border-b border-subtle-light dark:border-subtle-dark">
+                                    <h3 class="text-2xl font-bold">Node Management</h3>
+                                    <button id="close-node-modal" class="rounded-lg p-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-subtle-light dark:hover:bg-subtle-dark transition-colors">
+                                        <span class="material-symbols-outlined">close</span>
+                                    </button>
+                                </div>
 
-                    <!-- Nodes List -->
-                    <div>
-                        <h4 class="text-lg font-semibold mb-4">Configured Nodes</h4>
-                        <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
-                                    <tr>
-                                        <th class="p-4 font-semibold">Node Name</th>
-                                        <th class="p-4 font-semibold">Host</th>
-                                        <th class="p-4 font-semibold">Status</th>
-                                        <th class="p-4 font-semibold">Description</th>
-                                        <th class="p-4 font-semibold">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="nodes-table-body" class="divide-y divide-subtle-light dark:divide-subtle-dark">
-                                    <!-- Nodes will be populated by JavaScript -->
-                                </tbody>
-                            </table>
+                                <!-- Modal Body -->
+                                <div class="p-6 max-h-[80vh] overflow-y-auto">
+                                    <!-- Add Node Form -->
+                                    <div class="mb-8">
+                                        <h4 class="text-lg font-semibold mb-4">Add New Node</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Node Name</label>
+                                                <input id="node-name" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="e.g., prod-node-1">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Host/IP</label>
+                                                <input id="node-host" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="192.168.1.100">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">SSH User</label>
+                                                <input id="node-user" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="admin">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">SSH Key Path</label>
+                                                <input id="node-keypath" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="~/.ssh/id_rsa">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Remote Conf Dir</label>
+                                                <input id="node-confdir" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="/opt/vu-data-sim/conf.d">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Remote Binary Dir</label>
+                                                <input id="node-bindir" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="/opt/vu-data-sim/bin">
+                                            </div>
+                                            <div class="md:col-span-2">
+                                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Description</label>
+                                                <input id="node-description" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="Optional description">
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-4">
+                                            <button id="add-node-btn" class="group flex items-center gap-2 rounded-lg bg-primary dark:bg-primary-dark px-6 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100">
+                                                <span class="material-symbols-outlined">add</span>
+                                                <span>Add Node</span>
+                                            </button>
+                                            <label class="flex items-center gap-2">
+                                                <input id="node-enabled" type="checkbox" checked class="rounded border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark text-primary dark:text-primary-dark focus:ring-primary dark:focus:ring-primary-dark">
+                                                <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Enable node after creation</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Nodes List -->
+                                    <div>
+                                        <h4 class="text-lg font-semibold mb-4">Configured Nodes</h4>
+                                        <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
+                                            <table class="w-full text-left text-sm">
+                                                <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
+                                                    <tr>
+                                                        <th class="p-4 font-semibold">Node Name</th>
+                                                        <th class="p-4 font-semibold">Host</th>
+                                                        <th class="p-4 font-semibold">Status</th>
+                                                        <th class="p-4 font-semibold">Description</th>
+                                                        <th class="p-4 font-semibold">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="nodes-table-body" class="divide-y divide-subtle-light dark:divide-subtle-dark">
+                                                    <!-- Nodes will be populated by JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -468,11 +274,7 @@
                             <span class="material-symbols-outlined absolute left-3 top-10 text-text-secondary-light dark:text-text-secondary-dark">dns</span>
                             <select id="log-node" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark pl-10">
                                 <option>All Nodes</option>
-                                <option>Node 1</option>
-                                <option>Node 2</option>
-                                <option>Node 3</option>
-                                <option>Node 4</option>
-                                <option>Node 5</option>
+                                <!-- Node options will be populated dynamically -->
                             </select>
                         </div>
                         <div class="relative">
@@ -544,6 +346,6 @@
         </main>
     </div>
 
-    <script src="/static/script.js"></script>
+    <script src="/static/script.js?v=2024102501"></script>
 </body>
 </html>

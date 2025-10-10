@@ -3,8 +3,6 @@ class VuDataSimManager {
     constructor() {
         console.log('VuDataSimManager constructor called');
         this.isSimulationRunning = false;
-        this.simulationInterval = null;
-        this.currentProfile = 'medium';
         this.apiBaseUrl = ''; // Backend API base URL (empty for same origin)
         this.wsConnection = null;
         this.nodes = {}; // Store node data
@@ -13,6 +11,7 @@ class VuDataSimManager {
         this.bindEvents();
         this.loadNodes(); // Load nodes from API
         this.startRealTimeUpdates();
+        this.populateNodeFilters(); // Populate filter dropdowns with real node names
         console.log('VuDataSimManager initialization complete');
     }
 
@@ -20,14 +19,6 @@ class VuDataSimManager {
         console.log('Initializing components...');
         // Cache DOM elements for better performance
         this.elements = {
-            profileButton: document.getElementById('profile-button'),
-            profileDropdown: document.getElementById('profile-dropdown'),
-            selectedProfile: document.getElementById('selected-profile'),
-            targetEps: document.getElementById('target-eps'),
-            targetKafka: document.getElementById('target-kafka'),
-            targetCh: document.getElementById('target-ch'),
-            startBtn: document.getElementById('start-btn'),
-            stopBtn: document.getElementById('stop-btn'),
             syncBtn: document.getElementById('sync-btn'),
             logNodeFilter: document.getElementById('log-node'),
             logModuleFilter: document.getElementById('log-module'),
@@ -35,7 +26,9 @@ class VuDataSimManager {
 
             // Node management elements
             nodeManagementBtn: document.getElementById('node-management-btn'),
-            nodeManagementSection: document.getElementById('node-management-section'),
+            nodeManagementModal: document.getElementById('node-management-modal'),
+            modalBackdrop: document.getElementById('modal-backdrop'),
+            closeNodeModal: document.getElementById('close-node-modal'),
             nodeName: document.getElementById('node-name'),
             nodeHost: document.getElementById('node-host'),
             nodeUser: document.getElementById('node-user'),
@@ -46,373 +39,226 @@ class VuDataSimManager {
             nodeEnabled: document.getElementById('node-enabled'),
             addNodeBtn: document.getElementById('add-node-btn'),
             nodesTableBody: document.getElementById('nodes-table-body'),
-            
+
             // Dashboard elements
-            nodeStatusIndicators: {
-                node1: document.getElementById('node1-status'),
-                node2: document.getElementById('node2-status'),
-                node3: document.getElementById('node3-status'),
-                node4: document.getElementById('node4-status'),
-                node5: document.getElementById('node5-status')
-            },
-            
+            nodeStatusIndicatorsContainer: document.getElementById('node-status-indicators'),
+
             // Chart value elements
-            epsValue: document.getElementById('eps-value'),
-            kafkaValue: document.getElementById('kafka-value'),
-            chValue: document.getElementById('ch-value'),
             cpuMemoryValue: document.getElementById('cpu-memory-value'),
-            
-            // Trend indicators
-            epsTrend: document.getElementById('eps-trend'),
-            kafkaTrend: document.getElementById('kafka-trend'),
-            chTrend: document.getElementById('ch-trend'),
-            cpuMemoryTrend: document.getElementById('cpu-memory-trend'),
-            
-            // Profile summary
-            selectedModules: document.getElementById('selected-modules'),
-            targetValues: document.getElementById('target-values'),
-            projectedEps: document.getElementById('projected-eps'),
-            etaRuntime: document.getElementById('eta-runtime')
+
+            // Real-time status
         };
 
-        // Initialize node data (will be loaded from API)
+        // Initialize node data (will be loaded from API with real data only)
         this.nodeData = {};
 
-        // Log entries for demonstration
-        this.logEntries = [
-            { time: '2024-01-20 14:30:00', node: 'Node 1', module: 'Module A', message: 'Starting simulation...', type: 'info' },
-            { time: '2024-01-20 14:30:05', node: 'Node 1', module: 'Module A', message: 'Simulation running...', type: 'info' },
-            { time: '2024-01-20 14:30:10', node: 'Node 1', module: 'Module A', message: 'EPS: 9800, Kafka: 4900, CH: 1950', type: 'metric' },
-            { time: '2024-01-20 14:30:15', node: 'Node 1', module: 'Module A', message: 'EPS: 9900, Kafka: 4950, CH: 1980', type: 'metric' },
-            { time: '2024-01-20 14:30:20', node: 'Node 1', module: 'Module A', message: 'EPS: 10100, Kafka: 5050, CH: 2020', type: 'metric' },
-            { time: '2024-01-20 14:30:25', node: 'Node 2', module: 'Module B', message: 'Initializing...', type: 'warning' },
-            { time: '2024-01-20 14:30:30', node: 'Node 3', module: 'Module A', message: 'Heartbeat OK.', type: 'success' },
-            { time: '2024-01-20 14:30:35', node: 'Node 5', module: 'Module A', message: 'Load at 75% capacity.', type: 'info' },
-            { time: '2024-01-20 14:30:40', node: 'Node 1', module: 'Module A', message: 'Metric update successful.', type: 'success' },
-            { time: '2024-01-20 14:30:45', node: 'Node 4', module: 'System', message: 'Node is Inactive. No logs to display.', type: 'error' }
-        ];
+        // Legacy property for backward compatibility (browser cache)
+        this.nodeManagementSection = null;
+
+        // Real-time log entries (will be loaded from API)
+        this.logEntries = [];
+        this.lastLogUpdate = 0;
     }
 
     bindEvents() {
-        // Profile dropdown functionality
-        this.elements.profileButton?.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.toggleDropdown();
-        });
-
-        // Profile selection
-        this.elements.profileDropdown?.querySelectorAll('li').forEach(item => {
-            item.addEventListener('click', (e) => {
-                const value = e.target.closest('li').dataset.value;
-                this.selectProfile(value);
-            });
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#profile-button') && !e.target.closest('#profile-dropdown')) {
-                this.closeDropdown();
-            }
-        });
-
         // Button event listeners
-        this.elements.startBtn?.addEventListener('click', () => this.startSimulation());
-        this.elements.stopBtn?.addEventListener('click', () => this.stopSimulation());
-        this.elements.syncBtn?.addEventListener('click', () => this.syncConfiguration());
+        this.elements.syncBtn?.addEventListener('click', () => this.refreshRealData());
 
         // Node management event listeners
         console.log('Node Management Button element:', this.elements.nodeManagementBtn);
-        console.log('Node Management Section element:', this.elements.nodeManagementSection);
-        
+        console.log('Node Management Modal element:', this.elements.nodeManagementModal);
+
         if (this.elements.nodeManagementBtn) {
             this.elements.nodeManagementBtn.addEventListener('click', () => {
                 console.log('Node Management button clicked!');
-                this.toggleNodeManagement();
+                this.openNodeManagementModal();
             });
         } else {
             console.error('Node Management button not found!');
         }
-        
+
+        // Modal event listeners
+        this.elements.closeNodeModal?.addEventListener('click', () => this.closeNodeManagementModal());
+        this.elements.modalBackdrop?.addEventListener('click', () => this.closeNodeManagementModal());
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !this.elements.nodeManagementModal.classList.contains('hidden')) {
+                this.closeNodeManagementModal();
+            }
+        });
+
         this.elements.addNodeBtn?.addEventListener('click', () => this.addNode());
 
-        // Input validation
-        [this.elements.targetEps, this.elements.targetKafka, this.elements.targetCh].forEach(input => {
-            input?.addEventListener('input', (e) => this.validateInput(e.target));
-            input?.addEventListener('blur', (e) => this.formatNumber(e.target));
-        });
+        // Edit node form (initially hidden)
+        this.isEditMode = false;
+        this.editNodeName = null;
+
 
         // Log filtering
         this.elements.logNodeFilter?.addEventListener('change', () => this.filterLogs());
         this.elements.logModuleFilter?.addEventListener('change', () => this.filterLogs());
 
-        // Real-time updates
+        // Real-time updates - Update every 3 seconds with real data
         setInterval(() => {
-            if (this.isSimulationRunning) {
-                this.updateMetrics();
-                this.addRandomLog();
-            }
-        }, 2000);
+            this.updateMetrics();
+            this.updateNodeStatusIndicators(); // Ensure status dots stay in sync
+        }, 3000);
+
+        // Load logs initially and set up polling for live logs
+        this.loadLogs();
+        setInterval(() => {
+            this.loadLogs();
+        }, 5000); // Update logs every 5 seconds
     }
 
     async loadNodes() {
         try {
             // Load nodes from the integrated API
-            const response = await this.callAPI('/api/nodes');
-            if (response.success && response.data) {
-                // Convert API data to nodeData format
-                this.nodeData = {};
-                response.data.forEach(node => {
-                    const nodeId = node.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-                    this.nodeData[nodeId] = {
-                        eps: Math.floor(Math.random() * 10000) + 5000, // Mock metrics for now
-                        kafka: Math.floor(Math.random() * 5000) + 2500,
-                        ch: Math.floor(Math.random() * 2000) + 1000,
-                        cpu: Math.floor(Math.random() * 50) + 30,
-                        memory: Math.floor(Math.random() * 50) + 30,
-                        status: node.enabled ? 'active' : 'inactive'
-                    };
-                });
-
+            const response = await this.callAPI('/api/dashboard');
+            if (response.success && response.data && response.data.nodeData) {
+                this.nodeData = response.data.nodeData;
                 this.updateDashboardDisplay();
                 this.updateNodeStatusIndicators();
+            } else {
+                // Fallback: load from nodes API if dashboard doesn't have nodeData
+                const nodesResponse = await this.callAPI('/api/nodes');
+                if (nodesResponse.success && nodesResponse.data) {
+                    // Convert API data to nodeData format
+                    this.nodeData = {};
+                    nodesResponse.data.forEach(node => {
+                        const nodeId = node.name;
+                        this.nodeData[nodeId] = {
+                            cpu: 0,           // Will be updated with real data
+                            memory: 0,        // Will be updated with real data
+                            totalCpu: 4.0,
+                            totalMemory: 8.0,
+                            status: node.enabled ? 'active' : 'inactive'
+                        };
+                    });
+
+                    this.updateDashboardDisplay();
+                    this.updateNodeStatusIndicators();
+                    this.populateNodeFilters();
+                }
             }
         } catch (error) {
             console.error('Error loading nodes:', error);
         }
     }
 
-    toggleDropdown() {
-        const dropdown = this.elements.profileDropdown;
-        if (dropdown.classList.contains('hidden')) {
-            dropdown.classList.remove('hidden');
-            dropdown.classList.add('animate-slide-down');
-        } else {
-            this.closeDropdown();
+    async loadLogs() {
+        try {
+            const response = await this.callAPI('/api/logs?limit=50');
+            if (response.success && response.data && response.data.logs) {
+                this.logEntries = response.data.logs.map(log => ({
+                    time: log.timestamp,
+                    node: log.node,
+                    module: log.module,
+                    message: log.message,
+                    type: log.type
+                }));
+                this.displayLogs(this.logEntries);
+            }
+        } catch (error) {
+            console.error('Error loading logs:', error);
         }
     }
 
-    closeDropdown() {
-        const dropdown = this.elements.profileDropdown;
-        dropdown?.classList.add('hidden');
-        dropdown?.classList.remove('animate-slide-down');
-    }
+    populateNodeFilters() {
+        // Populate log filter dropdown with actual node names
+        const nodeFilter = this.elements.logNodeFilter;
+        if (!nodeFilter) return;
 
-    selectProfile(profile) {
-        this.currentProfile = profile;
-        this.elements.selectedProfile.textContent = profile.charAt(0).toUpperCase() + profile.slice(1);
-        this.closeDropdown();
-        this.updateProfileSummary();
-        
-        // Show success feedback
-        this.showNotification(`Profile changed to ${profile}`, 'success');
-    }
-
-    validateInput(input) {
-        const value = parseInt(input.value);
-        const min = parseInt(input.min);
-        const max = parseInt(input.max);
-
-        if (value < min || value > max) {
-            input.classList.add('border-danger');
-            input.classList.remove('border-primary');
-            this.showNotification(`Value must be between ${min} and ${max}`, 'error');
-            return false;
-        } else {
-            input.classList.remove('border-danger');
-            input.classList.add('border-primary');
-            return true;
-        }
-    }
-
-    formatNumber(input) {
-        const value = parseInt(input.value);
-        if (!isNaN(value)) {
-            input.value = value.toLocaleString();
-        }
-    }
-
-    async startSimulation() {
-        if (this.isSimulationRunning) {
-            this.showNotification('Simulation is already running', 'warning');
-            return;
+        // Clear existing options except "All Nodes"
+        while (nodeFilter.children.length > 1) {
+            nodeFilter.removeChild(nodeFilter.lastChild);
         }
 
-        // Validate inputs before starting
-        const inputs = [this.elements.targetEps, this.elements.targetKafka, this.elements.targetCh];
-        const allValid = inputs.every(input => this.validateInput(input));
+        // Add actual node names
+        Object.keys(this.nodeData).forEach(nodeId => {
+            const option = document.createElement('option');
+            option.value = nodeId;
+            option.textContent = nodeId;
+            nodeFilter.appendChild(option);
+        });
+    }
 
-        if (!allValid) {
-            this.showNotification('Please fix input validation errors before starting', 'error');
-            return;
-        }
 
+
+
+    async refreshRealData() {
         // Show loading state
-        this.setButtonLoading(this.elements.startBtn, true);
+        this.elements.syncBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span><span>Refreshing...</span>';
+        this.elements.syncBtn.disabled = true;
 
         try {
-            // Call backend API to start simulation
-            const response = await this.callAPI('/simulation/start', 'POST', {
-                profile: this.currentProfile,
-                targetEps: parseInt(this.elements.targetEps.value),
-                targetKafka: parseInt(this.elements.targetKafka.value),
-                targetClickHouse: parseInt(this.elements.targetCh.value)
-            });
-
-            if (response.success) {
-                this.isSimulationRunning = true;
-                this.updateSimulationState();
-                this.showNotification('Simulation started successfully', 'success');
-                
-                // Update projected values
-                this.updateProfileSummary();
-            } else {
-                throw new Error(response.message || 'Failed to start simulation');
-            }
+            // Refresh real data from nodes
+            await this.loadNodes();
+            this.showNotification('Real node data refreshed successfully', 'success');
         } catch (error) {
-            console.error('Error starting simulation:', error);
-            this.showNotification('Failed to start simulation: ' + error.message, 'error');
+            console.error('Error refreshing real data:', error);
+            this.showNotification('Failed to refresh real data: ' + error.message, 'error');
         } finally {
-            this.setButtonLoading(this.elements.startBtn, false);
+            // Reset button state
+            this.elements.syncBtn.innerHTML = '<span class="material-symbols-outlined transition-transform group-hover:rotate-180">sync</span><span>Refresh Real Data</span>';
+            this.elements.syncBtn.disabled = false;
         }
     }
 
-    async stopSimulation() {
-        if (!this.isSimulationRunning) {
-            this.showNotification('No simulation is currently running', 'warning');
-            return;
-        }
 
-        this.setButtonLoading(this.elements.stopBtn, true);
-
-        try {
-            const response = await this.callAPI('/simulation/stop', 'POST');
-
-            if (response.success) {
-                this.isSimulationRunning = false;
-                this.updateSimulationState();
-                this.showNotification('Simulation stopped successfully', 'success');
-            } else {
-                throw new Error(response.message || 'Failed to stop simulation');
-            }
-        } catch (error) {
-            console.error('Error stopping simulation:', error);
-            this.showNotification('Failed to stop simulation: ' + error.message, 'error');
-        } finally {
-            this.setButtonLoading(this.elements.stopBtn, false);
-        }
-    }
-
-    async syncConfiguration() {
-        this.setButtonLoading(this.elements.syncBtn, true);
-
-        try {
-            const response = await this.callAPI('/config/sync', 'POST');
-
-            if (response.success) {
-                this.showNotification('Configuration synced successfully', 'success');
-                // Update dashboard with fresh data
-                this.refreshDashboard();
-            } else {
-                throw new Error(response.message || 'Failed to sync configuration');
-            }
-        } catch (error) {
-            console.error('Error syncing configuration:', error);
-            this.showNotification('Failed to sync configuration: ' + error.message, 'error');
-        } finally {
-            this.setButtonLoading(this.elements.syncBtn, false);
-        }
-    }
-
-    setButtonLoading(button, isLoading) {
-        if (isLoading) {
-            button.classList.add('loading');
-            button.disabled = true;
-            const originalText = button.textContent;
-            button.dataset.originalText = originalText;
-            button.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span><span>Processing...</span>';
-        } else {
-            button.classList.remove('loading');
-            button.disabled = false;
-            if (button.dataset.originalText) {
-                button.innerHTML = button.dataset.originalText;
-            }
-        }
-    }
-
-    updateSimulationState() {
-        if (this.isSimulationRunning) {
-            this.elements.startBtn.disabled = true;
-            this.elements.startBtn.classList.add('opacity-50');
-            this.elements.stopBtn.disabled = false;
-            this.elements.stopBtn.classList.remove('opacity-50');
-        } else {
-            this.elements.startBtn.disabled = false;
-            this.elements.startBtn.classList.remove('opacity-50');
-            this.elements.stopBtn.disabled = true;
-            this.elements.stopBtn.classList.add('opacity-50');
-        }
-    }
 
     updateMetrics() {
-        // Simulate real-time metric updates
-        Object.keys(this.nodeData).forEach(nodeId => {
-            const node = this.nodeData[nodeId];
-            if (node.status === 'active') {
-                // Add small random variations
-                const variation = (Math.random() - 0.5) * 200;
-                node.eps = Math.max(0, node.eps + variation);
-                node.kafka = Math.max(0, node.kafka + variation / 2);
-                node.ch = Math.max(0, node.ch + variation / 5);
-                
-                // Update CPU and memory with smaller variations
-                node.cpu = Math.max(0, Math.min(100, node.cpu + (Math.random() - 0.5) * 5));
-                node.memory = Math.max(0, Math.min(100, node.memory + (Math.random() - 0.5) * 5));
-            }
-        });
-
+        // Only update display - no simulation
+        // Real metrics are collected by the backend via SSH
         this.updateDashboardDisplay();
     }
 
     updateDashboardDisplay() {
-        // Update cluster table
+        // Update cluster table dynamically
+        const tbody = document.getElementById('cluster-table-body');
+        tbody.innerHTML = ''; // Clear existing rows
+
         Object.keys(this.nodeData).forEach(nodeId => {
             const node = this.nodeData[nodeId];
-            const row = document.querySelector(`tr:nth-child(${parseInt(nodeId.slice(-1)) + (nodeId === 'node4' ? 0 : 1)})`);
-            
-            if (row) {
-                const cells = row.querySelectorAll('[data-field]');
-                cells.forEach(cell => {
-                    const field = cell.dataset.field;
-                    const value = node[field];
-                    const formattedValue = field === 'cpu' || field === 'memory' ? 
-                        `${Math.round(value)}%` : 
-                        Math.round(value).toLocaleString();
-                    cell.textContent = formattedValue;
-                });
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200';
+
+            if (node.status === 'inactive') {
+                row.classList.add('opacity-60');
             }
+
+            // Calculate memory usage in GB
+            const usedMemory = node.totalMemory * (node.memory / 100);
+
+            row.innerHTML = `
+                <td class="p-4 font-medium">${nodeId}</td>
+                <td class="p-4">
+                    <div class="inline-flex items-center gap-2 rounded-full ${node.status === 'active' ? 'bg-success/20 dark:bg-success-dark/20 px-3 py-1 text-xs font-medium text-success dark:text-success-dark' : 'bg-danger/20 dark:bg-danger-dark/20 px-3 py-1 text-xs font-medium text-danger dark:text-danger-dark'}">
+                        <span class="h-2 w-2 rounded-full ${node.status === 'active' ? 'bg-success' : 'bg-danger'}"></span>${node.status === 'active' ? 'Active' : 'Inactive'}
+                    </div>
+                </td>
+                <td class="p-4 text-right number-animate" data-field="cpu">${(node.totalCpu - (node.totalCpu * node.cpu / 100)).toFixed(1)} / ${node.totalCpu} cores</td>
+                <td class="p-4 text-right number-animate" data-field="memory">${usedMemory.toFixed(1)} / ${node.totalMemory} GB</td>
+            `;
+
+            tbody.appendChild(row);
         });
 
-        // Update chart values
-        const totalEps = Object.values(this.nodeData).reduce((sum, node) => sum + node.eps, 0);
-        const totalKafka = Object.values(this.nodeData).reduce((sum, node) => sum + node.kafka, 0);
-        const totalCh = Object.values(this.nodeData).reduce((sum, node) => sum + node.ch, 0);
-        
-        this.animateNumber(this.elements.epsValue, totalEps);
-        this.animateNumber(this.elements.kafkaValue, totalKafka);
-        this.animateNumber(this.elements.chValue, totalCh);
-        
-        // Calculate averages for CPU/Memory
+        // Calculate real-time CPU/Memory data only
         const activeNodes = Object.values(this.nodeData).filter(node => node.status === 'active');
-        const avgCpu = activeNodes.reduce((sum, node) => sum + node.cpu, 0) / activeNodes.length;
-        const avgMemory = activeNodes.reduce((sum, node) => sum + node.memory, 0) / activeNodes.length;
-        
-        this.elements.cpuMemoryValue.textContent = `${Math.round(avgCpu)}% / ${Math.round(avgMemory)}%`;
-        
-        // Update trends (simulated)
-        this.updateTrend(this.elements.epsTrend, Math.random() > 0.5 ? 'up' : 'down');
-        this.updateTrend(this.elements.kafkaTrend, Math.random() > 0.6 ? 'up' : 'down');
-        this.updateTrend(this.elements.chTrend, Math.random() > 0.5 ? 'up' : 'down');
-        this.updateTrend(this.elements.cpuMemoryTrend, Math.random() > 0.5 ? 'up' : 'down');
+        if (activeNodes.length > 0) {
+            const totalAvgCpu = activeNodes.reduce((sum, node) => sum + node.totalCpu, 0) / activeNodes.length;
+            const totalAvgMemory = activeNodes.reduce((sum, node) => sum + node.totalMemory, 0) / activeNodes.length;
+
+            const avgCpuUsage = activeNodes.reduce((sum, node) => sum + node.cpu, 0) / activeNodes.length;
+            const avgMemoryUsage = activeNodes.reduce((sum, node) => sum + node.memory, 0) / activeNodes.length;
+
+            const availableCpu = totalAvgCpu - (totalAvgCpu * avgCpuUsage / 100);
+            const usedMemory = totalAvgMemory * (avgMemoryUsage / 100);
+
+            this.elements.cpuMemoryValue.textContent = `${availableCpu.toFixed(1)}/${totalAvgCpu.toFixed(1)} cores / ${usedMemory.toFixed(1)}/${totalAvgMemory.toFixed(1)} GB`;
+        }
     }
 
     animateNumber(element, newValue) {
@@ -446,18 +292,6 @@ class VuDataSimManager {
         if (icon) icon.textContent = symbol;
     }
 
-    updateProfileSummary() {
-        const targetEps = parseInt(this.elements.targetEps.value) || 10000;
-        const targetKafka = parseInt(this.elements.targetKafka.value) || 5000;
-        const targetCh = parseInt(this.elements.targetCh.value) || 2000;
-        
-        this.elements.targetValues.textContent = `EPS: ${targetEps.toLocaleString()}, Kafka: ${targetKafka.toLocaleString()}, CH: ${targetCh.toLocaleString()}`;
-        
-        // Calculate projected EPS based on current performance
-        const currentTotalEps = Object.values(this.nodeData).reduce((sum, node) => sum + node.eps, 0);
-        const projectedEps = Math.round(currentTotalEps * 0.98); // 98% efficiency projection
-        this.animateNumber(this.elements.projectedEps, projectedEps);
-    }
 
     filterLogs() {
         const nodeFilter = this.elements.logNodeFilter.value;
@@ -540,9 +374,9 @@ class VuDataSimManager {
         this.updateDashboardDisplay();
         this.updateNodeStatusIndicators();
         this.refreshNodesTable();
-        this.updateProfileSummary();
+        this.loadLogs(); // Load real logs instead of static ones
         this.displayLogs(this.logEntries);
-        
+
         // Set up WebSocket connection for real-time updates
         this.setupWebSocket();
     }
@@ -588,8 +422,8 @@ class VuDataSimManager {
         try {
             // Reload nodes from API
             await this.loadNodes();
-            // Also refresh the nodes table if it's visible
-            if (!this.elements.nodeManagementSection.classList.contains('hidden')) {
+            // Also refresh the nodes table if modal is open
+            if (this.elements.nodeManagementModal && !this.elements.nodeManagementModal.classList.contains('hidden')) {
                 this.refreshNodesTable();
             }
         } catch (error) {
@@ -599,46 +433,68 @@ class VuDataSimManager {
 
     updateNodeStatusIndicators() {
         // Update node status indicators based on real node data
-        Object.keys(this.nodeData).forEach((nodeId, index) => {
-            const node = this.nodeData[nodeId];
-            const statusElement = this.elements.nodeStatusIndicators[`node${index + 1}`];
+        const nodeIds = Object.keys(this.nodeData);
+        const container = this.elements.nodeStatusIndicatorsContainer;
+        container.innerHTML = ''; // Clear existing indicators
 
-            if (statusElement) {
-                if (node.status === 'active') {
-                    statusElement.className = 'h-4 w-4 rounded-full bg-success animate-node-pulse';
-                    statusElement.title = `${nodeId.charAt(0).toUpperCase() + nodeId.slice(1)}: Active`;
-                } else {
-                    statusElement.className = 'h-4 w-4 rounded-full bg-danger';
-                    statusElement.title = `${nodeId.charAt(0).toUpperCase() + nodeId.slice(1)}: Inactive`;
-                }
-            }
+        nodeIds.forEach((nodeId, index) => {
+            const node = this.nodeData[nodeId];
+            const statusElement = document.createElement('span');
+            statusElement.className = `h-4 w-4 rounded-full ${node.status === 'active' ? 'bg-success animate-node-pulse' : 'bg-danger'}`;
+            statusElement.style.animationDelay = `${index * 0.2}s`;
+            statusElement.title = `${nodeId}: ${node.status === 'active' ? 'Active' : 'Inactive'}`;
+
+            container.appendChild(statusElement);
         });
     }
 
+    // Legacy function for backward compatibility (browser cache)
     toggleNodeManagement() {
-        console.log('toggleNodeManagement called');
-        const section = this.elements.nodeManagementSection;
-        console.log('Node management section:', section);
-        
-        if (!section) {
-            console.error('Node management section not found!');
+        console.log('toggleNodeManagement called - redirecting to modal');
+        console.log('Modal element available:', !!this.elements.nodeManagementModal);
+        console.log('Modal element ID:', this.elements.nodeManagementModal?.id);
+        this.openNodeManagementModal();
+    }
+
+    openNodeManagementModal() {
+        console.log('Opening node management modal');
+        console.log('Available elements:', Object.keys(this.elements));
+        console.log('Modal element search:', document.getElementById('node-management-modal'));
+        const modal = this.elements.nodeManagementModal;
+
+        if (!modal) {
+            console.error('Node management modal not found!');
+            console.error('Current modal element:', modal);
+            console.error('Direct DOM query:', document.getElementById('node-management-modal'));
             return;
         }
-        
-        const isHidden = section.classList.contains('hidden');
-        console.log('Section is hidden:', isHidden);
 
-        if (isHidden) {
-            console.log('Showing node management section');
-            section.classList.remove('hidden');
-            this.refreshNodesTable();
-        } else {
-            console.log('Hiding node management section');
-            section.classList.add('hidden');
+        modal.classList.remove('hidden');
+        // Refresh nodes table when modal opens
+        this.refreshNodesTable();
+    }
+
+    closeNodeManagementModal() {
+        console.log('Closing node management modal');
+        const modal = this.elements.nodeManagementModal;
+
+        if (!modal) {
+            console.error('Node management modal not found!');
+            return;
         }
+
+        modal.classList.add('hidden');
+        // Clear form when closing modal
+        this.clearNodeForm();
     }
 
     async addNode() {
+        // If in edit mode, call update instead
+        if (this.isEditMode) {
+            await this.updateNode();
+            return;
+        }
+
         const nodeData = {
             host: this.elements.nodeHost.value,
             user: this.elements.nodeUser.value,
@@ -685,6 +541,11 @@ class VuDataSimManager {
         this.elements.nodeBindir.value = '';
         this.elements.nodeDescription.value = '';
         this.elements.nodeEnabled.checked = true;
+
+        // Exit edit mode if active
+        if (this.isEditMode) {
+            this.exitEditMode();
+        }
     }
 
     async refreshNodesTable() {
@@ -724,6 +585,10 @@ class VuDataSimManager {
                 <td class="p-4">${node.description || '-'}</td>
                 <td class="p-4">
                     <div class="flex items-center gap-2">
+                        <button onclick="window.vuDataSimManager.editNode('${node.name}')" class="px-3 py-1 text-xs rounded bg-primary/20 text-primary hover:bg-primary/30 transition-colors">
+                            <span class="material-symbols-outlined text-sm mr-1">edit</span>
+                            Edit
+                        </button>
                         <button onclick="window.vuDataSimManager.toggleNode('${node.name}', ${!node.enabled})" class="px-3 py-1 text-xs rounded ${node.enabled ? 'bg-danger/20 text-danger hover:bg-danger/30' : 'bg-success/20 text-success hover:bg-success/30'} transition-colors">
                             ${node.enabled ? 'Disable' : 'Enable'}
                         </button>
@@ -776,6 +641,102 @@ class VuDataSimManager {
         }
     }
 
+    editNode(nodeName) {
+        console.log('Editing node:', nodeName);
+        // For now, we'll use the same form but in edit mode
+        // In a real implementation, you might want to pre-populate the form with existing data
+        this.isEditMode = true;
+        this.editNodeName = nodeName;
+
+        // Update the form title and button text
+        const formTitle = document.querySelector('#node-management-modal h4');
+        const addButton = this.elements.addNodeBtn;
+
+        if (formTitle) formTitle.textContent = `Edit Node: ${nodeName}`;
+        if (addButton) {
+            addButton.innerHTML = '<span class="material-symbols-outlined">save</span><span>Update Node</span>';
+            addButton.onclick = () => this.updateNode();
+        }
+
+        this.showNotification(`Edit mode for node ${nodeName}`, 'info');
+    }
+
+    async updateNode() {
+        if (!this.editNodeName) {
+            this.showNotification('No node selected for editing', 'error');
+            return;
+        }
+
+        const nodeData = {
+            host: this.elements.nodeHost.value,
+            user: this.elements.nodeUser.value,
+            key_path: this.elements.nodeKeypath.value,
+            conf_dir: this.elements.nodeConfdir.value,
+            binary_dir: this.elements.nodeBindir.value,
+            description: this.elements.nodeDescription.value,
+            enabled: this.elements.nodeEnabled.checked
+        };
+
+        if (!nodeData.host || !nodeData.user || !nodeData.key_path || !nodeData.conf_dir || !nodeData.binary_dir) {
+            this.showNotification('Please fill in all required fields', 'error');
+            return;
+        }
+
+        this.setButtonLoading(this.elements.addNodeBtn, true);
+
+        try {
+            // For now, we'll use PUT method to update the node
+            // Note: This would need backend support for updating nodes
+            const response = await this.callAPI(`/api/nodes/${this.editNodeName}`, 'PUT', nodeData);
+
+            if (response.success) {
+                this.showNotification(`Node ${this.editNodeName} updated successfully`, 'success');
+                this.clearNodeForm();
+                this.refreshNodesTable();
+                this.loadNodes(); // Refresh the dashboard nodes too
+                this.exitEditMode();
+            } else {
+                throw new Error(response.message || 'Failed to update node');
+            }
+        } catch (error) {
+            console.error('Error updating node:', error);
+            this.showNotification('Failed to update node: ' + error.message, 'error');
+        } finally {
+            this.setButtonLoading(this.elements.addNodeBtn, false);
+        }
+    }
+
+    exitEditMode() {
+        this.isEditMode = false;
+        this.editNodeName = null;
+
+        // Reset form title and button
+        const formTitle = document.querySelector('#node-management-modal h4');
+        const addButton = this.elements.addNodeBtn;
+
+        if (formTitle) formTitle.textContent = 'Add New Node';
+        if (addButton) {
+            addButton.innerHTML = '<span class="material-symbols-outlined">add</span><span>Add Node</span>';
+            addButton.onclick = () => this.addNode();
+        }
+    }
+
+    setButtonLoading(button, loading) {
+        if (!button) return;
+
+        if (loading) {
+            button.disabled = true;
+            button.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span><span>Processing...</span>';
+        } else {
+            button.disabled = false;
+            if (this.isEditMode) {
+                button.innerHTML = '<span class="material-symbols-outlined">save</span><span>Update Node</span>';
+            } else {
+                button.innerHTML = '<span class="material-symbols-outlined">add</span><span>Add Node</span>';
+            }
+        }
+    }
+
     showNotification(message, type = 'info') {
         // Create notification element
         const notification = document.createElement('div');
@@ -805,7 +766,7 @@ document.addEventListener('DOMContentLoaded', () => {
 window.testNodeManagement = function() {
     console.log('Test function called');
     if (window.vuDataSimManager) {
-        window.vuDataSimManager.toggleNodeManagement();
+        window.vuDataSimManager.openNodeManagementModal();
     } else {
         console.error('vuDataSimManager not initialized');
     }
