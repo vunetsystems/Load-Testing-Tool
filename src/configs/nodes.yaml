@@ -10,7 +10,7 @@ nodes:
         user: vunet
         key_path: ~/.ssh/id_rsa
         conf_dir: /home/vunet/NEWTESTING
-        binary_dir: /home/vunet/NEWTESTING
+        binary_dir: /home/vunet/NEWTESTING/bin
         description: ""
         enabled: true
     e2e-108-10:

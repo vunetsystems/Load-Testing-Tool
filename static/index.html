@@ -89,6 +89,10 @@
                     <span class="material-symbols-outlined transition-transform group-hover:rotate-180">sync</span>
                     <span>Refresh Real Data</span>
                 </button>
+                <button id="binary-control-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-success/50 dark:border-success-dark/50 py-3 text-success dark:text-success-dark font-semibold transition-colors hover:bg-success/10 dark:hover:bg-success-dark/10">
+                    <span class="material-symbols-outlined">play_arrow</span>
+                    <span>Binary Control</span>
+                </button>
                 <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark text-center">
                     Showing real metrics from your nodes
                 </div>
@@ -257,6 +261,142 @@
                                                     <!-- Nodes will be populated by JavaScript -->
                                                 </tbody>
                                             </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Binary Control Modal -->
+                <div id="binary-control-modal" class="fixed inset-0 z-50 hidden">
+                    <!-- Modal Backdrop -->
+                    <div id="binary-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+
+                    <!-- Modal Content -->
+                    <div class="fixed inset-0 overflow-hidden">
+                        <div class="flex min-h-full items-center justify-center p-4">
+                            <div class="relative w-full max-w-4xl bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl transform transition-all">
+                                <!-- Modal Header -->
+                                <div class="flex items-center justify-between p-6 border-b border-subtle-light dark:border-subtle-dark">
+                                    <h3 class="text-2xl font-bold">Binary Control</h3>
+                                    <button id="close-binary-modal" class="rounded-lg p-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-subtle-light dark:hover:bg-subtle-dark transition-colors">
+                                        <span class="material-symbols-outlined">close</span>
+                                    </button>
+                                </div>
+
+                                <!-- Modal Body -->
+                                <div class="p-6 max-h-[80vh] overflow-y-auto">
+                                    <!-- Node Selection and Status -->
+                                    <div class="mb-8">
+                                        <h4 class="text-lg font-semibold mb-4">Binary Management</h4>
+
+                                        <!-- Node Selection -->
+                                        <div class="mb-6">
+                                            <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Select Node</label>
+                                            <div class="relative">
+                                                <span class="material-symbols-outlined absolute left-3 top-3 text-text-secondary-light dark:text-text-secondary-dark">dns</span>
+                                                <select id="binary-node-select" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark pl-10">
+                                                    <option value="">Select a node...</option>
+                                                    <!-- Node options will be populated dynamically -->
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Binary Path Information -->
+                                        <div id="binary-path-info" class="mb-6 p-4 rounded-lg bg-primary/10 dark:bg-primary-dark/10 hidden">
+                                            <h5 class="font-medium mb-2 text-primary dark:text-primary-dark">Binary Path Information</h5>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                <div>
+                                                    <span class="text-text-secondary-light dark:text-text-secondary-dark">Binary Path:</span>
+                                                    <span id="binary-path-display" class="ml-2 font-medium text-primary dark:text-primary-dark">Not selected</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-text-secondary-light dark:text-text-secondary-dark">Binary Name:</span>
+                                                    <span id="binary-name-display" class="ml-2 font-medium text-primary dark:text-primary-dark">finalvudatasim</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Current Status Display -->
+                                        <div id="binary-status-display" class="mb-6 p-4 rounded-lg bg-subtle-light/50 dark:bg-subtle-dark/50 hidden">
+                                            <h5 class="font-medium mb-2">Current Status</h5>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                <div>
+                                                    <span class="text-text-secondary-light dark:text-text-secondary-dark">Status:</span>
+                                                    <span id="binary-current-status" class="ml-2 font-medium">Unknown</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-text-secondary-light dark:text-text-secondary-dark">PID:</span>
+                                                    <span id="binary-current-pid" class="ml-2 font-medium">-</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-text-secondary-light dark:text-text-secondary-dark">Start Time:</span>
+                                                    <span id="binary-current-start-time" class="ml-2 font-medium">-</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-text-secondary-light dark:text-text-secondary-dark">Last Checked:</span>
+                                                    <span id="binary-current-last-checked" class="ml-2 font-medium">-</span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-2">
+                                                <span class="text-text-secondary-light dark:text-text-secondary-dark">Process Info:</span>
+                                                <div id="binary-current-process-info" class="mt-1 p-2 bg-background-light dark:bg-background-dark rounded text-xs font-mono max-h-20 overflow-y-auto">-</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Control Buttons -->
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                            <button id="refresh-binary-status-btn" class="group flex items-center justify-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 px-4 py-3 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
+                                                <span class="material-symbols-outlined">refresh</span>
+                                                <span>Refresh Status</span>
+                                            </button>
+                                            <button id="start-binary-btn" class="group flex items-center justify-center gap-2 rounded-lg bg-success dark:bg-success-dark px-4 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                <span class="material-symbols-outlined">play_arrow</span>
+                                                <span>Start Binary</span>
+                                            </button>
+                                            <button id="stop-binary-btn" class="group flex items-center justify-center gap-2 rounded-lg bg-danger dark:bg-danger-dark px-4 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                <span class="material-symbols-outlined">stop</span>
+                                                <span>Stop Binary</span>
+                                            </button>
+                                        </div>
+
+                                        <!-- Timeout Configuration -->
+                                        <div class="mb-6">
+                                            <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Timeout (seconds)</label>
+                                            <div class="relative">
+                                                <input id="binary-timeout-input" type="number" min="10" max="300" value="30" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark">
+                                            </div>
+                                            <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-1">Timeout for start/stop operations (10-300 seconds)</p>
+                                        </div>
+
+                                        <!-- SSH Output Display -->
+                                        <div class="mb-6">
+                                            <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">SSH Output</label>
+                                            <div id="binary-ssh-output" class="h-32 overflow-y-auto rounded-lg bg-gray-900 dark:bg-black p-3 font-mono text-xs text-text-secondary-dark border border-subtle-dark">
+                                                <div class="text-text-secondary-light dark:text-text-secondary-dark">SSH output will appear here...</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- All Nodes Status -->
+                                        <div>
+                                            <h5 class="font-medium mb-3">All Nodes Status</h5>
+                                            <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
+                                                <table class="w-full text-left text-sm">
+                                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
+                                                        <tr>
+                                                            <th class="p-3 font-semibold">Node Name</th>
+                                                            <th class="p-3 font-semibold">Status</th>
+                                                            <th class="p-3 font-semibold">PID</th>
+                                                            <th class="p-3 font-semibold">Last Checked</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="binary-all-status-body" class="divide-y divide-subtle-light dark:divide-subtle-dark">
+                                                        <!-- Status will be populated dynamically -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
