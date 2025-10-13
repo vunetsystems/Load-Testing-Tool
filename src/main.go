@@ -2538,6 +2538,67 @@ func handleAPIStopBinary(w http.ResponseWriter, r *http.Request) {
 	sendJSONResponse(w, statusCode, apiResponse)
 }
 
+// SSH Status Types
+type SSHStatus struct {
+	NodeName    string `json:"nodeName"`
+	Status      string `json:"status"` // "connected", "disconnected", "error", "disabled"
+	Message     string `json:"message"`
+	LastChecked string `json:"lastChecked"`
+}
+
+// handleAPIGetSSHStatus handles GET /api/ssh/status
+func handleAPIGetSSHStatus(w http.ResponseWriter, r *http.Request) {
+	enabledNodes := nodeManager.GetEnabledNodes()
+	if len(enabledNodes) == 0 {
+		sendJSONResponse(w, http.StatusOK, APIResponse{
+			Success: true,
+			Message: "No enabled nodes found",
+			Data:    []SSHStatus{},
+		})
+		return
+	}
+
+	var allStatuses []SSHStatus
+	for nodeName, nodeConfig := range enabledNodes {
+		status := checkSSHConnectivity(nodeName, nodeConfig)
+		allStatuses = append(allStatuses, status)
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: fmt.Sprintf("Retrieved SSH status for %d nodes", len(allStatuses)),
+		Data:    allStatuses,
+	})
+}
+
+// checkSSHConnectivity checks SSH connectivity for a single node
+func checkSSHConnectivity(nodeName string, nodeConfig NodeConfig) SSHStatus {
+	status := SSHStatus{
+		NodeName:    nodeName,
+		LastChecked: time.Now().Format("2006-01-02 15:04:05"),
+	}
+
+	// Test SSH connection with a simple command
+	testCmd := "echo 'SSH connection test'"
+	output, err := nodeManager.sshExecWithOutput(nodeConfig, testCmd)
+
+	if err != nil {
+		status.Status = "disconnected"
+		status.Message = fmt.Sprintf("SSH connection failed: %v", err)
+		logger.LogWarning(nodeName, "SSH", fmt.Sprintf("Connection check failed: %v", err))
+	} else if strings.TrimSpace(output) == "SSH connection test" {
+		status.Status = "connected"
+		status.Message = "SSH connection successful"
+		logger.LogSuccess(nodeName, "SSH", "Connection check passed")
+	} else {
+		status.Status = "error"
+		status.Message = fmt.Sprintf("Unexpected SSH response: %s", output)
+		logger.LogWarning(nodeName, "SSH", fmt.Sprintf("Unexpected response: %s", output))
+	}
+
+	return status
+}
+
 // Serve static files with proper MIME types
 func serveStatic(w http.ResponseWriter, r *http.Request) {
 	// Serve index.html for root path
@@ -2646,6 +2707,9 @@ func main() {
 	api.HandleFunc("/binary/status/{node}", handleAPIGetBinaryStatus).Methods("GET")
 	api.HandleFunc("/binary/start/{node}", handleAPIStartBinary).Methods("POST")
 	api.HandleFunc("/binary/stop/{node}", handleAPIStopBinary).Methods("POST")
+
+	// SSH status API endpoint
+	api.HandleFunc("/ssh/status", handleAPIGetSSHStatus).Methods("GET")
 
 	// Start background real metrics collection
 	go collectRealMetrics()
