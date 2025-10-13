@@ -2,12 +2,13 @@ package o11y_source_manager
 
 import (
 	"fmt"
+	"bytes"
 	"log"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
-
+	
 	"gopkg.in/yaml.v3"
 )
 
@@ -25,9 +26,7 @@ type MaxEPSConfig struct {
 
 // MainConfig represents the main conf.d/conf.yml configuration
 type MainConfig struct {
-	IncludeModuleDirs map[string]struct {
-		Enabled bool `yaml:"enabled"`
-	} `yaml:"include_module_dirs"`
+	IncludeModuleDirs map[string]ModuleDirConfig `yaml:"include_module_dirs"`
 }
 
 // SourceConfig represents an individual o11y source main configuration
@@ -35,6 +34,10 @@ type SourceConfig struct {
 	Enabled           bool     `yaml:"enabled"`
 	UniqueKey         UniqueKey `yaml:"uniquekey"`
 	IncludeSubModules []string `yaml:"Include_sub_modules"`
+}
+
+type ModuleDirConfig struct {
+    Enabled bool `yaml:"enabled"`
 }
 
 // UniqueKey represents the uniquekey configuration
@@ -241,22 +244,37 @@ func (osm *O11ySourceManager) calculateProportionalDistribution(selectedSources 
 }
 
 // applyEPSDistribution applies the calculated EPS distribution to source configurations
+// applyEPSDistribution applies the calculated EPS distribution to source configurations
 func (osm *O11ySourceManager) applyEPSDistribution(sourceEPSMap map[string]int) error {
+	log.Printf("DEBUG: Starting applyEPSDistribution with %d sources", len(sourceEPSMap))
+	log.Printf("DEBUG: Current IncludeModuleDirs before processing has %d entries", len(osm.mainConfig.IncludeModuleDirs))
+	
+	// Ensure the map is initialized
+	if osm.mainConfig.IncludeModuleDirs == nil {
+		log.Println("DEBUG: IncludeModuleDirs is nil, initializing...")
+		osm.mainConfig.IncludeModuleDirs = make(map[string]ModuleDirConfig)
+	}
+	
+	// Get all available sources from max EPS config to ensure we have all sources in the map
+	for sourceName := range osm.maxEPSConfig.MaxEPS {
+		if _, exists := osm.mainConfig.IncludeModuleDirs[sourceName]; !exists {
+			log.Printf("DEBUG: Adding missing source %s to IncludeModuleDirs", sourceName)
+			osm.mainConfig.IncludeModuleDirs[sourceName] = ModuleDirConfig{Enabled: false}
+		}
+	}
+	
+	log.Printf("DEBUG: After ensuring all sources exist, IncludeModuleDirs has %d entries", len(osm.mainConfig.IncludeModuleDirs))
+	
 	// First, disable ALL sources in main config
 	for sourceName := range osm.mainConfig.IncludeModuleDirs {
-		if mainConfigEntry, exists := osm.mainConfig.IncludeModuleDirs[sourceName]; exists {
-			mainConfigEntry.Enabled = false
-			osm.mainConfig.IncludeModuleDirs[sourceName] = mainConfigEntry
-		}
+		config := osm.mainConfig.IncludeModuleDirs[sourceName]
+		config.Enabled = false
+		osm.mainConfig.IncludeModuleDirs[sourceName] = config
+		log.Printf("DEBUG: Disabled source: %s", sourceName)
 	}
 
 	// Then, enable ONLY the selected sources
 	for sourceName := range sourceEPSMap {
-		if mainConfigEntry, exists := osm.mainConfig.IncludeModuleDirs[sourceName]; exists {
-			mainConfigEntry.Enabled = true
-			osm.mainConfig.IncludeModuleDirs[sourceName] = mainConfigEntry
-		}
-
 		// Calculate total submodule keys for this source
 		totalSubKeys := osm.calculateTotalSubModuleKeys(sourceName)
 		if totalSubKeys == 0 {
@@ -275,10 +293,19 @@ func (osm *O11ySourceManager) applyEPSDistribution(sourceEPSMap map[string]int) 
 		if err != nil {
 			return fmt.Errorf("failed to update config for source %s: %v", sourceName, err)
 		}
+		
+		// Enable this source in main config
+		config := osm.mainConfig.IncludeModuleDirs[sourceName]
+		config.Enabled = true
+		osm.mainConfig.IncludeModuleDirs[sourceName] = config
+		log.Printf("DEBUG: Enabled source: %s", sourceName)
 
 		log.Printf("Updated %s: EPS=%d, MainKeys=%d, SubKeys=%d, Enabled=true",
 			sourceName, assignedEPS, requiredMainKeys, totalSubKeys)
 	}
+	
+	log.Printf("DEBUG: After enabling selected sources, IncludeModuleDirs has %d entries", len(osm.mainConfig.IncludeModuleDirs))
+	log.Printf("DEBUG: About to call saveMainConfig...")
 
 	// Save the updated main configuration
 	return osm.saveMainConfig()
@@ -385,47 +412,65 @@ func (osm *O11ySourceManager) updateSourceConfig(sourceName string, numUniqKey i
 	return nil
 }
 
-// saveMainConfig saves the main configuration to its YAML file
+// saveMainConfig saves the main configuration to its YAML file.
+// NOTE: This approach is more robust but will remove comments and reformat the file.
 func (osm *O11ySourceManager) saveMainConfig() error {
-	configPath := "src/conf.d/conf.yml"
+    configPath := "src/conf.d/conf.yml"
+    log.Printf("DEBUG: Attempting to save main config to %s", configPath)
+    log.Printf("DEBUG: Current IncludeModuleDirs has %d entries", len(osm.mainConfig.IncludeModuleDirs))
 
-	// Read the existing file to preserve all other content
-	data, err := os.ReadFile(configPath)
-	if err != nil {
-		return fmt.Errorf("failed to read main config file: %v", err)
-	}
+    // --- Create a temporary structure to match the file's layout ---
+    // This ensures the output YAML has the correct top-level keys.
+    fullConfig := make(map[string]interface{})
 
-	text := string(data)
+    // Read the original file to get all top-level keys (like logging, output.kafka, etc.)
+    data, err := os.ReadFile(configPath)
+    if err != nil {
+        log.Printf("DEBUG: Failed to read original config file to preserve keys: %v", err)
+        return fmt.Errorf("failed to read main config file: %v", err)
+    }
+    
+    // Unmarshal into a generic map to preserve all other sections
+    err = yaml.Unmarshal(data, &fullConfig)
+    if err != nil {
+        log.Printf("DEBUG: Failed to unmarshal original config: %v", err)
+        return fmt.Errorf("failed to unmarshal original main config: %v", err)
+    }
 
-	// Update only the enabled fields within include_module_dirs
-	for sourceName, config := range osm.mainConfig.IncludeModuleDirs {
-		newText := "    enabled: true"
-		if !config.Enabled {
-			newText = "    enabled: false"
-		}
+    // --- Convert IncludeModuleDirs to the format expected by YAML marshaling ---
+    // The issue is that the struct values need to be converted to map[string]interface{}
+    moduleDirsMap := make(map[string]interface{})
+    for sourceName, config := range osm.mainConfig.IncludeModuleDirs {
+        moduleDirsMap[sourceName] = map[string]interface{}{
+            "enabled": config.Enabled,
+        }
+    }
+    
+    log.Printf("DEBUG: Converted %d sources to map format", len(moduleDirsMap))
 
-		// Find and replace the specific enabled line for this source
-		// Pattern: sourceName:\n    enabled: (true|false)
-		sourcePattern := sourceName + ":\n    enabled:"
-		if strings.Contains(text, sourcePattern) {
-			// Replace enabled: false with new value
-			oldText := sourceName + ":\n    enabled: false"
-			newFullText := sourceName + ":\n" + newText
-			text = strings.Replace(text, oldText, newFullText, 1)
+    // --- Overwrite the 'include_module_dirs' section with our updated data ---
+    fullConfig["include_module_dirs"] = moduleDirsMap
 
-			// Also handle enabled: true
-			oldText = sourceName + ":\n    enabled: true"
-			newFullText = sourceName + ":\n" + newText
-			text = strings.Replace(text, oldText, newFullText, 1)
-		}
-	}
+    // --- Marshal the updated configuration map to YAML ---
+    var buf bytes.Buffer
+    encoder := yaml.NewEncoder(&buf)
+    encoder.SetIndent(2) // Keep the indentation clean
+    err = encoder.Encode(fullConfig)
+    if err != nil {
+        log.Printf("DEBUG: Failed to marshal updated config map: %v", err)
+        return fmt.Errorf("failed to marshal updated main config: %v", err)
+    }
 
-	err = os.WriteFile(configPath, []byte(text), 0644)
-	if err != nil {
-		return fmt.Errorf("failed to write main config file: %v", err)
-	}
+    // --- Write the new YAML content to the file ---
+    log.Println("DEBUG: YAML marshalled successfully. Writing back to file...")
+    err = os.WriteFile(configPath, buf.Bytes(), 0644)
+    if err != nil {
+        log.Printf("DEBUG: FAILED to write updated main config file: %v", err)
+        return fmt.Errorf("failed to write updated main config file: %v", err)
+    }
 
-	return nil
+    log.Println("DEBUG: Successfully saved main config file.")
+    return nil
 }
 
 // calculateCurrentEPS calculates the current total EPS across all enabled sources
