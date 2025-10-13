@@ -1,7 +1,6 @@
 # Date/Time for which data is generated - for real time or past time
 data_generation_time:
   type: real-time
-
 # Using the following config, you can generate the data for past-time.. In this case, data
 # gets generated continuously and sent with the older timestamps
 #data_generation_time:
@@ -27,7 +26,6 @@ logging:
   maxSize: 10
   maxBackups: 5
   maxAge: 1
-
 output.kafka:
   enabled: true
   # initial brokers for reading cluster metadata
@@ -38,16 +36,13 @@ output.kafka:
   ssl: true # Set to true if Kafka SSL is enabled
   ssl_certificate_authorities: /home/vunet/data_sim/vudatasim/vuDataSim/certs/vunet-ca-cert.pem
   ssl_verification_mode: no_verify # certificate Set to certificate to enable sercure verification, Set to no_verify otherwise
-
   # message topic selection + partitioning
   # topic_name must be defined by individual folders conf.yml
   partition.round_robin:
     reachable_only: false
-
   required_acks: 1
   compression: gzip
   max_message_bytes: 1000000
-
   # filename can be defined by individual folders conf.yml as well
 output.file:
   enabled: false
@@ -55,7 +50,6 @@ output.file:
   filename: vudatasim.json
   rotate_every_mb: 100
   max_files: 5 #Once the number of files have reached max_files limit, it will overwrite the 1st file
-
 # The above output config can be updated for every directory based on their needs
 
 # Add the folders/directories for which you want to generate data. Please use ‘All’ if you want to generate data for all sources (folders)
