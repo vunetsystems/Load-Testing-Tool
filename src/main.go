@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -20,6 +21,7 @@ import (
 
 	"vuDataSim/src/logger"
 
+	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
@@ -32,6 +34,15 @@ const (
 	StaticDir  = "./static"
 	Port       = ":3000"
 )
+
+// ClickHouse configuration
+type ClickHouseConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	Database string `yaml:"database"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+}
 
 // WebSocket upgrader
 var upgrader = websocket.Upgrader{
@@ -49,6 +60,7 @@ type AppState struct {
 	TargetClickHouse    int                     `json:"targetClickHouse"`
 	StartTime           time.Time               `json:"startTime"`
 	NodeData            map[string]*NodeMetrics `json:"nodeData"`
+	ClickHouseMetrics   *ClickHouseMetrics      `json:"clickHouseMetrics,omitempty"`
 	mutex               sync.RWMutex
 	clients             map[*websocket.Conn]bool
 	broadcast           chan []byte
@@ -107,6 +119,63 @@ type SimulationConfig struct {
 	TargetEPS        int    `json:"targetEps"`
 	TargetKafka      int    `json:"targetKafka"`
 	TargetClickHouse int    `json:"targetClickHouse"`
+}
+
+// ClickHouse data models
+
+// ClickHouseMetrics represents aggregated metrics from ClickHouse
+type ClickHouseMetrics struct {
+	KafkaProducerMetrics []KafkaProducerMetric `json:"kafkaProducerMetrics,omitempty"`
+	SystemMetrics        []SystemMetric        `json:"systemMetrics,omitempty"`
+	DatabaseMetrics      []DatabaseMetric      `json:"databaseMetrics,omitempty"`
+	ContainerMetrics     []ContainerMetric     `json:"containerMetrics,omitempty"`
+	LastUpdated          time.Time             `json:"lastUpdated"`
+}
+
+// KafkaProducerMetric represents Kafka producer metrics
+type KafkaProducerMetric struct {
+	Timestamp        time.Time `json:"timestamp"`
+	ClientID         string    `json:"clientId"`
+	Topic            string    `json:"topic"`
+	RecordSendTotal  float64   `json:"recordSendTotal"`
+	RecordSendRate   float64   `json:"recordSendRate"`
+	ByteTotal        float64   `json:"byteTotal"`
+	ByteRate         float64   `json:"byteRate"`
+	RecordErrorTotal float64   `json:"recordErrorTotal"`
+	RecordErrorRate  float64   `json:"recordErrorRate"`
+	CompressionRate  float64   `json:"compressionRate"`
+}
+
+// SystemMetric represents system-level metrics
+type SystemMetric struct {
+	Timestamp   time.Time `json:"timestamp"`
+	Host        string    `json:"host"`
+	CPUUsage    float64   `json:"cpuUsage"`
+	MemoryUsage float64   `json:"memoryUsage"`
+	DiskUsage   float64   `json:"diskUsage"`
+	NetworkRX   float64   `json:"networkRx"`
+	NetworkTX   float64   `json:"networkTx"`
+}
+
+// DatabaseMetric represents database performance metrics
+type DatabaseMetric struct {
+	Timestamp     time.Time `json:"timestamp"`
+	Database      string    `json:"database"`
+	Table         string    `json:"table"`
+	QueryCount    int64     `json:"queryCount"`
+	QueryDuration float64   `json:"queryDuration"`
+	ErrorCount    int64     `json:"errorCount"`
+}
+
+// ContainerMetric represents container/Kubernetes metrics
+type ContainerMetric struct {
+	Timestamp     time.Time `json:"timestamp"`
+	Namespace     string    `json:"namespace"`
+	PodName       string    `json:"podName"`
+	ContainerName string    `json:"containerName"`
+	CPUUsage      float64   `json:"cpuUsage"`
+	MemoryUsage   float64   `json:"memoryUsage"`
+	Status        string    `json:"status"`
 }
 
 // Global application state instance
@@ -671,6 +740,16 @@ func (nm *NodeManager) scpCopyDir(nodeConfig NodeConfig, localDir, remoteDir str
 // Global node manager instance
 var nodeManager = NewNodeManager()
 
+// ClickHouse client and configuration
+var clickHouseClient clickhouse.Conn
+var clickHouseConfig = ClickHouseConfig{
+	Host:     "10.32.3.50", // ClickHouse service ClusterIP
+	Port:     9000,
+	Database: "monitoring",
+	Username: "monitoring_read",
+	Password: "StrongP@assword123",
+}
+
 // Binary control types and instance
 type BinaryControlResponse struct {
 	Success bool        `json:"success"`
@@ -833,21 +912,51 @@ func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryContr
 		}, fmt.Errorf("node %s is disabled", nodeName)
 	}
 
+	// Check if binary exists first
+	binaryPath := fmt.Sprintf("%s/finalvudatasim", nodeConfig.BinaryDir)
+	checkCmd := fmt.Sprintf("test -f %s && echo 'EXISTS' || echo 'NOT_FOUND'", binaryPath)
+	output, err := bc.sshExecWithOutput(nodeConfig, checkCmd)
+	if err != nil {
+		return &BinaryControlResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to check binary existence on node %s: %v", nodeName, err),
+		}, fmt.Errorf("failed to check binary: %v", err)
+	}
+
+	if strings.TrimSpace(output) != "EXISTS" {
+		return &BinaryControlResponse{
+			Success: false,
+			Message: fmt.Sprintf("Binary not found at path %s on node %s", binaryPath, nodeName),
+			Data: map[string]interface{}{
+				"binaryPath": binaryPath,
+				"error":      "BINARY_NOT_FOUND",
+			},
+		}, fmt.Errorf("binary not found at %s", binaryPath)
+	}
+
 	// Check if already running
 	status, err := bc.GetBinaryStatus(nodeName)
 	if err == nil && status.Status == "running" {
+		// If already running, get the current output
+		logFile := fmt.Sprintf("%s/binary_output.log", nodeConfig.BinaryDir)
+		tailCmd := fmt.Sprintf("tail -20 %s 2>/dev/null || echo 'No output available yet'", logFile)
+		currentOutput, _ := bc.sshExecWithOutput(nodeConfig, tailCmd)
+
 		return &BinaryControlResponse{
 			Success: false,
 			Message: fmt.Sprintf("Binary is already running on node %s (PID: %d)", nodeName, status.PID),
+			Data: map[string]interface{}{
+				"binaryPath":    binaryPath,
+				"status":        status,
+				"currentOutput": strings.TrimSpace(currentOutput),
+				"warning":       "ALREADY_RUNNING",
+			},
 		}, fmt.Errorf("binary already running on node %s", nodeName)
 	}
 
-	// Start the binary
-	binaryPath := fmt.Sprintf("%s/finalvudatasim", nodeConfig.BinaryDir)
-	log.Printf("Starting binary on node %s: %s", nodeName, binaryPath)
-
-	// Show detailed command in logs
-	startCmd := fmt.Sprintf("cd %s && nohup %s > /dev/null 2>&1 &", nodeConfig.BinaryDir, binaryPath)
+	// Start the binary with output capture
+	logFile := fmt.Sprintf("%s/binary_output.log", nodeConfig.BinaryDir)
+	startCmd := fmt.Sprintf("cd %s && nohup %s >> %s 2>&1 & echo $! > binary.pid", nodeConfig.BinaryDir, binaryPath, logFile)
 	log.Printf("Executing start command on node %s: %s", nodeName, startCmd)
 
 	err = bc.sshExec(nodeConfig, startCmd)
@@ -861,23 +970,33 @@ func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryContr
 
 	log.Printf("Binary start command executed successfully on node %s", nodeName)
 
-	time.Sleep(2 * time.Second)
+	// Wait a bit for startup
+	time.Sleep(3 * time.Second)
+
+	// Get initial output
+	tailCmd := fmt.Sprintf("tail -20 %s 2>/dev/null || echo 'Binary started, waiting for output...'", logFile)
+	initialOutput, _ := bc.sshExecWithOutput(nodeConfig, tailCmd)
 
 	newStatus, err := bc.GetBinaryStatus(nodeName)
 	if err != nil {
 		return &BinaryControlResponse{
 			Success: true,
 			Message: fmt.Sprintf("Binary start command sent to node %s, but status check failed: %v", nodeName, err),
-			Data:    map[string]interface{}{"warning": "Binary may be starting, but status verification failed"},
+			Data: map[string]interface{}{
+				"warning":       "Binary may be starting, but status verification failed",
+				"binaryPath":    binaryPath,
+				"initialOutput": strings.TrimSpace(initialOutput),
+			},
 		}, nil
 	}
 
 	responseData := map[string]interface{}{
-		"nodeName":   nodeName,
-		"action":     "start",
-		"timeout":    timeout,
-		"binaryPath": binaryPath,
-		"status":     newStatus,
+		"nodeName":      nodeName,
+		"action":        "start",
+		"timeout":       timeout,
+		"binaryPath":    binaryPath,
+		"status":        newStatus,
+		"initialOutput": strings.TrimSpace(initialOutput),
 	}
 
 	return &BinaryControlResponse{
@@ -998,6 +1117,279 @@ func (bc *BinaryControl) sshExecWithOutput(nodeConfig NodeConfig, command string
 
 // Global binary control instance
 var binaryControl = NewBinaryControl()
+
+// ClickHouse connection and query functions
+
+// initClickHouse initializes the ClickHouse client connection
+func initClickHouse() error {
+	logger.LogWithNode("System", "ClickHouse", "Initializing ClickHouse client connection", "info")
+
+	conn, err := clickhouse.Open(&clickhouse.Options{
+		Addr: []string{fmt.Sprintf("%s:%d", clickHouseConfig.Host, clickHouseConfig.Port)},
+		Auth: clickhouse.Auth{
+			Database: clickHouseConfig.Database,
+			Username: clickHouseConfig.Username,
+			Password: clickHouseConfig.Password,
+		},
+		Settings: clickhouse.Settings{
+			"max_execution_time": 60,
+		},
+		Compression: &clickhouse.Compression{
+			Method: clickhouse.CompressionLZ4,
+		},
+	})
+
+	if err != nil {
+		logger.LogError("System", "ClickHouse", fmt.Sprintf("Failed to connect to ClickHouse: %v", err))
+		return err
+	}
+
+	// Test the connection
+	ctx := context.Background()
+	if err := conn.Ping(ctx); err != nil {
+		logger.LogError("System", "ClickHouse", fmt.Sprintf("ClickHouse ping failed: %v", err))
+		return err
+	}
+
+	clickHouseClient = conn
+	logger.LogSuccess("System", "ClickHouse", "ClickHouse client initialized successfully")
+	return nil
+}
+
+// getKafkaProducerMetrics retrieves latest Kafka producer metrics
+func getKafkaProducerMetrics(ctx context.Context, limit int) ([]KafkaProducerMetric, error) {
+	query := `
+		SELECT
+			timestamp,
+			"client-id",
+			topic,
+			"record-send-total",
+			"record-send-rate",
+			"byte-total",
+			"byte-rate",
+			"record-error-total",
+			"record-error-rate",
+			"compression-rate"
+		FROM kafka_producer_Producer_Topic_Metrics_data
+		WHERE timestamp >= now() - INTERVAL 5 MINUTE
+		ORDER BY timestamp DESC
+		LIMIT ?
+	`
+
+	rows, err := clickHouseClient.Query(ctx, query, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query Kafka producer metrics: %v", err)
+	}
+	defer rows.Close()
+
+	var metrics []KafkaProducerMetric
+	for rows.Next() {
+		var metric KafkaProducerMetric
+		err := rows.Scan(
+			&metric.Timestamp,
+			&metric.ClientID,
+			&metric.Topic,
+			&metric.RecordSendTotal,
+			&metric.RecordSendRate,
+			&metric.ByteTotal,
+			&metric.ByteRate,
+			&metric.RecordErrorTotal,
+			&metric.RecordErrorRate,
+			&metric.CompressionRate,
+		)
+		if err != nil {
+			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan Kafka metric row: %v", err))
+			continue
+		}
+		metrics = append(metrics, metric)
+	}
+
+	return metrics, nil
+}
+
+// getSystemMetrics retrieves latest system metrics
+func getSystemMetrics(ctx context.Context, limit int) ([]SystemMetric, error) {
+	query := `
+		SELECT
+			timestamp,
+			host,
+			usage_user as cpu_usage,
+			usage_percent as memory_usage,
+			usage_percent as disk_usage,
+			rx_bytes as network_rx,
+			tx_bytes as network_tx
+		FROM system
+		WHERE timestamp >= now() - INTERVAL 5 MINUTE
+		ORDER BY timestamp DESC
+		LIMIT ?
+	`
+
+	rows, err := clickHouseClient.Query(ctx, query, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query system metrics: %v", err)
+	}
+	defer rows.Close()
+
+	var metrics []SystemMetric
+	for rows.Next() {
+		var metric SystemMetric
+		err := rows.Scan(
+			&metric.Timestamp,
+			&metric.Host,
+			&metric.CPUUsage,
+			&metric.MemoryUsage,
+			&metric.DiskUsage,
+			&metric.NetworkRX,
+			&metric.NetworkTX,
+		)
+		if err != nil {
+			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan system metric row: %v", err))
+			continue
+		}
+		metrics = append(metrics, metric)
+	}
+
+	return metrics, nil
+}
+
+// getDatabaseMetrics retrieves latest database metrics
+func getDatabaseMetrics(ctx context.Context, limit int) ([]DatabaseMetric, error) {
+	query := `
+		SELECT
+			timestamp,
+			database,
+			table,
+			query_count,
+			query_duration_ms as query_duration,
+			error_count
+		FROM clickhouse_query_log
+		WHERE timestamp >= now() - INTERVAL 5 MINUTE
+			AND type = 'QueryFinish'
+		ORDER BY timestamp DESC
+		LIMIT ?
+	`
+
+	rows, err := clickHouseClient.Query(ctx, query, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query database metrics: %v", err)
+	}
+	defer rows.Close()
+
+	var metrics []DatabaseMetric
+	for rows.Next() {
+		var metric DatabaseMetric
+		err := rows.Scan(
+			&metric.Timestamp,
+			&metric.Database,
+			&metric.Table,
+			&metric.QueryCount,
+			&metric.QueryDuration,
+			&metric.ErrorCount,
+		)
+		if err != nil {
+			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan database metric row: %v", err))
+			continue
+		}
+		metrics = append(metrics, metric)
+	}
+
+	return metrics, nil
+}
+
+// getContainerMetrics retrieves latest container metrics
+func getContainerMetrics(ctx context.Context, limit int) ([]ContainerMetric, error) {
+	query := `
+		SELECT
+			timestamp,
+			namespace,
+			pod_name,
+			container_name,
+			cpu_usage_percent as cpu_usage,
+			memory_usage_percent as memory_usage,
+			status
+		FROM kubernetes_pod_container
+		WHERE timestamp >= now() - INTERVAL 5 MINUTE
+		ORDER BY timestamp DESC
+		LIMIT ?
+	`
+
+	rows, err := clickHouseClient.Query(ctx, query, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query container metrics: %v", err)
+	}
+	defer rows.Close()
+
+	var metrics []ContainerMetric
+	for rows.Next() {
+		var metric ContainerMetric
+		err := rows.Scan(
+			&metric.Timestamp,
+			&metric.Namespace,
+			&metric.PodName,
+			&metric.ContainerName,
+			&metric.CPUUsage,
+			&metric.MemoryUsage,
+			&metric.Status,
+		)
+		if err != nil {
+			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan container metric row: %v", err))
+			continue
+		}
+		metrics = append(metrics, metric)
+	}
+
+	return metrics, nil
+}
+
+// collectClickHouseMetrics collects all metrics from ClickHouse
+func collectClickHouseMetrics() (*ClickHouseMetrics, error) {
+	ctx := context.Background()
+
+	metrics := &ClickHouseMetrics{
+		LastUpdated: time.Now(),
+	}
+
+	// Collect Kafka producer metrics
+	kafkaMetrics, err := getKafkaProducerMetrics(ctx, 100)
+	if err != nil {
+		logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to collect Kafka metrics: %v", err))
+	} else {
+		metrics.KafkaProducerMetrics = kafkaMetrics
+		logger.LogSuccess("System", "ClickHouse", fmt.Sprintf("Collected %d Kafka producer metrics", len(kafkaMetrics)))
+	}
+
+	// Comment out other metrics collection for now - focus on Kafka producer metrics
+	/*
+		// Collect system metrics
+		systemMetrics, err := getSystemMetrics(ctx, 100)
+		if err != nil {
+			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to collect system metrics: %v", err))
+		} else {
+			metrics.SystemMetrics = systemMetrics
+			logger.LogSuccess("System", "ClickHouse", fmt.Sprintf("Collected %d system metrics", len(systemMetrics)))
+		}
+
+		// Collect database metrics
+		dbMetrics, err := getDatabaseMetrics(ctx, 100)
+		if err != nil {
+			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to collect database metrics: %v", err))
+		} else {
+			metrics.DatabaseMetrics = dbMetrics
+			logger.LogSuccess("System", "ClickHouse", fmt.Sprintf("Collected %d database metrics", len(dbMetrics)))
+		}
+
+		// Collect container metrics
+		containerMetrics, err := getContainerMetrics(ctx, 100)
+		if err != nil {
+			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to collect container metrics: %v", err))
+		} else {
+			metrics.ContainerMetrics = containerMetrics
+			logger.LogSuccess("System", "ClickHouse", fmt.Sprintf("Collected %d container metrics", len(containerMetrics)))
+		}
+	*/
+
+	return metrics, nil
+}
 
 // Initialize node data from nodes.yaml configuration
 func init() {
@@ -2526,6 +2918,72 @@ func handleAPIGetSSHStatus(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// handleAPIGetClickHouseMetrics handles GET /api/clickhouse/metrics
+func handleAPIGetClickHouseMetrics(w http.ResponseWriter, r *http.Request) {
+	if clickHouseClient == nil {
+		sendJSONResponse(w, http.StatusServiceUnavailable, APIResponse{
+			Success: false,
+			Message: "ClickHouse client not initialized",
+		})
+		return
+	}
+
+	metrics, err := collectClickHouseMetrics()
+	if err != nil {
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to collect ClickHouse metrics: %v", err),
+		})
+		return
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "ClickHouse metrics retrieved successfully",
+		Data:    metrics,
+	})
+}
+
+// handleAPIClickHouseHealth handles GET /api/clickhouse/health
+func handleAPIClickHouseHealth(w http.ResponseWriter, r *http.Request) {
+	if clickHouseClient == nil {
+		sendJSONResponse(w, http.StatusServiceUnavailable, APIResponse{
+			Success: false,
+			Message: "ClickHouse client not initialized",
+			Data: map[string]interface{}{
+				"status": "disconnected",
+			},
+		})
+		return
+	}
+
+	ctx := context.Background()
+	err := clickHouseClient.Ping(ctx)
+	if err != nil {
+		sendJSONResponse(w, http.StatusServiceUnavailable, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("ClickHouse health check failed: %v", err),
+			Data: map[string]interface{}{
+				"status": "error",
+				"error":  err.Error(),
+			},
+		})
+		return
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "ClickHouse is healthy",
+		Data: map[string]interface{}{
+			"status":       "connected",
+			"host":         clickHouseConfig.Host,
+			"port":         clickHouseConfig.Port,
+			"database":     clickHouseConfig.Database,
+			"last_checked": time.Now(),
+		},
+	})
+}
+
 // checkSSHConnectivity checks SSH connectivity for a single node
 func checkSSHConnectivity(nodeName string, nodeConfig NodeConfig) SSHStatus {
 	status := SSHStatus{
@@ -2665,6 +3123,17 @@ func main() {
 
 	// SSH status API endpoint
 	api.HandleFunc("/ssh/status", handleAPIGetSSHStatus).Methods("GET")
+
+	// ClickHouse metrics API endpoints
+	api.HandleFunc("/clickhouse/metrics", handleAPIGetClickHouseMetrics).Methods("GET")
+	api.HandleFunc("/clickhouse/health", handleAPIClickHouseHealth).Methods("GET")
+
+	// Initialize ClickHouse client
+	if err := initClickHouse(); err != nil {
+		logger.Warn().Err(err).Msg("Failed to initialize ClickHouse client - metrics will not be available")
+	} else {
+		logger.Info().Msg("ClickHouse client initialized successfully")
+	}
 
 	// Start background real metrics collection
 	go collectRealMetrics()
