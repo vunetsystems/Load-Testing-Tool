@@ -1,14 +1,16 @@
-package main
+package node_control
 
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -29,6 +31,7 @@ type NodeConfig struct {
 	KeyPath     string `yaml:"key_path"`
 	ConfDir     string `yaml:"conf_dir"`
 	BinaryDir   string `yaml:"binary_dir"`
+	MetricsPort int    `yaml:"metrics_port"`
 	Description string `yaml:"description"`
 	Enabled     bool   `yaml:"enabled"`
 }
@@ -104,11 +107,11 @@ type NodeManager struct {
 // NewNodeManager creates a new node manager instance
 func NewNodeManager() *NodeManager {
 	return &NodeManager{
-		nodesConfigPath: "../configs/nodes.yaml",
-		appConfigPath:   "../configs/config.yaml",
-		snapshotsDir:    "node_snapshots",
-		backupsDir:      "node_backups",
-		logsDir:         "logs",
+		nodesConfigPath: "src/configs/nodes.yaml",
+		appConfigPath:   "src/configs/config.yaml",
+		snapshotsDir:    "src/node_control/node_snapshots",
+		backupsDir:      "src/node_control/node_backups",
+		logsDir:         "src/node_control/logs",
 		nodesConfig: NodesConfig{
 			ClusterSettings: ClusterSettings{
 				BackupRetentionDays: 30,
@@ -255,20 +258,56 @@ func (nm *NodeManager) RemoveNode(name string) error {
 
 // EnableNode enables a node
 func (nm *NodeManager) EnableNode(name string) error {
+	log.Printf("=== ENABLE NODE PROCESS STARTED ===")
+	log.Printf("Attempting to enable node: %s", name)
+
 	nodeConfig, exists := nm.nodesConfig.Nodes[name]
 	if !exists {
+		log.Printf("ERROR: Node %s not found in configuration", name)
 		return fmt.Errorf("node %s not found", name)
 	}
+
+	log.Printf("Found node %s with config: Host=%s, Enabled=%v, MetricsPort=%d",
+		name, nodeConfig.Host, nodeConfig.Enabled, nodeConfig.MetricsPort)
 
 	nodeConfig.Enabled = true
 	nm.nodesConfig.Nodes[name] = nodeConfig
 
+	log.Printf("Saving configuration for node %s...", name)
 	err := nm.SaveNodesConfig()
 	if err != nil {
+		log.Printf("ERROR: Failed to save config for node %s: %v", name, err)
 		return fmt.Errorf("failed to save config: %v", err)
 	}
 
-	log.Printf("Successfully enabled node %s", name)
+	log.Printf("✓ Successfully enabled node %s in configuration", name)
+
+	// Trigger fresh deployment to ensure both binaries are present
+	log.Printf("=== STARTING FRESH DEPLOYMENT ===")
+	log.Printf("Triggering fresh deployment for node %s to ensure both binaries are present", name)
+	log.Printf("Node config: Host=%s, BinaryDir=%s, ConfDir=%s",
+		nodeConfig.Host, nodeConfig.BinaryDir, nodeConfig.ConfDir)
+
+	err = nm.copyFilesToNode(name, nodeConfig)
+	if err != nil {
+		log.Printf("ERROR: Failed to deploy files to node %s: %v", name, err)
+		log.Printf("Node enabled but files may not be up to date")
+	} else {
+		log.Printf("✓ Fresh deployment completed successfully for node %s", name)
+	}
+
+	// Verify metrics server is running
+	log.Printf("=== VERIFYING METRICS SERVER ===")
+	log.Printf("Verifying metrics server on %s:%d", nodeConfig.Host, nodeConfig.MetricsPort)
+	err = nm.verifyMetricsServer(nodeConfig)
+	if err != nil {
+		log.Printf("ERROR: Metrics server verification failed for node %s: %v", name, err)
+		log.Printf("Node enabled but metrics server may not be running properly")
+	} else {
+		log.Printf("✓ Metrics server verified successfully for node %s", name)
+	}
+
+	log.Printf("=== ENABLE NODE PROCESS COMPLETED ===")
 	return nil
 }
 
@@ -307,14 +346,54 @@ func (nm *NodeManager) GetEnabledNodes() map[string]NodeConfig {
 	return enabledNodes
 }
 
-// copyFilesToNode copies the binary and conf.d directory to the remote node
+// GetClusterSettings returns the cluster settings
+func (nm *NodeManager) GetClusterSettings() ClusterSettings {
+	return nm.nodesConfig.ClusterSettings
+}
+
+// UpdateClusterSettings updates the cluster settings
+func (nm *NodeManager) UpdateClusterSettings(settings ClusterSettings) error {
+	nm.nodesConfig.ClusterSettings = settings
+	return nm.SaveNodesConfig()
+}
+
+// SSHExecWithOutput executes a command on the remote node via SSH and returns the output
+func (nm *NodeManager) SSHExecWithOutput(nodeConfig NodeConfig, command string) (string, error) {
+	args := []string{
+		"-i", nodeConfig.KeyPath,
+		"-o", "StrictHostKeyChecking=no",
+		"-o", "UserKnownHostsFile=/dev/null",
+		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
+		command,
+	}
+
+	cmd := exec.Command("ssh", args...)
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("SSH command failed: %v", err)
+	}
+
+	return strings.TrimSpace(string(output)), nil
+}
+
+// copyFilesToNode copies the binaries and conf.d directory to the remote node
 func (nm *NodeManager) copyFilesToNode(nodeName string, nodeConfig NodeConfig) error {
-	localBinary := "finalvudatasim"
-	localConfDir := "conf.d"
+	localMainBinary := "src/finalvudatasim"
+	localMetricsBinary := "src/node_metrics_api/build/node_metrics_api"
+	localConfDir := "src/conf.d"
+
+	log.Printf("DEBUG: Deployment paths for node %s:", nodeName)
+	log.Printf("  Main binary path: %s", localMainBinary)
+	log.Printf("  Metrics binary path: %s", localMetricsBinary)
+	log.Printf("  Conf dir path: %s", localConfDir)
 
 	// Check if local files exist
-	if _, err := os.Stat(localBinary); os.IsNotExist(err) {
-		return fmt.Errorf("local binary file %s not found", localBinary)
+	if _, err := os.Stat(localMainBinary); os.IsNotExist(err) {
+		return fmt.Errorf("local main binary file %s not found", localMainBinary)
+	}
+
+	if _, err := os.Stat(localMetricsBinary); os.IsNotExist(err) {
+		return fmt.Errorf("local metrics binary file %s not found", localMetricsBinary)
 	}
 
 	if _, err := os.Stat(localConfDir); os.IsNotExist(err) {
@@ -327,17 +406,32 @@ func (nm *NodeManager) copyFilesToNode(nodeName string, nodeConfig NodeConfig) e
 		return fmt.Errorf("failed to create remote directories: %v", err)
 	}
 
-	// Copy binary file
-	err = nm.scpCopy(nodeConfig, localBinary, filepath.Join(nodeConfig.BinaryDir, "finalvudatasim"))
+	// Copy main binary file
+	log.Printf("Copying main binary from %s to %s", localMainBinary, filepath.Join(nodeConfig.BinaryDir, "finalvudatasim"))
+	err = nm.scpCopy(nodeConfig, localMainBinary, filepath.Join(nodeConfig.BinaryDir, "finalvudatasim"))
 	if err != nil {
-		return fmt.Errorf("failed to copy binary: %v", err)
+		log.Printf("ERROR: Failed to copy main binary: %v", err)
+		return fmt.Errorf("failed to copy main binary: %v", err)
 	}
+	log.Printf("✓ Main binary copied successfully")
+
+	// Copy metrics API binary
+	log.Printf("Copying metrics binary from %s to %s", localMetricsBinary, filepath.Join(nodeConfig.BinaryDir, "node_metrics_api"))
+	err = nm.scpCopy(nodeConfig, localMetricsBinary, filepath.Join(nodeConfig.BinaryDir, "node_metrics_api"))
+	if err != nil {
+		log.Printf("ERROR: Failed to copy metrics binary: %v", err)
+		return fmt.Errorf("failed to copy metrics binary: %v", err)
+	}
+	log.Printf("✓ Metrics binary copied successfully")
 
 	// Copy conf.d directory recursively
+	log.Printf("Copying conf.d directory from %s to %s", localConfDir, nodeConfig.ConfDir)
 	err = nm.scpCopyDir(nodeConfig, localConfDir, nodeConfig.ConfDir)
 	if err != nil {
+		log.Printf("ERROR: Failed to copy conf.d directory: %v", err)
 		return fmt.Errorf("failed to copy conf.d directory: %v", err)
 	}
+	log.Printf("✓ Conf.d directory copied successfully")
 
 	log.Printf("Successfully copied files to node %s", nodeName)
 	return nil
@@ -365,6 +459,52 @@ func (nm *NodeManager) cleanupNodeFiles(nodeName string) error {
 	return nil
 }
 
+// verifyMetricsServer checks if the metrics server is running on the node
+func (nm *NodeManager) verifyMetricsServer(nodeConfig NodeConfig) error {
+	// Create HTTP client with timeout
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	// Build health check URL
+	healthURL := fmt.Sprintf("http://%s:%d/api/system/health", nodeConfig.Host, nodeConfig.MetricsPort)
+
+	// Make HTTP request
+	resp, err := client.Get(healthURL)
+	if err != nil {
+		return fmt.Errorf("HTTP request to metrics server failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Check HTTP status code
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("metrics server returned HTTP %d: %s", resp.StatusCode, resp.Status)
+	}
+
+	// Parse JSON response to verify it's our metrics server
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %v", err)
+	}
+
+	var healthResponse map[string]interface{}
+	if err := json.Unmarshal(body, &healthResponse); err != nil {
+		return fmt.Errorf("failed to parse health response JSON: %v", err)
+	}
+
+	// Verify expected fields
+	if status, ok := healthResponse["status"].(string); !ok || status != "healthy" {
+		return fmt.Errorf("unexpected health status: %v", status)
+	}
+
+	if nodeID, ok := healthResponse["nodeId"].(string); !ok || nodeID == "" {
+		return fmt.Errorf("missing or invalid nodeId in health response")
+	}
+
+	log.Printf("Metrics server health check successful for node %s", nodeConfig.Host)
+	return nil
+}
+
 // sshExec executes a command on the remote node via SSH
 func (nm *NodeManager) sshExec(nodeConfig NodeConfig, command string) error {
 	args := []string{
@@ -388,6 +528,7 @@ func (nm *NodeManager) sshExec(nodeConfig NodeConfig, command string) error {
 }
 
 // scpCopy copies a single file to the remote node
+/*
 func (nm *NodeManager) scpCopy(nodeConfig NodeConfig, localPath, remotePath string) error {
 	args := []string{
 		"-i", nodeConfig.KeyPath,
@@ -408,9 +549,48 @@ func (nm *NodeManager) scpCopy(nodeConfig NodeConfig, localPath, remotePath stri
 	}
 
 	return nil
+}*/
+
+func (nm *NodeManager) scpCopy(nodeConfig NodeConfig, localPath, remotePath string) error {
+	log.Printf("DEBUG: SCP copying %s to %s@%s:%s", localPath, nodeConfig.User, nodeConfig.Host, remotePath)
+
+	args := []string{
+		"-i", nodeConfig.KeyPath,
+		"-o", "StrictHostKeyChecking=no",
+		"-o", "UserKnownHostsFile=/dev/null",
+		"-o", "ConnectTimeout=10",
+		"-o", "LogLevel=ERROR",
+	}
+
+	// Add -r only if localPath is a directory
+	info, err := os.Stat(localPath)
+	if err != nil {
+		return fmt.Errorf("failed to stat local path %s: %v", localPath, err)
+	}
+	if info.IsDir() {
+		args = append(args, "-r")
+		log.Printf("DEBUG: Copying directory with -r flag")
+	}
+
+	args = append(args, localPath, fmt.Sprintf("%s@%s:%s", nodeConfig.User, nodeConfig.Host, remotePath))
+
+	log.Printf("DEBUG: Executing SCP command: scp %v", args)
+
+	cmd := exec.Command("scp", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		log.Printf("ERROR: SCP command failed for %s: %v", localPath, err)
+		return fmt.Errorf("SCP copy failed: %v", err)
+	}
+
+	log.Printf("DEBUG: SCP copy successful for %s", localPath)
+	return nil
 }
 
 // scpCopyDir copies a directory recursively to the remote node
+
 func (nm *NodeManager) scpCopyDir(nodeConfig NodeConfig, localDir, remoteDir string) error {
 	args := []string{
 		"-i", nodeConfig.KeyPath,
