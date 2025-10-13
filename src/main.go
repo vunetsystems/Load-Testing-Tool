@@ -967,7 +967,7 @@ func pollNodeMetrics(nodeConfig node_control.NodeConfig) (*HTTPMetricsResponse, 
 	}
 
 	// Build metrics URL
-	metricsURL := fmt.Sprintf("http://%s:8085/api/system/metrics", nodeConfig.Host)
+	metricsURL := fmt.Sprintf("http://%s:%s/api/system/metrics", nodeConfig.Host, port)
 
 	logger.LogWithNode(nodeConfig.Host, "HTTP", fmt.Sprintf("Making GET request to %s", metricsURL), "info")
 
