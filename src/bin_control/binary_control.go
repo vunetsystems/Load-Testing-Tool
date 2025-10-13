@@ -1,4 +1,4 @@
-package main
+package bin_control
 
 import (
 	"fmt"
@@ -19,6 +19,7 @@ type NodeConfig struct {
 	KeyPath     string `yaml:"key_path"`
 	ConfDir     string `yaml:"conf_dir"`
 	BinaryDir   string `yaml:"binary_dir"`
+	MetricsPort int    `yaml:"metrics_port"`
 	Description string `yaml:"description"`
 	Enabled     bool   `yaml:"enabled"`
 }

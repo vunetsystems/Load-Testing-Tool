@@ -1,0 +1,8 @@
+| Attribute       | Value                                     |
+| --------------- | ----------------------------------------- |
+| Username        | `monitoring_read`                         |
+| Password        | `StrongP@assword123`                      |
+| Auth type       | `sha256_password`                         |
+| Role            | `monitoring_reader`                       |
+| Role privileges | `SHOW ON *.*`, `SELECT ON monitoring.*`   |
+| Permissions     | Read-only access to `monitoring` database |
