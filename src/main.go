@@ -18,12 +18,14 @@ import (
 	"syscall"
 	"time"
 
+	"vuDataSim/src/bin_control"
+	"vuDataSim/src/clickhouse"
 	"vuDataSim/src/logger"
+	"vuDataSim/src/node_control"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
-	"gopkg.in/yaml.v3"
 )
 
 // Application version and configuration
@@ -32,6 +34,8 @@ const (
 	StaticDir  = "./static"
 	Port       = ":3000"
 )
+
+// ClickHouse configuration (moved to clickhouse package)
 
 // WebSocket upgrader
 var upgrader = websocket.Upgrader{
@@ -42,13 +46,14 @@ var upgrader = websocket.Upgrader{
 
 // Global application state
 type AppState struct {
-	IsSimulationRunning bool                    `json:"isSimulationRunning"`
-	CurrentProfile      string                  `json:"currentProfile"`
-	TargetEPS           int                     `json:"targetEps"`
-	TargetKafka         int                     `json:"targetKafka"`
-	TargetClickHouse    int                     `json:"targetClickHouse"`
-	StartTime           time.Time               `json:"startTime"`
-	NodeData            map[string]*NodeMetrics `json:"nodeData"`
+	IsSimulationRunning bool                          `json:"isSimulationRunning"`
+	CurrentProfile      string                        `json:"currentProfile"`
+	TargetEPS           int                           `json:"targetEps"`
+	TargetKafka         int                           `json:"targetKafka"`
+	TargetClickHouse    int                           `json:"targetClickHouse"`
+	StartTime           time.Time                     `json:"startTime"`
+	NodeData            map[string]*NodeMetrics       `json:"nodeData"`
+	ClickHouseMetrics   *clickhouse.ClickHouseMetrics `json:"clickHouseMetrics,omitempty"`
 	mutex               sync.RWMutex
 	clients             map[*websocket.Conn]bool
 	broadcast           chan []byte
@@ -109,6 +114,8 @@ type SimulationConfig struct {
 	TargetClickHouse int    `json:"targetClickHouse"`
 }
 
+// ClickHouse data models (moved to clickhouse package)
+
 // Global application state instance
 var appState = &AppState{
 	IsSimulationRunning: false,
@@ -123,919 +130,52 @@ var appState = &AppState{
 
 // Node Management Structures and Types
 
-// ClusterSettings represents cluster-wide configuration
-type ClusterSettings struct {
-	BackupRetentionDays int    `yaml:"backup_retention_days"`
-	ConflictResolution  string `yaml:"conflict_resolution"`
-	ConnectionTimeout   int    `yaml:"connection_timeout"`
-	MaxRetries          int    `yaml:"max_retries"`
-	SyncTimeout         int    `yaml:"sync_timeout"`
-}
+// Node control types and instance (moved to node_control package)
 
-// NodeConfig represents a single node configuration
-type NodeConfig struct {
-	Host        string `yaml:"host"`
-	User        string `yaml:"user"`
-	KeyPath     string `yaml:"key_path"`
-	ConfDir     string `yaml:"conf_dir"`
-	BinaryDir   string `yaml:"binary_dir"`
-	MetricsPort int    `yaml:"metrics_port"`
-	Description string `yaml:"description"`
-	Enabled     bool   `yaml:"enabled"`
-}
+// Node control functions (moved to node_control package)
 
-// NodesConfig represents the entire nodes configuration
-type NodesConfig struct {
-	ClusterSettings ClusterSettings       `yaml:"cluster_settings"`
-	Nodes           map[string]NodeConfig `yaml:"nodes"`
-}
-
-// NodeManager handles node operations
-type NodeManager struct {
-	nodesConfigPath string
-	snapshotsDir    string
-	backupsDir      string
-	logsDir         string
-	nodesConfig     NodesConfig
-}
-
-// NewNodeManager creates a new node manager instance
-func NewNodeManager() *NodeManager {
-	return &NodeManager{
-		nodesConfigPath: "src/configs/nodes.yaml",
-		snapshotsDir:    "src/node_control/node_snapshots",
-		backupsDir:      "src/node_control/node_backups",
-		logsDir:         "src/node_control/logs",
-		nodesConfig: NodesConfig{
-			ClusterSettings: ClusterSettings{
-				BackupRetentionDays: 30,
-				ConflictResolution:  "manual",
-				ConnectionTimeout:   10,
-				MaxRetries:          3,
-				SyncTimeout:         60,
-			},
-			Nodes: make(map[string]NodeConfig),
-		},
-	}
-}
-
-// LoadNodesConfig loads the nodes configuration from YAML file
-func (nm *NodeManager) LoadNodesConfig() error {
-	if _, err := os.Stat(nm.nodesConfigPath); os.IsNotExist(err) {
-		// Create default config if file doesn't exist
-		return nm.SaveNodesConfig()
-	}
-
-	data, err := os.ReadFile(nm.nodesConfigPath)
-	if err != nil {
-		return fmt.Errorf("failed to read nodes config file: %v", err)
-	}
-
-	err = yaml.Unmarshal(data, &nm.nodesConfig)
-	if err != nil {
-		return fmt.Errorf("failed to parse nodes config file: %v", err)
-	}
-
-	// Ensure Nodes map is initialized
-	if nm.nodesConfig.Nodes == nil {
-		nm.nodesConfig.Nodes = make(map[string]NodeConfig)
-	}
-
-	return nil
-}
-
-// SaveNodesConfig saves the nodes configuration to YAML file
-func (nm *NodeManager) SaveNodesConfig() error {
-	data, err := yaml.Marshal(nm.nodesConfig)
-	if err != nil {
-		return fmt.Errorf("failed to marshal nodes config: %v", err)
-	}
-
-	err = os.WriteFile(nm.nodesConfigPath, data, 0644)
-	if err != nil {
-		return fmt.Errorf("failed to write nodes config file: %v", err)
-	}
-
-	return nil
-}
-
-// AddNode adds a new node to the configuration and copies files via SSH
-func (nm *NodeManager) AddNode(name, host, user, keyPath, confDir, binaryDir, description string, enabled bool) error {
-	if _, exists := nm.nodesConfig.Nodes[name]; exists {
-		return fmt.Errorf("node %s already exists", name)
-	}
-
-	nodeConfig := NodeConfig{
-		Host:        host,
-		User:        user,
-		KeyPath:     keyPath,
-		ConfDir:     confDir,
-		BinaryDir:   binaryDir,
-		Description: description,
-		Enabled:     enabled,
-	}
-
-	nm.nodesConfig.Nodes[name] = nodeConfig
-
-	// Save configuration first
-	err := nm.SaveNodesConfig()
-	if err != nil {
-		return fmt.Errorf("failed to save nodes config: %v", err)
-	}
-
-	// Copy files to remote node
-	err = nm.copyFilesToNode(name, nodeConfig)
-	if err != nil {
-		// Rollback configuration on copy failure
-		delete(nm.nodesConfig.Nodes, name)
-		nm.SaveNodesConfig()
-		return fmt.Errorf("failed to copy files to node: %v", err)
-	}
-
-	log.Printf("Successfully added node %s", name)
-	return nil
-}
-
-// RemoveNode removes a node from configuration and cleans up files
-func (nm *NodeManager) RemoveNode(name string) error {
-	_, exists := nm.nodesConfig.Nodes[name]
-	if !exists {
-		return fmt.Errorf("node %s not found", name)
-	}
-
-	// Remove from configuration
-	delete(nm.nodesConfig.Nodes, name)
-	err := nm.SaveNodesConfig()
-	if err != nil {
-		return fmt.Errorf("failed to save config: %v", err)
-	}
-
-	// Clean up snapshots and backups
-	err = nm.cleanupNodeFiles(name)
-	if err != nil {
-		log.Printf("Warning: failed to cleanup files for node %s: %v", name, err)
-	}
-
-	log.Printf("Successfully removed node %s", name)
-	return nil
-}
-
-// EnableNode enables a node
-func (nm *NodeManager) EnableNode(name string) error {
-	nodeConfig, exists := nm.nodesConfig.Nodes[name]
-	if !exists {
-		return fmt.Errorf("node %s not found", name)
-	}
-
-	nodeConfig.Enabled = true
-	nm.nodesConfig.Nodes[name] = nodeConfig
-
-	err := nm.SaveNodesConfig()
-	if err != nil {
-		return fmt.Errorf("failed to save config: %v", err)
-	}
-
-	logger.LogSuccess(name, "Node", "Node enabled successfully")
-
-	// Copy files to the node
-	err = nm.copyFilesToNode(name, nodeConfig)
-	if err != nil {
-		logger.LogError(name, "Deployment", fmt.Sprintf("Failed to copy files: %v", err))
-		return fmt.Errorf("failed to copy files to node: %v", err)
-	}
-
-	// Start the node metrics binary
-	err = nm.startNodeMetricsBinary(name, nodeConfig)
-	if err != nil {
-		logger.LogWarning(name, "Metrics", fmt.Sprintf("Failed to start metrics binary: %v", err))
-		// Don't fail the enable operation if metrics binary fails to start
-	} else {
-		logger.LogSuccess(name, "Metrics", "Node metrics binary started successfully")
-	}
-
-	return nil
-}
-
-// DisableNode disables a node
-func (nm *NodeManager) DisableNode(name string) error {
-	nodeConfig, exists := nm.nodesConfig.Nodes[name]
-	if !exists {
-		return fmt.Errorf("node %s not found", name)
-	}
-
-	nodeConfig.Enabled = false
-	nm.nodesConfig.Nodes[name] = nodeConfig
-
-	err := nm.SaveNodesConfig()
-	if err != nil {
-		return fmt.Errorf("failed to save config: %v", err)
-	}
-
-	log.Printf("Successfully disabled node %s", name)
-	return nil
-}
-
-// GetNodes returns all nodes
-func (nm *NodeManager) GetNodes() map[string]NodeConfig {
-	return nm.nodesConfig.Nodes
-}
-
-// GetEnabledNodes returns only enabled nodes
-func (nm *NodeManager) GetEnabledNodes() map[string]NodeConfig {
-	enabledNodes := make(map[string]NodeConfig)
-	for name, config := range nm.nodesConfig.Nodes {
-		if config.Enabled {
-			enabledNodes[name] = config
-		}
-	}
-	return enabledNodes
-}
-
-// copyFilesToNode copies the binaries and conf.d directory to the remote node
-func (nm *NodeManager) copyFilesToNode(nodeName string, nodeConfig NodeConfig) error {
-	localMainBinary := "src/finalvudatasim"
-	localMetricsBinary := "node_metrics_api" // Use the built binary from root directory
-	localConfDir := "src/conf.d"
-
-	logger.Debug().
-		Str("node", nodeName).
-		Str("main_binary", localMainBinary).
-		Str("metrics_binary", localMetricsBinary).
-		Str("conf_dir", localConfDir).
-		Msg("Deployment paths")
-
-	// Check if local files exist
-	if _, err := os.Stat(localMainBinary); os.IsNotExist(err) {
-		return fmt.Errorf("local main binary file %s not found", localMainBinary)
-	}
-
-	if _, err := os.Stat(localMetricsBinary); os.IsNotExist(err) {
-		return fmt.Errorf("local metrics binary file %s not found", localMetricsBinary)
-	}
-
-	// Build the node_metrics_api binary if it doesn't exist
-	if _, err := os.Stat(localMetricsBinary); os.IsNotExist(err) {
-		log.Printf("Building node_metrics_api binary for node %s...", nodeName)
-		buildCmd := exec.Command("go", "build", "-o", localMetricsBinary, "src/node_metrics_api")
-		buildCmd.Dir = "." // Run from project root
-		if output, err := buildCmd.CombinedOutput(); err != nil {
-			return fmt.Errorf("failed to build node_metrics_api binary: %v, output: %s", err, string(output))
-		}
-		log.Printf("node_metrics_api binary built successfully for node %s", nodeName)
-	}
-
-	if _, err := os.Stat(localConfDir); os.IsNotExist(err) {
-		return fmt.Errorf("local conf.d directory %s not found", localConfDir)
-	}
-
-	// Create remote directories
-	err := nm.sshExec(nodeConfig, fmt.Sprintf("mkdir -p %s %s", nodeConfig.BinaryDir, nodeConfig.ConfDir))
-	if err != nil {
-		return fmt.Errorf("failed to create remote directories: %v", err)
-	}
-
-	// Copy main binary file
-	logger.Info().
-		Str("node", nodeName).
-		Str("from", localMainBinary).
-		Str("to", filepath.Join(nodeConfig.BinaryDir, "finalvudatasim")).
-		Msg("Copying main binary")
-	err = nm.scpCopy(nodeConfig, localMainBinary, filepath.Join(nodeConfig.BinaryDir, "finalvudatasim"))
-	if err != nil {
-		logger.Error().
-			Str("node", nodeName).
-			Err(err).
-			Msg("Failed to copy main binary")
-		return fmt.Errorf("failed to copy main binary: %v", err)
-	}
-	logger.LogSuccess(nodeName, "Deployment", "Main binary copied successfully")
-
-	// Copy metrics API binary
-	logger.Info().
-		Str("node", nodeName).
-		Str("from", localMetricsBinary).
-		Str("to", filepath.Join(nodeConfig.BinaryDir, "node_metrics_api")).
-		Msg("Copying metrics binary")
-	err = nm.scpCopy(nodeConfig, localMetricsBinary, filepath.Join(nodeConfig.BinaryDir, "node_metrics_api"))
-	if err != nil {
-		logger.Error().
-			Str("node", nodeName).
-			Err(err).
-			Msg("Failed to copy metrics binary")
-		return fmt.Errorf("failed to copy metrics binary: %v", err)
-	}
-	logger.LogSuccess(nodeName, "Deployment", "Metrics binary copied successfully")
-
-	// Copy conf.d directory recursively
-	logger.Info().
-		Str("node", nodeName).
-		Str("from", localConfDir).
-		Str("to", nodeConfig.ConfDir).
-		Msg("Copying conf.d directory")
-	err = nm.scpCopyDir(nodeConfig, localConfDir, nodeConfig.ConfDir)
-	if err != nil {
-		logger.Error().
-			Str("node", nodeName).
-			Err(err).
-			Msg("Failed to copy conf.d directory")
-		return fmt.Errorf("failed to copy conf.d directory: %v", err)
-	}
-	logger.LogSuccess(nodeName, "Deployment", "Conf.d directory copied successfully")
-
-	logger.LogSuccess(nodeName, "Deployment", "Successfully copied all files to node")
-	return nil
-}
-
-// readMetricsPort reads the port from the metrics.port file on the remote node
-func (nm *NodeManager) readMetricsPort(nodeConfig NodeConfig) (string, error) {
-	portFilePath := fmt.Sprintf("%s/metrics.port", nodeConfig.BinaryDir)
-	cmd := fmt.Sprintf("cat %s", portFilePath)
-	portStr, err := nm.sshExecWithOutput(nodeConfig, cmd)
-	if err != nil {
-		return "", fmt.Errorf("failed to read port file: %v", err)
-	}
-	portStr = strings.TrimSpace(portStr)
-	if portStr == "" {
-		return "", fmt.Errorf("port file is empty")
-	}
-	return portStr, nil
-}
-
-// startNodeMetricsBinary starts the node metrics API binary on the remote node
-func (nm *NodeManager) startNodeMetricsBinary(nodeName string, nodeConfig NodeConfig) error {
-	logger.LogWithNode(nodeName, "Metrics", "Starting node metrics binary...", "info")
-
-	// Kill any existing metrics processes
-	killCmd := fmt.Sprintf("pkill -f node_metrics_api || true")
-	err := nm.sshExec(nodeConfig, killCmd)
-	if err != nil {
-		logger.LogWarning(nodeName, "Metrics", fmt.Sprintf("Failed to kill existing metrics processes: %v", err))
-	}
-
-	// Make sure the binary has execute permissions
-	metricsPath := fmt.Sprintf("%s/node_metrics_api", nodeConfig.BinaryDir)
-	chmodCmd := fmt.Sprintf("chmod +x %s", metricsPath)
-	err = nm.sshExec(nodeConfig, chmodCmd)
-	if err != nil {
-		logger.LogWarning(nodeName, "Metrics", fmt.Sprintf("Failed to set execute permissions: %v", err))
-	}
-
-	// Start the metrics binary in the background (will find available port)
-	startCmd := fmt.Sprintf("cd %s && nohup %s > metrics.log 2>&1 & echo $! > metrics.pid", nodeConfig.BinaryDir, metricsPath)
-	logger.LogWithNode(nodeName, "Metrics", fmt.Sprintf("Executing start command: %s", startCmd), "info")
-
-	err = nm.sshExec(nodeConfig, startCmd)
-	if err != nil {
-		logger.LogError(nodeName, "Metrics", fmt.Sprintf("Failed to execute start command: %v", err))
-		return fmt.Errorf("failed to start metrics binary: %v", err)
-	}
-
-	logger.LogWithNode(nodeName, "Metrics", "Start command executed, waiting for startup...", "info")
-
-	// Wait a moment for the binary to start
-	time.Sleep(3 * time.Second)
-
-	// Check if the process is running by checking the PID file
-	checkPidCmd := fmt.Sprintf("cat %s/metrics.pid 2>/dev/null || echo 'no pid'", nodeConfig.BinaryDir)
-	pidOutput, err := nm.sshExecWithOutput(nodeConfig, checkPidCmd)
-	if err != nil {
-		logger.LogWarning(nodeName, "Metrics", fmt.Sprintf("Could not check PID file: %v", err))
-	} else if strings.TrimSpace(pidOutput) != "no pid" && strings.TrimSpace(pidOutput) != "" {
-		logger.LogSuccess(nodeName, "Metrics", fmt.Sprintf("Metrics binary started with PID: %s", strings.TrimSpace(pidOutput)))
-	} else {
-		logger.LogWarning(nodeName, "Metrics", "PID file not found or empty")
-	}
-
-	// Wait for the port file to be created
-	time.Sleep(2 * time.Second)
-
-	// Read the port from the metrics.port file
-	port, err := nm.readMetricsPort(nodeConfig)
-	if err != nil {
-		logger.LogError(nodeName, "Metrics", fmt.Sprintf("Failed to read metrics port: %v", err))
-		return fmt.Errorf("failed to read metrics port: %v", err)
-	}
-
-	logger.LogWithNode(nodeName, "Metrics", fmt.Sprintf("Metrics API is running on port %s", port), "info")
-
-	// Verify the metrics server is running by making a test request
-	client := &http.Client{Timeout: 5 * time.Second}
-	healthURL := fmt.Sprintf("http://%s:%s/api/system/health", nodeConfig.Host, port)
-	logger.LogWithNode(nodeName, "Metrics", fmt.Sprintf("Checking health endpoint: %s", healthURL), "info")
-
-	resp, err := client.Get(healthURL)
-	if err != nil {
-		logger.LogError(nodeName, "Metrics", fmt.Sprintf("Health check failed: %v", err))
-		return fmt.Errorf("metrics server health check failed: %v", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		logger.LogError(nodeName, "Metrics", fmt.Sprintf("Health check returned status %d", resp.StatusCode))
-		return fmt.Errorf("metrics server returned status %d", resp.StatusCode)
-	}
-
-	logger.LogSuccess(nodeName, "Metrics", "Health check passed - metrics binary is running successfully")
-	return nil
-}
-
-// cleanupNodeFiles removes snapshots and backups for a node
-func (nm *NodeManager) cleanupNodeFiles(nodeName string) error {
-	nodeSnapshotDir := filepath.Join(nm.snapshotsDir, nodeName)
-	nodeBackupDir := filepath.Join(nm.backupsDir, nodeName)
-
-	if _, err := os.Stat(nodeSnapshotDir); !os.IsNotExist(err) {
-		err := os.RemoveAll(nodeSnapshotDir)
-		if err != nil {
-			return fmt.Errorf("failed to remove snapshot directory: %v", err)
-		}
-	}
-
-	if _, err := os.Stat(nodeBackupDir); !os.IsNotExist(err) {
-		err := os.RemoveAll(nodeBackupDir)
-		if err != nil {
-			return fmt.Errorf("failed to remove backup directory: %v", err)
-		}
-	}
-
-	return nil
-}
-
-// sshExec executes a command on the remote node via SSH
-func (nm *NodeManager) sshExec(nodeConfig NodeConfig, command string) error {
-	args := []string{
-		"-i", nodeConfig.KeyPath,
-		"-o", "StrictHostKeyChecking=no",
-		"-o", "UserKnownHostsFile=/dev/null",
-		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
-		command,
-	}
-
-	cmd := exec.Command("ssh", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("SSH command failed: %v", err)
-	}
-
-	return nil
-}
-
-// sshExecWithOutput executes a command on the remote node via SSH and returns the output
-func (nm *NodeManager) sshExecWithOutput(nodeConfig NodeConfig, command string) (string, error) {
-	args := []string{
-		"-i", nodeConfig.KeyPath,
-		"-o", "StrictHostKeyChecking=no",
-		"-o", "UserKnownHostsFile=/dev/null",
-		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
-		command,
-	}
-
-	cmd := exec.Command("ssh", args...)
-	output, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("SSH command failed: %v", err)
-	}
-
-	return strings.TrimSpace(string(output)), nil
-}
-
-// scpCopy copies a single file to the remote node
-func (nm *NodeManager) scpCopy(nodeConfig NodeConfig, localPath, remotePath string) error {
-	args := []string{
-		"-i", nodeConfig.KeyPath,
-		"-o", "StrictHostKeyChecking=no",
-		"-o", "UserKnownHostsFile=/dev/null",
-		"-r", // recursive for directories
-		localPath,
-		fmt.Sprintf("%s@%s:%s", nodeConfig.User, nodeConfig.Host, remotePath),
-	}
-
-	cmd := exec.Command("scp", args...)
-
-	// Capture stdout and stderr
-	stdoutPipe, err := cmd.StdoutPipe()
-	if err != nil {
-		return fmt.Errorf("failed to create stdout pipe: %v", err)
-	}
-	stderrPipe, err := cmd.StderrPipe()
-	if err != nil {
-		return fmt.Errorf("failed to create stderr pipe: %v", err)
-	}
-
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("failed to start SCP command: %v", err)
-	}
-
-	// Read and log stdout
-	go func() {
-		scanner := bufio.NewScanner(stdoutPipe)
-		for scanner.Scan() {
-			line := scanner.Text()
-			logger.LogMetric("System", "SCP", fmt.Sprintf("STDOUT: %s", line))
-		}
-	}()
-
-	// Read and log stderr
-	go func() {
-		scanner := bufio.NewScanner(stderrPipe)
-		for scanner.Scan() {
-			line := scanner.Text()
-			logger.LogMetric("System", "SCP", fmt.Sprintf("STDERR: %s", line))
-		}
-	}()
-
-	if err := cmd.Wait(); err != nil {
-		return fmt.Errorf("SCP copy failed: %v", err)
-	}
-
-	return nil
-}
-
-// scpCopyDir copies a directory recursively to the remote node
-func (nm *NodeManager) scpCopyDir(nodeConfig NodeConfig, localDir, remoteDir string) error {
-	args := []string{
-		"-i", nodeConfig.KeyPath,
-		"-o", "StrictHostKeyChecking=no",
-		"-o", "UserKnownHostsFile=/dev/null",
-		"-r",
-		localDir,
-		fmt.Sprintf("%s@%s:%s", nodeConfig.User, nodeConfig.Host, remoteDir),
-	}
-
-	cmd := exec.Command("scp", args...)
-
-	// Capture stdout and stderr
-	stdoutPipe, err := cmd.StdoutPipe()
-	if err != nil {
-		return fmt.Errorf("failed to create stdout pipe: %v", err)
-	}
-	stderrPipe, err := cmd.StderrPipe()
-	if err != nil {
-		return fmt.Errorf("failed to create stderr pipe: %v", err)
-	}
-
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("failed to start SCP command: %v", err)
-	}
-
-	// Read and log stdout
-	go func() {
-		scanner := bufio.NewScanner(stdoutPipe)
-		for scanner.Scan() {
-			line := scanner.Text()
-			logger.LogMetric("System", "SCP", fmt.Sprintf("STDOUT: %s", line))
-		}
-	}()
-
-	// Read and log stderr
-	go func() {
-		scanner := bufio.NewScanner(stderrPipe)
-		for scanner.Scan() {
-			line := scanner.Text()
-			logger.LogMetric("System", "SCP", fmt.Sprintf("STDERR: %s", line))
-		}
-	}()
-
-	if err := cmd.Wait(); err != nil {
-		return fmt.Errorf("SCP directory copy failed: %v", err)
-	}
-
-	return nil
-}
+// Node control functions (moved to node_control package)
 
 // Global node manager instance
-var nodeManager = NewNodeManager()
+var nodeManager *node_control.NodeManager
 
-// Binary control types and instance
-type BinaryControlResponse struct {
-	Success bool        `json:"success"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
+// ClickHouse client and configuration
+var clickHouseClient *clickhouse.ClickHouseClient
+var clickHouseConfig = clickhouse.ClickHouseConfig{
+	Host:     "10.32.3.50", // ClickHouse service ClusterIP
+	Port:     9000,
+	Database: "monitoring",
+	Username: "monitoring_read",
+	Password: "StrongP@assword123",
 }
 
-type BinaryStatus struct {
-	NodeName    string `json:"nodeName"`
-	Status      string `json:"status"`
-	PID         int    `json:"pid"`
-	StartTime   string `json:"startTime"`
-	ProcessInfo string `json:"processInfo"`
-	LastChecked string `json:"lastChecked"`
-}
-
-type BinaryControl struct {
-	nodesConfigPath string
-	nodesConfig     NodesConfig
-}
-
-func NewBinaryControl() *BinaryControl {
-	return &BinaryControl{
-		nodesConfigPath: "src/configs/nodes.yaml",
-		nodesConfig: NodesConfig{
-			Nodes: make(map[string]NodeConfig),
-		},
-	}
-}
-
-func (bc *BinaryControl) LoadNodesConfig() error {
-	if _, err := os.Stat(bc.nodesConfigPath); os.IsNotExist(err) {
-		return fmt.Errorf("nodes config file not found: %s", bc.nodesConfigPath)
-	}
-
-	data, err := os.ReadFile(bc.nodesConfigPath)
-	if err != nil {
-		return fmt.Errorf("failed to read nodes config file: %v", err)
-	}
-
-	err = yaml.Unmarshal(data, &bc.nodesConfig)
-	if err != nil {
-		return fmt.Errorf("failed to parse nodes config file: %v", err)
-	}
-
-	return nil
-}
-
-func (bc *BinaryControl) GetEnabledNodes() map[string]NodeConfig {
-	enabledNodes := make(map[string]NodeConfig)
-	for name, config := range bc.nodesConfig.Nodes {
-		if config.Enabled {
-			enabledNodes[name] = config
-		}
-	}
-	return enabledNodes
-}
-
-func (bc *BinaryControl) GetBinaryStatus(nodeName string) (*BinaryStatus, error) {
-	nodeConfig, exists := bc.nodesConfig.Nodes[nodeName]
-	if !exists {
-		return nil, fmt.Errorf("node %s not found in configuration", nodeName)
-	}
-
-	if !nodeConfig.Enabled {
-		return &BinaryStatus{
-			NodeName:    nodeName,
-			Status:      "disabled",
-			LastChecked: time.Now().Format("2006-01-02 15:04:05"),
-		}, nil
-	}
-
-	// Check if the binary process is running
-	checkCmd := "pgrep -f finalvudatasim"
-	output, err := bc.sshExecWithOutput(nodeConfig, checkCmd)
-	if err != nil || strings.TrimSpace(output) == "" {
-		return &BinaryStatus{
-			NodeName:    nodeName,
-			Status:      "stopped",
-			LastChecked: time.Now().Format("2006-01-02 15:04:05"),
-		}, nil
-	}
-
-	// Parse PID
-	pids := strings.Split(strings.TrimSpace(output), "\n")
-	if len(pids) == 0 || pids[0] == "" {
-		return &BinaryStatus{
-			NodeName:    nodeName,
-			Status:      "stopped",
-			LastChecked: time.Now().Format("2006-01-02 15:04:05"),
-		}, nil
-	}
-
-	pid, err := strconv.Atoi(pids[0])
-	if err != nil {
-		return &BinaryStatus{
-			NodeName:    nodeName,
-			Status:      "error",
-			ProcessInfo: fmt.Sprintf("Failed to parse PID: %v", err),
-			LastChecked: time.Now().Format("2006-01-02 15:04:05"),
-		}, err
-	}
-
-	return &BinaryStatus{
-		NodeName:    nodeName,
-		Status:      "running",
-		PID:         pid,
-		StartTime:   "Unknown",
-		ProcessInfo: fmt.Sprintf("PID: %d", pid),
-		LastChecked: time.Now().Format("2006-01-02 15:04:05"),
-	}, nil
-}
-
-func (bc *BinaryControl) GetAllBinaryStatuses() (*BinaryControlResponse, error) {
-	enabledNodes := bc.GetEnabledNodes()
-	if len(enabledNodes) == 0 {
-		return &BinaryControlResponse{
-			Success: true,
-			Message: "No enabled nodes found",
-			Data:    []BinaryStatus{},
-		}, nil
-	}
-
-	var allStatuses []BinaryStatus
-	for nodeName := range enabledNodes {
-		status, err := bc.GetBinaryStatus(nodeName)
-		if err != nil {
-			log.Printf("Warning: Failed to get binary status for node %s: %v", nodeName, err)
-			allStatuses = append(allStatuses, BinaryStatus{
-				NodeName:    nodeName,
-				Status:      "error",
-				ProcessInfo: fmt.Sprintf("Status check failed: %v", err),
-				LastChecked: time.Now().Format("2006-01-02 15:04:05"),
-			})
-		} else {
-			allStatuses = append(allStatuses, *status)
-		}
-	}
-
-	return &BinaryControlResponse{
-		Success: true,
-		Message: fmt.Sprintf("Retrieved status for %d nodes", len(allStatuses)),
-		Data:    allStatuses,
-	}, nil
-}
-
-func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryControlResponse, error) {
-	nodeConfig, exists := bc.nodesConfig.Nodes[nodeName]
-	if !exists {
-		return &BinaryControlResponse{
-			Success: false,
-			Message: fmt.Sprintf("Node %s not found in configuration", nodeName),
-		}, fmt.Errorf("node %s not found", nodeName)
-	}
-
-	if !nodeConfig.Enabled {
-		return &BinaryControlResponse{
-			Success: false,
-			Message: fmt.Sprintf("Node %s is disabled", nodeName),
-		}, fmt.Errorf("node %s is disabled", nodeName)
-	}
-
-	// Check if already running
-	status, err := bc.GetBinaryStatus(nodeName)
-	if err == nil && status.Status == "running" {
-		return &BinaryControlResponse{
-			Success: false,
-			Message: fmt.Sprintf("Binary is already running on node %s (PID: %d)", nodeName, status.PID),
-		}, fmt.Errorf("binary already running on node %s", nodeName)
-	}
-
-	// Start the binary
-	binaryPath := fmt.Sprintf("%s/finalvudatasim", nodeConfig.BinaryDir)
-	log.Printf("Starting binary on node %s: %s", nodeName, binaryPath)
-
-	// Show detailed command in logs
-	startCmd := fmt.Sprintf("cd %s && nohup %s > /dev/null 2>&1 &", nodeConfig.BinaryDir, binaryPath)
-	log.Printf("Executing start command on node %s: %s", nodeName, startCmd)
-
-	err = bc.sshExec(nodeConfig, startCmd)
-	if err != nil {
-		log.Printf("SSH execution failed for start command on node %s: %v", nodeName, err)
-		return &BinaryControlResponse{
-			Success: false,
-			Message: fmt.Sprintf("Failed to start binary on node %s: %v", nodeName, err),
-		}, err
-	}
-
-	log.Printf("Binary start command executed successfully on node %s", nodeName)
-
-	time.Sleep(2 * time.Second)
-
-	newStatus, err := bc.GetBinaryStatus(nodeName)
-	if err != nil {
-		return &BinaryControlResponse{
-			Success: true,
-			Message: fmt.Sprintf("Binary start command sent to node %s, but status check failed: %v", nodeName, err),
-			Data:    map[string]interface{}{"warning": "Binary may be starting, but status verification failed"},
-		}, nil
-	}
-
-	responseData := map[string]interface{}{
-		"nodeName":   nodeName,
-		"action":     "start",
-		"timeout":    timeout,
-		"binaryPath": binaryPath,
-		"status":     newStatus,
-	}
-
-	return &BinaryControlResponse{
-		Success: true,
-		Message: fmt.Sprintf("Binary started successfully on node %s", nodeName),
-		Data:    responseData,
-	}, nil
-}
-
-func (bc *BinaryControl) StopBinary(nodeName string, timeout int) (*BinaryControlResponse, error) {
-	nodeConfig, exists := bc.nodesConfig.Nodes[nodeName]
-	if !exists {
-		return &BinaryControlResponse{
-			Success: false,
-			Message: fmt.Sprintf("Node %s not found in configuration", nodeName),
-		}, fmt.Errorf("node %s not found", nodeName)
-	}
-
-	if !nodeConfig.Enabled {
-		return &BinaryControlResponse{
-			Success: false,
-			Message: fmt.Sprintf("Node %s is disabled", nodeName),
-		}, fmt.Errorf("node %s is disabled", nodeName)
-	}
-
-	// Get current status
-	status, err := bc.GetBinaryStatus(nodeName)
-	if err != nil || status.Status != "running" {
-		return &BinaryControlResponse{
-			Success: false,
-			Message: fmt.Sprintf("Binary is not running on node %s", nodeName),
-		}, fmt.Errorf("binary not running on node %s", nodeName)
-	}
-
-	// Stop the binary
-	log.Printf("Stopping binary on node %s (PID: %d)", nodeName, status.PID)
-	killCmd := fmt.Sprintf("kill %d", status.PID)
-	err = bc.sshExec(nodeConfig, killCmd)
-	if err != nil {
-		killCmd = fmt.Sprintf("kill -9 %d", status.PID)
-		err = bc.sshExec(nodeConfig, killCmd)
-		if err != nil {
-			return &BinaryControlResponse{
-				Success: false,
-				Message: fmt.Sprintf("Failed to stop binary on node %s: %v", nodeName, err),
-			}, err
-		}
-	}
-
-	time.Sleep(2 * time.Second)
-
-	newStatus, err := bc.GetBinaryStatus(nodeName)
-	if err != nil {
-		return &BinaryControlResponse{
-			Success: true,
-			Message: fmt.Sprintf("Binary stop command sent to node %s, but status verification failed: %v", nodeName, err),
-			Data:    map[string]interface{}{"warning": "Binary may be stopped, but status verification failed"},
-		}, nil
-	}
-
-	responseData := map[string]interface{}{
-		"nodeName":    nodeName,
-		"action":      "stop",
-		"timeout":     timeout,
-		"previousPID": status.PID,
-		"status":      newStatus,
-	}
-
-	return &BinaryControlResponse{
-		Success: true,
-		Message: fmt.Sprintf("Binary stopped successfully on node %s", nodeName),
-		Data:    responseData,
-	}, nil
-}
-
-func (bc *BinaryControl) sshExec(nodeConfig NodeConfig, command string) error {
-	args := []string{
-		"-i", nodeConfig.KeyPath,
-		"-o", "StrictHostKeyChecking=no",
-		"-o", "UserKnownHostsFile=/dev/null",
-		"-o", "ConnectTimeout=10",
-		"-o", "LogLevel=ERROR",
-		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
-		command,
-	}
-
-	cmd := exec.Command("ssh", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("SSH command failed: %v", err)
-	}
-
-	return nil
-}
-
-func (bc *BinaryControl) sshExecWithOutput(nodeConfig NodeConfig, command string) (string, error) {
-	args := []string{
-		"-i", nodeConfig.KeyPath,
-		"-o", "StrictHostKeyChecking=no",
-		"-o", "UserKnownHostsFile=/dev/null",
-		"-o", "ConnectTimeout=10",
-		"-o", "LogLevel=ERROR",
-		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
-		command,
-	}
-
-	cmd := exec.Command("ssh", args...)
-	output, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("SSH command failed: %v", err)
-	}
-
-	return strings.TrimSpace(string(output)), nil
-}
+// Binary control types and instance (moved to bin_control package)
 
 // Global binary control instance
-var binaryControl = NewBinaryControl()
+var binaryControl *bin_control.BinaryControl
+
+// ClickHouse connection and query functions
+
+// initClickHouse initializes the ClickHouse client connection
+func initClickHouse() error {
+	client, err := clickhouse.NewClickHouseClient(clickHouseConfig)
+	if err != nil {
+		return err
+	}
+
+	clickHouseClient = client
+	logger.LogSuccess("System", "ClickHouse", "ClickHouse client initialized successfully")
+	return nil
+}
+
+// collectClickHouseMetrics collects all metrics from ClickHouse
+func collectClickHouseMetrics() (*clickhouse.ClickHouseMetrics, error) {
+	if clickHouseClient == nil {
+		return nil, fmt.Errorf("ClickHouse client not initialized")
+	}
+
+	return clickHouseClient.CollectMetrics()
+}
 
 // Initialize node data from nodes.yaml configuration
 func init() {
@@ -1048,14 +188,14 @@ func init() {
 		logger.Warn().Msg("Using default node configuration")
 		initializeDefaultNodes()
 		// Initialize binary control with default config
-		binaryControl = NewBinaryControl()
+		binaryControl = bin_control.NewBinaryControl()
 		return
 	}
 
 	logger.Info().Interface("nodes", nodeManager.GetNodes()).Msg("Loaded nodes from config")
 
 	// Initialize binary control with loaded config
-	binaryControl = NewBinaryControl()
+	binaryControl = bin_control.NewBinaryControl()
 	err = binaryControl.LoadNodesConfig()
 	if err != nil {
 		log.Printf("Warning: Failed to load nodes config for binary control: %v", err)
@@ -1715,7 +855,7 @@ func collectRealMetrics() {
 }
 
 // Get real CPU usage from node via SSH
-func getNodeCPUUsage(nodeConfig NodeConfig) (float64, error) {
+func getNodeCPUUsage(nodeConfig node_control.NodeConfig) (float64, error) {
 	// Use 'vmstat' for more reliable CPU metrics
 	cmd := "vmstat 1 2 | tail -1 | awk '{print $13}'"
 	output, err := sshExec(nodeConfig, cmd)
@@ -1772,7 +912,7 @@ func getNodeCPUUsage(nodeConfig NodeConfig) (float64, error) {
 }
 
 // Get real memory usage from node via SSH
-func getNodeMemoryUsage(nodeConfig NodeConfig) (float64, error) {
+func getNodeMemoryUsage(nodeConfig node_control.NodeConfig) (float64, error) {
 	// Use 'free' command with better parsing
 	cmd := "free -b | grep Mem | awk '{printf \"%.2f\", ($3 / $2) * 100}'"
 	output, err := sshExec(nodeConfig, cmd)
@@ -1797,7 +937,7 @@ func getNodeMemoryUsage(nodeConfig NodeConfig) (float64, error) {
 }
 
 // Get total memory from node via SSH
-func getNodeTotalMemory(nodeConfig NodeConfig) (float64, error) {
+func getNodeTotalMemory(nodeConfig node_control.NodeConfig) (float64, error) {
 	// Use 'free' command to get total memory in GB
 	cmd := "free -b | grep Mem | awk '{printf \"%.2f\", $2 / 1024 / 1024 / 1024}'"
 	output, err := sshExec(nodeConfig, cmd)
@@ -1820,14 +960,7 @@ func getNodeTotalMemory(nodeConfig NodeConfig) (float64, error) {
 }
 
 // pollNodeMetrics performs HTTP GET request to node's metrics endpoint
-func pollNodeMetrics(nodeConfig NodeConfig) (*HTTPMetricsResponse, error) {
-	// Read the port from the metrics.port file
-	port, err := nodeManager.readMetricsPort(nodeConfig)
-	if err != nil {
-		logger.LogError(nodeConfig.Host, "HTTP", fmt.Sprintf("Failed to read metrics port: %v", err))
-		return nil, fmt.Errorf("failed to read metrics port: %v", err)
-	}
-
+func pollNodeMetrics(nodeConfig node_control.NodeConfig) (*HTTPMetricsResponse, error) {
 	// Create HTTP client with timeout
 	client := &http.Client{
 		Timeout: 2 * time.Second,
@@ -1866,7 +999,7 @@ func pollNodeMetrics(nodeConfig NodeConfig) (*HTTPMetricsResponse, error) {
 }
 
 // Get total CPU cores from node via SSH (legacy function - kept for compatibility)
-func getNodeTotalCPU(nodeConfig NodeConfig) (float64, error) {
+func getNodeTotalCPU(nodeConfig node_control.NodeConfig) (float64, error) {
 	// Use 'nproc' command to get CPU count
 	cmd := "nproc"
 	output, err := sshExec(nodeConfig, cmd)
@@ -1940,7 +1073,7 @@ func getLocalSystemCPU() (float64, error) {
 }
 
 // Execute SSH command and return output
-func sshExec(nodeConfig NodeConfig, command string) (string, error) {
+func sshExec(nodeConfig node_control.NodeConfig, command string) (string, error) {
 	args := []string{
 		"-i", nodeConfig.KeyPath,
 		"-o", "StrictHostKeyChecking=no",
@@ -2218,10 +1351,10 @@ func handleAPIClusterSettings(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		sendJSONResponse(w, http.StatusOK, APIResponse{
 			Success: true,
-			Data:    nodeManager.nodesConfig.ClusterSettings,
+			Data:    nodeManager.GetClusterSettings(),
 		})
 	case http.MethodPut:
-		var settings ClusterSettings
+		var settings node_control.ClusterSettings
 		if err := json.NewDecoder(r.Body).Decode(&settings); err != nil {
 			sendJSONResponse(w, http.StatusBadRequest, APIResponse{
 				Success: false,
@@ -2230,8 +1363,7 @@ func handleAPIClusterSettings(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		nodeManager.nodesConfig.ClusterSettings = settings
-		err := nodeManager.SaveNodesConfig()
+		err := nodeManager.UpdateClusterSettings(settings)
 		if err != nil {
 			sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 				Success: false,
@@ -2571,8 +1703,73 @@ func handleAPIGetSSHStatus(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// handleAPIGetClickHouseMetrics handles GET /api/clickhouse/metrics
+func handleAPIGetClickHouseMetrics(w http.ResponseWriter, r *http.Request) {
+	if clickHouseClient == nil {
+		sendJSONResponse(w, http.StatusServiceUnavailable, APIResponse{
+			Success: false,
+			Message: "ClickHouse client not initialized",
+		})
+		return
+	}
+
+	metrics, err := collectClickHouseMetrics()
+	if err != nil {
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to collect ClickHouse metrics: %v", err),
+		})
+		return
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "ClickHouse metrics retrieved successfully",
+		Data:    metrics,
+	})
+}
+
+// handleAPIClickHouseHealth handles GET /api/clickhouse/health
+func handleAPIClickHouseHealth(w http.ResponseWriter, r *http.Request) {
+	if clickHouseClient == nil {
+		sendJSONResponse(w, http.StatusServiceUnavailable, APIResponse{
+			Success: false,
+			Message: "ClickHouse client not initialized",
+			Data: map[string]interface{}{
+				"status": "disconnected",
+			},
+		})
+		return
+	}
+
+	err := clickHouseClient.HealthCheck()
+	if err != nil {
+		sendJSONResponse(w, http.StatusServiceUnavailable, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("ClickHouse health check failed: %v", err),
+			Data: map[string]interface{}{
+				"status": "error",
+				"error":  err.Error(),
+			},
+		})
+		return
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "ClickHouse is healthy",
+		Data: map[string]interface{}{
+			"status":       "connected",
+			"host":         clickHouseConfig.Host,
+			"port":         clickHouseConfig.Port,
+			"database":     clickHouseConfig.Database,
+			"last_checked": time.Now(),
+		},
+	})
+}
+
 // checkSSHConnectivity checks SSH connectivity for a single node
-func checkSSHConnectivity(nodeName string, nodeConfig NodeConfig) SSHStatus {
+func checkSSHConnectivity(nodeName string, nodeConfig node_control.NodeConfig) SSHStatus {
 	status := SSHStatus{
 		NodeName:    nodeName,
 		LastChecked: time.Now().Format("2006-01-02 15:04:05"),
@@ -2580,7 +1777,7 @@ func checkSSHConnectivity(nodeName string, nodeConfig NodeConfig) SSHStatus {
 
 	// Test SSH connection with a simple command
 	testCmd := "echo 'SSH connection test'"
-	output, err := nodeManager.sshExecWithOutput(nodeConfig, testCmd)
+	output, err := nodeManager.SSHExecWithOutput(nodeConfig, testCmd)
 
 	if err != nil {
 		status.Status = "disconnected"
@@ -2710,6 +1907,17 @@ func main() {
 
 	// SSH status API endpoint
 	api.HandleFunc("/ssh/status", handleAPIGetSSHStatus).Methods("GET")
+
+	// ClickHouse metrics API endpoints
+	api.HandleFunc("/clickhouse/metrics", handleAPIGetClickHouseMetrics).Methods("GET")
+	api.HandleFunc("/clickhouse/health", handleAPIClickHouseHealth).Methods("GET")
+
+	// Initialize ClickHouse client
+	if err := initClickHouse(); err != nil {
+		logger.Warn().Err(err).Msg("Failed to initialize ClickHouse client - metrics will not be available")
+	} else {
+		logger.Info().Msg("ClickHouse client initialized successfully")
+	}
 
 	// Start background real metrics collection
 	go collectRealMetrics()

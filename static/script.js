@@ -68,6 +68,19 @@ class VuDataSimManager {
             // Chart value elements
             cpuMemoryValue: document.getElementById('cpu-memory-value'),
 
+            // ClickHouse metrics elements
+            clickHouseMetricsBtn: document.getElementById('clickhouse-metrics-btn'),
+            clickHouseMetricsModal: document.getElementById('clickhouse-metrics-modal'),
+            clickHouseModalBackdrop: document.getElementById('clickhouse-modal-backdrop'),
+            closeClickHouseModal: document.getElementById('close-clickhouse-modal'),
+            refreshClickHouseMetricsBtn: document.getElementById('refresh-clickhouse-metrics-btn'),
+            clickHouseStatus: document.getElementById('clickhouse-status'),
+            clickHouseLastUpdate: document.getElementById('clickhouse-last-update'),
+            kafkaMetricsTable: document.getElementById('kafka-metrics-table'),
+            systemMetricsTable: document.getElementById('system-metrics-table'),
+            databaseMetricsTable: document.getElementById('database-metrics-table'),
+            containerMetricsTable: document.getElementById('container-metrics-table'),
+
             // Real-time status
         };
 
@@ -116,6 +129,19 @@ class VuDataSimManager {
             console.error('Binary Control button not found!');
         }
 
+        // ClickHouse metrics event listeners
+        console.log('ClickHouse Metrics Button element:', this.elements.clickHouseMetricsBtn);
+        console.log('ClickHouse Metrics Modal element:', this.elements.clickHouseMetricsModal);
+
+        if (this.elements.clickHouseMetricsBtn) {
+            this.elements.clickHouseMetricsBtn.addEventListener('click', () => {
+                console.log('ClickHouse Metrics button clicked!');
+                this.openClickHouseMetricsModal();
+            });
+        } else {
+            console.error('ClickHouse Metrics button not found!');
+        }
+
         // Modal event listeners
         this.elements.closeNodeModal?.addEventListener('click', () => this.closeNodeManagementModal());
         this.elements.modalBackdrop?.addEventListener('click', () => this.closeNodeManagementModal());
@@ -124,11 +150,22 @@ class VuDataSimManager {
         this.elements.closeBinaryModal?.addEventListener('click', () => this.closeBinaryControlModal());
         this.elements.binaryModalBackdrop?.addEventListener('click', () => this.closeBinaryControlModal());
 
+        // ClickHouse metrics modal event listeners
+        this.elements.closeClickHouseModal?.addEventListener('click', () => this.closeClickHouseMetricsModal());
+        this.elements.clickHouseModalBackdrop?.addEventListener('click', () => this.closeClickHouseMetricsModal());
+        this.elements.refreshClickHouseMetricsBtn?.addEventListener('click', () => this.refreshClickHouseMetrics());
+
         // Binary control action listeners
         this.elements.refreshBinaryStatusBtn?.addEventListener('click', () => this.refreshBinaryStatus());
         this.elements.startBinaryBtn?.addEventListener('click', () => this.startBinary());
         this.elements.stopBinaryBtn?.addEventListener('click', () => this.stopBinary());
         this.elements.binaryNodeSelect?.addEventListener('change', () => this.onBinaryNodeSelectChange());
+
+        // Add get binary output button listener
+        const getOutputBtn = document.getElementById('get-binary-output-btn');
+        if (getOutputBtn) {
+            getOutputBtn.addEventListener('click', () => this.getBinaryOutput());
+        }
 
         // Close modal on Escape key
         document.addEventListener('keydown', (e) => {
@@ -138,6 +175,9 @@ class VuDataSimManager {
                 }
                 if (!this.elements.binaryControlModal.classList.contains('hidden')) {
                     this.closeBinaryControlModal();
+                }
+                if (!this.elements.clickHouseMetricsModal.classList.contains('hidden')) {
+                    this.closeClickHouseMetricsModal();
                 }
             }
         });
@@ -175,15 +215,21 @@ class VuDataSimManager {
 
     async loadNodes() {
         try {
+            console.log('Loading nodes...');
             // Load nodes from the integrated API
             const response = await this.callAPI('/api/dashboard');
+            console.log('Dashboard API response:', response);
             if (response.success && response.data && response.data.nodeData) {
                 this.nodeData = response.data.nodeData;
+                console.log('Loaded nodeData from dashboard API:', this.nodeData);
                 this.updateDashboardDisplay();
                 this.updateNodeStatusIndicators();
+                this.populateNodeFilters();
             } else {
+                console.log('Dashboard API did not return nodeData, trying nodes API...');
                 // Fallback: load from nodes API if dashboard doesn't have nodeData
                 const nodesResponse = await this.callAPI('/api/nodes');
+                console.log('Nodes API response:', nodesResponse);
                 if (nodesResponse.success && nodesResponse.data) {
                     // Convert API data to nodeData format
                     this.nodeData = {};
@@ -196,7 +242,9 @@ class VuDataSimManager {
                             totalMemory: 8.0,
                             status: node.enabled ? 'active' : 'inactive'
                         };
+                        console.log(`Converted node ${nodeId} with status ${this.nodeData[nodeId].status}`);
                     });
+                    console.log('Final nodeData after conversion:', this.nodeData);
 
                     this.updateDashboardDisplay();
                     this.updateNodeStatusIndicators();
@@ -236,7 +284,7 @@ class VuDataSimManager {
             nodeFilter.removeChild(nodeFilter.lastChild);
         }
 
-        // Add actual node names
+        // Add actual node names (include both active and error status nodes)
         Object.keys(this.nodeData).forEach(nodeId => {
             const option = document.createElement('option');
             option.value = nodeId;
@@ -382,14 +430,14 @@ class VuDataSimManager {
             tbody.appendChild(row);
         });
 
-        // Calculate real-time CPU/Memory data only
-        const activeNodes = Object.values(this.nodeData).filter(node => node.status === 'active');
-        if (activeNodes.length > 0) {
-            const totalAvgCpu = activeNodes.reduce((sum, node) => sum + node.totalCpu, 0) / activeNodes.length;
-            const totalAvgMemory = activeNodes.reduce((sum, node) => sum + node.totalMemory, 0) / activeNodes.length;
+        // Calculate real-time CPU/Memory data for active and error nodes (nodes that are enabled but may have connection issues)
+        const displayableNodes = Object.values(this.nodeData).filter(node => node.status === 'active' || node.status === 'error');
+        if (displayableNodes.length > 0) {
+            const totalAvgCpu = displayableNodes.reduce((sum, node) => sum + node.totalCpu, 0) / displayableNodes.length;
+            const totalAvgMemory = displayableNodes.reduce((sum, node) => sum + node.totalMemory, 0) / displayableNodes.length;
 
-            const avgCpuUsage = activeNodes.reduce((sum, node) => sum + node.cpu, 0) / activeNodes.length;
-            const avgMemoryUsage = activeNodes.reduce((sum, node) => sum + node.memory, 0) / activeNodes.length;
+            const avgCpuUsage = displayableNodes.reduce((sum, node) => sum + node.cpu, 0) / displayableNodes.length;
+            const avgMemoryUsage = displayableNodes.reduce((sum, node) => sum + node.memory, 0) / displayableNodes.length;
 
             const availableCpu = totalAvgCpu - (totalAvgCpu * avgCpuUsage / 100);
             const usedMemory = totalAvgMemory * (avgMemoryUsage / 100);
@@ -487,7 +535,7 @@ class VuDataSimManager {
 
         const randomMessage = randomMessages[Math.floor(Math.random() * randomMessages.length)];
         const currentTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
-        const activeNodes = Object.keys(this.nodeData).filter(id => this.nodeData[id].status === 'active');
+        const activeNodes = Object.keys(this.nodeData).filter(id => this.nodeData[id].status === 'active' || this.nodeData[id].status === 'error');
         const randomNode = activeNodes[Math.floor(Math.random() * activeNodes.length)];
         
         const newLog = {
@@ -926,21 +974,29 @@ class VuDataSimManager {
         const nodeSelect = this.elements.binaryNodeSelect;
         if (!nodeSelect) return;
 
+        console.log('Populating binary node select with nodeData:', this.nodeData);
+
         // Clear existing options except the first one
         while (nodeSelect.children.length > 1) {
             nodeSelect.removeChild(nodeSelect.lastChild);
         }
 
-        // Add enabled nodes
+        // Add enabled nodes (both active and error status nodes are enabled)
+        let addedNodes = 0;
         Object.keys(this.nodeData).forEach(nodeId => {
             const node = this.nodeData[nodeId];
-            if (node.status === 'active') {
+            console.log(`Checking node ${nodeId}: status=${node.status}, enabled=${node.status !== 'inactive'}`);
+            if (node.status === 'active' || node.status === 'error') {
                 const option = document.createElement('option');
                 option.value = nodeId;
                 option.textContent = nodeId;
                 nodeSelect.appendChild(option);
+                addedNodes++;
+                console.log(`Added node ${nodeId} to binary select`);
             }
         });
+
+        console.log(`Total nodes added to binary select: ${addedNodes}`);
     }
 
     async refreshAllBinaryStatuses() {
@@ -1096,27 +1152,28 @@ class VuDataSimManager {
         this.setBinaryButtonLoading('start', true);
 
         try {
-            // Get node configuration to show binary path
-            const nodesResponse = await this.callAPI('/api/nodes');
-            let binaryPath = 'Unknown';
-            if (nodesResponse.success && nodesResponse.data) {
-                const nodeData = nodesResponse.data.find(node => node.name === selectedNode);
-                if (nodeData) {
-                    binaryPath = `${nodeData.binary_dir}/finalvudatasim`;
-                }
-            }
-
             this.addSshOutput(`=== Starting Binary on Node: ${selectedNode} ===`);
-            this.addSshOutput(`Binary Path: ${binaryPath}`);
-            this.addSshOutput(`Timeout: ${timeout} seconds`);
-            this.addSshOutput(`Command: cd ${binaryPath.replace('/finalvudatasim', '')} && nohup ${binaryPath} > /dev/null 2>&1 &`);
-            this.addSshOutput(`Executing start command...`);
+            this.addSshOutput(`Checking binary existence...`);
 
             const response = await this.callAPI(`/api/binary/start/${selectedNode}?timeout=${timeout}`, 'POST');
+
             if (response.success) {
                 this.addSshOutput(`✓ Binary start command sent successfully`);
-                if (response.data && response.data.binaryPath) {
-                    this.addSshOutput(`✓ Binary path confirmed: ${response.data.binaryPath}`);
+                if (response.data) {
+                    if (response.data.binaryPath) {
+                        this.addSshOutput(`✓ Binary path: ${response.data.binaryPath}`);
+                    }
+                    if (response.data.initialOutput) {
+                        this.addSshOutput(`=== Initial Binary Output ===`);
+                        this.addSshOutput(response.data.initialOutput);
+                    }
+                    if (response.data.warning === 'ALREADY_RUNNING') {
+                        this.addSshOutput(`⚠ Warning: Binary was already running`);
+                        if (response.data.currentOutput) {
+                            this.addSshOutput(`=== Current Binary Output ===`);
+                            this.addSshOutput(response.data.currentOutput);
+                        }
+                    }
                 }
                 this.showNotification(`Binary start initiated on node ${selectedNode}`, 'success');
 
@@ -1126,7 +1183,13 @@ class VuDataSimManager {
                     this.refreshAllBinaryStatuses();
                 }, 3000);
             } else {
-                throw new Error(response.message || 'Failed to start binary');
+                // Handle specific error cases
+                if (response.data && response.data.error === 'BINARY_NOT_FOUND') {
+                    this.addSshOutput(`✗ ERROR: Binary not found at ${response.data.binaryPath}`);
+                    this.showNotification(`Binary not found on node ${selectedNode}. Please check deployment.`, 'error');
+                } else {
+                    throw new Error(response.message || 'Failed to start binary');
+                }
             }
         } catch (error) {
             console.error('Error starting binary:', error);
@@ -1178,6 +1241,43 @@ class VuDataSimManager {
         }
     }
 
+    // Add method to get current binary output
+    async getBinaryOutput() {
+        const selectedNode = this.elements.binaryNodeSelect.value;
+        if (!selectedNode) {
+            this.showNotification('Please select a node first', 'warning');
+            return;
+        }
+
+        try {
+            this.addSshOutput(`=== Getting Current Output for Node: ${selectedNode} ===`);
+
+            // Get node configuration to find log file path
+            const nodesResponse = await this.callAPI('/api/nodes');
+            if (nodesResponse.success && nodesResponse.data) {
+                const nodeData = nodesResponse.data.find(node => node.name === selectedNode);
+                if (nodeData) {
+                    const logFile = `${nodeData.binary_dir}/binary_output.log`;
+                    this.addSshOutput(`Log file location: ${logFile}`);
+
+                    // Try to get current output via a new API endpoint (would need backend implementation)
+                    // For now, simulate by showing the log file content
+                    this.addSshOutput(`Attempting to read current output...`);
+
+                    // This is a placeholder - in a real implementation, you'd have an API endpoint
+                    // that reads the log file and returns its content
+                    this.addSshOutput(`Note: Real-time output reading requires backend API implementation`);
+                    this.addSshOutput(`Log file would be tailed from: ${logFile}`);
+                    this.showNotification('Output retrieval requires backend API implementation', 'info');
+                }
+            }
+        } catch (error) {
+            console.error('Error getting binary output:', error);
+            this.showNotification('Failed to get binary output: ' + error.message, 'error');
+            this.addSshOutput(`✗ ERROR: ${error.message}`);
+        }
+    }
+
     setBinaryButtonLoading(action, loading) {
         const startBtn = this.elements.startBinaryBtn;
         const stopBtn = this.elements.stopBinaryBtn;
@@ -1225,6 +1325,250 @@ class VuDataSimManager {
         this.hideBinaryStatusDisplay();
         this.elements.binaryTimeoutInput.value = '30';
         this.elements.binarySshOutput.innerHTML = '<div class="text-text-secondary-light dark:text-text-secondary-dark">SSH output will appear here...</div>';
+    }
+
+    // ClickHouse Metrics Methods
+
+    openClickHouseMetricsModal() {
+        console.log('Opening ClickHouse metrics modal');
+        const modal = this.elements.clickHouseMetricsModal;
+
+        if (!modal) {
+            console.error('ClickHouse metrics modal not found!');
+            return;
+        }
+
+        modal.classList.remove('hidden');
+        this.refreshClickHouseMetrics();
+    }
+
+    closeClickHouseMetricsModal() {
+        console.log('Closing ClickHouse metrics modal');
+        const modal = this.elements.clickHouseMetricsModal;
+
+        if (!modal) {
+            console.error('ClickHouse metrics modal not found!');
+            return;
+        }
+
+        modal.classList.add('hidden');
+    }
+
+    async refreshClickHouseMetrics() {
+        const refreshBtn = this.elements.refreshClickHouseMetricsBtn;
+        if (refreshBtn) {
+            refreshBtn.disabled = true;
+            refreshBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span><span>Refreshing...</span>';
+        }
+
+        try {
+            // First check ClickHouse health
+            const healthResponse = await this.callAPI('/api/clickhouse/health');
+            if (healthResponse.success && healthResponse.data) {
+                this.updateClickHouseStatus(healthResponse.data);
+            }
+
+            // Then get metrics
+            const metricsResponse = await this.callAPI('/api/clickhouse/metrics');
+            if (metricsResponse.success && metricsResponse.data) {
+                this.displayClickHouseMetrics(metricsResponse.data);
+                this.showNotification('ClickHouse metrics refreshed successfully', 'success');
+            } else {
+                this.showNotification('Failed to load ClickHouse metrics', 'error');
+            }
+        } catch (error) {
+            console.error('Error refreshing ClickHouse metrics:', error);
+            this.showNotification('Failed to refresh ClickHouse metrics: ' + error.message, 'error');
+            this.updateClickHouseStatus({ status: 'error', error: error.message });
+        } finally {
+            if (refreshBtn) {
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = '<span class="material-symbols-outlined">refresh</span><span>Refresh Metrics</span>';
+            }
+        }
+    }
+
+    updateClickHouseStatus(healthData) {
+        const statusElement = this.elements.clickHouseStatus;
+        const lastUpdateElement = this.elements.clickHouseLastUpdate;
+
+        if (statusElement) {
+            let statusBadge = '';
+            if (healthData.status === 'connected') {
+                statusBadge = '<div class="inline-flex items-center gap-2 rounded-full bg-success/20 dark:bg-success-dark/20 px-3 py-1 text-xs font-medium text-success dark:text-success-dark"><span class="h-2 w-2 rounded-full bg-success"></span>Connected</div>';
+            } else if (healthData.status === 'error') {
+                statusBadge = '<div class="inline-flex items-center gap-2 rounded-full bg-danger/20 dark:bg-danger-dark/20 px-3 py-1 text-xs font-medium text-danger dark:text-danger-dark"><span class="h-2 w-2 rounded-full bg-danger"></span>Error</div>';
+            } else {
+                statusBadge = '<div class="inline-flex items-center gap-2 rounded-full bg-warning/20 dark:bg-warning-dark/20 px-3 py-1 text-xs font-medium text-warning dark:text-warning-dark"><span class="h-2 w-2 rounded-full bg-warning"></span>Disconnected</div>';
+            }
+            statusElement.innerHTML = statusBadge;
+        }
+
+        if (lastUpdateElement) {
+            const timestamp = healthData.last_checked ? new Date(healthData.last_checked).toLocaleString() : 'Never';
+            lastUpdateElement.textContent = `Last checked: ${timestamp}`;
+        }
+    }
+
+    displayClickHouseMetrics(metrics) {
+        // Display Kafka Producer Metrics
+        this.displayKafkaMetrics(metrics.kafkaProducerMetrics || []);
+
+        // Display System Metrics
+        this.displaySystemMetrics(metrics.systemMetrics || []);
+
+        // Display Database Metrics
+        this.displayDatabaseMetrics(metrics.databaseMetrics || []);
+
+        // Display Container Metrics
+        this.displayContainerMetrics(metrics.containerMetrics || []);
+
+        // Update last update time
+        if (this.elements.clickHouseLastUpdate && metrics.lastUpdated) {
+            const timestamp = new Date(metrics.lastUpdated).toLocaleString();
+            this.elements.clickHouseLastUpdate.textContent = `Last updated: ${timestamp}`;
+        }
+    }
+
+    displayKafkaMetrics(metrics) {
+        const tbody = this.elements.kafkaMetricsTable?.querySelector('tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+
+        if (metrics.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="7" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">No Kafka producer metrics available</td>';
+            tbody.appendChild(row);
+            return;
+        }
+
+        metrics.forEach(metric => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200';
+
+            const timestamp = new Date(metric.timestamp).toLocaleString();
+            const recordRate = metric.recordSendRate ? metric.recordSendRate.toFixed(2) : '0.00';
+            const byteRate = metric.byteRate ? (metric.byteRate / 1024 / 1024).toFixed(2) : '0.00'; // Convert to MB/s
+            const compressionRate = metric.compressionRate ? metric.compressionRate.toFixed(2) : '0.00';
+
+            row.innerHTML = `
+                <td class="p-3 font-medium">${timestamp}</td>
+                <td class="p-3">${metric.clientId || '-'}</td>
+                <td class="p-3">${metric.topic || '-'}</td>
+                <td class="p-3 text-right">${metric.recordSendTotal || 0}</td>
+                <td class="p-3 text-right">${recordRate}/s</td>
+                <td class="p-3 text-right">${byteRate} MB/s</td>
+                <td class="p-3 text-right">${compressionRate}%</td>
+            `;
+
+            tbody.appendChild(row);
+        });
+    }
+
+    displaySystemMetrics(metrics) {
+        const tbody = this.elements.systemMetricsTable?.querySelector('tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+
+        if (metrics.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="6" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">No system metrics available</td>';
+            tbody.appendChild(row);
+            return;
+        }
+
+        metrics.forEach(metric => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200';
+
+            const timestamp = new Date(metric.timestamp).toLocaleString();
+            const cpuUsage = metric.cpuUsage ? metric.cpuUsage.toFixed(1) : '0.0';
+            const memoryUsage = metric.memoryUsage ? metric.memoryUsage.toFixed(1) : '0.0';
+            const diskUsage = metric.diskUsage ? metric.diskUsage.toFixed(1) : '0.0';
+            const networkRx = metric.networkRx ? (metric.networkRx / 1024 / 1024).toFixed(2) : '0.00'; // Convert to MB
+            const networkTx = metric.networkTx ? (metric.networkTx / 1024 / 1024).toFixed(2) : '0.00'; // Convert to MB
+
+            row.innerHTML = `
+                <td class="p-3 font-medium">${timestamp}</td>
+                <td class="p-3">${metric.host || '-'}</td>
+                <td class="p-3 text-right">${cpuUsage}%</td>
+                <td class="p-3 text-right">${memoryUsage}%</td>
+                <td class="p-3 text-right">${diskUsage}%</td>
+                <td class="p-3 text-right">${networkRx}/${networkTx} MB</td>
+            `;
+
+            tbody.appendChild(row);
+        });
+    }
+
+    displayDatabaseMetrics(metrics) {
+        const tbody = this.elements.databaseMetricsTable?.querySelector('tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+
+        if (metrics.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="6" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">No database metrics available</td>';
+            tbody.appendChild(row);
+            return;
+        }
+
+        metrics.forEach(metric => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200';
+
+            const timestamp = new Date(metric.timestamp).toLocaleString();
+            const queryDuration = metric.queryDuration ? metric.queryDuration.toFixed(2) : '0.00';
+
+            row.innerHTML = `
+                <td class="p-3 font-medium">${timestamp}</td>
+                <td class="p-3">${metric.database || '-'}</td>
+                <td class="p-3">${metric.table || '-'}</td>
+                <td class="p-3 text-right">${metric.queryCount || 0}</td>
+                <td class="p-3 text-right">${queryDuration}ms</td>
+                <td class="p-3 text-right">${metric.errorCount || 0}</td>
+            `;
+
+            tbody.appendChild(row);
+        });
+    }
+
+    displayContainerMetrics(metrics) {
+        const tbody = this.elements.containerMetricsTable?.querySelector('tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+
+        if (metrics.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="6" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">No container metrics available</td>';
+            tbody.appendChild(row);
+            return;
+        }
+
+        metrics.forEach(metric => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200';
+
+            const timestamp = new Date(metric.timestamp).toLocaleString();
+            const cpuUsage = metric.cpuUsage ? metric.cpuUsage.toFixed(1) : '0.0';
+            const memoryUsage = metric.memoryUsage ? metric.memoryUsage.toFixed(1) : '0.0';
+
+            row.innerHTML = `
+                <td class="p-3 font-medium">${timestamp}</td>
+                <td class="p-3">${metric.namespace || '-'}</td>
+                <td class="p-3">${metric.podName || '-'}</td>
+                <td class="p-3">${metric.containerName || '-'}</td>
+                <td class="p-3 text-right">${cpuUsage}%</td>
+                <td class="p-3 text-right">${memoryUsage}%</td>
+                <td class="p-3">${metric.status || '-'}</td>
+            `;
+
+            tbody.appendChild(row);
+        });
     }
 }
 

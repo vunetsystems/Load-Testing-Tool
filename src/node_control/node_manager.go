@@ -1,4 +1,4 @@
-package main
+package node_control
 
 import (
 	"encoding/json"
@@ -344,6 +344,36 @@ func (nm *NodeManager) GetEnabledNodes() map[string]NodeConfig {
 		}
 	}
 	return enabledNodes
+}
+
+// GetClusterSettings returns the cluster settings
+func (nm *NodeManager) GetClusterSettings() ClusterSettings {
+	return nm.nodesConfig.ClusterSettings
+}
+
+// UpdateClusterSettings updates the cluster settings
+func (nm *NodeManager) UpdateClusterSettings(settings ClusterSettings) error {
+	nm.nodesConfig.ClusterSettings = settings
+	return nm.SaveNodesConfig()
+}
+
+// SSHExecWithOutput executes a command on the remote node via SSH and returns the output
+func (nm *NodeManager) SSHExecWithOutput(nodeConfig NodeConfig, command string) (string, error) {
+	args := []string{
+		"-i", nodeConfig.KeyPath,
+		"-o", "StrictHostKeyChecking=no",
+		"-o", "UserKnownHostsFile=/dev/null",
+		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
+		command,
+	}
+
+	cmd := exec.Command("ssh", args...)
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("SSH command failed: %v", err)
+	}
+
+	return strings.TrimSpace(string(output)), nil
 }
 
 // copyFilesToNode copies the binaries and conf.d directory to the remote node
