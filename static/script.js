@@ -74,6 +74,10 @@ class VuDataSimManager {
         // Initialize node data (will be loaded from API with real data only)
         this.nodeData = {};
 
+        // SSH status cache (updated hourly)
+        this.sshStatuses = {};
+        this.lastSshStatusUpdate = 0;
+
         // Legacy property for backward compatibility (browser cache)
         this.nodeManagementSection = null;
 
@@ -153,7 +157,14 @@ class VuDataSimManager {
         setInterval(() => {
             this.updateMetrics();
             this.updateNodeStatusIndicators(); // Ensure status dots stay in sync
+            // Note: updateDashboardDisplay() is now called hourly for SSH status
         }, 3000);
+
+        // SSH status updates - Update every hour
+        setInterval(() => {
+            console.log('Hourly SSH status check triggered');
+            this.updateDashboardDisplay();
+        }, 60 * 60 * 1000); // 1 hour in milliseconds
 
         // Load logs initially and set up polling for live logs
         this.loadLogs();
@@ -261,33 +272,109 @@ class VuDataSimManager {
     updateMetrics() {
         // Only update display - no simulation
         // Real metrics are collected by the backend via SSH
-        this.updateDashboardDisplay();
+        // Note: updateDashboardDisplay() is now called hourly for SSH status
     }
 
-    updateDashboardDisplay() {
+    async updateDashboardDisplay() {
         // Update cluster table dynamically
         const tbody = document.getElementById('cluster-table-body');
         tbody.innerHTML = ''; // Clear existing rows
+
+        // Fetch SSH status for enabled nodes (only once per hour)
+        const now = Date.now();
+        const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+
+        if (now - this.lastSshStatusUpdate > oneHour || Object.keys(this.sshStatuses).length === 0) {
+            try {
+                console.log('Fetching SSH status (hourly update)...');
+                const sshResponse = await this.callAPI('/api/ssh/status');
+                if (sshResponse.success && sshResponse.data) {
+                    this.sshStatuses = {};
+                    sshResponse.data.forEach(status => {
+                        this.sshStatuses[status.nodeName] = status;
+                    });
+                    this.lastSshStatusUpdate = now;
+                    console.log('SSH status updated:', this.sshStatuses);
+                }
+            } catch (error) {
+                console.error('Error fetching SSH status:', error);
+            }
+        }
+
+        const sshStatuses = this.sshStatuses;
 
         Object.keys(this.nodeData).forEach(nodeId => {
             const node = this.nodeData[nodeId];
             const row = document.createElement('tr');
             row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200';
 
-            if (node.status === 'inactive') {
+            // Check if node is disabled (not enabled in the configuration)
+            const isNodeDisabled = node.status === 'inactive';
+            if (isNodeDisabled) {
                 row.classList.add('opacity-60');
             }
 
             // Calculate memory usage in GB
             const usedMemory = node.totalMemory * (node.memory / 100);
 
+            // Determine status display based on SSH connectivity for enabled nodes
+            let statusDisplay = '';
+            if (!isNodeDisabled) {
+                const sshStatus = sshStatuses[nodeId];
+                if (sshStatus) {
+                    const timestamp = new Date(sshStatus.lastChecked).toLocaleString();
+                    if (sshStatus.status === 'connected') {
+                        statusDisplay = `
+                            <div class="flex flex-col items-start gap-1">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-success/20 dark:bg-success-dark/20 px-3 py-1 text-xs font-medium text-success dark:text-success-dark">
+                                    <span class="h-2 w-2 rounded-full bg-success"></span>SSH Connected
+                                </div>
+                                <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                                    Last checked: ${timestamp}
+                                </div>
+                            </div>
+                        `;
+                    } else if (sshStatus.status === 'disconnected') {
+                        statusDisplay = `
+                            <div class="flex flex-col items-start gap-1">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-danger/20 dark:bg-danger-dark/20 px-3 py-1 text-xs font-medium text-danger dark:text-danger-dark">
+                                    <span class="h-2 w-2 rounded-full bg-danger"></span>SSH Disconnected
+                                </div>
+                                <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                                    Last checked: ${timestamp}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        statusDisplay = `
+                            <div class="flex flex-col items-start gap-1">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-warning/20 dark:bg-warning-dark/20 px-3 py-1 text-xs font-medium text-warning dark:text-warning-dark">
+                                    <span class="h-2 w-2 rounded-full bg-warning"></span>SSH ${sshStatus.status}
+                                </div>
+                                <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                                    Last checked: ${timestamp}
+                                </div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    statusDisplay = `
+                        <div class="inline-flex items-center gap-2 rounded-full bg-warning/20 dark:bg-warning-dark/20 px-3 py-1 text-xs font-medium text-warning dark:text-warning-dark">
+                            <span class="h-2 w-2 rounded-full bg-warning"></span>Checking SSH...
+                        </div>
+                    `;
+                }
+            } else {
+                statusDisplay = `
+                    <div class="inline-flex items-center gap-2 rounded-full bg-gray-500/20 dark:bg-gray-400/20 px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                        <span class="h-2 w-2 rounded-full bg-gray-500"></span>Disabled
+                    </div>
+                `;
+            }
+
             row.innerHTML = `
                 <td class="p-4 font-medium">${nodeId}</td>
-                <td class="p-4">
-                    <div class="inline-flex items-center gap-2 rounded-full ${node.status === 'active' ? 'bg-success/20 dark:bg-success-dark/20 px-3 py-1 text-xs font-medium text-success dark:text-success-dark' : 'bg-danger/20 dark:bg-danger-dark/20 px-3 py-1 text-xs font-medium text-danger dark:text-danger-dark'}">
-                        <span class="h-2 w-2 rounded-full ${node.status === 'active' ? 'bg-success' : 'bg-danger'}"></span>${node.status === 'active' ? 'Active' : 'Inactive'}
-                    </div>
-                </td>
+                <td class="p-4">${statusDisplay}</td>
                 <td class="p-4 text-right number-animate" data-field="cpu">${(node.totalCpu - (node.totalCpu * node.cpu / 100)).toFixed(1)} / ${node.totalCpu} cores</td>
                 <td class="p-4 text-right number-animate" data-field="memory">${usedMemory.toFixed(1)} / ${node.totalMemory} GB</td>
             `;
@@ -420,7 +507,7 @@ class VuDataSimManager {
     }
 
     startRealTimeUpdates() {
-        // Initial display
+        // Initial display - fetch SSH status immediately on startup
         this.updateDashboardDisplay();
         this.updateNodeStatusIndicators();
         this.refreshNodesTable();
