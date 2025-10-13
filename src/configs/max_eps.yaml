@@ -1,0 +1,27 @@
+# Maximum EPS configuration for each o11y source
+# These values represent the maximum Events Per Second each source can handle
+max_eps_config:
+  Apache: 42000
+  AWS_ALB: 53000
+  AzureStorageBlob: 51000
+  BRUM: 40000
+  CiscoIoSSwitch: 48000
+  Azure_Firewall: 58000
+  DNS_Monitoring: 66000
+  Azure_API_Management: 49000
+  LinuxMonitor: 50000
+  MongoDB: 31000
+  Mssql: 89000
+  IBMMQ: 60000
+  Azure_Redis_Cache: 60000
+  ServiceMonitor: 67000
+  SyntheticBrowserMonitoring: 53000
+  Tomcat: 65000
+  Traces: 56000
+  WebLogic: 35000
+  Nginx: 42000
+  K8s: 48000
+  exampleLogs: 15000
+  ibm_was: 35000
+  Azure_App_Gateway: 58000
+  Azure_Load_Balancer: 58000

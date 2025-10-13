@@ -8,6 +8,7 @@ require (
 	github.com/rs/cors v1.10.1
 )
 
+require gopkg.in/yaml.v3 v3.0.1
 require (
 	github.com/ClickHouse/ch-go v0.68.0 // indirect
 	github.com/ClickHouse/clickhouse-go/v2 v2.40.3 // indirect

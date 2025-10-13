@@ -23,6 +23,8 @@ import (
 	"vuDataSim/src/logger"
 	"vuDataSim/src/node_control"
 
+	"vuDataSim/src/o11y_source_manager"
+
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
@@ -176,6 +178,9 @@ func collectClickHouseMetrics() (*clickhouse.ClickHouseMetrics, error) {
 
 	return clickHouseClient.CollectMetrics()
 }
+
+// Global o11y source manager instance
+var o11yManager = o11y_source_manager.NewO11ySourceManager()
 
 // Initialize node data from nodes.yaml configuration
 func init() {
@@ -1831,6 +1836,206 @@ func serveStatic(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, staticPath)
 }
 
+// O11y Source Manager API Handlers
+
+// handleAPIGetO11ySources handles GET /api/o11y/sources
+func handleAPIGetO11ySources(w http.ResponseWriter, r *http.Request) {
+	// Initialize o11y manager if not already done
+	if len(o11yManager.GetMaxEPSConfig()) == 0 {
+		err := o11yManager.LoadMaxEPSConfig()
+		if err != nil {
+			sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+				Success: false,
+				Message: fmt.Sprintf("Failed to load max EPS config: %v", err),
+			})
+			return
+		}
+	}
+
+	// Main config is loaded dynamically when needed
+
+	sources := o11yManager.GetAvailableSources()
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Data:    sources,
+	})
+}
+
+// handleAPIGetEnabledO11ySources handles GET /api/o11y/sources/enabled
+func handleAPIGetEnabledO11ySources(w http.ResponseWriter, r *http.Request) {
+	// Ensure o11y manager is initialized
+	// Available sources are loaded dynamically when needed
+
+	sources := o11yManager.GetEnabledSources()
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Data:    sources,
+	})
+}
+
+// handleAPIGetO11ySourceDetails handles GET /api/o11y/sources/{source}
+func handleAPIGetO11ySourceDetails(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	sourceName := vars["source"]
+
+	if sourceName == "" {
+		sendJSONResponse(w, http.StatusBadRequest, APIResponse{
+			Success: false,
+			Message: "Source name is required",
+		})
+		return
+	}
+
+	// Available sources are loaded dynamically when needed
+
+	details, err := o11yManager.GetSourceDetails(sourceName)
+	if err != nil {
+		sendJSONResponse(w, http.StatusNotFound, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Source not found: %s", sourceName),
+		})
+		return
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Data:    details,
+	})
+}
+
+// handleAPIDistributeEPS handles POST /api/o11y/eps/distribute
+func handleAPIDistributeEPS(w http.ResponseWriter, r *http.Request) {
+	var request o11y_source_manager.EPSDistributionRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		sendJSONResponse(w, http.StatusBadRequest, APIResponse{
+			Success: false,
+			Message: "Invalid JSON payload",
+		})
+		return
+	}
+
+	// Available sources are loaded dynamically when needed
+
+	response, err := o11yManager.DistributeEPS(request)
+	if err != nil {
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	statusCode := http.StatusOK
+	if !response.Success {
+		statusCode = http.StatusBadRequest
+	}
+
+	sendJSONResponse(w, statusCode, APIResponse{
+		Success: response.Success,
+		Message: response.Message,
+		Data:    response.Data,
+	})
+}
+
+// handleAPIGetCurrentEPS handles GET /api/o11y/eps/current
+func handleAPIGetCurrentEPS(w http.ResponseWriter, r *http.Request) {
+	// Available sources are loaded dynamically when needed
+
+	currentEPS := o11yManager.CalculateCurrentEPS()
+	breakdown := o11yManager.GetSourceEPSBreakdown()
+
+	data := map[string]interface{}{
+		"totalEPS":  currentEPS,
+		"breakdown": breakdown,
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Data:    data,
+	})
+}
+
+// handleAPIEnableO11ySource handles POST /api/o11y/sources/{source}/enable
+func handleAPIEnableO11ySource(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	sourceName := vars["source"]
+
+	if sourceName == "" {
+		sendJSONResponse(w, http.StatusBadRequest, APIResponse{
+			Success: false,
+			Message: "Source name is required",
+		})
+		return
+	}
+
+	// Available sources are loaded dynamically when needed
+
+	err := o11yManager.EnableSource(sourceName)
+	if err != nil {
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: fmt.Sprintf("Source %s enabled successfully", sourceName),
+	})
+}
+
+// handleAPIDisableO11ySource handles POST /api/o11y/sources/{source}/disable
+func handleAPIDisableO11ySource(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	sourceName := vars["source"]
+
+	if sourceName == "" {
+		sendJSONResponse(w, http.StatusBadRequest, APIResponse{
+			Success: false,
+			Message: "Source name is required",
+		})
+		return
+	}
+
+	// Available sources are loaded dynamically when needed
+
+	err := o11yManager.DisableSource(sourceName)
+	if err != nil {
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: fmt.Sprintf("Source %s disabled successfully", sourceName),
+	})
+}
+
+// handleAPIGetMaxEPSConfig handles GET /api/o11y/max-eps
+func handleAPIGetMaxEPSConfig(w http.ResponseWriter, r *http.Request) {
+	// Ensure o11y manager is initialized
+	if len(o11yManager.GetMaxEPSConfig()) == 0 {
+		err := o11yManager.LoadMaxEPSConfig()
+		if err != nil {
+			sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+				Success: false,
+				Message: fmt.Sprintf("Failed to load max EPS config: %v", err),
+			})
+			return
+		}
+	}
+
+	maxEPSConfig := o11yManager.GetMaxEPSConfig()
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Data:    maxEPSConfig,
+	})
+}
+
 func main() {
 	// Initialize logger
 	logFilePath := "logs/vuDataSim.log"
@@ -1847,6 +2052,17 @@ func main() {
 		logger.Warn().Err(err).Msg("Failed to load nodes config")
 		logger.Warn().Msg("Node management features may not be available")
 	}
+
+	// Initialize o11y source manager
+	err = o11yManager.LoadMaxEPSConfig()
+	if err != nil {
+		log.Printf("Warning: Failed to load max EPS config: %v", err)
+		log.Println("O11y source management features may not be available")
+	}
+
+	// Main config is loaded dynamically when needed
+
+	// Source configs are loaded dynamically when needed
 
 	// Check for CLI node management commands
 	if len(os.Args) > 1 {
@@ -1905,9 +2121,16 @@ func main() {
 	api.HandleFunc("/binary/start/{node}", handleAPIStartBinary).Methods("POST")
 	api.HandleFunc("/binary/stop/{node}", handleAPIStopBinary).Methods("POST")
 
+	// O11y Source Manager API endpoints
+	api.HandleFunc("/o11y/sources", handleAPIGetO11ySources).Methods("GET")
+	api.HandleFunc("/o11y/sources/{source}", handleAPIGetO11ySourceDetails).Methods("GET")
+	api.HandleFunc("/o11y/eps/distribute", handleAPIDistributeEPS).Methods("POST")
+	api.HandleFunc("/o11y/eps/current", handleAPIGetCurrentEPS).Methods("GET")
+	api.HandleFunc("/o11y/sources/{source}/enable", handleAPIEnableO11ySource).Methods("POST")
+	api.HandleFunc("/o11y/sources/{source}/disable", handleAPIDisableO11ySource).Methods("POST")
+	api.HandleFunc("/o11y/max-eps", handleAPIGetMaxEPSConfig).Methods("GET")
 	// SSH status API endpoint
 	api.HandleFunc("/ssh/status", handleAPIGetSSHStatus).Methods("GET")
-
 	// ClickHouse metrics API endpoints
 	api.HandleFunc("/clickhouse/metrics", handleAPIGetClickHouseMetrics).Methods("GET")
 	api.HandleFunc("/clickhouse/health", handleAPIClickHouseHealth).Methods("GET")
@@ -1920,7 +2143,6 @@ func main() {
 	}
 
 	// Start background real metrics collection
-	go collectRealMetrics()
 
 	// Set up graceful shutdown
 	c := make(chan os.Signal, 1)
