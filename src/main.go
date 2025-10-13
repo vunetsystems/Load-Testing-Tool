@@ -354,7 +354,7 @@ func (nm *NodeManager) GetEnabledNodes() map[string]NodeConfig {
 // copyFilesToNode copies the binaries and conf.d directory to the remote node
 func (nm *NodeManager) copyFilesToNode(nodeName string, nodeConfig NodeConfig) error {
 	localMainBinary := "src/finalvudatasim"
-	localMetricsBinary := "src/node_metrics_api/build/node_metrics_api"
+	localMetricsBinary := "node_metrics_api" // Use the built binary from root directory
 	localConfDir := "src/conf.d"
 
 	logger.Debug().
@@ -371,6 +371,17 @@ func (nm *NodeManager) copyFilesToNode(nodeName string, nodeConfig NodeConfig) e
 
 	if _, err := os.Stat(localMetricsBinary); os.IsNotExist(err) {
 		return fmt.Errorf("local metrics binary file %s not found", localMetricsBinary)
+	}
+
+	// Build the node_metrics_api binary if it doesn't exist
+	if _, err := os.Stat(localMetricsBinary); os.IsNotExist(err) {
+		log.Printf("Building node_metrics_api binary for node %s...", nodeName)
+		buildCmd := exec.Command("go", "build", "-o", localMetricsBinary, "src/node_metrics_api")
+		buildCmd.Dir = "." // Run from project root
+		if output, err := buildCmd.CombinedOutput(); err != nil {
+			return fmt.Errorf("failed to build node_metrics_api binary: %v, output: %s", err, string(output))
+		}
+		log.Printf("node_metrics_api binary built successfully for node %s", nodeName)
 	}
 
 	if _, err := os.Stat(localConfDir); os.IsNotExist(err) {
