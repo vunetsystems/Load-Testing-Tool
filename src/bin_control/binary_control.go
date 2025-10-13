@@ -1,4 +1,4 @@
-package main
+package bin_control
 
 import (
 	"fmt"
