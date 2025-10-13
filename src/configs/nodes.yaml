@@ -5,7 +5,7 @@ cluster_settings:
     max_retries: 3
     sync_timeout: 60
 nodes:
-    prod 11:
+    Prod-184:
         host: 164.52.214.184
         user: vunet
         key_path: ~/.ssh/id_rsa
