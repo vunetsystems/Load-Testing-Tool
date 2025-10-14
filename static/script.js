@@ -12,17 +12,53 @@ class VuDataSimManager {
         this.loadNodes(); // Load nodes from API
         this.startRealTimeUpdates();
         this.populateNodeFilters(); // Populate filter dropdowns with real node names
+
+        // Load o11y sources after DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('DOM loaded, about to load O11y sources...');
+                this.loadO11ySources(); // Load available o11y sources
+            });
+        } else {
+            console.log('DOM already loaded, loading O11y sources...');
+            setTimeout(() => {
+                this.loadO11ySources(); // Load available o11y sources
+            }, 100);
+        }
         console.log('VuDataSimManager initialization complete');
     }
 
     initializeComponents() {
         console.log('Initializing components...');
         // Cache DOM elements for better performance
+        console.log('DOM elements for O11y sources:');
+        console.log('- o11ySourcesContainer:', document.getElementById('o11y-sources-container'));
+        console.log('- o11ySourcesDropdown:', document.getElementById('o11y-sources-dropdown'));
+        console.log('- o11ySourcesOptions:', document.getElementById('o11y-sources-options'));
+        console.log('- o11ySourcesList:', document.getElementById('o11y-sources-list'));
         this.elements = {
             syncBtn: document.getElementById('sync-btn'),
             logNodeFilter: document.getElementById('log-node'),
             logModuleFilter: document.getElementById('log-module'),
             logsContainer: document.getElementById('logs-container'),
+
+            // O11y source management elements
+            o11ySourcesContainer: document.getElementById('o11y-sources-container'),
+            o11ySourcesDropdown: document.getElementById('o11y-sources-dropdown'),
+            o11ySourcesOptions: document.getElementById('o11y-sources-options'),
+            o11ySourcesList: document.getElementById('o11y-sources-list'),
+            o11ySourcesSearch: document.getElementById('o11y-sources-search'),
+            o11ySourcesPlaceholder: document.getElementById('o11y-sources-placeholder'),
+            o11ySourcesSelected: document.getElementById('o11y-sources-selected'),
+            o11ySourcesArrow: document.getElementById('o11y-sources-arrow'),
+            o11ySourcesSelectAll: document.getElementById('o11y-sources-select-all'),
+            o11ySourcesClearAll: document.getElementById('o11y-sources-clear-all'),
+            o11ySourcesCount: document.getElementById('o11y-sources-count'),
+            epsSelect: document.getElementById('eps-select'),
+            syncConfigsBtn: document.getElementById('sync-configs-btn'),
+            syncStatusContainer: document.getElementById('sync-status-container'),
+            syncSuccessMessage: document.getElementById('sync-success-message'),
+            syncErrorMessage: document.getElementById('sync-error-message'),
 
             // Node management elements
             nodeManagementBtn: document.getElementById('node-management-btn'),
@@ -104,6 +140,22 @@ class VuDataSimManager {
     bindEvents() {
         // Button event listeners
         this.elements.syncBtn?.addEventListener('click', () => this.refreshRealData());
+
+        // O11y source management event listeners
+        this.elements.syncConfigsBtn?.addEventListener('click', () => this.syncConfigs());
+
+        // New custom multi-select event listeners
+        this.elements.o11ySourcesDropdown?.addEventListener('click', () => this.toggleO11ySourcesDropdown());
+        this.elements.o11ySourcesSearch?.addEventListener('input', (e) => this.filterO11ySources(e.target.value));
+        this.elements.o11ySourcesSelectAll?.addEventListener('click', () => this.selectAllO11ySources());
+        this.elements.o11ySourcesClearAll?.addEventListener('click', () => this.clearAllO11ySources());
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!this.elements.o11ySourcesContainer?.contains(e.target)) {
+                this.closeO11ySourcesDropdown();
+            }
+        });
 
         // Node management event listeners
         console.log('Node Management Button element:', this.elements.nodeManagementBtn);
@@ -1672,6 +1724,321 @@ class VuDataSimManager {
             tbody.appendChild(row);
         });
     }
+
+    // O11y Source Management Methods
+
+    loadO11ySources() {
+        console.log('Loading o11y sources...');
+        this.callAPI('/api/o11y/sources')
+            .then(response => {
+                console.log('O11y sources API response:', response);
+                if (response.success && response.data) {
+                    console.log('Sources data:', response.data);
+                    this.populateO11ySourcesSelect(response.data);
+                    console.log('Loaded o11y sources:', response.data.length, 'sources');
+                } else {
+                    console.error('Failed to load o11y sources:', response.message);
+                    this.showNotification('Failed to load O11y sources: ' + response.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading o11y sources:', error);
+                this.showNotification('Error loading O11y sources: ' + error.message, 'error');
+            });
+    }
+
+    populateO11ySourcesSelect(sources) {
+        console.log('populateO11ySourcesSelect called with:', sources);
+        const list = this.elements.o11ySourcesList;
+        if (!list) {
+            console.error('o11ySourcesList element not found!');
+            return;
+        }
+
+        console.log('o11ySourcesList element found:', list);
+
+        // Store sources for filtering
+        this.o11ySources = sources;
+
+        // Clear existing options
+        list.innerHTML = '';
+
+        if (!sources || sources.length === 0) {
+            console.error('No sources provided or sources array is empty');
+            list.innerHTML = '<div class="o11y-sources-empty"><span class="material-symbols-outlined">error</span><p>No O11y sources available</p></div>';
+            return;
+        }
+
+        // Add sources as custom options with checkboxes
+        sources.forEach((source, index) => {
+            console.log(`Adding source ${index + 1}: ${source}`);
+            const option = document.createElement('div');
+            option.className = 'o11y-source-option';
+            option.innerHTML = `
+                <div class="o11y-source-checkbox" data-source="${source}"></div>
+                <span class="o11y-source-label">${source}</span>
+            `;
+
+            option.addEventListener('click', () => {
+                console.log('Source clicked:', source);
+                this.toggleO11ySource(source);
+            });
+            list.appendChild(option);
+        });
+
+        // Initialize selected sources array
+        this.selectedO11ySources = [];
+
+        console.log(`Successfully populated ${sources.length} o11y sources`);
+    }
+
+    syncConfigs() {
+        const selectedSources = [...this.selectedO11ySources];
+        const selectedEPS = parseInt(this.elements.epsSelect.value);
+
+        if (selectedSources.length === 0) {
+            this.showNotification('Please select at least one o11y source', 'warning');
+            return;
+        }
+
+        if (!selectedEPS || selectedEPS <= 0) {
+            this.showNotification('Please select a valid EPS target', 'warning');
+            return;
+        }
+
+        // Show loading state
+        this.setSyncButtonLoading(true);
+
+        console.log('Syncing configs for sources:', selectedSources, 'EPS:', selectedEPS);
+
+        // Call EPS distribution API first
+        this.callAPI('/api/o11y/eps/distribute', 'POST', {
+            selectedSources: selectedSources,
+            totalEps: selectedEPS
+        })
+        .then(epsResponse => {
+            console.log('EPS distribution response:', epsResponse);
+            if (!epsResponse.success) {
+                throw new Error(epsResponse.message || 'EPS distribution failed');
+            }
+
+            // Call conf.d distribution API
+            return this.callAPI('/api/o11y/confd/distribute', 'POST');
+        })
+        .then(confDResponse => {
+            console.log('Conf.d distribution response:', confDResponse);
+            if (!confDResponse.success) {
+                throw new Error(confDResponse.message || 'Conf.d distribution failed');
+            }
+
+            // Both APIs succeeded
+            this.showSyncSuccess();
+            this.showNotification('Configs synced successfully!', 'success');
+        })
+        .catch(error => {
+            console.error('Error syncing configs:', error);
+            this.showSyncError(error.message);
+            this.showNotification('Failed to sync configs: ' + error.message, 'error');
+        })
+        .finally(() => {
+            this.setSyncButtonLoading(false);
+        });
+    }
+
+    setSyncButtonLoading(loading) {
+        const button = this.elements.syncConfigsBtn;
+        if (!button) return;
+
+        if (loading) {
+            button.disabled = true;
+            button.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span><span>Syncing...</span>';
+        } else {
+            button.disabled = false;
+            button.innerHTML = '<span class="material-symbols-outlined">sync</span><span>Sync Configs</span>';
+        }
+    }
+
+    showSyncSuccess() {
+        this.hideSyncMessages();
+        this.elements.syncSuccessMessage.classList.remove('hidden');
+        this.elements.syncStatusContainer.classList.remove('hidden');
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            this.hideSyncMessages();
+        }, 5000);
+    }
+
+    showSyncError(message) {
+        this.hideSyncMessages();
+        this.elements.syncErrorMessage.classList.remove('hidden');
+        this.elements.syncStatusContainer.classList.remove('hidden');
+
+        // Auto-hide after 8 seconds for errors
+        setTimeout(() => {
+            this.hideSyncMessages();
+        }, 8000);
+    }
+
+    hideSyncMessages() {
+        this.elements.syncSuccessMessage.classList.add('hidden');
+        this.elements.syncErrorMessage.classList.add('hidden');
+        this.elements.syncStatusContainer.classList.add('hidden');
+    }
+
+    // Custom Multi-Select Methods
+
+    toggleO11ySourcesDropdown() {
+        const isOpen = !this.elements.o11ySourcesOptions.classList.contains('hidden');
+
+        if (isOpen) {
+            this.closeO11ySourcesDropdown();
+        } else {
+            this.openO11ySourcesDropdown();
+        }
+    }
+
+    openO11ySourcesDropdown() {
+        this.elements.o11ySourcesOptions.classList.remove('hidden');
+        this.elements.o11ySourcesContainer.classList.add('open');
+        this.elements.o11ySourcesSearch.focus();
+
+        // Update checkboxes to reflect current selection
+        this.updateO11ySourceCheckboxes();
+    }
+
+    closeO11ySourcesDropdown() {
+        this.elements.o11ySourcesOptions.classList.add('hidden');
+        this.elements.o11ySourcesContainer.classList.remove('open');
+        this.elements.o11ySourcesSearch.value = '';
+        this.filterO11ySources(''); // Show all sources
+    }
+
+    toggleO11ySource(source) {
+        const index = this.selectedO11ySources.indexOf(source);
+
+        if (index > -1) {
+            this.selectedO11ySources.splice(index, 1);
+        } else {
+            this.selectedO11ySources.push(source);
+        }
+
+        this.updateO11ySourceDisplay();
+        this.updateO11ySourceCheckboxes();
+        this.updateO11ySourceCount();
+    }
+
+    updateO11ySourceDisplay() {
+        const selectedContainer = this.elements.o11ySourcesSelected;
+        const placeholder = this.elements.o11ySourcesPlaceholder;
+
+        // Clear current selection display
+        selectedContainer.innerHTML = '';
+
+        if (this.selectedO11ySources.length === 0) {
+            placeholder.textContent = 'Select O11y sources...';
+            selectedContainer.classList.add('hidden');
+        } else {
+            placeholder.textContent = `${this.selectedO11ySources.length} source${this.selectedO11ySources.length > 1 ? 's' : ''} selected`;
+            selectedContainer.classList.remove('hidden');
+
+            // Add selected items as removable tags
+            this.selectedO11ySources.forEach(source => {
+                const tag = document.createElement('div');
+                tag.className = 'o11y-selected-item';
+                tag.innerHTML = `
+                    <span>${source}</span>
+                    <span class="o11y-selected-item-remove material-symbols-outlined" data-source="${source}">close</span>
+                `;
+
+                tag.querySelector('.o11y-selected-item-remove').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleO11ySource(source);
+                });
+
+                selectedContainer.appendChild(tag);
+            });
+        }
+    }
+
+    updateO11ySourceCheckboxes() {
+        // Update all checkboxes to reflect current selection
+        const checkboxes = this.elements.o11ySourcesList.querySelectorAll('.o11y-source-checkbox');
+        checkboxes.forEach(checkbox => {
+            const source = checkbox.dataset.source;
+            const isSelected = this.selectedO11ySources.includes(source);
+
+            if (isSelected) {
+                checkbox.classList.add('checked');
+            } else {
+                checkbox.classList.remove('checked');
+            }
+        });
+    }
+
+    updateO11ySourceCount() {
+        const countElement = this.elements.o11ySourcesCount;
+        const totalSources = this.o11ySources.length;
+        const selectedCount = this.selectedO11ySources.length;
+
+        countElement.textContent = `${selectedCount}/${totalSources} selected`;
+    }
+
+    filterO11ySources(searchTerm) {
+        const options = this.elements.o11ySourcesList.querySelectorAll('.o11y-source-option');
+        const term = searchTerm.toLowerCase();
+
+        options.forEach(option => {
+            const label = option.querySelector('.o11y-source-label');
+            const source = label.textContent.toLowerCase();
+
+            if (source.includes(term)) {
+                option.style.display = 'flex';
+                // Highlight search term
+                if (term && source.includes(term)) {
+                    const regex = new RegExp(`(${term})`, 'gi');
+                    label.innerHTML = label.textContent.replace(regex, '<span class="search-highlight">$1</span>');
+                } else {
+                    label.innerHTML = label.textContent;
+                }
+            } else {
+                option.style.display = 'none';
+            }
+        });
+
+        // Show empty state if no results
+        const visibleOptions = Array.from(options).filter(opt => opt.style.display !== 'none');
+        const emptyState = this.elements.o11ySourcesList.querySelector('.o11y-sources-empty');
+
+        if (visibleOptions.length === 0) {
+            if (!emptyState) {
+                const empty = document.createElement('div');
+                empty.className = 'o11y-sources-empty';
+                empty.innerHTML = `
+                    <span class="material-symbols-outlined">search_off</span>
+                    <p>No sources found matching "${searchTerm}"</p>
+                `;
+                this.elements.o11ySourcesList.appendChild(empty);
+            }
+        } else if (emptyState) {
+            emptyState.remove();
+        }
+    }
+
+    selectAllO11ySources() {
+        this.selectedO11ySources = [...this.o11ySources];
+        this.updateO11ySourceDisplay();
+        this.updateO11ySourceCheckboxes();
+        this.updateO11ySourceCount();
+    }
+
+    clearAllO11ySources() {
+        this.selectedO11ySources = [];
+        this.updateO11ySourceDisplay();
+        this.updateO11ySourceCheckboxes();
+        this.updateO11ySourceCount();
+    }
+
 }
 
 // Initialize the application when DOM is loaded
@@ -1689,7 +2056,28 @@ window.testNodeManagement = function() {
     }
 };
 
-// Export for potential module usage
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = VuDataSimManager;
-}
+// Test function to manually load O11y sources
+window.testLoadO11ySources = function() {
+    console.log('Manual test: Loading O11y sources...');
+    if (window.vuDataSimManager) {
+        window.vuDataSimManager.loadO11ySources();
+    } else {
+        console.error('vuDataSimManager not initialized');
+    }
+};
+
+// Test function to check DOM elements
+window.testO11yElements = function() {
+    console.log('Testing O11y DOM elements:');
+    console.log('- o11y-sources-container:', document.getElementById('o11y-sources-container'));
+    console.log('- o11y-sources-dropdown:', document.getElementById('o11y-sources-dropdown'));
+    console.log('- o11y-sources-options:', document.getElementById('o11y-sources-options'));
+    console.log('- o11y-sources-list:', document.getElementById('o11y-sources-list'));
+    console.log('- o11y-sources-search:', document.getElementById('o11y-sources-search'));
+
+    if (window.vuDataSimManager) {
+        console.log('vuDataSimManager elements:', window.vuDataSimManager.elements.o11ySourcesList);
+        console.log('O11y sources array:', window.vuDataSimManager.o11ySources);
+        console.log('Selected sources:', window.vuDataSimManager.selectedO11ySources);
+    }
+};

@@ -143,3 +143,199 @@
 {"level":"warn","node":"localhost","module":"SSH","type":"warning","time":"2025-10-14T12:42:20+05:30","message":"Connection check failed: SSH command failed: exit status 255"}
 {"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T12:42:21+05:30","message":"Pod Resource Metrics: 3, Pod Status Metrics: 3"}
 {"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T12:42:21+05:30","message":"Sending metrics response: &{KafkaProducerMetrics:[] SystemMetrics:[] DatabaseMetrics:[] ContainerMetrics:[] PodResourceMetrics:[{ClusterID:perf-cluster PodName:mssql-telegraf-pipeline-dcffcd5f6-kqmch CPUPercentage:0.0009407379672568305 MemoryPercentage:0.05549086515181345 LastTimestamp:2025-10-14 07:11:34 +0000 UTC} {ClusterID:perf-cluster PodName:linuxmonitor-8d545644d-wv77v CPUPercentage:0.0020699497531183127 MemoryPercentage:0.0778948998516513 LastTimestamp:2025-10-14 07:11:34 +0000 UTC} {ClusterID:perf-cluster PodName:apache-metrics-6d7f45d5d8-vbmcf CPUPercentage:0.009927609343154049 MemoryPercentage:0.411577228624423 LastTimestamp:2025-10-14 07:11:34 +0000 UTC}] PodStatusMetrics:[{ClusterID:perf-cluster NodeName:e2e-82-181 PodName:mssql-telegraf-pipeline-dcffcd5f6-kqmch PodPhase:running ContainerStatus:mssql-telegraf-pipeline=running ContainerReasons: RunningContainers:1 NonRunningContainers:0 DerivedStatus:running} {ClusterID:perf-cluster NodeName:e2e-82-181 PodName:linuxmonitor-8d545644d-wv77v PodPhase:running ContainerStatus:linuxmonitor=running ContainerReasons: RunningContainers:1 NonRunningContainers:0 DerivedStatus:running} {ClusterID:perf-cluster NodeName:e2e-82-181 PodName:apache-metrics-6d7f45d5d8-vbmcf PodPhase:running ContainerStatus:apache-metrics=running ContainerReasons: RunningContainers:1 NonRunningContainers:0 DerivedStatus:running}] LastUpdated:2025-10-14 12:42:21.306376674 +0530 IST m=+5.365958123}"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T12:53:57+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T12:53:57+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T12:53:57+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T12:54:26+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T12:54:26+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T12:54:26+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T13:05:14+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T13:05:14+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T13:05:14+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T13:05:44+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T13:05:44+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T13:05:44+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T13:05:44+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T13:07:44+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T13:07:44+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T13:07:44+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T13:08:14+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T13:08:14+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T13:08:14+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T13:08:14+05:30","message":"Open in browser"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T13:09:14+05:30","message":"Connection check passed"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T13:09:27+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T13:19:42+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T13:19:42+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T13:19:42+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T13:20:12+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T13:20:12+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T13:20:12+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T13:20:12+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T13:32:44+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T13:32:44+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T13:32:44+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T13:33:14+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T13:33:14+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T13:33:14+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T13:33:14+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T13:33:44+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T13:33:44+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T13:33:44+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T13:34:14+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T13:34:14+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T13:34:14+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T13:34:14+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T13:37:10+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T13:37:10+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T13:37:10+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T13:37:40+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T13:37:40+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T13:37:40+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T13:37:40+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T13:48:14+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T13:48:14+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T13:48:14+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T13:48:45+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T13:48:45+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T13:48:45+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T13:48:45+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T13:49:56+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T13:49:56+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T13:49:56+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T13:50:26+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T13:50:26+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T13:50:26+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T13:50:26+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T14:00:06+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T14:00:06+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T14:00:06+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T14:00:36+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T14:00:36+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T14:00:36+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T14:00:36+05:30","message":"Open in browser"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T14:08:52+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T14:18:27+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T14:18:27+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T14:18:27+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T14:18:57+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T14:18:57+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T14:18:57+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T14:18:57+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T14:42:55+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T14:42:55+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T14:42:55+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T14:43:25+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T14:43:25+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T14:43:25+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T14:43:25+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:07:08+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:07:08+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:07:08+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T15:07:38+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T15:07:38+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T15:07:38+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T15:07:38+05:30","message":"Open in browser"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T15:10:01+05:30","message":"Connection check passed"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T15:10:21+05:30","message":"Connection check passed"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T15:10:29+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:18:04+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:18:04+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:18:04+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T15:18:34+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T15:18:34+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T15:18:34+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T15:18:34+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:23:38+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:23:38+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:23:38+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T15:24:08+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T15:24:08+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T15:24:08+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T15:24:08+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:25:05+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:25:05+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:25:05+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T15:25:35+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T15:25:35+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T15:25:35+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T15:25:35+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:26:37+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:26:37+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:26:37+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T15:27:07+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T15:27:07+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T15:27:07+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T15:27:07+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:27:26+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:27:26+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:27:26+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T15:27:56+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T15:27:56+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T15:27:56+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T15:27:56+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:34:07+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:34:07+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:34:07+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T15:34:37+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T15:34:37+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T15:34:37+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T15:34:37+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:39:59+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:39:59+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:39:59+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T15:40:29+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T15:40:29+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T15:40:29+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T15:40:29+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:52:29+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:52:29+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:52:29+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T15:52:59+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T15:52:59+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T15:52:59+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T15:52:59+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:53:26+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:53:26+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:53:26+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T15:53:56+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T15:53:56+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T15:53:56+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T15:53:56+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:02:36+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:02:36+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:02:36+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T16:03:06+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T16:03:06+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T16:03:06+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T16:03:06+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:03:51+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:03:51+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:03:51+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T16:04:21+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T16:04:21+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T16:04:21+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T16:04:21+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:08:56+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:08:56+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:08:56+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T16:09:26+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T16:09:26+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T16:09:26+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T16:09:26+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:17:05+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:17:05+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:17:05+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:17:33+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:17:33+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:17:33+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-14T16:18:03+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: i/o timeout"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: i/o timeout","time":"2025-10-14T16:18:03+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"localhost:8086","time":"2025-10-14T16:18:03+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:8086","time":"2025-10-14T16:18:03+05:30","message":"Open in browser"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T16:29:15+05:30","message":"Connection check passed"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T16:29:16+05:30","message":"Connection check passed"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T16:31:39+05:30","message":"Connection check passed"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T16:31:39+05:30","message":"Connection check passed"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T16:36:48+05:30","message":"Connection check passed"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T16:36:49+05:30","message":"Connection check passed"}
