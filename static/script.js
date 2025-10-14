@@ -221,7 +221,8 @@ class VuDataSimManager {
             // Load nodes from the integrated API
             const response = await this.callAPI('/api/dashboard');
             console.log('Dashboard API response:', response);
-            if (response.success && response.data && response.data.nodeData) {
+            if (response.success && response.data && response.data.nodeData && Object.keys(response.data.nodeData).length > 0) {
+
                 this.nodeData = response.data.nodeData;
                 console.log('Loaded nodeData from dashboard API:', this.nodeData);
                 this.updateDashboardDisplay();
@@ -558,7 +559,7 @@ class VuDataSimManager {
 
     startRealTimeUpdates() {
         // Initial display - fetch SSH status immediately on startup
-        this.updateDashboardDisplay();
+        //this.updateDashboardDisplay();
         this.updateNodeStatusIndicators();
         this.refreshNodesTable();
         this.loadLogs(); // Load real logs instead of static ones
