@@ -80,6 +80,8 @@ class VuDataSimManager {
             systemMetricsTable: document.getElementById('system-metrics-table'),
             databaseMetricsTable: document.getElementById('database-metrics-table'),
             containerMetricsTable: document.getElementById('container-metrics-table'),
+            podResourceMetricsTable: document.getElementById('pod-resource-metrics-table'),
+            podStatusMetricsTable: document.getElementById('pod-status-metrics-table'),
 
             // Real-time status
         };
@@ -1370,7 +1372,9 @@ class VuDataSimManager {
 
             // Then get metrics
             const metricsResponse = await this.callAPI('/api/clickhouse/metrics');
+            console.log('ClickHouse metrics API response:', metricsResponse);
             if (metricsResponse.success && metricsResponse.data) {
+                console.log('ClickHouse metrics data:', metricsResponse.data);
                 this.displayClickHouseMetrics(metricsResponse.data);
                 this.showNotification('ClickHouse metrics refreshed successfully', 'success');
             } else {
@@ -1411,8 +1415,11 @@ class VuDataSimManager {
     }
 
     displayClickHouseMetrics(metrics) {
-        // Display Kafka Producer Metrics
-        this.displayKafkaMetrics(metrics.kafkaProducerMetrics || []);
+        console.log('Received ClickHouse metrics:', metrics);
+        
+        // Display Pod Metrics first
+        this.displayPodResourceMetrics(metrics.podResourceMetrics || []);
+        this.displayPodStatusMetrics(metrics.podStatusMetrics || []);
 
         // Display System Metrics
         this.displaySystemMetrics(metrics.systemMetrics || []);
@@ -1428,6 +1435,101 @@ class VuDataSimManager {
             const timestamp = new Date(metrics.lastUpdated).toLocaleString();
             this.elements.clickHouseLastUpdate.textContent = `Last updated: ${timestamp}`;
         }
+    }
+
+    displayPodResourceMetrics(metrics) {
+        console.log('Displaying pod resource metrics:', metrics);
+        const tbody = this.elements.podResourceMetricsTable;
+        if (!tbody) {
+            console.error('Pod resource metrics table not found in elements');
+            return;
+        }
+
+        tbody.innerHTML = '';
+
+        if (!metrics || !Array.isArray(metrics) || metrics.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="5" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">No pod resource metrics available</td>';
+            tbody.appendChild(row);
+            return;
+        }
+
+        metrics.forEach(metric => {
+            try {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50';
+
+                // Handle potential missing or invalid values
+                const clusterId = metric.clusterId || 'N/A';
+                const podName = metric.podName || 'N/A';
+                const cpuPercentage = typeof metric.cpuPercentage === 'number' ? metric.cpuPercentage.toFixed(2) : 'N/A';
+                const memoryPercentage = typeof metric.memoryPercentage === 'number' ? metric.memoryPercentage.toFixed(2) : 'N/A';
+                let timestamp = 'N/A';
+                try {
+                    if (metric.lastTimestamp) {
+                        timestamp = new Date(metric.lastTimestamp).toLocaleString();
+                    }
+                } catch (error) {
+                    console.warn('Invalid timestamp format:', error);
+                }
+
+                row.innerHTML = `
+                    <td class="p-3">${clusterId}</td>
+                    <td class="p-3">${podName}</td>
+                    <td class="p-3 text-right">${cpuPercentage}${typeof metric.cpuPercentage === 'number' ? '%' : ''}</td>
+                    <td class="p-3 text-right">${memoryPercentage}${typeof metric.memoryPercentage === 'number' ? '%' : ''}</td>
+                    <td class="p-3">${timestamp}</td>
+                `;
+                tbody.appendChild(row);
+            } catch (error) {
+                console.error('Error processing pod resource metric:', error);
+            }
+        });
+    }
+
+    displayPodStatusMetrics(metrics) {
+        console.log('Displaying pod status metrics:', metrics);
+        const tbody = this.elements.podStatusMetricsTable;
+        if (!tbody) {
+            console.error('Pod status metrics table not found in elements');
+            return;
+        }
+
+        tbody.innerHTML = '';
+
+        if (!metrics || !Array.isArray(metrics) || metrics.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="7" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">No pod status metrics available</td>';
+            tbody.appendChild(row);
+            return;
+        }
+
+        metrics.forEach(metric => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50';
+            const statusClass = String(metric.podPhase).toLowerCase() === 'running' ? 'text-success' : 'text-danger';
+
+            // Handle any undefined values with default strings
+            const clusterId = metric.clusterId || 'N/A';
+            const nodeName = metric.nodeName || 'N/A';
+            const podName = metric.podName || 'N/A';
+            const podPhase = metric.podPhase || 'Unknown';
+            const containerStatus = metric.containerStatus || 'Unknown';
+            const runningContainers = typeof metric.runningContainers === 'number' ? metric.runningContainers : 0;
+            const nonRunningContainers = typeof metric.nonRunningContainers === 'number' ? metric.nonRunningContainers : 0;
+            const derivedStatus = metric.derivedStatus || 'Unknown';
+
+            row.innerHTML = `
+                <td class="p-3">${clusterId}</td>
+                <td class="p-3">${nodeName}</td>
+                <td class="p-3">${podName}</td>
+                <td class="p-3">${podPhase}</td>
+                <td class="p-3">${containerStatus}</td>
+                <td class="p-3">${runningContainers}/${runningContainers + nonRunningContainers}</td>
+                <td class="p-3 ${statusClass}">${derivedStatus}</td>
+            `;
+            tbody.appendChild(row);
+        });
     }
 
     displayKafkaMetrics(metrics) {

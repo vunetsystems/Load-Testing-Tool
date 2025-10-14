@@ -25,6 +25,8 @@ type ClickHouseMetrics struct {
 	SystemMetrics        []SystemMetric        `json:"systemMetrics,omitempty"`
 	DatabaseMetrics      []DatabaseMetric      `json:"databaseMetrics,omitempty"`
 	ContainerMetrics     []ContainerMetric     `json:"containerMetrics,omitempty"`
+	PodResourceMetrics   []PodResourceMetric   `json:"podResourceMetrics,omitempty"`
+	PodStatusMetrics     []PodStatusMetric     `json:"podStatusMetrics,omitempty"`
 	LastUpdated          time.Time             `json:"lastUpdated"`
 }
 
@@ -72,6 +74,28 @@ type ContainerMetric struct {
 	CPUUsage      float64   `json:"cpuUsage"`
 	MemoryUsage   float64   `json:"memoryUsage"`
 	Status        string    `json:"status"`
+}
+
+// PodResourceMetric represents pod resource utilization metrics
+type PodResourceMetric struct {
+	ClusterID       string    `json:"clusterId"`
+	PodName         string    `json:"podName"`
+	CPUPercentage   float64   `json:"cpuPercentage"`
+	MemoryPercentage float64   `json:"memoryPercentage"`
+	LastTimestamp   time.Time `json:"lastTimestamp"`
+}
+
+// PodStatusMetric represents pod status metrics
+type PodStatusMetric struct {
+	ClusterID            string    `json:"clusterId"`
+	NodeName             string    `json:"nodeName"`
+	PodName              string    `json:"podName"`
+	PodPhase             string    `json:"podPhase"`
+	ContainerStatus      string    `json:"containerStatus"`
+	ContainerReasons     string    `json:"containerReasons"`
+	RunningContainers    uint64    `json:"runningContainers"`
+	NonRunningContainers uint64    `json:"nonRunningContainers"`
+	DerivedStatus        string    `json:"derivedStatus"`
 }
 
 // ClickHouseClient wraps the ClickHouse client and configuration
@@ -305,22 +329,55 @@ func (ch *ClickHouseClient) getContainerMetrics(ctx context.Context, limit int) 
 	return metrics, nil
 }
 
-// CollectMetrics collects all metrics from ClickHouse
-func (ch *ClickHouseClient) CollectMetrics() (*ClickHouseMetrics, error) {
-	ctx := context.Background()
-
+// CollectMetrics gathers all metrics from ClickHouse
+func (c *ClickHouseClient) CollectMetrics() (*ClickHouseMetrics, error) {
+	var err error
 	metrics := &ClickHouseMetrics{
 		LastUpdated: time.Now(),
 	}
 
+	// List of pods to monitor
+	monitoredPods := []string{
+		"linuxmonitor-8d545644d-wv77v",
+		"apache-metrics-6d7f45d5d8-vbmcf",
+		"mssql-telegraf-pipeline-dcffcd5f6-kqmch",
+	}
+
+	// Collect pod resource metrics
+	podResourceMetrics, err := c.GetPodResourceMetrics(monitoredPods)
+	if err != nil {
+		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Error collecting pod resource metrics: %v", err), "error")
+	} else {
+		metrics.PodResourceMetrics = podResourceMetrics
+	}
+
+	// Collect pod status metrics
+	podStatusMetrics, err := c.GetPodStatusMetrics(monitoredPods)
+	if err != nil {
+		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Error collecting pod status metrics: %v", err), "error")
+	} else {
+		metrics.PodStatusMetrics = podStatusMetrics
+	}
+
+	// Temporarily disabled Kafka metrics
+	/*
+	var kafkaMetrics []KafkaProducerMetric
+	kafkaMetrics, err = c.getKafkaProducerMetrics(ctx, 100)
+	if err != nil {
+		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Error collecting Kafka metrics: %v", err), "error")
+	} else {
+		metrics.KafkaProducerMetrics = kafkaMetrics
+	}
+	*/
+
 	// Collect Kafka producer metrics
-	kafkaMetrics, err := ch.getKafkaProducerMetrics(ctx, 100)
+	/*kafkaMetrics, err := ch.getKafkaProducerMetrics(ctx, 100)
 	if err != nil {
 		logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to collect Kafka metrics: %v", err))
 	} else {
 		metrics.KafkaProducerMetrics = kafkaMetrics
 		logger.LogSuccess("System", "ClickHouse", fmt.Sprintf("Collected %d Kafka producer metrics", len(kafkaMetrics)))
-	}
+	}*/
 
 	// Comment out other metrics collection for now - focus on Kafka producer metrics
 	/*
