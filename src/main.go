@@ -145,6 +145,9 @@ func main() {
 	api.HandleFunc("/logs", getLogs).Methods("GET")
 	api.HandleFunc("/nodes/{nodeId}/metrics", updateNodeMetrics).Methods("PUT")
 	api.HandleFunc("/health", healthCheck).Methods("GET")
+	api.HandleFunc("/dashboard", getDashboardData).Methods("GET")
+	// Cluster metrics API endpoint
+	api.HandleFunc("/cluster/metrics", handleAPIGetClusterMetrics).Methods("GET")
 
 	// Node management API endpoints
 	api.HandleFunc("/nodes", handleAPINodes).Methods("GET")

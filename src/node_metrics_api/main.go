@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"sync"
@@ -20,35 +21,20 @@ const (
 	MetricsInterval = 1 * time.Second
 )
 
-// SystemMetrics represents the complete metrics payload
-type SystemMetrics struct {
-	NodeID    string    `json:"nodeId"`
-	Timestamp time.Time `json:"timestamp"`
-	System    struct {
-		CPU    CPUInfo    `json:"cpu"`
-		Memory MemoryInfo `json:"memory"`
-		Uptime int64      `json:"uptime_seconds"`
-	} `json:"system"`
-}
-
-// CPUInfo represents CPU metrics
-type CPUInfo struct {
-	UsedPercent float64 `json:"used_percent"`
-	Cores       int     `json:"cores"`
-	Load1M      float64 `json:"load_1m"`
-}
-
-// MemoryInfo represents memory metrics
-type MemoryInfo struct {
-	UsedGB      float64 `json:"used_gb"`
-	AvailableGB float64 `json:"available_gb"`
-	TotalGB     float64 `json:"total_gb"`
-	UsedPercent float64 `json:"used_percent"`
+// FinalVuDataSimMetrics represents metrics for the finalvudatasim process
+type FinalVuDataSimMetrics struct {
+	Running    bool      `json:"running"`
+	PID        int       `json:"pid,omitempty"`
+	StartTime  string    `json:"start_time,omitempty"`
+	CPUPercent float64   `json:"cpu_percent,omitempty"`
+	MemMB      float64   `json:"mem_mb,omitempty"`
+	Cmdline    string    `json:"cmdline,omitempty"`
+	Timestamp  time.Time `json:"timestamp,omitempty"`
 }
 
 // MetricsCollector handles system metrics collection
 type MetricsCollector struct {
-	currentMetrics SystemMetrics
+	currentMetrics FinalVuDataSimMetrics
 	mutex          sync.RWMutex
 	nodeID         string
 }
@@ -60,21 +46,7 @@ func NewMetricsCollector(nodeID string) *MetricsCollector {
 		hostname, _ := os.Hostname()
 		nodeID = hostname
 	}
-
-	mc := &MetricsCollector{
-		nodeID: nodeID,
-	}
-
-	// Initialize total CPU and memory
-	mc.initializeSystemInfo()
-
-	return mc
-}
-
-// initializeSystemInfo gets static system information
-func (mc *MetricsCollector) initializeSystemInfo() {
-	mc.currentMetrics.System.CPU.Cores = getCPUCores()
-	mc.currentMetrics.System.Memory.TotalGB = getTotalMemoryGB()
+	return &MetricsCollector{nodeID: nodeID}
 }
 
 // collectMetrics runs in background to collect system metrics
@@ -92,27 +64,36 @@ func (mc *MetricsCollector) updateMetrics() {
 	mc.mutex.Lock()
 	defer mc.mutex.Unlock()
 
-	// Update timestamp
-	mc.currentMetrics.Timestamp = time.Now()
+	metrics := FinalVuDataSimMetrics{}
+	output, err := exec.Command("pgrep", "-f", "finalvudatasim").Output()
+	if err == nil && len(output) > 0 {
+		lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+		pidStr := lines[0]
+		pid, err := strconv.Atoi(pidStr)
+		if err == nil {
+			metrics.Running = true
+			metrics.PID = pid
 
-	// Collect CPU metrics
-	cpuUsage := getCPUUsagePercent()
-	load1M := getLoadAverage1M()
-	mc.currentMetrics.System.CPU.UsedPercent = cpuUsage
-	mc.currentMetrics.System.CPU.Load1M = load1M
+			// Get process start time
+			startTimeOut, _ := exec.Command("ps", "-p", pidStr, "-o", "lstart=").Output()
+			metrics.StartTime = strings.TrimSpace(string(startTimeOut))
 
-	// Collect memory metrics
-	usedGB, availableGB := getMemoryUsageGB()
-	mc.currentMetrics.System.Memory.UsedGB = usedGB
-	mc.currentMetrics.System.Memory.AvailableGB = availableGB
-	mc.currentMetrics.System.Memory.UsedPercent = (usedGB / mc.currentMetrics.System.Memory.TotalGB) * 100
-
-	// Collect uptime
-	mc.currentMetrics.System.Uptime = getSystemUptimeSeconds()
+			// Get CPU and memory usage
+			psOut, _ := exec.Command("ps", "-p", pidStr, "-o", "%cpu,rss,cmd").Output()
+			psFields := strings.Fields(string(psOut))
+			if len(psFields) >= 3 {
+				metrics.CPUPercent, _ = strconv.ParseFloat(psFields[0], 64)
+				memKB, _ := strconv.ParseFloat(psFields[1], 64)
+				metrics.MemMB = memKB / 1024.0
+				metrics.Cmdline = strings.Join(psFields[2:], " ")
+			}
+		}
+	}
+	mc.currentMetrics = metrics
 }
 
 // GetCurrentMetrics returns the current metrics (thread-safe)
-func (mc *MetricsCollector) GetCurrentMetrics() SystemMetrics {
+func (mc *MetricsCollector) GetCurrentMetrics() FinalVuDataSimMetrics {
 	mc.mutex.RLock()
 	defer mc.mutex.RUnlock()
 	return mc.currentMetrics
@@ -128,8 +109,6 @@ func (mc *MetricsCollector) handleMetrics(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json")
 
 	metrics := mc.GetCurrentMetrics()
-	// Ensure node ID is set
-	metrics.NodeID = mc.nodeID
 
 	if err := json.NewEncoder(w).Encode(metrics); err != nil {
 		log.Printf("Error encoding metrics JSON: %v", err)
@@ -161,174 +140,6 @@ func (mc *MetricsCollector) handleHealth(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-}
-
-// getCPUCores returns the total number of CPU cores
-func getCPUCores() int {
-	data, err := os.ReadFile("/proc/cpuinfo")
-	if err != nil {
-		log.Printf("Error reading /proc/cpuinfo: %v", err)
-		return 4 // fallback
-	}
-
-	count := 0
-	lines := strings.Split(string(data), "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "processor") {
-			count++
-		}
-	}
-
-	if count == 0 {
-		return 4 // fallback
-	}
-
-	return count
-}
-
-// getCPUUsagePercent returns current CPU usage as percentage
-func getCPUUsagePercent() float64 {
-	data, err := os.ReadFile("/proc/stat")
-	if err != nil {
-		log.Printf("Error reading /proc/stat: %v", err)
-		return 0
-	}
-
-	lines := strings.Split(string(data), "\n")
-	if len(lines) < 1 {
-		return 0
-	}
-
-	// Parse first line: cpu user nice system idle iowait irq softirq steal guest guest_nice
-	fields := strings.Fields(lines[0])
-	if len(fields) < 8 {
-		return 0
-	}
-
-	// Convert string values to integers
-	values := make([]float64, 8)
-	for i := 1; i < len(fields) && i <= 8; i++ {
-		if val, err := strconv.ParseFloat(fields[i], 64); err == nil {
-			values[i-1] = val
-		}
-	}
-
-	// Calculate total time
-	total := values[0] + values[1] + values[2] + values[3] + values[4] + values[5] + values[6] + values[7]
-
-	// Calculate idle time (idle + iowait)
-	idle := values[3] + values[4]
-
-	// CPU usage = (total - idle) / total * 100
-	if total == 0 {
-		return 0
-	}
-
-	return ((total - idle) / total) * 100
-}
-
-// getLoadAverage1M returns the 1-minute load average
-func getLoadAverage1M() float64 {
-	data, err := os.ReadFile("/proc/loadavg")
-	if err != nil {
-		log.Printf("Error reading /proc/loadavg: %v", err)
-		return 0
-	}
-
-	fields := strings.Fields(string(data))
-	if len(fields) < 1 {
-		return 0
-	}
-
-	load, err := strconv.ParseFloat(fields[0], 64)
-	if err != nil {
-		log.Printf("Error parsing load average: %v", err)
-		return 0
-	}
-
-	return load
-}
-
-// getTotalMemoryGB returns total memory in GB
-func getTotalMemoryGB() float64 {
-	data, err := os.ReadFile("/proc/meminfo")
-	if err != nil {
-		log.Printf("Error reading /proc/meminfo: %v", err)
-		return 8.0 // fallback 8GB
-	}
-
-	lines := strings.Split(string(data), "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "MemTotal:") {
-			fields := strings.Fields(line)
-			if len(fields) >= 2 {
-				if kb, err := strconv.ParseFloat(fields[1], 64); err == nil {
-					return kb / 1024 / 1024 // Convert KB to GB
-				}
-			}
-		}
-	}
-
-	return 8.0 // fallback
-}
-
-// getMemoryUsageGB returns used and available memory in GB
-func getMemoryUsageGB() (float64, float64) {
-	data, err := os.ReadFile("/proc/meminfo")
-	if err != nil {
-		log.Printf("Error reading /proc/meminfo: %v", err)
-		return 0, 8.0 // fallback
-	}
-
-	var memTotalKB, memAvailableKB float64
-
-	lines := strings.Split(string(data), "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "MemTotal:") {
-			fields := strings.Fields(line)
-			if len(fields) >= 2 {
-				memTotalKB, _ = strconv.ParseFloat(fields[1], 64)
-			}
-		}
-		if strings.HasPrefix(line, "MemAvailable:") {
-			fields := strings.Fields(line)
-			if len(fields) >= 2 {
-				memAvailableKB, _ = strconv.ParseFloat(fields[1], 64)
-			}
-		}
-	}
-
-	if memTotalKB == 0 {
-		return 0, 8.0 // fallback
-	}
-
-	usedKB := memTotalKB - memAvailableKB
-	usedGB := usedKB / 1024 / 1024
-	availableGB := memAvailableKB / 1024 / 1024
-
-	return usedGB, availableGB
-}
-
-// getSystemUptimeSeconds returns system uptime in seconds
-func getSystemUptimeSeconds() int64 {
-	data, err := os.ReadFile("/proc/uptime")
-	if err != nil {
-		log.Printf("Error reading /proc/uptime: %v", err)
-		return 0
-	}
-
-	fields := strings.Fields(string(data))
-	if len(fields) < 1 {
-		return 0
-	}
-
-	uptime, err := strconv.ParseFloat(fields[0], 64)
-	if err != nil {
-		log.Printf("Error parsing uptime: %v", err)
-		return 0
-	}
-
-	return int64(uptime)
 }
 
 // getNodeIDFromEnv gets node ID from environment variable or generates from hostname
