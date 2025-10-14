@@ -413,6 +413,15 @@ func handleUpdateNode(w http.ResponseWriter, r *http.Request, nodeName string) {
 				})
 				return
 			}
+			// Start node_metrics_api binary
+			_, err = binaryControl.StartMetricsBinary(nodeName, 10)
+			if err != nil {
+				sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+					Success: false,
+					Message: "Node enabled, but failed to start node_metrics_api: " + err.Error(),
+				})
+				return
+			}
 		} else {
 			err := nodeManager.DisableNode(nodeName)
 			if err != nil {
@@ -422,12 +431,21 @@ func handleUpdateNode(w http.ResponseWriter, r *http.Request, nodeName string) {
 				})
 				return
 			}
+			// Stop node_metrics_api binary
+			_, err = binaryControl.StopMetricsBinary(nodeName, 10)
+			if err != nil {
+				sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+					Success: false,
+					Message: "Node disabled, but failed to stop node_metrics_api: " + err.Error(),
+				})
+				return
+			}
 		}
 	}
 
 	sendJSONResponse(w, http.StatusOK, APIResponse{
 		Success: true,
-		Message: fmt.Sprintf("Node %s updated successfully", nodeName),
+		Message: "Node updated successfully",
 	})
 }
 
@@ -1014,6 +1032,24 @@ func getLogField(entry map[string]interface{}, field, defaultValue string) strin
 		}
 	}
 	return defaultValue
+}
+
+// handleAPIGetClusterMetrics handles GET /api/cluster/metrics
+func handleAPIGetClusterMetrics(w http.ResponseWriter, r *http.Request) {
+	metrics, err := clickhouse.GetClusterNodeMetrics()
+	if err != nil {
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to fetch cluster metrics: %v", err),
+		})
+		return
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "Cluster metrics retrieved successfully",
+		Data:    metrics,
+	})
 }
 
 // getLogType determines the log type based on zerolog level
