@@ -5,10 +5,12 @@ import (
 	"bytes"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
-	
+
+	"vuDataSim/src/node_control"
 	"gopkg.in/yaml.v3"
 )
 
@@ -707,4 +709,264 @@ func (osm *O11ySourceManager) getUpdatedNumUniqKeyValues(selectedSources []strin
 	}
 
 	return updatedValues
+}
+
+// ConfDNodeResult represents the result of conf.d distribution to a single node
+type ConfDNodeResult struct {
+	NodeName string `json:"nodeName"`
+	Success  bool   `json:"success"`
+	Message  string `json:"message"`
+}
+
+// ConfDDistributionResponse represents the response after conf.d distribution
+type ConfDDistributionResponse struct {
+	Success           bool                        `json:"success"`
+	Message           string                      `json:"message"`
+	Data              map[string]interface{}      `json:"data,omitempty"`
+	Distribution      map[string]ConfDNodeResult  `json:"distribution"`
+}
+
+// DistributeConfD distributes the conf.d directory to all enabled nodes
+// DistributeConfD distributes the conf.d directory to all enabled nodes
+// DistributeConfD distributes the conf.d directory to all enabled nodes
+func (osm *O11ySourceManager) DistributeConfD() (*ConfDDistributionResponse, error) {
+	log.Println("Starting conf.d distribution to all enabled nodes...")
+	
+	// Load node manager to access node configurations
+	nodeManager := osm.getNodeManager()
+	if nodeManager == nil {
+		return &ConfDDistributionResponse{
+			Success: false,
+			Message: "Node manager not available",
+		}, fmt.Errorf("node manager not available")
+	}
+	
+	// Get enabled nodes
+	enabledNodes := nodeManager.GetEnabledNodes()
+	if len(enabledNodes) == 0 {
+		log.Println("No enabled nodes found to distribute conf.d to")
+		return &ConfDDistributionResponse{
+			Success: true,
+			Message: "No enabled nodes found to distribute conf.d to",
+			Data: map[string]interface{}{
+				"distributedNodes": 0,
+				"totalNodes":       0,
+				"successRate":     "0/0",
+			},
+			Distribution: make(map[string]ConfDNodeResult),
+		}, nil
+	}
+	
+	log.Printf("Found %d enabled nodes to distribute conf.d to", len(enabledNodes))
+	
+	// Create temporary tar file from local conf.d directory
+	tempTarFile := "/tmp/confd_backup.tar.gz"
+	localConfDir := "src/conf.d"
+	
+	// Check if local conf.d directory exists
+	if _, err := os.Stat(localConfDir); os.IsNotExist(err) {
+		return &ConfDDistributionResponse{
+			Success: false,
+			Message: fmt.Sprintf("Local conf.d directory not found: %s", localConfDir),
+		}, fmt.Errorf("local conf.d directory not found: %s", localConfDir)
+	}
+	
+	// Create tar command - include the conf.d directory itself
+	tarCmd := exec.Command("tar", "-czf", tempTarFile, "-C", filepath.Dir(localConfDir), filepath.Base(localConfDir))
+	log.Printf("Creating temporary tar file: tar -czf %s -C %s %s", tempTarFile, filepath.Dir(localConfDir), filepath.Base(localConfDir))
+	
+	if err := tarCmd.Run(); err != nil {
+		return &ConfDDistributionResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to create tar file: %v", err),
+		}, fmt.Errorf("failed to create tar file: %v", err)
+	}
+	
+	defer func() {
+		// Clean up temporary tar file
+		if err := os.Remove(tempTarFile); err != nil {
+			log.Printf("Warning: Failed to remove temporary tar file %s: %v", tempTarFile, err)
+		}
+	}()
+	
+	// Distribute to each enabled node
+	distributionResults := make(map[string]ConfDNodeResult)
+	successCount := 0
+	
+	for nodeName, nodeConfig := range enabledNodes {
+		log.Printf("Distributing conf.d to node: %s (host: %s, conf_dir: %s)", nodeName, nodeConfig.Host, nodeConfig.ConfDir)
+		
+		result := osm.distributeConfDToNode(nodeName, nodeConfig, tempTarFile)
+		distributionResults[nodeName] = result
+		
+		if result.Success {
+			successCount++
+			log.Printf("✓ Successfully distributed conf.d to node: %s", nodeName)
+		} else {
+			log.Printf("✗ Failed to distribute conf.d to node: %s - %s", nodeName, result.Message)
+		}
+	}
+	
+	successRate := fmt.Sprintf("%d/%d", successCount, len(enabledNodes))
+	message := fmt.Sprintf("Conf.d distribution completed: %s nodes successful", successRate)
+	
+	response := &ConfDDistributionResponse{
+		Success: successCount == len(enabledNodes),
+		Message: message,
+		Data: map[string]interface{}{
+			"distributedNodes": successCount,
+			"totalNodes":       len(enabledNodes),
+			"successRate":      successRate,
+		},
+		Distribution: distributionResults,
+	}
+	
+	log.Printf("✓ Conf.d distribution completed successfully to %d/%d nodes", successCount, len(enabledNodes))
+	return response, nil
+}
+
+// distributeConfDToNode distributes conf.d to a single node
+func (osm *O11ySourceManager) distributeConfDToNode(nodeName string, nodeConfig node_control.NodeConfig, tempTarFile string) ConfDNodeResult {
+	log.Printf("Starting conf.d replacement for node %s", nodeConfig.Host)
+	
+	// nodeConfig.ConfDir is the parent directory where conf.d should be placed (e.g., /path/to/)
+	// We need to create /path/to/conf.d
+	targetConfDir := filepath.Join(nodeConfig.ConfDir, "conf.d")
+	
+	// Remove existing conf.d directory on remote node
+	log.Printf("Removing existing conf.d directory on remote node: rm -rf %s", targetConfDir)
+	err := osm.sshExec(nodeConfig, fmt.Sprintf("rm -rf %s", targetConfDir))
+	if err != nil {
+		return ConfDNodeResult{
+			NodeName: nodeName,
+			Success:  false,
+			Message:  fmt.Sprintf("Failed to remove existing conf.d directory: %v", err),
+		}
+	}
+	
+	// Ensure parent directory exists
+	log.Printf("Creating parent directory if needed: mkdir -p %s", nodeConfig.ConfDir)
+	err = osm.sshExec(nodeConfig, fmt.Sprintf("mkdir -p %s", nodeConfig.ConfDir))
+	if err != nil {
+		return ConfDNodeResult{
+			NodeName: nodeName,
+			Success:  false,
+			Message:  fmt.Sprintf("Failed to create parent directory: %v", err),
+		}
+	}
+	
+	// Copy tar file to a temporary location
+	remoteTarPath := filepath.Join("/tmp", "confd_backup_"+nodeName+".tar.gz")
+	log.Printf("Copying tar file to remote node: scp %s to %s", tempTarFile, remoteTarPath)
+	err = osm.scpCopy(nodeConfig, tempTarFile, remoteTarPath)
+	if err != nil {
+		return ConfDNodeResult{
+			NodeName: nodeName,
+			Success:  false,
+			Message:  fmt.Sprintf("Failed to copy tar file: %v", err),
+		}
+	}
+	
+	// Extract tar file to the target directory
+	// The tar contains "conf.d/" so it will create conf.d in nodeConfig.ConfDir
+	extractAndCleanupCmd := fmt.Sprintf(
+		"cd %s && tar -xzf %s && rm %s",
+		nodeConfig.ConfDir,
+		remoteTarPath,
+		remoteTarPath,
+	)
+	
+	log.Printf("Extracting tar file on remote node: %s", extractAndCleanupCmd)
+	err = osm.sshExec(nodeConfig, extractAndCleanupCmd)
+	if err != nil {
+		return ConfDNodeResult{
+			NodeName: nodeName,
+			Success:  false,
+			Message:  fmt.Sprintf("Failed to extract tar file: %v", err),
+		}
+	}
+	
+	// Verify the conf.d directory exists in the target location
+	verifyCmd := fmt.Sprintf("test -d %s", targetConfDir)
+	log.Printf("Verifying conf.d directory exists at: %s", targetConfDir)
+	err = osm.sshExec(nodeConfig, verifyCmd)
+	if err != nil {
+		// Additional debug: list the parent directory to see what was created
+		listCmd := fmt.Sprintf("ls -la %s", nodeConfig.ConfDir)
+		osm.sshExec(nodeConfig, listCmd)
+		
+		return ConfDNodeResult{
+			NodeName: nodeName,
+			Success:  false,
+			Message:  fmt.Sprintf("Conf.d directory not found after extraction at %s: %v", targetConfDir, err),
+		}
+	}
+	
+	log.Printf("✓ Conf.d replacement completed for node %s at %s", nodeConfig.Host, targetConfDir)
+	return ConfDNodeResult{
+		NodeName: nodeName,
+		Success:  true,
+		Message:  fmt.Sprintf("Conf.d distributed successfully to %s", targetConfDir),
+	}
+}
+
+// sshExec executes a command on the remote node via SSH
+func (osm *O11ySourceManager) sshExec(nodeConfig node_control.NodeConfig, command string) error {
+	args := []string{
+		"-i", nodeConfig.KeyPath,
+		"-o", "StrictHostKeyChecking=no",
+		"-o", "UserKnownHostsFile=/dev/null",
+		"-o", "ConnectTimeout=10",
+		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
+		command,
+	}
+
+	cmd := exec.Command("ssh", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("SSH command failed: %v", err)
+	}
+
+	return nil
+}
+
+// scpCopy copies a file to the remote node
+func (osm *O11ySourceManager) scpCopy(nodeConfig node_control.NodeConfig, localPath, remotePath string) error {
+	args := []string{
+		"-i", nodeConfig.KeyPath,
+		"-o", "StrictHostKeyChecking=no",
+		"-o", "UserKnownHostsFile=/dev/null",
+		"-o", "ConnectTimeout=10",
+		localPath,
+		fmt.Sprintf("%s@%s:%s", nodeConfig.User, nodeConfig.Host, remotePath),
+	}
+
+	cmd := exec.Command("scp", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("SCP copy failed: %v", err)
+	}
+
+	return nil
+}
+
+// getNodeManager returns the node manager instance
+// Note: This is a workaround since we can't directly access the global nodeManager from main.go
+// In a production system, you might want to pass the nodeManager as a dependency
+func (osm *O11ySourceManager) getNodeManager() *node_control.NodeManager {
+	// For now, create a new instance - this is not ideal but works for the API
+	// In a better design, the nodeManager would be injected as a dependency
+	nodeManager := node_control.NewNodeManager()
+	err := nodeManager.LoadNodesConfig()
+	if err != nil {
+		log.Printf("Warning: Failed to load nodes config in getNodeManager: %v", err)
+		return nil
+	}
+	return nodeManager
 }
