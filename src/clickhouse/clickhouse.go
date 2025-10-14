@@ -78,24 +78,24 @@ type ContainerMetric struct {
 
 // PodResourceMetric represents pod resource utilization metrics
 type PodResourceMetric struct {
-	ClusterID       string    `json:"clusterId"`
-	PodName         string    `json:"podName"`
-	CPUPercentage   float64   `json:"cpuPercentage"`
+	ClusterID        string    `json:"clusterId"`
+	PodName          string    `json:"podName"`
+	CPUPercentage    float64   `json:"cpuPercentage"`
 	MemoryPercentage float64   `json:"memoryPercentage"`
-	LastTimestamp   time.Time `json:"lastTimestamp"`
+	LastTimestamp    time.Time `json:"lastTimestamp"`
 }
 
 // PodStatusMetric represents pod status metrics
 type PodStatusMetric struct {
-	ClusterID            string    `json:"clusterId"`
-	NodeName             string    `json:"nodeName"`
-	PodName              string    `json:"podName"`
-	PodPhase             string    `json:"podPhase"`
-	ContainerStatus      string    `json:"containerStatus"`
-	ContainerReasons     string    `json:"containerReasons"`
-	RunningContainers    uint64    `json:"runningContainers"`
-	NonRunningContainers uint64    `json:"nonRunningContainers"`
-	DerivedStatus        string    `json:"derivedStatus"`
+	ClusterID            string `json:"clusterId"`
+	NodeName             string `json:"nodeName"`
+	PodName              string `json:"podName"`
+	PodPhase             string `json:"podPhase"`
+	ContainerStatus      string `json:"containerStatus"`
+	ContainerReasons     string `json:"containerReasons"`
+	RunningContainers    uint64 `json:"runningContainers"`
+	NonRunningContainers uint64 `json:"nonRunningContainers"`
+	DerivedStatus        string `json:"derivedStatus"`
 }
 
 // ClickHouseClient wraps the ClickHouse client and configuration
@@ -361,13 +361,13 @@ func (c *ClickHouseClient) CollectMetrics() (*ClickHouseMetrics, error) {
 
 	// Temporarily disabled Kafka metrics
 	/*
-	var kafkaMetrics []KafkaProducerMetric
-	kafkaMetrics, err = c.getKafkaProducerMetrics(ctx, 100)
-	if err != nil {
-		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Error collecting Kafka metrics: %v", err), "error")
-	} else {
-		metrics.KafkaProducerMetrics = kafkaMetrics
-	}
+		var kafkaMetrics []KafkaProducerMetric
+		kafkaMetrics, err = c.getKafkaProducerMetrics(ctx, 100)
+		if err != nil {
+			logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Error collecting Kafka metrics: %v", err), "error")
+		} else {
+			metrics.KafkaProducerMetrics = kafkaMetrics
+		}
 	*/
 
 	// Collect Kafka producer metrics
@@ -418,7 +418,73 @@ func (ch *ClickHouseClient) HealthCheck() error {
 	return ch.Client.Ping(ctx)
 }
 
+// GetClickHouseHealth returns health information for ClickHouse
+func GetClickHouseHealth() (map[string]interface{}, error) {
+	if clickHouseClient == nil {
+		return map[string]interface{}{
+			"status": "disconnected",
+		}, fmt.Errorf("ClickHouse client not initialized")
+	}
+
+	err := clickHouseClient.HealthCheck()
+	if err != nil {
+		return map[string]interface{}{
+			"status": "error",
+			"error":  err.Error(),
+		}, err
+	}
+
+	return map[string]interface{}{
+		"status":       "connected",
+		"host":         clickHouseConfig.Host,
+		"port":         clickHouseConfig.Port,
+		"database":     clickHouseConfig.Database,
+		"last_checked": time.Now(),
+	}, nil
+}
+
 // Close closes the ClickHouse client connection
 func (ch *ClickHouseClient) Close() error {
 	return ch.Client.Close()
+}
+
+// Global ClickHouse client and configuration
+var clickHouseClient *ClickHouseClient
+var clickHouseConfig = ClickHouseConfig{
+	Host:     "10.32.3.50", // ClickHouse service ClusterIP
+	Port:     9000,
+	Database: "vusmart", // Changed from monitoring to vusmart
+	Username: "monitoring_read",
+	Password: "StrongP@assword123",
+}
+
+// initClickHouse initializes the ClickHouse client connection
+func InitClickHouse() error {
+	client, err := NewClickHouseClient(clickHouseConfig)
+	if err != nil {
+		return err
+	}
+
+	clickHouseClient = client
+	logger.LogSuccess("System", "ClickHouse", "ClickHouse client initialized successfully")
+	return nil
+}
+
+// collectClickHouseMetrics collects all metrics from ClickHouse
+func CollectClickHouseMetrics() (*ClickHouseMetrics, error) {
+	if clickHouseClient == nil {
+		return nil, fmt.Errorf("ClickHouse client not initialized")
+	}
+
+	metrics, err := clickHouseClient.CollectMetrics()
+	if err != nil {
+		logger.LogError("System", "ClickHouse", fmt.Sprintf("Error collecting metrics: %v", err))
+		return nil, err
+	}
+
+	// Debug log the collected metrics
+	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Pod Resource Metrics: %d, Pod Status Metrics: %d",
+		len(metrics.PodResourceMetrics), len(metrics.PodStatusMetrics)), "info")
+
+	return metrics, nil
 }

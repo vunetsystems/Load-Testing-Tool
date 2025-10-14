@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -91,6 +92,46 @@ type ProcessConfig struct {
 	DefaultTimeout          int `yaml:"default_timeout"`
 	GracefulShutdownTimeout int `yaml:"graceful_shutdown_timeout"`
 	RemoteTimeout           int `yaml:"remote_timeout"`
+}
+
+// NodeMetrics represents metrics for a single node
+type NodeMetrics struct {
+	NodeID      string    `json:"nodeId"`
+	Status      string    `json:"status"`
+	EPS         int       `json:"eps"`
+	KafkaLoad   int       `json:"kafkaLoad"`
+	CHLoad      int       `json:"chLoad"`
+	CPU         float64   `json:"cpu"`         // CPU usage percentage (0-100)
+	Memory      float64   `json:"memory"`      // Memory usage percentage (0-100)
+	TotalCPU    float64   `json:"totalCpu"`    // Total CPU cores available
+	TotalMemory float64   `json:"totalMemory"` // Total memory in GB available
+	LastUpdate  time.Time `json:"lastUpdate"`
+}
+
+// HTTPMetricsResponse represents the response from node metrics API
+type HTTPMetricsResponse struct {
+	NodeID    string    `json:"nodeId"`
+	Timestamp time.Time `json:"timestamp"`
+	System    struct {
+		CPU    HTTPNodeCPUInfo    `json:"cpu"`
+		Memory HTTPNodeMemoryInfo `json:"memory"`
+		Uptime int64              `json:"uptime_seconds"`
+	} `json:"system"`
+}
+
+// HTTPNodeCPUInfo represents CPU metrics from HTTP API
+type HTTPNodeCPUInfo struct {
+	UsedPercent float64 `json:"used_percent"`
+	Cores       int     `json:"cores"`
+	Load1M      float64 `json:"load_1m"`
+}
+
+// HTTPNodeMemoryInfo represents memory metrics from HTTP API
+type HTTPNodeMemoryInfo struct {
+	UsedGB      float64 `json:"used_gb"`
+	AvailableGB float64 `json:"available_gb"`
+	TotalGB     float64 `json:"total_gb"`
+	UsedPercent float64 `json:"used_percent"`
 }
 
 // NodeManager handles node operations
@@ -1116,4 +1157,228 @@ func printUsage() {
 	fmt.Println("  node_manager list")
 	fmt.Println("  node_manager list-enabled")
 	fmt.Println("  node_manager web")
+}
+
+// Initialize node data from nodes.yaml configuration
+func InitNodeData(nm *NodeManager, appState interface{}) {
+	log.Printf("Initializing node data from configuration...")
+
+	// Load nodes from configuration
+	err := nm.LoadNodesConfig()
+	if err != nil {
+		log.Printf("Failed to load nodes config: %v", err)
+		log.Printf("Using default node configuration")
+		return
+	}
+
+	log.Printf("Loaded nodes from config")
+}
+
+// pollNodeMetrics performs HTTP GET request to node's metrics endpoint
+func pollNodeMetrics(nodeConfig NodeConfig) (*HTTPMetricsResponse, error) {
+	// Create HTTP client with timeout
+	client := &http.Client{
+		Timeout: 2 * time.Second,
+	}
+
+	// Build metrics URL
+	metricsURL := fmt.Sprintf("http://%s:%d/api/system/metrics", nodeConfig.Host, nodeConfig.MetricsPort)
+
+	log.Printf("Making GET request to %s", metricsURL)
+
+	// Make HTTP request
+	resp, err := client.Get(metricsURL)
+	if err != nil {
+		log.Printf("HTTP request failed: %v", err)
+		return nil, fmt.Errorf("HTTP request failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	log.Printf("Response status: %d", resp.StatusCode)
+
+	// Check HTTP status code
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Bad status: %d %s", resp.StatusCode, resp.Status)
+		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
+	}
+
+	// Parse JSON response
+	var metrics HTTPMetricsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&metrics); err != nil {
+		log.Printf("JSON decode failed: %v", err)
+		return nil, fmt.Errorf("JSON decode failed: %v", err)
+	}
+
+	log.Printf("Metrics response parsed successfully")
+	return &metrics, nil
+}
+
+// Get local system total memory
+func getLocalSystemMemory() (float64, error) {
+	cmd := exec.Command("free", "-b")
+	output, err := cmd.Output()
+	if err != nil {
+		return 0, fmt.Errorf("failed to execute local free command: %v", err)
+	}
+
+	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+	for _, line := range lines {
+		if strings.Contains(line, "Mem:") {
+			fields := strings.Fields(line)
+			if len(fields) >= 2 {
+				bytes, err := strconv.ParseInt(fields[1], 10, 64)
+				if err != nil {
+					return 0, fmt.Errorf("failed to parse memory bytes: %v", err)
+				}
+				// Convert bytes to GB
+				return float64(bytes) / 1024 / 1024 / 1024, nil
+			}
+		}
+	}
+
+	return 0, fmt.Errorf("could not find memory information in free output")
+}
+
+// Get local system total CPU cores
+func getLocalSystemCPU() (float64, error) {
+	cmd := exec.Command("nproc")
+	output, err := cmd.Output()
+	if err != nil {
+		return 0, fmt.Errorf("failed to execute local nproc command: %v", err)
+	}
+
+	cpuCores, err := strconv.ParseFloat(strings.TrimSpace(string(output)), 64)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse CPU cores: %v", err)
+	}
+
+	if cpuCores < 1 {
+		return 4.0, nil // fallback to 4 cores if parsing fails
+	}
+
+	return cpuCores, nil
+}
+
+// Handle node management CLI commands
+func HandleNodeManagementCLI(command string, args []string) bool {
+	switch command {
+	case "add":
+		handleAddNodeCLI(args)
+		return true
+	case "remove":
+		handleRemoveNodeCLI(args)
+		return true
+	case "enable":
+		handleEnableNodeCLI(args)
+		return true
+	case "disable":
+		handleDisableNodeCLI(args)
+		return true
+	case "list":
+		handleListNodesCLI()
+		return true
+	case "list-enabled":
+		handleListEnabledNodesCLI()
+		return true
+	case "web":
+		// Continue to web server mode
+		return false
+	default:
+		return false // Not a node management command
+	}
+}
+
+func handleAddNodeCLI(args []string) {
+	if len(args) < 6 {
+		log.Fatal("Usage: vuDataSim-manager add <name> <host> <user> <key_path> <conf_dir> <binary_dir> [description] [enabled]")
+	}
+
+	name := args[0]
+	host := args[1]
+	user := args[2]
+	keyPath := args[3]
+	confDir := args[4]
+	binaryDir := args[5]
+
+	description := ""
+	if len(args) > 6 {
+		description = strings.Join(args[6:len(args)-1], " ")
+	}
+
+	enabled := true
+	if len(args) > 7 {
+		enabled = args[len(args)-1] == "true"
+	}
+
+	nm := NewNodeManager()
+	err := nm.AddNode(name, host, user, keyPath, confDir, binaryDir, description, enabled)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func handleRemoveNodeCLI(args []string) {
+	if len(args) != 1 {
+		log.Fatal("Usage: vuDataSim-manager remove <name>")
+	}
+
+	name := args[0]
+	nm := NewNodeManager()
+	err := nm.RemoveNode(name)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func handleEnableNodeCLI(args []string) {
+	if len(args) != 1 {
+		log.Fatal("Usage: vuDataSim-manager enable <name>")
+	}
+
+	name := args[0]
+	nm := NewNodeManager()
+	err := nm.EnableNode(name)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func handleDisableNodeCLI(args []string) {
+	if len(args) != 1 {
+		log.Fatal("Usage: vuDataSim-manager disable <name>")
+	}
+
+	name := args[0]
+	nm := NewNodeManager()
+	err := nm.DisableNode(name)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func handleListNodesCLI() {
+	nm := NewNodeManager()
+	nm.ListNodes()
+}
+
+func handleListEnabledNodesCLI() {
+	nm := NewNodeManager()
+	enabledNodes := nm.GetEnabledNodes()
+	fmt.Println("Enabled Nodes:")
+	fmt.Println("==============")
+
+	if len(enabledNodes) == 0 {
+		fmt.Println("No enabled nodes")
+		return
+	}
+
+	for name, config := range enabledNodes {
+		fmt.Printf("Node: %s\n", name)
+		fmt.Printf("  Host: %s\n", config.Host)
+		fmt.Printf("  User: %s\n", config.User)
+		fmt.Printf("  Description: %s\n", config.Description)
+		fmt.Printf("  Binary Dir: %s\n", config.BinaryDir)
+		fmt.Printf("  Conf Dir: %s\n", config.ConfDir)
+		fmt.Println()
+	}
 }
