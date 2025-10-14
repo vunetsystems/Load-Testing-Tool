@@ -12,7 +12,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// NodeConfig represents a single node configuration
 type NodeConfig struct {
 	Host        string `yaml:"host"`
 	User        string `yaml:"user"`
@@ -24,13 +23,11 @@ type NodeConfig struct {
 	Enabled     bool   `yaml:"enabled"`
 }
 
-// NodesConfig represents the entire nodes configuration
 type NodesConfig struct {
 	ClusterSettings ClusterSettings       `yaml:"cluster_settings"`
 	Nodes           map[string]NodeConfig `yaml:"nodes"`
 }
 
-// ClusterSettings represents cluster-wide configuration
 type ClusterSettings struct {
 	BackupRetentionDays int    `yaml:"backup_retention_days"`
 	ConflictResolution  string `yaml:"conflict_resolution"`
@@ -39,40 +36,33 @@ type ClusterSettings struct {
 	SyncTimeout         int    `yaml:"sync_timeout"`
 }
 
-// BinaryControl manages binary operations across nodes
 type BinaryControl struct {
 	nodesConfigPath string
 	nodesConfig     NodesConfig
 }
 
-// BinaryStatus represents the status of a binary on a node
 type BinaryStatus struct {
 	NodeName    string `json:"nodeName"`
-	Status      string `json:"status"` // running, stopped, not_found, error
-	PID         int    `json:"pid"`
-	StartTime   string `json:"startTime"`
-	ProcessInfo string `json:"processInfo"`
+	Status      string `json:"status"` // running, stopped, disabled, error
+	PID         int    `json:"pid,omitempty"`
+	StartTime   string `json:"startTime,omitempty"`
+	ProcessInfo string `json:"processInfo,omitempty"`
 	LastChecked string `json:"lastChecked"`
 }
 
-// BinaryControlResponse represents the response from binary control operations
 type BinaryControlResponse struct {
 	Success bool        `json:"success"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data,omitempty"`
 }
 
-// NewBinaryControl creates a new binary control instance
 func NewBinaryControl() *BinaryControl {
 	return &BinaryControl{
 		nodesConfigPath: "src/configs/nodes.yaml",
-		nodesConfig: NodesConfig{
-			Nodes: make(map[string]NodeConfig),
-		},
+		nodesConfig:     NodesConfig{Nodes: make(map[string]NodeConfig)},
 	}
 }
 
-// LoadNodesConfig loads the nodes configuration from YAML file
 func (bc *BinaryControl) LoadNodesConfig() error {
 	if _, err := os.Stat(bc.nodesConfigPath); os.IsNotExist(err) {
 		return fmt.Errorf("nodes config file not found: %s", bc.nodesConfigPath)
@@ -83,80 +73,58 @@ func (bc *BinaryControl) LoadNodesConfig() error {
 		return fmt.Errorf("failed to read nodes config file: %v", err)
 	}
 
-	err = yaml.Unmarshal(data, &bc.nodesConfig)
-	if err != nil {
+	if err := yaml.Unmarshal(data, &bc.nodesConfig); err != nil {
 		return fmt.Errorf("failed to parse nodes config file: %v", err)
 	}
 
 	return nil
 }
 
-// GetEnabledNodes returns only enabled nodes
 func (bc *BinaryControl) GetEnabledNodes() map[string]NodeConfig {
-	enabledNodes := make(map[string]NodeConfig)
-	for name, config := range bc.nodesConfig.Nodes {
-		if config.Enabled {
-			enabledNodes[name] = config
+	enabled := make(map[string]NodeConfig)
+	for name, node := range bc.nodesConfig.Nodes {
+		if node.Enabled {
+			enabled[name] = node
 		}
 	}
-	return enabledNodes
+	return enabled
 }
 
-// StartBinary starts the binary on a specific node
 func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryControlResponse, error) {
-	nodeConfig, exists := bc.nodesConfig.Nodes[nodeName]
-	if !exists {
-		return &BinaryControlResponse{
-			Success: false,
-			Message: fmt.Sprintf("Node %s not found in configuration", nodeName),
-		}, fmt.Errorf("node %s not found", nodeName)
+	node, ok := bc.nodesConfig.Nodes[nodeName]
+	if !ok {
+		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
+	}
+	if !node.Enabled {
+		return response(false, fmt.Sprintf("Node %s is disabled", nodeName)), fmt.Errorf("node %s disabled", nodeName)
 	}
 
-	if !nodeConfig.Enabled {
-		return &BinaryControlResponse{
-			Success: false,
-			Message: fmt.Sprintf("Node %s is disabled", nodeName),
-		}, fmt.Errorf("node %s is disabled", nodeName)
-	}
-
-	// Check if binary is already running
 	status, err := bc.GetBinaryStatus(nodeName)
 	if err == nil && status.Status == "running" {
-		return &BinaryControlResponse{
-			Success: false,
-			Message: fmt.Sprintf("Binary is already running on node %s (PID: %d)", nodeName, status.PID),
-		}, fmt.Errorf("binary already running on node %s", nodeName)
+		return response(false, fmt.Sprintf("Binary already running on node %s (PID %d)", nodeName, status.PID)), fmt.Errorf("binary already running")
 	}
 
-	// Start the binary
-	binaryPath := fmt.Sprintf("%s/finalvudatasim", nodeConfig.BinaryDir)
+	binaryPath := fmt.Sprintf("%s/finalvudatasim", node.BinaryDir)
 	log.Printf("Starting binary on node %s: %s", nodeName, binaryPath)
 
-	// Use nohup to run in background and redirect output
-	startCmd := fmt.Sprintf("cd %s && nohup ", nodeConfig.BinaryDir, binaryPath)
-
-	err = bc.sshExec(nodeConfig, startCmd)
-	if err != nil {
-		return &BinaryControlResponse{
-			Success: false,
-			Message: fmt.Sprintf("Failed to start binary on node %s: %v", nodeName, err),
-		}, err
+	// Run binary in background using nohup, redirect output
+	cmd := fmt.Sprintf("cd %s && nohup ./finalvudatasim > /dev/null 2>&1 &", node.BinaryDir)
+	if err := bc.sshExec(node, cmd); err != nil {
+		return response(false, fmt.Sprintf("Failed to start binary on node %s: %v", nodeName, err)), err
 	}
 
-	// Wait a moment for the process to start
 	time.Sleep(2 * time.Second)
 
-	// Get the updated status
 	newStatus, err := bc.GetBinaryStatus(nodeName)
 	if err != nil {
 		return &BinaryControlResponse{
 			Success: true,
-			Message: fmt.Sprintf("Binary start command sent to node %s, but status check failed: %v", nodeName, err),
-			Data:    map[string]interface{}{"warning": "Binary may be starting, but status verification failed"},
+			Message: fmt.Sprintf("Start command sent to node %s, status check failed: %v", nodeName, err),
+			Data:    map[string]string{"warning": "Binary may be starting, status check failed"},
 		}, nil
 	}
 
-	responseData := map[string]interface{}{
+	data := map[string]interface{}{
 		"nodeName":   nodeName,
 		"action":     "start",
 		"timeout":    timeout,
@@ -167,69 +135,48 @@ func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryContr
 	return &BinaryControlResponse{
 		Success: true,
 		Message: fmt.Sprintf("Binary started successfully on node %s", nodeName),
-		Data:    responseData,
+		Data:    data,
 	}, nil
 }
 
-// StopBinary stops the binary on a specific node
 func (bc *BinaryControl) StopBinary(nodeName string, timeout int) (*BinaryControlResponse, error) {
-	nodeConfig, exists := bc.nodesConfig.Nodes[nodeName]
-	if !exists {
-		return &BinaryControlResponse{
-			Success: false,
-			Message: fmt.Sprintf("Node %s not found in configuration", nodeName),
-		}, fmt.Errorf("node %s not found", nodeName)
+	node, ok := bc.nodesConfig.Nodes[nodeName]
+	if !ok {
+		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
+	}
+	if !node.Enabled {
+		return response(false, fmt.Sprintf("Node %s is disabled", nodeName)), fmt.Errorf("node %s disabled", nodeName)
 	}
 
-	if !nodeConfig.Enabled {
-		return &BinaryControlResponse{
-			Success: false,
-			Message: fmt.Sprintf("Node %s is disabled", nodeName),
-		}, fmt.Errorf("node %s is disabled", nodeName)
-	}
-
-	// Get current status to find PID
 	status, err := bc.GetBinaryStatus(nodeName)
 	if err != nil || status.Status != "running" {
-		return &BinaryControlResponse{
-			Success: false,
-			Message: fmt.Sprintf("Binary is not running on node %s", nodeName),
-		}, fmt.Errorf("binary not running on node %s", nodeName)
+		return response(false, fmt.Sprintf("Binary not running on node %s", nodeName)), fmt.Errorf("binary not running")
 	}
 
-	// Stop the binary using kill command
 	log.Printf("Stopping binary on node %s (PID: %d)", nodeName, status.PID)
 
-	// First try graceful termination
+	// Attempt graceful kill; if fails, force kill
 	killCmd := fmt.Sprintf("kill %d", status.PID)
-	err = bc.sshExec(nodeConfig, killCmd)
-	if err != nil {
-		// If graceful termination fails, try force kill
-		log.Printf("Graceful termination failed, trying force kill on node %s", nodeName)
+	if err := bc.sshExec(node, killCmd); err != nil {
+		log.Printf("Graceful kill failed, force killing on node %s", nodeName)
 		killCmd = fmt.Sprintf("kill -9 %d", status.PID)
-		err = bc.sshExec(nodeConfig, killCmd)
-		if err != nil {
-			return &BinaryControlResponse{
-				Success: false,
-				Message: fmt.Sprintf("Failed to stop binary on node %s: %v", nodeName, err),
-			}, err
+		if err := bc.sshExec(node, killCmd); err != nil {
+			return response(false, fmt.Sprintf("Failed to stop binary on node %s: %v", nodeName, err)), err
 		}
 	}
 
-	// Wait a moment for the process to stop
 	time.Sleep(2 * time.Second)
 
-	// Verify the process has stopped
 	newStatus, err := bc.GetBinaryStatus(nodeName)
 	if err != nil {
 		return &BinaryControlResponse{
 			Success: true,
-			Message: fmt.Sprintf("Binary stop command sent to node %s, but status verification failed: %v", nodeName, err),
-			Data:    map[string]interface{}{"warning": "Binary may be stopped, but status verification failed"},
+			Message: fmt.Sprintf("Stop command sent to node %s, status check failed: %v", nodeName, err),
+			Data:    map[string]string{"warning": "Binary may be stopped, status check failed"},
 		}, nil
 	}
 
-	responseData := map[string]interface{}{
+	data := map[string]interface{}{
 		"nodeName":    nodeName,
 		"action":      "stop",
 		"timeout":     timeout,
@@ -240,18 +187,108 @@ func (bc *BinaryControl) StopBinary(nodeName string, timeout int) (*BinaryContro
 	return &BinaryControlResponse{
 		Success: true,
 		Message: fmt.Sprintf("Binary stopped successfully on node %s", nodeName),
-		Data:    responseData,
+		Data:    data,
 	}, nil
 }
 
-// GetBinaryStatus gets the status of the binary on a specific node
-func (bc *BinaryControl) GetBinaryStatus(nodeName string) (*BinaryStatus, error) {
-	nodeConfig, exists := bc.nodesConfig.Nodes[nodeName]
-	if !exists {
-		return nil, fmt.Errorf("node %s not found in configuration", nodeName)
+func (bc *BinaryControl) StartMetricsBinary(nodeName string, timeout int) (*BinaryControlResponse, error) {
+	node, ok := bc.nodesConfig.Nodes[nodeName]
+	if !ok {
+		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
+	}
+	if !node.Enabled {
+		return response(false, fmt.Sprintf("Node %s is disabled", nodeName)), fmt.Errorf("node %s disabled", nodeName)
 	}
 
-	if !nodeConfig.Enabled {
+	// Check if already running
+	output, err := bc.sshExecWithOutput(node, "pgrep -f node_metrics_api")
+	if err == nil && output != "" {
+		return response(false, fmt.Sprintf("node_metrics_api already running on node %s", nodeName)), fmt.Errorf("metrics binary already running")
+	}
+
+	binaryPath := fmt.Sprintf("%s/node_metrics_api", node.BinaryDir)
+	log.Printf("Starting node_metrics_api on node %s: %s", nodeName, binaryPath)
+
+	// Run metrics binary in background on port 8086
+	cmd := fmt.Sprintf("cd %s && nohup ./node_metrics_api --port 8086 > /dev/null 2>&1 &", node.BinaryDir)
+	if err := bc.sshExec(node, cmd); err != nil {
+		return response(false, fmt.Sprintf("Failed to start node_metrics_api on node %s: %v", nodeName, err)), err
+	}
+
+	time.Sleep(2 * time.Second)
+
+	output, err = bc.sshExecWithOutput(node, "pgrep -f node_metrics_api")
+	status := "stopped"
+	if err == nil && output != "" {
+		status = "running"
+	}
+
+	data := map[string]interface{}{
+		"nodeName":   nodeName,
+		"action":     "start_metrics",
+		"timeout":    timeout,
+		"binaryPath": binaryPath,
+		"status":     status,
+	}
+
+	return &BinaryControlResponse{
+		Success: true,
+		Message: fmt.Sprintf("node_metrics_api started on node %s", nodeName),
+		Data:    data,
+	}, nil
+}
+
+func (bc *BinaryControl) StopMetricsBinary(nodeName string, timeout int) (*BinaryControlResponse, error) {
+	node, ok := bc.nodesConfig.Nodes[nodeName]
+	if !ok {
+		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
+	}
+	if !node.Enabled {
+		return response(false, fmt.Sprintf("Node %s is disabled", nodeName)), fmt.Errorf("node %s disabled", nodeName)
+	}
+
+	output, err := bc.sshExecWithOutput(node, "pgrep -f node_metrics_api")
+	if err != nil || output == "" {
+		return response(false, fmt.Sprintf("node_metrics_api not running on node %s", nodeName)), fmt.Errorf("metrics binary not running")
+	}
+
+	pids := strings.Split(output, "\n")
+	for _, pidStr := range pids {
+		pid, err := strconv.Atoi(pidStr)
+		if err == nil {
+			killCmd := fmt.Sprintf("kill %d", pid)
+			_ = bc.sshExec(node, killCmd)
+		}
+	}
+
+	time.Sleep(2 * time.Second)
+
+	output, err = bc.sshExecWithOutput(node, "pgrep -f node_metrics_api")
+	status := "running"
+	if err != nil || output == "" {
+		status = "stopped"
+	}
+
+	data := map[string]interface{}{
+		"nodeName":   nodeName,
+		"action":     "stop_metrics",
+		"timeout":    timeout,
+		"status":     status,
+	}
+
+	return &BinaryControlResponse{
+		Success: true,
+		Message: fmt.Sprintf("node_metrics_api stopped on node %s", nodeName),
+		Data:    data,
+	}, nil
+}
+
+func (bc *BinaryControl) GetBinaryStatus(nodeName string) (*BinaryStatus, error) {
+	node, ok := bc.nodesConfig.Nodes[nodeName]
+	if !ok {
+		return nil, fmt.Errorf("node %s not found", nodeName)
+	}
+	if !node.Enabled {
 		return &BinaryStatus{
 			NodeName:    nodeName,
 			Status:      "disabled",
@@ -259,11 +296,8 @@ func (bc *BinaryControl) GetBinaryStatus(nodeName string) (*BinaryStatus, error)
 		}, nil
 	}
 
-	// Check if the binary process is running
-	// Look for the finalvudatasim process
-	checkCmd := "pgrep -f finalvudatasim"
-	output, err := bc.sshExecWithOutput(nodeConfig, checkCmd)
-	if err != nil || strings.TrimSpace(output) == "" {
+	output, err := bc.sshExecWithOutput(node, "pgrep -f finalvudatasim")
+	if err != nil || output == "" {
 		return &BinaryStatus{
 			NodeName:    nodeName,
 			Status:      "stopped",
@@ -271,17 +305,7 @@ func (bc *BinaryControl) GetBinaryStatus(nodeName string) (*BinaryStatus, error)
 		}, nil
 	}
 
-	// Get process details
-	pids := strings.Split(strings.TrimSpace(output), "\n")
-	if len(pids) == 0 || pids[0] == "" {
-		return &BinaryStatus{
-			NodeName:    nodeName,
-			Status:      "stopped",
-			LastChecked: time.Now().Format("2006-01-02 15:04:05"),
-		}, nil
-	}
-
-	// Get the first PID (main process)
+	pids := strings.Split(output, "\n")
 	pid, err := strconv.Atoi(pids[0])
 	if err != nil {
 		return &BinaryStatus{
@@ -292,18 +316,12 @@ func (bc *BinaryControl) GetBinaryStatus(nodeName string) (*BinaryStatus, error)
 		}, err
 	}
 
-	// Get process start time
-	startTimeCmd := fmt.Sprintf("ps -p %d -o lstart=", pid)
-	startTimeOutput, err := bc.sshExecWithOutput(nodeConfig, startTimeCmd)
+	startTime, err := bc.sshExecWithOutput(node, fmt.Sprintf("ps -p %d -o lstart=", pid))
 	if err != nil {
-		startTimeOutput = "Unknown"
-	} else {
-		startTimeOutput = strings.TrimSpace(startTimeOutput)
+		startTime = "Unknown"
 	}
 
-	// Get detailed process info
-	processInfoCmd := fmt.Sprintf("ps -p %d -o pid,ppid,pcpu,pmem,etime,comm", pid)
-	processInfo, err := bc.sshExecWithOutput(nodeConfig, processInfoCmd)
+	processInfo, err := bc.sshExecWithOutput(node, fmt.Sprintf("ps -p %d -o pid,ppid,pcpu,pmem,etime,comm", pid))
 	if err != nil {
 		processInfo = fmt.Sprintf("PID: %d", pid)
 	}
@@ -312,13 +330,12 @@ func (bc *BinaryControl) GetBinaryStatus(nodeName string) (*BinaryStatus, error)
 		NodeName:    nodeName,
 		Status:      "running",
 		PID:         pid,
-		StartTime:   startTimeOutput,
+		StartTime:   strings.TrimSpace(startTime),
 		ProcessInfo: strings.TrimSpace(processInfo),
 		LastChecked: time.Now().Format("2006-01-02 15:04:05"),
 	}, nil
 }
 
-// GetAllBinaryStatuses gets the status of binaries on all enabled nodes
 func (bc *BinaryControl) GetAllBinaryStatuses() (*BinaryControlResponse, error) {
 	enabledNodes := bc.GetEnabledNodes()
 	if len(enabledNodes) == 0 {
@@ -329,83 +346,72 @@ func (bc *BinaryControl) GetAllBinaryStatuses() (*BinaryControlResponse, error) 
 		}, nil
 	}
 
-	var allStatuses []BinaryStatus
+	var statuses []BinaryStatus
 	for nodeName := range enabledNodes {
 		status, err := bc.GetBinaryStatus(nodeName)
 		if err != nil {
-			log.Printf("Warning: Failed to get binary status for node %s: %v", nodeName, err)
-			// Add error status
-			allStatuses = append(allStatuses, BinaryStatus{
+			log.Printf("Failed to get status for node %s: %v", nodeName, err)
+			statuses = append(statuses, BinaryStatus{
 				NodeName:    nodeName,
 				Status:      "error",
 				ProcessInfo: fmt.Sprintf("Status check failed: %v", err),
 				LastChecked: time.Now().Format("2006-01-02 15:04:05"),
 			})
 		} else {
-			allStatuses = append(allStatuses, *status)
+			statuses = append(statuses, *status)
 		}
 	}
 
 	return &BinaryControlResponse{
 		Success: true,
-		Message: fmt.Sprintf("Retrieved status for %d nodes", len(allStatuses)),
-		Data:    allStatuses,
+		Message: fmt.Sprintf("Retrieved status for %d nodes", len(statuses)),
+		Data:    statuses,
 	}, nil
 }
 
-// sshExec executes a command on the remote node via SSH
-func (bc *BinaryControl) sshExec(nodeConfig NodeConfig, command string) error {
+func (bc *BinaryControl) sshExec(node NodeConfig, command string) error {
 	args := []string{
-		"-i", nodeConfig.KeyPath,
+		"-i", node.KeyPath,
 		"-o", "StrictHostKeyChecking=no",
 		"-o", "UserKnownHostsFile=/dev/null",
 		"-o", "ConnectTimeout=10",
 		"-o", "LogLevel=ERROR",
-		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
+		fmt.Sprintf("%s@%s", node.User, node.Host),
 		command,
 	}
-
 	cmd := exec.Command("ssh", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("SSH command failed: %v", err)
-	}
-
-	return nil
+	return cmd.Run()
 }
 
-// sshExecWithOutput executes a command on the remote node and returns the output
-func (bc *BinaryControl) sshExecWithOutput(nodeConfig NodeConfig, command string) (string, error) {
+func (bc *BinaryControl) sshExecWithOutput(node NodeConfig, command string) (string, error) {
 	args := []string{
-		"-i", nodeConfig.KeyPath,
+		"-i", node.KeyPath,
 		"-o", "StrictHostKeyChecking=no",
 		"-o", "UserKnownHostsFile=/dev/null",
 		"-o", "ConnectTimeout=10",
 		"-o", "LogLevel=ERROR",
-		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
+		fmt.Sprintf("%s@%s", node.User, node.Host),
 		command,
 	}
-
 	cmd := exec.Command("ssh", args...)
-
 	output, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("SSH command failed: %v", err)
-	}
-
-	return strings.TrimSpace(string(output)), nil
+	return strings.TrimSpace(string(output)), err
 }
 
-// Global binary control instance
+func response(success bool, message string) *BinaryControlResponse {
+	return &BinaryControlResponse{
+		Success: success,
+		Message: message,
+	}
+}
+
+// Global instance
 var binaryControl = NewBinaryControl()
 
-// Initialize binary control
 func init() {
-	err := binaryControl.LoadNodesConfig()
-	if err != nil {
-		log.Printf("Warning: Failed to load nodes config for binary control: %v", err)
+	if err := binaryControl.LoadNodesConfig(); err != nil {
+		log.Printf("Warning: Failed to load nodes config: %v", err)
 	}
 }
