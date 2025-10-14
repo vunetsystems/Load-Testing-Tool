@@ -499,8 +499,6 @@ func CollectClickHouseMetrics() (*ClickHouseMetrics, error) {
 	}
 
 	// Debug log the collected metrics
-	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Pod Resource Metrics: %d, Pod Status Metrics: %d",
-		len(metrics.PodResourceMetrics), len(metrics.PodStatusMetrics)), "info")
 
 	return metrics, nil
 }

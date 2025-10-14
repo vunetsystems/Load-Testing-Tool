@@ -985,6 +985,24 @@ func getLogField(entry map[string]interface{}, field, defaultValue string) strin
 	return defaultValue
 }
 
+// handleAPIGetClusterMetrics handles GET /api/cluster/metrics
+func handleAPIGetClusterMetrics(w http.ResponseWriter, r *http.Request) {
+	metrics, err := clickhouse.GetClusterNodeMetrics()
+	if err != nil {
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to fetch cluster metrics: %v", err),
+		})
+		return
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "Cluster metrics retrieved successfully",
+		Data:    metrics,
+	})
+}
+
 // getLogType determines the log type based on zerolog level
 func getLogType(entry map[string]interface{}) string {
 	if level, ok := entry["level"]; ok {

@@ -6,7 +6,9 @@ class VuDataSimManager {
         this.apiBaseUrl = ''; // Backend API base URL (empty for same origin)
         this.wsConnection = null;
         this.nodes = {}; // Store node data
-        
+        // Add this property to the constructor
+        this.clusterMetrics = {}; // Store real cluster metrics
+
         this.initializeComponents();
         this.bindEvents();
         this.loadNodes(); // Load nodes from API
@@ -202,6 +204,27 @@ class VuDataSimManager {
             // Note: updateDashboardDisplay() is now called hourly for SSH status
         }, 3000);
 
+        // Cluster metrics updates - Update every 30 seconds
+        setInterval(async () => {
+            try {
+                const metricsResponse = await this.callAPI('/api/cluster/metrics');
+                console.log('=== CLUSTER METRICS API RESPONSE ===');
+                console.log('Full response:', metricsResponse);
+                console.log('Response data:', metricsResponse.data);
+                console.log('Response success:', metricsResponse.success);
+                if (metricsResponse.success && metricsResponse.data) {
+                    this.clusterMetrics = metricsResponse.data;
+                    console.log('Assigned clusterMetrics:', this.clusterMetrics);
+                    this.updateClusterTableOnly(); // Update only the metrics columns
+                } else {
+                    console.log('No valid metrics data in response');
+                }
+            } catch (error) {
+                console.error('Error fetching cluster metrics:', error);
+            }
+        }, 30000); // 30 seconds
+
+
         // SSH status updates - Update every hour
         setInterval(() => {
             console.log('Hourly SSH status check triggered');
@@ -243,9 +266,10 @@ class VuDataSimManager {
                             memory: 0,        // Will be updated with real data
                             totalCpu: 4.0,
                             totalMemory: 8.0,
-                            status: node.enabled ? 'active' : 'inactive'
+                            status: node.enabled ? 'active' : 'inactive',
+                            host: node.host   // Store the host IP for matching with metrics target
                         };
-                        console.log(`Converted node ${nodeId} with status ${this.nodeData[nodeId].status}`);
+                        console.log(`Converted node ${nodeId} with host ${node.host} and status ${this.nodeData[nodeId].status}`);
                     });
                     console.log('Final nodeData after conversion:', this.nodeData);
 
@@ -434,31 +458,62 @@ class VuDataSimManager {
         });
 
         // Calculate real-time CPU/Memory data for active and error nodes (nodes that are enabled but may have connection issues)
+        // Calculate real-time CPU/Memory data for active and error nodes
         const displayableNodes = Object.values(this.nodeData).filter(node => node.status === 'active' || node.status === 'error');
         if (displayableNodes.length > 0) {
-            const totalAvgCpu = displayableNodes.reduce((sum, node) => sum + node.totalCpu, 0) / displayableNodes.length;
-            const totalAvgMemory = displayableNodes.reduce((sum, node) => sum + node.totalMemory, 0) / displayableNodes.length;
+            // Use real metrics if available, otherwise fall back to defaults
+            let totalRealCpu = 0;
+            let totalRealMemory = 0;
+            let totalUsedMemory = 0;
+            let nodeCount = 0;
 
-            const avgCpuUsage = displayableNodes.reduce((sum, node) => sum + node.cpu, 0) / displayableNodes.length;
-            const avgMemoryUsage = displayableNodes.reduce((sum, node) => sum + node.memory, 0) / displayableNodes.length;
+            displayableNodes.forEach(node => {
+                const realMetrics = this.clusterMetrics[node.nodeId || node.name];
+                if (realMetrics) {
+                    totalRealCpu += realMetrics.cpu_cores;
+                    totalRealMemory += realMetrics.total_memory_gb;
+                    totalUsedMemory += realMetrics.used_memory_gb;
+                    nodeCount++;
+                }
+            });
 
-            const availableCpu = totalAvgCpu - (totalAvgCpu * avgCpuUsage / 100);
-            const usedMemory = totalAvgMemory * (avgMemoryUsage / 100);
+            if (nodeCount > 0) {
+                // Use real metrics
+                const avgRealCpu = totalRealCpu / nodeCount;
+                const avgRealMemory = totalRealMemory / nodeCount;
+                const avgUsedMemory = totalUsedMemory / nodeCount;
+                const availableCpu = avgRealCpu * 0.1; // Show 10% usage as example
 
-            this.elements.cpuMemoryValue.textContent = `${availableCpu.toFixed(1)}/${totalAvgCpu.toFixed(1)} cores / ${usedMemory.toFixed(1)}/${totalAvgMemory.toFixed(1)} GB`;
+                this.elements.cpuMemoryValue.textContent = `${availableCpu.toFixed(1)}/${avgRealCpu.toFixed(1)} cores / ${avgUsedMemory.toFixed(1)}/${avgRealMemory.toFixed(1)} GB`;
+            } else {
+                // Fallback to old calculation
+                const totalAvgCpu = displayableNodes.reduce((sum, node) => sum + node.totalCpu, 0) / displayableNodes.length;
+                const totalAvgMemory = displayableNodes.reduce((sum, node) => sum + node.totalMemory, 0) / displayableNodes.length;
+                const avgCpuUsage = displayableNodes.reduce((sum, node) => sum + node.cpu, 0) / displayableNodes.length;
+                const avgMemoryUsage = displayableNodes.reduce((sum, node) => sum + node.memory, 0) / displayableNodes.length;
+                const availableCpu = totalAvgCpu - (totalAvgCpu * avgCpuUsage / 100);
+                const usedMemory = totalAvgMemory * (avgMemoryUsage / 100);
+
+                this.elements.cpuMemoryValue.textContent = `${availableCpu.toFixed(1)}/${totalAvgCpu.toFixed(1)} cores / ${usedMemory.toFixed(1)}/${totalAvgMemory.toFixed(1)} GB`;
+            }
         }
+
+
+
+
+
     }
 
     animateNumber(element, newValue) {
         if (!element) return;
-        
+
         const currentValue = parseInt(element.textContent.replace(/[^0-9]/g, '')) || 0;
         const difference = newValue - currentValue;
-        
+
         if (Math.abs(difference) > 50) { // Only animate significant changes
             element.style.transform = 'scale(1.05)';
             element.textContent = Math.round(newValue).toLocaleString();
-            
+
             setTimeout(() => {
                 element.style.transform = 'scale(1)';
             }, 200);
@@ -467,15 +522,15 @@ class VuDataSimManager {
 
     updateTrend(element, direction) {
         if (!element) return;
-        
+
         const isPositive = direction === 'up';
         const value = (Math.random() * 2).toFixed(1);
         const symbol = isPositive ? 'trending_up' : 'trending_down';
         const colorClass = isPositive ? 'text-success' : 'text-danger';
-        
+
         element.textContent = `${isPositive ? '+' : '-'}${value}%`;
         element.className = `flex items-center gap-1 text-sm ${colorClass} dark:${colorClass}-dark mt-1`;
-        
+
         const icon = element.querySelector('.material-symbols-outlined');
         if (icon) icon.textContent = symbol;
     }
@@ -484,7 +539,7 @@ class VuDataSimManager {
     filterLogs() {
         const nodeFilter = this.elements.logNodeFilter.value;
         const moduleFilter = this.elements.logModuleFilter.value;
-        
+
         const filteredLogs = this.logEntries.filter(log => {
             const nodeMatch = nodeFilter === 'All Nodes' || log.node === nodeFilter;
             const moduleMatch = moduleFilter === 'All Modules' || log.module === moduleFilter;
@@ -497,19 +552,19 @@ class VuDataSimManager {
     displayLogs(logs) {
         const container = this.elements.logsContainer;
         container.innerHTML = '';
-        
+
         logs.forEach((log, index) => {
             const logElement = document.createElement('p');
             logElement.className = 'animate-fade-in';
             logElement.style.animationDelay = `${index * 50}ms`;
-            
+
             const typeClass = this.getLogTypeClass(log.type);
             logElement.innerHTML = `
                 <span class="text-sky-400">${log.time}</span> - 
                 <span class="text-purple-400">${log.node}</span> - 
                 <span class="${typeClass}">${log.module}</span>: ${log.message}
             `;
-            
+
             container.appendChild(logElement);
         });
     }
@@ -540,7 +595,7 @@ class VuDataSimManager {
         const currentTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
         const activeNodes = Object.keys(this.nodeData).filter(id => this.nodeData[id].status === 'active' || this.nodeData[id].status === 'error');
         const randomNode = activeNodes[Math.floor(Math.random() * activeNodes.length)];
-        
+
         const newLog = {
             time: currentTime,
             node: randomNode.charAt(0).toUpperCase() + randomNode.slice(1),
@@ -589,11 +644,11 @@ class VuDataSimManager {
             }
 
             const response = await fetch(`${this.apiBaseUrl}${endpoint}`, config);
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
             return await response.json();
         } catch (error) {
             console.error('API call failed:', error);
@@ -928,12 +983,11 @@ class VuDataSimManager {
     showNotification(message, type = 'info') {
         // Create notification element
         const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-down ${
-            type === 'success' ? 'bg-success text-white' :
-            type === 'error' ? 'bg-danger text-white' :
-            type === 'warning' ? 'bg-yellow-500 text-white' :
-            'bg-primary text-white'
-        }`;
+        notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-down ${type === 'success' ? 'bg-success text-white' :
+                type === 'error' ? 'bg-danger text-white' :
+                    type === 'warning' ? 'bg-yellow-500 text-white' :
+                        'bg-primary text-white'
+            }`;
         notification.textContent = message;
 
         document.body.appendChild(notification);
@@ -1031,8 +1085,8 @@ class VuDataSimManager {
             const statusBadge = status.status === 'running'
                 ? '<div class="inline-flex items-center gap-2 rounded-full bg-success/20 dark:bg-success-dark/20 px-3 py-1 text-xs font-medium text-success dark:text-success-dark"><span class="h-2 w-2 rounded-full bg-success"></span>Running</div>'
                 : status.status === 'stopped'
-                ? '<div class="inline-flex items-center gap-2 rounded-full bg-danger/20 dark:bg-danger-dark/20 px-3 py-1 text-xs font-medium text-danger dark:text-danger-dark"><span class="h-2 w-2 rounded-full bg-danger"></span>Stopped</div>'
-                : '<div class="inline-flex items-center gap-2 rounded-full bg-warning/20 dark:bg-warning-dark/20 px-3 py-1 text-xs font-medium text-warning dark:text-warning-dark"><span class="h-2 w-2 rounded-full bg-warning"></span>' + status.status + '</div>';
+                    ? '<div class="inline-flex items-center gap-2 rounded-full bg-danger/20 dark:bg-danger-dark/20 px-3 py-1 text-xs font-medium text-danger dark:text-danger-dark"><span class="h-2 w-2 rounded-full bg-danger"></span>Stopped</div>'
+                    : '<div class="inline-flex items-center gap-2 rounded-full bg-warning/20 dark:bg-warning-dark/20 px-3 py-1 text-xs font-medium text-warning dark:text-warning-dark"><span class="h-2 w-2 rounded-full bg-warning"></span>' + status.status + '</div>';
 
             row.innerHTML = `
                 <td class="p-3 font-medium">${status.nodeName}</td>
@@ -1417,7 +1471,7 @@ class VuDataSimManager {
 
     displayClickHouseMetrics(metrics) {
         console.log('Received ClickHouse metrics:', metrics);
-        
+
         // Display Pod Metrics first
         this.displayPodResourceMetrics(metrics.podResourceMetrics || []);
         this.displayPodStatusMetrics(metrics.podStatusMetrics || []);
@@ -1673,6 +1727,54 @@ class VuDataSimManager {
             tbody.appendChild(row);
         });
     }
+
+    updateClusterTableOnly() {
+        const tbody = document.getElementById('cluster-table-body');
+        const rows = tbody.querySelectorAll('tr');
+
+        console.log('Updating cluster table with metrics:', this.clusterMetrics);
+
+        rows.forEach(row => {
+            const nodeName = row.cells[0]?.textContent?.trim();
+            console.log('Processing node:', nodeName);
+
+            // Get the host IP from nodeData for this node
+            const nodeData = this.nodeData[nodeName];
+            const hostIP = nodeData ? nodeData.host : null;
+            console.log('Node data for', nodeName, ':', nodeData);
+            console.log('Host IP for matching:', hostIP);
+
+            // Find metrics by matching the target field with the host IP
+            let matchingMetrics = null;
+            for (const [key, metrics] of Object.entries(this.clusterMetrics)) {
+                console.log('Checking metrics key:', key, 'target:', metrics.target, 'against hostIP:', hostIP);
+                if (metrics.target === hostIP) {
+                    matchingMetrics = metrics;
+                    console.log('Found metrics for node:', nodeName, 'using target match with key:', key, 'hostIP:', hostIP);
+                    break;
+                }
+            }
+
+            if (matchingMetrics) {
+                // Update CPU column (index 2) - show available/total format
+                if (row.cells[2]) {
+                    const availableCpu = matchingMetrics.cpu_cores * 0.1; // Example: show 10% available
+                    const newCpuText = `${availableCpu.toFixed(1)} / ${matchingMetrics.cpu_cores.toFixed(1)} cores`;
+                    console.log('Updating CPU for node:', nodeName, 'to:', newCpuText);
+                    row.cells[2].textContent = newCpuText;
+                }
+
+                // Update Memory column (index 3) - show used/total format
+                if (row.cells[3]) {
+                    const newMemText = `${matchingMetrics.used_memory_gb.toFixed(1)} / ${matchingMetrics.total_memory_gb.toFixed(1)} GB`;
+                    console.log('Updating Memory for node:', nodeName, 'to:', newMemText);
+                    row.cells[3].textContent = newMemText;
+                }
+            } else {
+                console.log('No metrics found for node:', nodeName, 'by target matching');
+            }
+        });
+    }
 }
 
 // Initialize the application when DOM is loaded
@@ -1681,7 +1783,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Test function to manually toggle node management
-window.testNodeManagement = function() {
+window.testNodeManagement = function () {
     console.log('Test function called');
     if (window.vuDataSimManager) {
         window.vuDataSimManager.openNodeManagementModal();
