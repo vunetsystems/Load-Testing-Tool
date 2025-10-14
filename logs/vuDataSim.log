@@ -247,3 +247,196 @@
 {"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T14:55:35+05:30","message":"Open in browser"}
 {"level":"info","node":"e2e-108-10","module":"SSH","type":"success","time":"2025-10-14T14:55:51+05:30","message":"Connection check passed"}
 {"level":"info","node":"e2e-108-10","module":"SSH","type":"success","time":"2025-10-14T15:02:44+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:35:49+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:35:49+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:35:49+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T15:35:49+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T15:35:49+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T15:35:49+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T15:35:49+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T15:35:49+05:30","message":"Open in browser"}
+{"level":"info","node":"e2e-108-10","module":"SSH","type":"success","time":"2025-10-14T15:36:00+05:30","message":"Connection check passed"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T15:40:19+05:30","message":"Connection check passed"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T15:40:50+05:30","message":"Connection check passed"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T15:41:38+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:43:01+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:43:01+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:43:01+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T15:43:01+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T15:43:01+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T15:43:01+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T15:43:01+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T15:43:01+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:43:09+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:43:09+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:43:09+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T15:43:09+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T15:43:09+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T15:43:09+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T15:43:09+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T15:43:09+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T15:43:15+05:30","message":"Connection check passed"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:43:19+05:30","message":"Fetched metrics for 10 nodes"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:43:43+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:43:43+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:43:43+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T15:43:43+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T15:43:43+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T15:43:43+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T15:43:43+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T15:43:43+05:30","message":"Open in browser"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:43:44+05:30","message":"Fetched metrics for 10 nodes"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T15:43:49+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:52:41+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:52:41+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:52:41+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T15:52:41+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T15:52:41+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T15:52:41+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T15:52:41+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T15:52:41+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T15:52:46+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:55:40+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:55:40+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:55:40+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T15:55:40+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T15:55:40+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T15:55:40+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T15:55:40+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T15:55:40+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T15:55:52+05:30","message":"Connection check passed"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T15:56:54+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T15:58:29+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T15:58:29+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T15:58:29+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T15:58:29+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T15:58:29+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T15:58:29+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T15:58:29+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T15:58:29+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T15:58:41+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:06:10+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:06:10+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:06:10+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:06:10+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:06:10+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T16:06:10+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T16:06:10+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T16:06:10+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T16:06:13+05:30","message":"Connection check passed"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T16:06:56+05:30","message":"Connection check passed"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:08:01+05:30","message":"Pod Resource Metrics: 3, Pod Status Metrics: 3"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:08:01+05:30","message":"Sending metrics response: &{KafkaProducerMetrics:[] SystemMetrics:[] DatabaseMetrics:[] ContainerMetrics:[] PodResourceMetrics:[{ClusterID:perf-cluster PodName:mssql-telegraf-pipeline-dcffcd5f6-kqmch CPUPercentage:0.0008799649435930482 MemoryPercentage:0.05092137310546238 LastTimestamp:2025-10-14 10:37:34 +0000 UTC} {ClusterID:perf-cluster PodName:linuxmonitor-8d545644d-wv77v CPUPercentage:0.002157522773335363 MemoryPercentage:0.07142473036484327 LastTimestamp:2025-10-14 10:37:34 +0000 UTC} {ClusterID:perf-cluster PodName:apache-metrics-6d7f45d5d8-vbmcf CPUPercentage:0.014323381115396185 MemoryPercentage:0.41870208837460543 LastTimestamp:2025-10-14 10:34:34 +0000 UTC}] PodStatusMetrics:[{ClusterID:perf-cluster NodeName:e2e-82-181 PodName:mssql-telegraf-pipeline-dcffcd5f6-kqmch PodPhase:running ContainerStatus:mssql-telegraf-pipeline=running ContainerReasons: RunningContainers:1 NonRunningContainers:0 DerivedStatus:running} {ClusterID:perf-cluster NodeName:e2e-82-181 PodName:linuxmonitor-8d545644d-wv77v PodPhase:running ContainerStatus:linuxmonitor=running ContainerReasons: RunningContainers:1 NonRunningContainers:0 DerivedStatus:running} {ClusterID:perf-cluster NodeName:e2e-82-181 PodName:apache-metrics-6d7f45d5d8-vbmcf PodPhase:running ContainerStatus:apache-metrics=waiting ContainerReasons:CrashLoopBackOff RunningContainers:0 NonRunningContainers:1 DerivedStatus:CrashLoopBackOff}] LastUpdated:2025-10-14 16:08:00.604272421 +0530 IST m=+110.372271518}"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:11:15+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:11:15+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:11:15+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:11:15+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:11:15+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T16:11:15+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T16:11:15+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T16:11:15+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T16:11:19+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:14:30+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:14:30+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:14:30+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:14:30+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:14:30+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T16:14:30+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T16:14:30+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T16:14:30+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T16:14:35+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:17:42+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:17:42+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:17:42+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:17:42+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:17:42+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T16:17:42+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T16:17:42+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T16:17:42+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T16:17:58+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:21:29+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:21:29+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:21:29+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:21:29+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:21:29+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T16:21:29+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T16:21:29+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T16:21:29+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T16:21:35+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:23:06+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:23:06+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:23:06+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:23:06+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:23:06+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T16:23:06+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T16:23:06+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T16:23:06+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T16:23:11+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:26:39+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:26:39+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:26:39+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:26:39+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:26:39+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T16:26:39+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T16:26:39+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T16:26:39+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T16:26:46+05:30","message":"Connection check passed"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T16:28:00+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:30:06+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:30:06+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:30:06+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:30:06+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:30:06+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T16:30:06+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T16:30:06+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T16:30:06+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:30:24+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:30:24+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:30:24+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:30:24+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:30:24+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T16:30:24+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T16:30:24+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T16:30:24+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T16:30:29+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:31:40+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:31:40+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:31:40+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:31:40+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:31:40+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T16:31:40+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T16:31:40+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T16:31:40+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T16:32:03+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T16:39:29+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T16:39:29+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:39:29+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:39:29+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T16:39:29+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T16:39:29+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T16:39:29+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-14T16:39:29+05:30","message":"Open in browser"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:39:30+05:30","message":"Node e2e-102-179 (target: 216.48.185.179) metrics - CPU: 0.85 cores, Memory: 24.52/58.47 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:39:30+05:30","message":"Node e2e-106-75 (target: 216.48.189.75) metrics - CPU: 2.32 cores, Memory: 34.05/58.47 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:39:30+05:30","message":"Node e2e-82-181 (target: 164.52.213.181) metrics - CPU: 2.56 cores, Memory: 10.48/29.18 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:39:30+05:30","message":"Node e2e-82-234 (target: 164.52.213.234) metrics - CPU: 0.49 cores, Memory: 13.59/29.18 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:39:30+05:30","message":"Node e2e-83-134 (target: 164.52.214.134) metrics - CPU: 0.86 cores, Memory: 10.76/29.18 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:39:30+05:30","message":"Node e2e-83-184 (target: 164.52.214.184) metrics - CPU: 0.73 cores, Memory: 16.95/58.47 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:39:30+05:30","message":"Node e2e-83-212 (target: 164.52.214.212) metrics - CPU: 1.32 cores, Memory: 22.93/58.47 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:39:30+05:30","message":"Node e2e-106-71 (target: 216.48.189.71) metrics - CPU: 0.62 cores, Memory: 14.55/58.47 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:39:30+05:30","message":"Node e2e-108-10 (target: 216.48.191.10) metrics - CPU: 5.48 cores, Memory: 3.61/29.18 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:39:30+05:30","message":"Node e2e-82-158 (target: 164.52.213.158) metrics - CPU: 3.58 cores, Memory: 23.64/29.18 GB"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:39:30+05:30","message":"Fetched metrics for 10 nodes"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T16:39:36+05:30","message":"Connection check passed"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:40:06+05:30","message":"Node e2e-106-75 (target: 216.48.189.75) metrics - CPU: 2.30 cores, Memory: 34.03/58.47 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:40:06+05:30","message":"Node e2e-82-158 (target: 164.52.213.158) metrics - CPU: 3.57 cores, Memory: 23.93/29.18 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:40:06+05:30","message":"Node e2e-82-181 (target: 164.52.213.181) metrics - CPU: 2.38 cores, Memory: 10.49/29.18 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:40:06+05:30","message":"Node e2e-82-234 (target: 164.52.213.234) metrics - CPU: 0.52 cores, Memory: 13.74/29.18 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:40:06+05:30","message":"Node e2e-83-134 (target: 164.52.214.134) metrics - CPU: 0.87 cores, Memory: 11.00/29.18 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:40:06+05:30","message":"Node e2e-83-184 (target: 164.52.214.184) metrics - CPU: 0.75 cores, Memory: 16.96/58.47 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:40:06+05:30","message":"Node e2e-102-179 (target: 216.48.185.179) metrics - CPU: 0.85 cores, Memory: 24.53/58.47 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:40:06+05:30","message":"Node e2e-106-71 (target: 216.48.189.71) metrics - CPU: 0.60 cores, Memory: 14.45/58.47 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:40:06+05:30","message":"Node e2e-108-10 (target: 216.48.191.10) metrics - CPU: 5.56 cores, Memory: 3.64/29.18 GB"}
+{"level":"debug","node":"System","module":"ClickHouse","type":"debug","time":"2025-10-14T16:40:06+05:30","message":"Node e2e-83-212 (target: 164.52.214.212) metrics - CPU: 1.31 cores, Memory: 22.97/58.47 GB"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T16:40:06+05:30","message":"Fetched metrics for 10 nodes"}
+{"level":"info","node":"216.48.191.10","module":"SSH","type":"success","time":"2025-10-14T16:40:11+05:30","message":"Connection check passed"}
