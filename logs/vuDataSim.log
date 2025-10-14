@@ -1,0 +1,33 @@
+{"level":"info","version":"1.0.0","time":"2025-10-14T10:26:00+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T10:26:00+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T10:26:00+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T10:26:00+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T10:26:00+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T10:26:00+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":":3000","time":"2025-10-14T10:26:00+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost:3000","time":"2025-10-14T10:26:00+05:30","message":"Open in browser"}
+{"level":"warn","node":"localhost","module":"SSH","type":"warning","time":"2025-10-14T10:26:35+05:30","message":"Connection check failed: SSH command failed: exit status 255"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T10:26:36+05:30","message":"Connection check passed"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T10:26:36+05:30","message":"Connection check passed"}
+{"level":"warn","node":"localhost","module":"SSH","type":"warning","time":"2025-10-14T10:26:36+05:30","message":"Connection check failed: SSH command failed: exit status 255"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T10:26:41+05:30","message":"Collected 0 Kafka producer metrics"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T10:31:30+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T10:31:30+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T10:31:30+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T10:31:30+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T10:31:30+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T10:31:30+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:30080","time":"2025-10-14T10:31:30+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost164.52.213.158:30080","time":"2025-10-14T10:31:30+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-14T10:32:50+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-14T10:32:50+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-14T10:32:50+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T10:32:50+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-14T10:32:50+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-14T10:32:50+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-14T10:32:50+05:30","message":"Server starting"}
+{"level":"info","url":"http://localhost164.52.213.158:8086","time":"2025-10-14T10:32:50+05:30","message":"Open in browser"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T10:33:04+05:30","message":"Connection check passed"}
+{"level":"info","node":"Prod-184","module":"SSH","type":"success","time":"2025-10-14T10:33:04+05:30","message":"Connection check passed"}
+{"level":"warn","node":"localhost","module":"SSH","type":"warning","time":"2025-10-14T10:33:04+05:30","message":"Connection check failed: SSH command failed: exit status 255"}
+{"level":"warn","node":"localhost","module":"SSH","type":"warning","time":"2025-10-14T10:33:04+05:30","message":"Connection check failed: SSH command failed: exit status 255"}

@@ -34,7 +34,7 @@ import (
 const (
 	AppVersion = "1.0.0"
 	StaticDir  = "./static"
-	Port       = ":3000"
+	Port       = "164.52.213.158:8086"
 )
 
 // ClickHouse configuration (moved to clickhouse package)
@@ -2161,7 +2161,7 @@ func main() {
 
 	// Start server
 	logger.Info().Str("port", Port).Msg("Server starting")
-	logger.Info().Str("url", "http://localhost"+Port).Msg("Open in browser")
+	logger.Info().Str("url", "http://"+Port).Msg("Open in browser")
 
 	srv := &http.Server{
 		Addr:         Port,
