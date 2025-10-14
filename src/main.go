@@ -139,7 +139,7 @@ var appState = &AppState{
 // Node control functions (moved to node_control package)
 
 // Global node manager instance
-var nodeManager *node_control.NodeManager
+var nodeManager = node_control.NewNodeManager()
 
 // ClickHouse client and configuration
 var clickHouseClient *clickhouse.ClickHouseClient
@@ -972,7 +972,7 @@ func pollNodeMetrics(nodeConfig node_control.NodeConfig) (*HTTPMetricsResponse, 
 	}
 
 	// Build metrics URL
-	metricsURL := fmt.Sprintf("http://%s:%s/api/system/metrics", nodeConfig.Host, port)
+	metricsURL := fmt.Sprintf("http://%s:%d/api/system/metrics", nodeConfig.Host, nodeConfig.MetricsPort)
 
 	logger.LogWithNode(nodeConfig.Host, "HTTP", fmt.Sprintf("Making GET request to %s", metricsURL), "info")
 
