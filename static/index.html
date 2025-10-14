@@ -479,6 +479,60 @@
                                             </div>
                                         </div>
 
+                                        <!-- Pod Resource Utilization -->
+                                        <div>
+                                            <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                                                <span class="material-symbols-outlined text-primary dark:text-primary-dark">memory</span>
+                                                Pod Resource Utilization
+                                            </h4>
+                                            <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
+                                                <table class="w-full text-left text-sm">
+                                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
+                                                        <tr>
+                                                            <th class="p-3 font-semibold">Cluster ID</th>
+                                                            <th class="p-3 font-semibold">Pod Name</th>
+                                                            <th class="p-3 font-semibold text-right">CPU %</th>
+                                                            <th class="p-3 font-semibold text-right">Memory %</th>
+                                                            <th class="p-3 font-semibold">Last Updated</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="pod-resource-metrics-table" class="divide-y divide-subtle-light dark:divide-subtle-dark">
+                                                        <tr>
+                                                            <td colspan="5" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">Loading pod resource metrics...</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <!-- Pod Status -->
+                                        <div>
+                                            <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                                                <span class="material-symbols-outlined text-primary dark:text-primary-dark">health_metrics</span>
+                                                Pod Status
+                                            </h4>
+                                            <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
+                                                <table class="w-full text-left text-sm">
+                                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
+                                                        <tr>
+                                                            <th class="p-3 font-semibold">Cluster ID</th>
+                                                            <th class="p-3 font-semibold">Node Name</th>
+                                                            <th class="p-3 font-semibold">Pod Name</th>
+                                                            <th class="p-3 font-semibold">Pod Phase</th>
+                                                            <th class="p-3 font-semibold">Container Status</th>
+                                                            <th class="p-3 font-semibold">Running/Total Containers</th>
+                                                            <th class="p-3 font-semibold">Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="pod-status-metrics-table" class="divide-y divide-subtle-light dark:divide-subtle-dark">
+                                                        <tr>
+                                                            <td colspan="7" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">Loading pod status metrics...</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
                                         <!-- System Metrics -->
                                         <div>
                                             <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">

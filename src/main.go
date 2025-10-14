@@ -146,7 +146,7 @@ var clickHouseClient *clickhouse.ClickHouseClient
 var clickHouseConfig = clickhouse.ClickHouseConfig{
 	Host:     "10.32.3.50", // ClickHouse service ClusterIP
 	Port:     9000,
-	Database: "monitoring",
+	Database: "vusmart",  // Changed from monitoring to vusmart
 	Username: "monitoring_read",
 	Password: "StrongP@assword123",
 }
@@ -176,7 +176,17 @@ func collectClickHouseMetrics() (*clickhouse.ClickHouseMetrics, error) {
 		return nil, fmt.Errorf("ClickHouse client not initialized")
 	}
 
-	return clickHouseClient.CollectMetrics()
+	metrics, err := clickHouseClient.CollectMetrics()
+	if err != nil {
+		logger.LogError("System", "ClickHouse", fmt.Sprintf("Error collecting metrics: %v", err))
+		return nil, err
+	}
+	
+	// Debug log the collected metrics
+	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Pod Resource Metrics: %d, Pod Status Metrics: %d",
+		len(metrics.PodResourceMetrics), len(metrics.PodStatusMetrics)), "info")
+	
+	return metrics, nil
 }
 
 // Global o11y source manager instance
@@ -1727,6 +1737,9 @@ func handleAPIGetClickHouseMetrics(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Log the metrics before sending
+	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Sending metrics response: %+v", metrics), "info")
+	
 	sendJSONResponse(w, http.StatusOK, APIResponse{
 		Success: true,
 		Message: "ClickHouse metrics retrieved successfully",
