@@ -28,7 +28,7 @@ include_module_dirs:
   K8s:
     enabled: false
   LinuxMonitor:
-    enabled: false
+    enabled: true
   MongoDB:
     enabled: false
   Mssql:
