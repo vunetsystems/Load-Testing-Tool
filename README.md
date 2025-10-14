@@ -28,6 +28,7 @@ The **vuDataSim Cluster Manager** is a sophisticated load testing and performanc
 - **Node Lifecycle Management**: Add, remove, enable, disable nodes dynamically
 - **Configuration Sync**: Synchronize configuration files across cluster nodes
 - **Connection Management**: SSH key-based authentication with connection pooling concepts
+- **Conf.d Distribution**: Automatically distribute updated observability configurations to all enabled nodes
 
 ### Load Testing Capabilities
 - **Profile Management**: Low/Medium/High/Custom load testing profiles
@@ -214,6 +215,61 @@ nodes:
 - **Enable/Disable**: Activate/deactivate node monitoring
 - **Update Configuration**: Modify node settings dynamically
 
+### Conf.d Distribution
+
+#### Overview
+The system can automatically distribute updated `conf.d` directories to all enabled nodes. This feature is particularly useful when you modify observability source configurations and need to propagate those changes to all connected nodes.
+
+#### Distribution Process
+1. **Local Configuration**: Modify configuration files in `src/conf.d/` locally
+2. **Trigger Distribution**: Use the API endpoint or web interface to trigger distribution
+3. **Remote Deployment**: System creates tar archive and distributes to all enabled nodes
+4. **Verification**: Each node's `conf_dir` (specified in `nodes.yaml`) is updated
+
+#### API Usage
+```bash
+# Distribute conf.d to all enabled nodes
+curl -X POST http://localhost:8086/api/o11y/confd/distribute
+
+# Response includes distribution results for each node
+{
+  "success": true,
+  "message": "Conf.d distribution completed: 2/2 nodes successful",
+  "data": {
+    "distributedNodes": 2,
+    "totalNodes": 2,
+    "successRate": "2/2"
+  },
+  "distribution": {
+    "node1": {
+      "nodeName": "node1",
+      "success": true,
+      "message": "Conf.d distributed successfully"
+    },
+    "node2": {
+      "nodeName": "node2",
+      "success": true,
+      "message": "Conf.d distributed successfully"
+    }
+  }
+}
+```
+
+#### Node Configuration
+Each node in `src/configs/nodes.yaml` specifies where configurations should be deployed:
+
+```yaml
+nodes:
+  production-node:
+    host: "192.168.1.100"
+    user: "vunet"
+    key_path: "~/.ssh/id_rsa"
+    conf_dir: "/home/vunet/production/conf.d"  # Where conf.d will be distributed
+    binary_dir: "/home/vunet/production/bin"
+    description: "Production load testing node"
+    enabled: true
+```
+
 ### Metrics Collection Process
 
 #### Current Implementation (SSH-based)
@@ -290,6 +346,16 @@ nodes:
 - `PUT /api/nodes/{name}` - Update node configuration
 - `DELETE /api/nodes/{name}` - Remove node
 
+#### O11y Source Manager
+- `GET /api/o11y/sources` - List all available o11y sources
+- `GET /api/o11y/sources/{source}` - Get detailed information about a specific source
+- `POST /api/o11y/eps/distribute` - Distribute EPS across selected sources
+- `GET /api/o11y/eps/current` - Get current EPS distribution
+- `POST /api/o11y/sources/{source}/enable` - Enable a specific o11y source
+- `POST /api/o11y/sources/{source}/disable` - Disable a specific o11y source
+- `GET /api/o11y/max-eps` - Get maximum EPS configuration
+- `POST /api/o11y/confd/distribute` - Distribute updated conf.d directory to all enabled nodes
+
 #### Real-time Communication
 - `WebSocket /ws` - Real-time bidirectional updates
 - `PUT /api/nodes/{nodeId}/metrics` - Update node metrics
@@ -311,6 +377,235 @@ go run src/main.go list-enabled      # List only enabled nodes
 # Server mode
 go run src/main.go web               # Start web server
 ```
+
+### Testing Conf.d Distribution
+
+#### Manual Testing with curl Commands
+
+**1. Check Available O11y Sources:**
+```bash
+curl -X GET http://localhost:8086/api/o11y/sources
+```
+
+**2. Check Current EPS Distribution:**
+```bash
+curl -X GET http://localhost:8086/api/o11y/eps/current
+```
+
+**3. Distribute EPS to Sources (Example: Apache and LinuxMonitor):**
+```bash
+curl -X POST http://localhost:8086/api/o11y/eps/distribute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "selectedSources": ["Apache", "LinuxMonitor"],
+    "totalEps": 5000
+  }'
+```
+
+**4. Distribute Updated conf.d to All Enabled Nodes:**
+```bash
+curl -X POST http://localhost:8086/api/o11y/confd/distribute
+```
+
+**5. Check Node Status:**
+```bash
+curl -X GET http://localhost:8086/api/nodes
+```
+
+**6. Check SSH Connection Status:**
+```bash
+curl -X GET http://localhost:8086/api/ssh/status
+```
+
+#### Detailed Conf.d Distribution API
+
+**Endpoint:** `POST /api/o11y/confd/distribute`
+
+**Description:** Distributes the local `src/conf.d` directory to all enabled nodes by:
+1. Creating a tar archive of the local conf.d directory
+2. Removing existing conf.d directories on remote nodes
+3. Creating fresh directories on remote nodes
+4. Copying the tar file via SCP
+5. Extracting the tar file on each remote node
+
+**Response Format:**
+```json
+{
+  "success": true,
+  "message": "Conf.d distribution completed: 2/2 nodes successful",
+  "data": {
+    "distributedNodes": 2,
+    "totalNodes": 2,
+    "successRate": "2/2"
+  },
+  "distribution": {
+    "node1": {
+      "nodeName": "node1",
+      "success": true,
+      "message": "Conf.d distributed successfully"
+    },
+    "node2": {
+      "nodeName": "node2",
+      "success": true,
+      "message": "Conf.d distributed successfully"
+    }
+  }
+}
+```
+
+**HTTP Status Codes:**
+- `200` - All nodes successful
+- `206` - Partial success (some nodes failed)
+- `500` - Complete failure or server error
+
+**Error Responses:**
+```json
+{
+  "success": false,
+  "message": "Failed to distribute conf.d: local conf.d directory not found",
+  "data": null
+}
+```
+
+#### Example Test Sequence
+
+```bash
+# 1. Start the server
+go run src/main.go
+
+# 2. In another terminal, check if nodes are configured
+curl -X GET http://localhost:8086/api/nodes
+
+# 3. If nodes are enabled, distribute conf.d
+curl -X POST http://localhost:8086/api/o11y/confd/distribute
+
+# 4. Check the response for distribution results
+# The response will show success/failure for each node
+```
+
+#### Comprehensive Conf.d Distribution Testing
+
+**Complete Test Workflow:**
+
+```bash
+# 1. Verify server is running
+curl -X GET http://localhost:8086/api/health
+
+# 2. Check available o11y sources
+curl -X GET http://localhost:8086/api/o11y/sources
+
+# 3. Check current EPS distribution
+curl -X GET http://localhost:8086/api/o11y/eps/current
+
+# 4. List all configured nodes
+curl -X GET http://localhost:8086/api/nodes
+
+# 5. Check which nodes are enabled
+curl -X GET http://localhost:8086/api/nodes | jq '.data[] | select(.enabled == true)'
+
+# 6. Check SSH connectivity status
+curl -X GET http://localhost:8086/api/ssh/status
+
+# 7. Distribute conf.d to all enabled nodes
+echo "Distributing conf.d to all enabled nodes..."
+curl -X POST http://localhost:8086/api/o11y/confd/distribute
+
+# 8. Verify distribution results with detailed output
+curl -X POST http://localhost:8086/api/o11y/confd/distribute | jq '.'
+
+# 9. Check logs for any errors during distribution
+curl -X GET "http://localhost:8086/api/logs?limit=50" | jq '.data.logs[] | select(.message | contains("conf.d"))'
+```
+
+**Testing with Specific Nodes:**
+
+```bash
+# Test distribution with verbose output
+curl -v -X POST http://localhost:8086/api/o11y/confd/distribute \
+  -H "Content-Type: application/json" \
+  -w "\nHTTP Status: %{http_code}\nTotal Time: %{time_total}s\n"
+
+# Save response for analysis
+curl -X POST http://localhost:8086/api/o11y/confd/distribute \
+  -o confd-distribution-result.json
+
+# Pretty print the results
+cat confd-distribution-result.json | jq '.'
+```
+
+**Monitoring Distribution Progress:**
+
+```bash
+# Monitor logs in real-time during distribution
+curl -X GET "http://localhost:8086/api/logs?limit=100" | \
+  jq -r '.data.logs[] | select(.message | contains("conf.d") or contains("tar") or contains("scp") or contains("ssh")) | "\(.timestamp) [\(.type)] \(.message)"'
+```
+
+#### Troubleshooting Test Commands
+
+**Check Server Health:**
+```bash
+curl -X GET http://localhost:8086/api/health
+```
+
+**View Recent Logs:**
+```bash
+curl -X GET "http://localhost:8086/api/logs?limit=20"
+```
+
+**Check Specific Node Details:**
+```bash
+curl -X GET http://localhost:8086/api/nodes
+```
+
+**Debug SSH Issues:**
+```bash
+# Test SSH connectivity manually (replace with your node details)
+ssh -i ~/.ssh/id_rsa vunet@your-node-host "echo 'SSH test successful'"
+
+# Check if conf.d directory exists locally
+ls -la src/conf.d/
+
+# Verify tar command works
+tar -czf /tmp/test.tar.gz -C src/conf.d .
+echo "Tar creation: $?"
+ls -la /tmp/test.tar.gz
+rm -f /tmp/test.tar.gz
+```
+
+**Common Error Scenarios:**
+
+1. **"No enabled nodes found"**
+   ```bash
+   # Check node configuration
+   curl -X GET http://localhost:8086/api/nodes | jq '.data[] | {name: .name, enabled: .enabled}'
+
+   # Enable a node if needed
+   curl -X PUT http://localhost:8086/api/nodes/your-node-name \
+     -H "Content-Type: application/json" \
+     -d '{"enabled": true}'
+   ```
+
+2. **"Local conf.d directory not found"**
+   ```bash
+   # Check if directory exists
+   ls -la src/conf.d/
+
+   # Create directory if missing
+   mkdir -p src/conf.d/
+   ```
+
+3. **SSH/SCP failures**
+   ```bash
+   # Check SSH key permissions
+   chmod 600 ~/.ssh/id_rsa
+
+   # Test manual SCP
+   scp -i ~/.ssh/id_rsa src/conf.d/conf.yml vunet@your-node-host:/tmp/test-conf.yml
+
+   # Check SSH agent
+   ssh-add -l
+   ```
 
 ## 🚨 Current Issues & Limitations
 

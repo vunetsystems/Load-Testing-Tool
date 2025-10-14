@@ -739,12 +739,21 @@ func handleAPIGetO11ySources(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Main config is loaded dynamically when needed
+	// Also load main config to ensure it's up to date
+	err := o11yManager.LoadMainConfig()
+	if err != nil {
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to load main config: %v", err),
+		})
+		return
+	}
 
 	sources := o11yManager.GetAvailableSources()
 	sendJSONResponse(w, http.StatusOK, APIResponse{
 		Success: true,
 		Data:    sources,
+		Message: fmt.Sprintf("Retrieved %d available o11y sources", len(sources)),
 	})
 }
 
@@ -921,6 +930,46 @@ func handleAPIGetMaxEPSConfig(w http.ResponseWriter, r *http.Request) {
 		Success: true,
 		Data:    maxEPSConfig,
 	})
+}
+
+// handleAPIDistributeConfD handles POST /api/o11y/confd/distribute
+func handleAPIDistributeConfD(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		sendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
+			Success: false,
+			Message: "Method not allowed. Use POST.",
+		})
+		return
+	}
+
+	// Distribute conf.d to all enabled nodes
+	response, err := o11yManager.DistributeConfD()
+	if err != nil {
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to distribute conf.d: %v", err),
+		})
+		return
+	}
+
+	statusCode := http.StatusOK
+	if !response.Success {
+		statusCode = http.StatusPartialContent // 206 for partial success
+	}
+
+	apiResponse := APIResponse{
+		Success: response.Success,
+		Message: response.Message,
+		Data:    response.Data,
+	}
+
+	// Add distribution details to response data
+	if apiResponse.Data == nil {
+		apiResponse.Data = make(map[string]interface{})
+	}
+	apiResponse.Data.(map[string]interface{})["distribution"] = response.Distribution
+
+	sendJSONResponse(w, statusCode, apiResponse)
 }
 
 // Log parsing functions
