@@ -14,12 +14,3 @@ nodes:
         metrics_port: 0
         description: /home/vunet/Oct13
         enabled: true
-    localhost:
-        host: localhost
-        user: vunet
-        key_path: ~/.ssh/id_rsa
-        conf_dir: /tmp/local_metrics
-        binary_dir: /tmp/local_metrics
-        metrics_port: 0
-        description: Local Node Metrics API
-        enabled: true

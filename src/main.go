@@ -24,7 +24,7 @@ import (
 const (
 	AppVersion = "1.0.0"
 	StaticDir  = "./static"
-	Port       = "164.52.213.158:8086"
+	Port       = "localhost:8086"
 )
 
 // Global application state
@@ -165,6 +165,7 @@ func main() {
 	api.HandleFunc("/o11y/sources/{source}/enable", handleAPIEnableO11ySource).Methods("POST")
 	api.HandleFunc("/o11y/sources/{source}/disable", handleAPIDisableO11ySource).Methods("POST")
 	api.HandleFunc("/o11y/max-eps", handleAPIGetMaxEPSConfig).Methods("GET")
+	api.HandleFunc("/o11y/confd/distribute", handleAPIDistributeConfD).Methods("POST")
 	// SSH status API endpoint
 	api.HandleFunc("/ssh/status", handleAPIGetSSHStatus).Methods("GET")
 	// ClickHouse metrics API endpoints

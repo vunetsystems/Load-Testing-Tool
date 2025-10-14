@@ -70,6 +70,99 @@
             <h2 class="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">Controls</h2>
 
             <div class="space-y-6">
+                <!-- O11y Source Selection -->
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-primary dark:text-primary-dark">source</span>
+                        <span class="font-medium">O11y Sources</span>
+                    </div>
+                    <div class="relative">
+                        <div id="o11y-sources-container" class="w-full min-h-[120px] rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus-within:ring-2 focus-within:ring-primary dark:focus-within:ring-primary-dark focus-within:border-primary dark:focus-within:border-primary-dark transition-all duration-200">
+                            <!-- Dropdown trigger -->
+                            <button id="o11y-sources-dropdown" type="button" class="w-full p-3 text-left flex items-center justify-between hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200">
+                                <div class="flex-1">
+                                    <div id="o11y-sources-placeholder" class="text-text-secondary-light dark:text-text-secondary-dark">Select O11y sources...</div>
+                                    <div id="o11y-sources-selected" class="hidden flex flex-wrap gap-1 mt-1">
+                                        <!-- Selected items will be displayed here -->
+                                    </div>
+                                </div>
+                                <span id="o11y-sources-arrow" class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark transition-transform duration-200">expand_more</span>
+                            </button>
+
+                            <!-- Dropdown options -->
+                            <div id="o11y-sources-options" class="absolute z-10 w-full mt-1 bg-surface-light dark:bg-surface-dark border border-subtle-light dark:border-subtle-dark rounded-lg shadow-lg max-h-60 overflow-y-auto hidden">
+                                <!-- Search input -->
+                                <div class="p-3 border-b border-subtle-light dark:border-subtle-dark">
+                                    <div class="relative">
+                                        <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark">search</span>
+                                        <input id="o11y-sources-search" type="text" placeholder="Search sources..." class="w-full pl-10 pr-4 py-2 rounded-md bg-background-light dark:bg-background-dark border border-subtle-light dark:border-subtle-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark text-sm">
+                                    </div>
+                                </div>
+
+                                <!-- Options list -->
+                                <div id="o11y-sources-list" class="max-h-40 overflow-y-auto">
+                                    <!-- O11y sources will be populated dynamically -->
+                                </div>
+
+                                <!-- Footer with select all/none -->
+                                <div class="p-3 border-t border-subtle-light dark:border-subtle-dark bg-subtle-light/30 dark:bg-subtle-dark/30">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <button id="o11y-sources-select-all" type="button" class="text-primary dark:text-primary-dark hover:text-primary-dark dark:hover:text-primary font-medium transition-colors">
+                                            Select All
+                                        </button>
+                                        <button id="o11y-sources-clear-all" type="button" class="text-text-secondary-light dark:text-text-secondary-dark hover:text-danger dark:hover:text-danger-dark font-medium transition-colors">
+                                            Clear All
+                                        </button>
+                                        <div id="o11y-sources-count" class="text-text-secondary-light dark:text-text-secondary-dark">
+                                            0 selected
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EPS Configuration -->
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-primary dark:text-primary-dark">speed</span>
+                        <span class="font-medium">EPS Configuration</span>
+                    </div>
+                    <div class="relative">
+                        <select id="eps-select" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark">
+                            <option value="">Select EPS target...</option>
+                            <option value="25000">25,000 EPS</option>
+                            <option value="50000">50,000 EPS</option>
+                            <option value="100000">100,000 EPS</option>
+                            <option value="150000">150,000 EPS</option>
+                            <option value="200000">200,000 EPS</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Sync Configs Button -->
+                <button id="sync-configs-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 py-3 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
+                    <span class="material-symbols-outlined">sync</span>
+                    <span>Sync Configs</span>
+                </button>
+
+                <!-- Sync Status Messages -->
+                <div id="sync-status-container" class="hidden">
+                    <div id="sync-success-message" class="p-3 rounded-lg bg-success/20 dark:bg-success-dark/20 border border-success/30 dark:border-success-dark/30 hidden">
+                        <div class="flex items-center gap-2 text-success dark:text-success-dark">
+                            <span class="material-symbols-outlined text-sm">check_circle</span>
+                            <span class="text-sm font-medium">Configs synced successfully!</span>
+                        </div>
+                    </div>
+                    <div id="sync-error-message" class="p-3 rounded-lg bg-danger/20 dark:bg-danger-dark/20 border border-danger/30 dark:border-danger-dark/30 hidden">
+                        <div class="flex items-center gap-2 text-danger dark:text-danger-dark">
+                            <span class="material-symbols-outlined text-sm">error</span>
+                            <span class="text-sm font-medium">Failed to sync configs. Please try again.</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="text-sm text-text-secondary-light dark:text-text-secondary-dark">
                     <div class="flex items-center gap-2 mb-2">
                         <span class="material-symbols-outlined text-primary dark:text-primary-dark">info</span>
@@ -702,6 +795,6 @@
         </main>
     </div>
 
-    <script src="/static/script.js?v=2024102501"></script>
+    <script src="/static/script.js?v=2024102502"></script>
 </body>
 </html>
