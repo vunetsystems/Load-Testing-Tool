@@ -242,6 +242,19 @@ func (osm *O11ySourceManager) calculateProportionalDistribution(selectedSources 
 		}
 	}
 
+	var exceededSources []string
+	for sourceName, assignedEPS := range sourceEPSMap {
+		maxEPS := sourceMaxEPS[sourceName]
+		if assignedEPS > maxEPS {
+			exceededSources = append(exceededSources, fmt.Sprintf("%s (assigned: %d, max: %d)", sourceName, assignedEPS, maxEPS))
+		}
+	}
+
+
+	if len(exceededSources) > 0 {
+		return nil, fmt.Errorf("distributed EPS exceeds maximum limits for sources: %s", strings.Join(exceededSources, "; "))
+	}
+
 	return sourceEPSMap, nil
 }
 
