@@ -32,11 +32,28 @@ type FinalVuDataSimMetrics struct {
 	Timestamp  time.Time `json:"timestamp,omitempty"`
 }
 
+// SystemMetrics represents basic system metrics
+type SystemMetrics struct {
+	CPU struct {
+		UsedPercent float64 `json:"used_percent"`
+		Cores       int     `json:"cores"`
+		Load1m      float64 `json:"load_1m"`
+	} `json:"cpu"`
+	Memory struct {
+		UsedGB      float64 `json:"used_gb"`
+		AvailableGB float64 `json:"available_gb"`
+		TotalGB     float64 `json:"total_gb"`
+		UsedPercent float64 `json:"used_percent"`
+	} `json:"memory"`
+	UptimeSeconds int64 `json:"uptime_seconds"`
+}
+
 // MetricsCollector handles system metrics collection
 type MetricsCollector struct {
-	currentMetrics FinalVuDataSimMetrics
-	mutex          sync.RWMutex
-	nodeID         string
+	currentMetrics       FinalVuDataSimMetrics
+	currentSystemMetrics SystemMetrics
+	mutex                sync.RWMutex
+	nodeID               string
 }
 
 // NewMetricsCollector creates a new metrics collector
@@ -88,8 +105,69 @@ func (mc *MetricsCollector) updateMetrics() {
 				metrics.Cmdline = strings.Join(psFields[2:], " ")
 			}
 		}
+	} else {
+		metrics.Running = false
+		metrics.PID = 0
+		metrics.StartTime = ""
+		metrics.CPUPercent = 0
+		metrics.MemMB = 0
+		metrics.Cmdline = ""
 	}
+	metrics.Timestamp = time.Now()
+
+	// Collect system metrics
+	sys := SystemMetrics{}
+	// CPU
+	cpuOut, _ := exec.Command("nproc").Output()
+	cores, _ := strconv.Atoi(strings.TrimSpace(string(cpuOut)))
+	sys.CPU.Cores = cores
+	loadOut, _ := exec.Command("cat", "/proc/loadavg").Output()
+	loadFields := strings.Fields(string(loadOut))
+	if len(loadFields) > 0 {
+		sys.CPU.Load1m, _ = strconv.ParseFloat(loadFields[0], 64)
+	}
+	psCpuOut, _ := exec.Command("top", "-bn1").Output()
+	for _, line := range strings.Split(string(psCpuOut), "\n") {
+		if strings.Contains(line, "Cpu(s)") {
+			parts := strings.Split(line, ",")
+			if len(parts) > 0 {
+				cpuUsedStr := strings.Fields(parts[0])
+				if len(cpuUsedStr) > 1 {
+					val, _ := strconv.ParseFloat(cpuUsedStr[1], 64)
+					sys.CPU.UsedPercent = val
+				}
+			}
+		}
+	}
+	// Memory
+	memOut, _ := exec.Command("free", "-g").Output()
+	for _, line := range strings.Split(string(memOut), "\n") {
+		if strings.HasPrefix(line, "Mem:") {
+			fields := strings.Fields(line)
+			if len(fields) >= 4 {
+				total, _ := strconv.ParseFloat(fields[1], 64)
+				used, _ := strconv.ParseFloat(fields[2], 64)
+				free, _ := strconv.ParseFloat(fields[3], 64)
+				sys.Memory.TotalGB = total
+				sys.Memory.UsedGB = used
+				sys.Memory.AvailableGB = free
+				if total > 0 {
+					sys.Memory.UsedPercent = (used / total) * 100
+				}
+			}
+		}
+	}
+	// Uptime
+	uptimeOut, _ := exec.Command("cat", "/proc/uptime").Output()
+	uptimeFields := strings.Fields(string(uptimeOut))
+	if len(uptimeFields) > 0 {
+		uptimeSec, _ := strconv.ParseFloat(uptimeFields[0], 64)
+		sys.UptimeSeconds = int64(uptimeSec)
+	}
+
+	// Store both process and system metrics
 	mc.currentMetrics = metrics
+	mc.currentSystemMetrics = sys
 }
 
 // GetCurrentMetrics returns the current metrics (thread-safe)
@@ -109,8 +187,21 @@ func (mc *MetricsCollector) handleMetrics(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json")
 
 	metrics := mc.GetCurrentMetrics()
+	system := mc.currentSystemMetrics
 
-	if err := json.NewEncoder(w).Encode(metrics); err != nil {
+	resp := map[string]interface{}{
+		"nodeId":      mc.nodeID,
+		"timestamp":   metrics.Timestamp,
+		"running":     metrics.Running,
+		"pid":         metrics.PID,
+		"start_time":  metrics.StartTime,
+		"cpu_percent": metrics.CPUPercent,
+		"mem_mb":      metrics.MemMB,
+		"cmdline":     metrics.Cmdline,
+		"system":      system,
+	}
+
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		log.Printf("Error encoding metrics JSON: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return

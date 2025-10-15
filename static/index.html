@@ -536,10 +536,20 @@
                                                 Last updated: Never
                                             </div>
                                         </div>
-                                        <button id="refresh-clickhouse-metrics-btn" class="group flex items-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 px-4 py-2 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
-                                            <span class="material-symbols-outlined">refresh</span>
-                                            <span>Refresh Metrics</span>
-                                        </button>
+                                       <div class="flex items-center gap-4">
+                                            <div class="flex items-center gap-2">
+                                                <input type="text" id="metrics-time-range" placeholder="Select time range" class="px-4 py-2 rounded-lg border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark text-sm">
+                                                <div class="flex gap-1">
+                                                    <button id="preset-1min" class="px-3 py-1 text-xs rounded border border-primary/50 dark:border-primary-dark/50 text-primary dark:text-primary-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10">1m</button>
+                                                    <button id="preset-5min" class="px-3 py-1 text-xs rounded border border-primary/50 dark:border-primary-dark/50 text-primary dark:text-primary-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10">5m</button>
+                                                    <button id="preset-15min" class="px-3 py-1 text-xs rounded border border-primary/50 dark:border-primary-dark/50 text-primary dark:text-primary-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10">15m</button>
+                                                </div>
+                                            </div>
+                                            <button id="refresh-clickhouse-metrics-btn" class="group flex items-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 px-4 py-2 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
+                                                <span class="material-symbols-outlined">refresh</span>
+                                                <span>Refresh Metrics</span>
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <!-- Metrics Tables -->
@@ -817,6 +827,12 @@
         </main>
     </div>
 
+    <!-- Include a time picker library (e.g., Flatpickr) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
+    <!-- Your application scripts -->
+    <script src="/static/metrics.js"></script>
     <script src="/static/script.js?v=2024102502"></script>
 </body>
 </html>

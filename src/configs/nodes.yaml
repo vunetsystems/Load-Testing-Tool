@@ -5,12 +5,12 @@ cluster_settings:
     max_retries: 3
     sync_timeout: 60
 nodes:
-    216.48.191.10:
+    Prod-node-1:
         host: 216.48.191.10
         user: vunet
         key_path: ~/.ssh/id_rsa
-        conf_dir: /home/vunet/LoadTestingTool
-        binary_dir: /home/vunet/LoadTestingTool/bin
+        conf_dir: /home/vunet/Load-Test/conf.d
+        binary_dir: /home/vunet/Load-Test/bin
         metrics_port: 0
-        description: 216.48.191.10
+        description: ""
         enabled: true

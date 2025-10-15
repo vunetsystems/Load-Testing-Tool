@@ -24,7 +24,7 @@ import (
 const (
 	AppVersion = "1.0.0"
 	StaticDir  = "./static"
-	Port       = "localhost:8086"
+	Port       = "164.52.213.158:8086"
 )
 
 // Global application state
@@ -148,6 +148,8 @@ func main() {
 	api.HandleFunc("/dashboard", getDashboardData).Methods("GET")
 	// Cluster metrics API endpoint
 	api.HandleFunc("/cluster/metrics", handleAPIGetClusterMetrics).Methods("GET")
+	// Metrics with time range endpoint
+	api.HandleFunc("/metrics", getMetrics).Methods("GET")
 
 	// Node management API endpoints
 	api.HandleFunc("/nodes", handleAPINodes).Methods("GET")
