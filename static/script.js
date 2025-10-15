@@ -8,6 +8,7 @@ class VuDataSimManager {
         this.nodes = {}; // Store node data
         // Add this property to the constructor
         this.clusterMetrics = {}; // Store real cluster metrics
+        this.metricsManager = new MetricsManager(this); // Initialize metrics manager
 
         this.initializeComponents();
         this.bindEvents();
@@ -38,13 +39,14 @@ class VuDataSimManager {
         console.log('- o11ySourcesDropdown:', document.getElementById('o11y-sources-dropdown'));
         console.log('- o11ySourcesOptions:', document.getElementById('o11y-sources-options'));
         console.log('- o11ySourcesList:', document.getElementById('o11y-sources-list'));
+
         this.elements = {
             syncBtn: document.getElementById('sync-btn'),
             logNodeFilter: document.getElementById('log-node'),
             logModuleFilter: document.getElementById('log-module'),
             logsContainer: document.getElementById('logs-container'),
 
-            // O11y source management elements
+                        // O11y source management elements
             o11ySourcesContainer: document.getElementById('o11y-sources-container'),
             o11ySourcesDropdown: document.getElementById('o11y-sources-dropdown'),
             o11ySourcesOptions: document.getElementById('o11y-sources-options'),
@@ -319,7 +321,8 @@ class VuDataSimManager {
                             totalCpu: 4.0,
                             totalMemory: 8.0,
                             status: node.enabled ? 'active' : 'inactive',
-                            host: node.host   // Store the host IP for matching with metrics target
+                            host: node.host  // Store the host IP for matching with metrics target
+                    
                         };
                         console.log(`Converted node ${nodeId} with host ${node.host} and status ${this.nodeData[nodeId].status}`);
                     });
@@ -674,6 +677,11 @@ class VuDataSimManager {
 
         // Set up WebSocket connection for real-time updates
         this.setupWebSocket();
+
+        
+        setInterval(() => {
+            this.fetchFinalVuDataSimMetrics();
+        }, 3000);
     }
 
     setupWebSocket() {
@@ -1569,8 +1577,8 @@ class VuDataSimManager {
                 // Handle potential missing or invalid values
                 const clusterId = metric.clusterId || 'N/A';
                 const podName = metric.podName || 'N/A';
-                const cpuPercentage = typeof metric.cpuPercentage === 'number' ? metric.cpuPercentage.toFixed(2) : 'N/A';
-                const memoryPercentage = typeof metric.memoryPercentage === 'number' ? metric.memoryPercentage.toFixed(2) : 'N/A';
+                const cpuPercentage = typeof metric.cpuPercentage === 'number' ? (metric.cpuPercentage * 100).toFixed(2) : 'N/A';
+                const memoryPercentage = typeof metric.memoryPercentage === 'number' ? (metric.memoryPercentage * 100).toFixed(2) : 'N/A';
                 let timestamp = 'N/A';
                 try {
                     if (metric.lastTimestamp) {
@@ -1779,8 +1787,7 @@ class VuDataSimManager {
             tbody.appendChild(row);
         });
     }
-
-    // O11y Source Management Methods
+     // O11y Source Management Methods
 
     loadO11ySources() {
         console.log('Loading o11y sources...');
@@ -2094,9 +2101,80 @@ class VuDataSimManager {
         this.updateO11ySourceCount();
     }
 
+    updateClusterTableOnly() {
+        const tbody = document.getElementById('cluster-table-body');
+        const rows = tbody.querySelectorAll('tr');
+
+        console.log('Updating cluster table with metrics:', this.clusterMetrics);
+
+        rows.forEach(row => {
+            const nodeName = row.cells[0]?.textContent?.trim();
+            console.log('Processing node:', nodeName);
+
+            // Find metrics by matching the target field instead of node name
+            let matchingMetrics = null;
+            for (const [key, metrics] of Object.entries(this.clusterMetrics)) {
+                if (metrics.target === nodeName) {
+                    matchingMetrics = metrics;
+                    console.log('Found metrics for node:', nodeName, 'using target match with key:', key);
+                    break;
+                }
+            }
+
+            if (matchingMetrics) {
+                // Update CPU column (index 2) - show available/total format
+                if (row.cells[2]) {
+                    const availableCpu = matchingMetrics.cpu_cores * 0.1; // Example: show 10% available
+                    const newCpuText = `${availableCpu.toFixed(1)} / ${matchingMetrics.cpu_cores.toFixed(1)} cores`;
+                    console.log('Updating CPU for node:', nodeName, 'to:', newCpuText);
+                    row.cells[2].textContent = newCpuText;
+                }
+
+                // Update Memory column (index 3) - show used/total format
+                if (row.cells[3]) {
+                    const newMemText = `${matchingMetrics.used_memory_gb.toFixed(1)} / ${matchingMetrics.total_memory_gb.toFixed(1)} GB`;
+                    console.log('Updating Memory for node:', nodeName, 'to:', newMemText);
+                    row.cells[3].textContent = newMemText;
+                }
+            } else {
+                console.log('No metrics found for node:', nodeName, 'by target matching');
+            }
+        });
+    }
+
+    async fetchFinalVuDataSimMetrics() {
+        try {
+            // Fetch metrics from the correct node where node_metrics_api is running
+            const response = await fetch('http://216.48.191.10:8086/api/system/metrics');
+            if (!response.ok) throw new Error('Failed to fetch metrics');
+            const metrics = await response.json();
+            this.displayFinalVuDataSimMetrics(metrics);
+        } catch (error) {
+            console.error('Error fetching finalvudatasim metrics:', error);
+            this.displayFinalVuDataSimMetrics({}); // Show empty row on error
+        }
+    }
+
+    displayFinalVuDataSimMetrics(metrics) {
+        const tbody = document.getElementById('finalvudatasim-metrics-body');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        // Robust running detection: if running is true OR pid is present and > 0
+        const isRunning = metrics.running || (metrics.pid && metrics.pid > 0);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="p-4">${isRunning ? '<span class="text-success font-bold">Yes</span>' : '<span class="text-danger font-bold">No</span>'}</td>
+            <td class="p-4">${metrics.pid && metrics.pid > 0 ? metrics.pid : '-'}</td>
+            <td class="p-4">${metrics.start_time ? metrics.start_time : '-'}</td>
+            <td class="p-4">${typeof metrics.cpu_percent === 'number' ? metrics.cpu_percent.toFixed(2) : '-'}</td>
+            <td class="p-4">${typeof metrics.mem_mb === 'number' ? metrics.mem_mb.toFixed(2) : '-'}</td>
+            <td class="p-4">${metrics.cmdline ? metrics.cmdline : '-'}</td>
+        `;
+        tbody.appendChild(row);
+    }
 }
 
-// Initialize the application when DOM is loaded
+// Initialize the application when DOM is loadedFinalVu
 document.addEventListener('DOMContentLoaded', () => {
     window.vuDataSimManager = new VuDataSimManager();
 });
@@ -2110,6 +2188,7 @@ window.testNodeManagement = function () {
         console.error('vuDataSimManager not initialized');
     }
 };
+
 
 // Test function to manually load O11y sources
 window.testLoadO11ySources = function() {
@@ -2136,3 +2215,9 @@ window.testO11yElements = function() {
         console.log('Selected sources:', window.vuDataSimManager.selectedO11ySources);
     }
 };
+
+
+// Export for potential module usage
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = VuDataSimManager;
+}
