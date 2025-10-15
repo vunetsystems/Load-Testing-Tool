@@ -178,7 +178,7 @@ func main() {
 	api.HandleFunc("/clickhouse/health", handleAPIClickHouseHealth).Methods("GET")
 
 	// Initialize ClickHouse client
-	if err := clickhouse.InitClickHouse(); err != nil {
+	if err := clickhouse.InitClickHouse("src/configs/config.yaml"); err != nil {
 		logger.Warn().Err(err).Msg("Failed to initialize ClickHouse client - metrics will not be available")
 	} else {
 		logger.Info().Msg("ClickHouse client initialized successfully")
