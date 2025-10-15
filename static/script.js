@@ -9,6 +9,7 @@ class VuDataSimManager {
         // Add this property to the constructor
         this.clusterMetrics = {}; // Store real cluster metrics
         this.metricsManager = new MetricsManager(this); // Initialize metrics manager
+        this.allTopPodMemoryMetrics = []; // Store all top pod memory metrics for filtering
 
         this.initializeComponents();
         this.bindEvents();
@@ -122,6 +123,9 @@ class VuDataSimManager {
             containerMetricsTable: document.getElementById('container-metrics-table'),
             podResourceMetricsTable: document.getElementById('pod-resource-metrics-table'),
             podStatusMetricsTable: document.getElementById('pod-status-metrics-table'),
+            topPodMemoryMetricsTable: document.getElementById('top-pod-memory-metrics-table'),
+            kafkaTopicMetricsTable: document.getElementById('kafka-topic-metrics-table'),
+            nodeFilterSelect: document.getElementById('node-filter-select'),
 
             // Real-time status
         };
@@ -212,6 +216,7 @@ class VuDataSimManager {
         this.elements.closeClickHouseModal?.addEventListener('click', () => this.closeClickHouseMetricsModal());
         this.elements.clickHouseModalBackdrop?.addEventListener('click', () => this.closeClickHouseMetricsModal());
         this.elements.refreshClickHouseMetricsBtn?.addEventListener('click', () => this.refreshClickHouseMetrics());
+        this.elements.nodeFilterSelect?.addEventListener('change', () => this.filterTopPodMemoryMetrics());
 
         // Binary control action listeners
         this.elements.refreshBinaryStatusBtn?.addEventListener('click', () => this.refreshBinaryStatus());
@@ -1532,9 +1537,19 @@ class VuDataSimManager {
     displayClickHouseMetrics(metrics) {
         console.log('Received ClickHouse metrics:', metrics);
 
+        // Store all top pod memory metrics for filtering
+        this.allTopPodMemoryMetrics = metrics.topPodMemoryMetrics || [];
+
+        // Populate node filter dropdown
+        this.populateNodeFilterDropdown();
+
         // Display Pod Metrics first
         this.displayPodResourceMetrics(metrics.podResourceMetrics || []);
         this.displayPodStatusMetrics(metrics.podStatusMetrics || []);
+        this.displayTopPodMemoryMetrics(this.allTopPodMemoryMetrics);
+
+        // Display Kafka Topic Metrics
+        this.displayKafkaTopicMetrics(metrics.kafkaTopicMetrics || []);
 
         // Display System Metrics
         this.displaySystemMetrics(metrics.systemMetrics || []);
@@ -1786,6 +1801,151 @@ class VuDataSimManager {
 
             tbody.appendChild(row);
         });
+    }
+
+    displayTopPodMemoryMetrics(metrics) {
+        console.log('Displaying top pod memory metrics:', metrics);
+        const tbody = this.elements.topPodMemoryMetricsTable;
+        if (!tbody) {
+            console.error('Top pod memory metrics table not found in elements');
+            return;
+        }
+
+        tbody.innerHTML = '';
+
+        if (!metrics || !Array.isArray(metrics) || metrics.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="4" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">No top pod memory metrics available</td>';
+            tbody.appendChild(row);
+            return;
+        }
+
+        metrics.forEach(metric => {
+            try {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50';
+
+                // Handle potential missing or invalid values
+                const timestamp = metric.timestamp ? new Date(metric.timestamp).toLocaleString() : 'N/A';
+                const nodeIP = metric.nodeIp || 'N/A';
+                const podName = metric.podName || 'N/A';
+                const memoryPct = typeof metric.memoryPct === 'number' ? metric.memoryPct.toFixed(2) : 'N/A';
+
+                row.innerHTML = `
+                    <td class="p-3">${timestamp}</td>
+                    <td class="p-3">${nodeIP}</td>
+                    <td class="p-3">${podName}</td>
+                    <td class="p-3 text-right">${memoryPct}${typeof metric.memoryPct === 'number' ? '%' : ''}</td>
+                `;
+                tbody.appendChild(row);
+            } catch (error) {
+                console.error('Error processing top pod memory metric:', error);
+            }
+        });
+    }
+
+    displayKafkaTopicMetrics(metrics) {
+        console.log('Displaying Kafka topic metrics:', metrics);
+        const tbody = this.elements.kafkaTopicMetricsTable;
+        if (!tbody) {
+            console.error('Kafka topic metrics table not found in elements');
+            return;
+        }
+
+        tbody.innerHTML = '';
+
+        if (!metrics || !Array.isArray(metrics) || metrics.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="3" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">No Kafka topic metrics available</td>';
+            tbody.appendChild(row);
+            return;
+        }
+
+        // Group metrics by topic and get the latest for each topic
+        const latestMetricsByTopic = {};
+        metrics.forEach(metric => {
+            if (metric.topic && typeof metric.oneMinuteRate === 'number') {
+                if (!latestMetricsByTopic[metric.topic] ||
+                    metric.timestamp > latestMetricsByTopic[metric.topic].timestamp) {
+                    latestMetricsByTopic[metric.topic] = metric;
+                }
+            }
+        });
+
+        // Convert to array and sort by OneMinuteRate (highest first)
+        const sortedMetrics = Object.values(latestMetricsByTopic)
+            .sort((a, b) => b.oneMinuteRate - a.oneMinuteRate);
+
+        sortedMetrics.forEach(metric => {
+            try {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50';
+
+                // Handle potential missing or invalid values
+                const timestamp = metric.timestamp ? new Date(metric.timestamp).toLocaleString() : 'N/A';
+                const topic = metric.topic || 'N/A';
+                const oneMinuteRate = typeof metric.oneMinuteRate === 'number' ? metric.oneMinuteRate.toFixed(2) : 'N/A';
+
+                row.innerHTML = `
+                    <td class="p-3">${timestamp}</td>
+                    <td class="p-3">${topic}</td>
+                    <td class="p-3 text-right">${oneMinuteRate}</td>
+                `;
+                tbody.appendChild(row);
+            } catch (error) {
+                console.error('Error processing Kafka topic metric:', error);
+            }
+        });
+    }
+
+    populateNodeFilterDropdown() {
+        const nodeFilterSelect = this.elements.nodeFilterSelect;
+        if (!nodeFilterSelect) return;
+
+        // Clear existing options except "All Nodes"
+        while (nodeFilterSelect.children.length > 1) {
+            nodeFilterSelect.removeChild(nodeFilterSelect.lastChild);
+        }
+
+        // Extract unique node IPs from the top pod memory metrics
+        const nodeIPs = new Set();
+        this.allTopPodMemoryMetrics.forEach(metric => {
+            if (metric.nodeIp) {
+                nodeIPs.add(metric.nodeIp);
+            }
+        });
+
+        // Add node options
+        Array.from(nodeIPs).sort().forEach(nodeIP => {
+            const option = document.createElement('option');
+            option.value = nodeIP;
+            option.textContent = nodeIP;
+            nodeFilterSelect.appendChild(option);
+        });
+
+        console.log(`Populated node filter dropdown with ${nodeIPs.size} nodes`);
+    }
+
+    filterTopPodMemoryMetrics() {
+        const selectedNode = this.elements.nodeFilterSelect.value;
+
+        let filteredMetrics;
+        if (!selectedNode) {
+            // Show global top 5 pods across all nodes
+            filteredMetrics = this.getGlobalTop5Pods();
+        } else {
+            // Filter by selected node (show top 5 for that specific node)
+            filteredMetrics = this.allTopPodMemoryMetrics.filter(metric => metric.nodeIp === selectedNode);
+        }
+
+        this.displayTopPodMemoryMetrics(filteredMetrics);
+    }
+
+    getGlobalTop5Pods() {
+        // Sort all pods globally by memory utilization (highest first) and take top 5
+        return this.allTopPodMemoryMetrics
+            .sort((a, b) => (b.memoryPct || 0) - (a.memoryPct || 0))
+            .slice(0, 5);
     }
      // O11y Source Management Methods
 

@@ -138,10 +138,6 @@ func GetClusterNodeMetrics() (map[string]ClusterNodeMetrics, error) {
 	clusterMetricsCache.lastUpdate = time.Now()
 
 	// Add detailed debug logging
-	for nodeName, nodeMetrics := range metrics {
-		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Node %s (target: %s) metrics - CPU: %.2f cores, Memory: %.2f/%.2f GB",
-			nodeName, nodeMetrics.Target, nodeMetrics.CPUCores, nodeMetrics.UsedMemoryGB, nodeMetrics.TotalMemoryGB), "debug")
-	}
 
 	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Fetched metrics for %d nodes", len(metrics)), "info")
 	return metrics, nil
