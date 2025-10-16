@@ -3,11 +3,13 @@ package clickhouse
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"vuDataSim/src/logger"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
+	"go.yaml.in/yaml/v3"
 )
 
 // ClickHouseConfig holds configuration for connection
@@ -17,6 +19,14 @@ type ClickHouseConfig struct {
 	Database string `yaml:"database"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
+}
+
+// AppConfig holds the entire application configuration
+type AppConfig struct {
+	ClickHouse     ClickHouseConfig `yaml:"clickhouse"`
+	MonitoredPods  []string         `yaml:"monitored_pods"`
+	MonitoredNodes []string         `yaml:"monitored_nodes"`
+	MonitoringDB   ClickHouseConfig `yaml:"monitoring_db"`
 }
 
 // ClickHouseClient wraps the ClickHouse connection and config
@@ -75,21 +85,59 @@ func (ch *ClickHouseClient) Close() error {
 
 // Global instances (used in main app; consider dependency injection for tests)
 var clickHouseClient *ClickHouseClient
-var clickHouseConfig = ClickHouseConfig{
-	Host:     "10.32.3.50",
-	Port:     9000,
-	Database: "vusmart",
-	Username: "monitoring_read",
-	Password: "StrongP@assword123",
+var clickHouseConfig ClickHouseConfig
+var monitoringDBClient *ClickHouseClient
+var monitoringDBConfig ClickHouseConfig
+var monitoredPods []string
+var monitoredNodes []string
+
+// LoadConfig loads configuration from YAML file
+func LoadConfig(configPath string) error {
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return fmt.Errorf("failed to read config file: %v", err)
+	}
+
+	var config AppConfig
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		return fmt.Errorf("failed to parse config file: %v", err)
+	}
+
+	clickHouseConfig = config.ClickHouse
+	monitoringDBConfig = config.MonitoringDB
+	monitoredPods = config.MonitoredPods
+	monitoredNodes = config.MonitoredNodes
+
+	logger.LogWithNode("System", "ClickHouse", "Configuration loaded successfully", "info")
+	return nil
 }
 
 // Initializes and sets global client
-func InitClickHouse() error {
+func InitClickHouse(configPath string) error {
+	// Load configuration first
+	err := LoadConfig(configPath)
+	if err != nil {
+		return fmt.Errorf("failed to load config: %v", err)
+	}
+
 	client, err := NewClickHouseClient(clickHouseConfig)
 	if err != nil {
 		return err
 	}
 	clickHouseClient = client
+
+	// Initialize monitoring DB client if configured
+	if monitoringDBConfig.Host != "" {
+		monitoringClient, err := NewClickHouseClient(monitoringDBConfig)
+		if err != nil {
+			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to initialize monitoring DB client: %v", err))
+		} else {
+			monitoringDBClient = monitoringClient
+			logger.LogSuccess("System", "ClickHouse", "Monitoring DB client initialized successfully")
+		}
+	}
+
 	logger.LogSuccess("System", "ClickHouse", "ClickHouse client initialized successfully")
 	return nil
 }

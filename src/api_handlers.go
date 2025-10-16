@@ -685,7 +685,36 @@ func handleAPIGetSSHStatus(w http.ResponseWriter, r *http.Request) {
 
 // handleAPIGetClickHouseMetrics handles GET /api/clickhouse/metrics
 func handleAPIGetClickHouseMetrics(w http.ResponseWriter, r *http.Request) {
-	metrics, err := clickhouse.CollectClickHouseMetrics()
+	// Get time range from query parameters
+	startStr := r.URL.Query().Get("start")
+	endStr := r.URL.Query().Get("end")
+
+	var timeRange clickhouse.TimeRange
+	if startStr == "" || endStr == "" {
+		// Default to last 5 minutes if no time range provided
+		timeRange.To = time.Now()
+		timeRange.From = timeRange.To.Add(-5 * time.Minute)
+	} else {
+		var err error
+		timeRange.From, err = time.Parse(time.RFC3339, startStr)
+		if err != nil {
+			sendJSONResponse(w, http.StatusBadRequest, APIResponse{
+				Success: false,
+				Message: fmt.Sprintf("Invalid start time format: %v", err),
+			})
+			return
+		}
+		timeRange.To, err = time.Parse(time.RFC3339, endStr)
+		if err != nil {
+			sendJSONResponse(w, http.StatusBadRequest, APIResponse{
+				Success: false,
+				Message: fmt.Sprintf("Invalid end time format: %v", err),
+			})
+			return
+		}
+	}
+
+	metrics, err := clickhouse.CollectClickHouseMetrics(timeRange)
 	if err != nil {
 		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,

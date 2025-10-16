@@ -8,6 +8,8 @@ class VuDataSimManager {
         this.nodes = {}; // Store node data
         // Add this property to the constructor
         this.clusterMetrics = {}; // Store real cluster metrics
+        this.metricsManager = new MetricsManager(this); // Initialize metrics manager
+        this.allTopPodMemoryMetrics = []; // Store all top pod memory metrics for filtering
 
         this.initializeComponents();
         this.bindEvents();
@@ -38,13 +40,14 @@ class VuDataSimManager {
         console.log('- o11ySourcesDropdown:', document.getElementById('o11y-sources-dropdown'));
         console.log('- o11ySourcesOptions:', document.getElementById('o11y-sources-options'));
         console.log('- o11ySourcesList:', document.getElementById('o11y-sources-list'));
+
         this.elements = {
             syncBtn: document.getElementById('sync-btn'),
             logNodeFilter: document.getElementById('log-node'),
             logModuleFilter: document.getElementById('log-module'),
             logsContainer: document.getElementById('logs-container'),
 
-            // O11y source management elements
+                        // O11y source management elements
             o11ySourcesContainer: document.getElementById('o11y-sources-container'),
             o11ySourcesDropdown: document.getElementById('o11y-sources-dropdown'),
             o11ySourcesOptions: document.getElementById('o11y-sources-options'),
@@ -120,6 +123,9 @@ class VuDataSimManager {
             containerMetricsTable: document.getElementById('container-metrics-table'),
             podResourceMetricsTable: document.getElementById('pod-resource-metrics-table'),
             podStatusMetricsTable: document.getElementById('pod-status-metrics-table'),
+            topPodMemoryMetricsTable: document.getElementById('top-pod-memory-metrics-table'),
+            kafkaTopicMetricsTable: document.getElementById('kafka-topic-metrics-table'),
+            nodeFilterSelect: document.getElementById('node-filter-select'),
 
             // Real-time status
         };
@@ -210,6 +216,7 @@ class VuDataSimManager {
         this.elements.closeClickHouseModal?.addEventListener('click', () => this.closeClickHouseMetricsModal());
         this.elements.clickHouseModalBackdrop?.addEventListener('click', () => this.closeClickHouseMetricsModal());
         this.elements.refreshClickHouseMetricsBtn?.addEventListener('click', () => this.refreshClickHouseMetrics());
+        this.elements.nodeFilterSelect?.addEventListener('change', () => this.filterTopPodMemoryMetrics());
 
         // Binary control action listeners
         this.elements.refreshBinaryStatusBtn?.addEventListener('click', () => this.refreshBinaryStatus());
@@ -280,7 +287,7 @@ class VuDataSimManager {
         // SSH status updates - Update every hour
         setInterval(() => {
             console.log('Hourly SSH status check triggered');
-            this.updateDashboardDisplay();
+            this.updateSSHStatuses();
         }, 60 * 60 * 1000); // 1 hour in milliseconds
 
         // Load logs initially and set up polling for live logs
@@ -300,6 +307,18 @@ class VuDataSimManager {
 
                 this.nodeData = response.data.nodeData;
                 console.log('Loaded nodeData from dashboard API:', this.nodeData);
+
+                // Load host information from nodes API to ensure we have host field for metrics matching
+                const nodesResponse = await this.callAPI('/api/nodes');
+                if (nodesResponse.success && nodesResponse.data) {
+                    nodesResponse.data.forEach(node => {
+                        if (this.nodeData[node.name]) {
+                            this.nodeData[node.name].host = node.host;
+                            console.log(`Added host ${node.host} to node ${node.name}`);
+                        }
+                    });
+                }
+
                 this.updateDashboardDisplay();
                 this.updateNodeStatusIndicators();
                 this.populateNodeFilters();
@@ -316,10 +335,11 @@ class VuDataSimManager {
                         this.nodeData[nodeId] = {
                             cpu: 0,           // Will be updated with real data
                             memory: 0,        // Will be updated with real data
-                            totalCpu: 4.0,
+                            totalCpu: 8.0,
                             totalMemory: 8.0,
                             status: node.enabled ? 'active' : 'inactive',
-                            host: node.host   // Store the host IP for matching with metrics target
+                            host: node.host  // Store the host IP for matching with metrics target
+
                         };
                         console.log(`Converted node ${nodeId} with host ${node.host} and status ${this.nodeData[nodeId].status}`);
                     });
@@ -441,8 +461,26 @@ class VuDataSimManager {
                 row.classList.add('opacity-60');
             }
 
-            // Calculate memory usage in GB
-            const usedMemory = node.totalMemory * (node.memory / 100);
+            // Calculate CPU usage - use real metrics if available
+            let cpuDisplay = '';
+            const realMetrics = this.clusterMetrics ? Object.values(this.clusterMetrics).find(m => m.target === node.host) : null;
+            if (realMetrics) {
+                const availableCpu = realMetrics.cpu_cores * 0.1; // Show 10% as available for example
+                cpuDisplay = `${availableCpu.toFixed(1)} / ${realMetrics.cpu_cores.toFixed(1)} cores`;
+            } else {
+                // Fallback to old calculation
+                cpuDisplay = `${(node.totalCpu - (node.totalCpu * node.cpu / 100)).toFixed(1)} / ${node.totalCpu} cores`;
+            }
+
+            // Calculate memory usage - use real metrics if available
+            let memoryDisplay = '';
+            if (realMetrics) {
+                memoryDisplay = `${realMetrics.used_memory_gb.toFixed(1)} / ${realMetrics.total_memory_gb.toFixed(1)} GB`;
+            } else {
+                // Fallback to old calculation
+                const usedMemory = node.totalMemory * (node.memory / 100);
+                memoryDisplay = `${usedMemory.toFixed(1)} / ${node.totalMemory} GB`;
+            }
 
             // Determine status display based on SSH connectivity for enabled nodes
             let statusDisplay = '';
@@ -502,8 +540,8 @@ class VuDataSimManager {
             row.innerHTML = `
                 <td class="p-4 font-medium">${nodeId}</td>
                 <td class="p-4">${statusDisplay}</td>
-                <td class="p-4 text-right number-animate" data-field="cpu">${(node.totalCpu - (node.totalCpu * node.cpu / 100)).toFixed(1)} / ${node.totalCpu} cores</td>
-                <td class="p-4 text-right number-animate" data-field="memory">${usedMemory.toFixed(1)} / ${node.totalMemory} GB</td>
+                <td class="p-4 text-right number-animate" data-field="cpu">${cpuDisplay}</td>
+                <td class="p-4 text-right number-animate" data-field="memory">${memoryDisplay}</td>
             `;
 
             tbody.appendChild(row);
@@ -674,6 +712,11 @@ class VuDataSimManager {
 
         // Set up WebSocket connection for real-time updates
         this.setupWebSocket();
+
+        
+        setInterval(() => {
+            this.fetchFinalVuDataSimMetrics();
+        }, 3000);
     }
 
     setupWebSocket() {
@@ -1540,9 +1583,19 @@ class VuDataSimManager {
     displayClickHouseMetrics(metrics) {
         console.log('Received ClickHouse metrics:', metrics);
 
+        // Store all top pod memory metrics for filtering
+        this.allTopPodMemoryMetrics = metrics.topPodMemoryMetrics || [];
+
+        // Populate node filter dropdown
+        this.populateNodeFilterDropdown();
+
         // Display Pod Metrics first
         this.displayPodResourceMetrics(metrics.podResourceMetrics || []);
         this.displayPodStatusMetrics(metrics.podStatusMetrics || []);
+        this.displayTopPodMemoryMetrics(this.allTopPodMemoryMetrics);
+
+        // Display Kafka Topic Metrics
+        this.displayKafkaTopicMetrics(metrics.kafkaTopicMetrics || []);
 
         // Display System Metrics
         this.displaySystemMetrics(metrics.systemMetrics || []);
@@ -1585,8 +1638,8 @@ class VuDataSimManager {
                 // Handle potential missing or invalid values
                 const clusterId = metric.clusterId || 'N/A';
                 const podName = metric.podName || 'N/A';
-                const cpuPercentage = typeof metric.cpuPercentage === 'number' ? metric.cpuPercentage.toFixed(2) : 'N/A';
-                const memoryPercentage = typeof metric.memoryPercentage === 'number' ? metric.memoryPercentage.toFixed(2) : 'N/A';
+                const cpuPercentage = typeof metric.cpuPercentage === 'number' ? (metric.cpuPercentage * 100).toFixed(2) : 'N/A';
+                const memoryPercentage = typeof metric.memoryPercentage === 'number' ? (metric.memoryPercentage * 100).toFixed(2) : 'N/A';
                 let timestamp = 'N/A';
                 try {
                     if (metric.lastTimestamp) {
@@ -1796,7 +1849,151 @@ class VuDataSimManager {
         });
     }
 
-    // O11y Source Management Methods
+    displayTopPodMemoryMetrics(metrics) {
+        console.log('Displaying top pod memory metrics:', metrics);
+        const tbody = this.elements.topPodMemoryMetricsTable;
+        if (!tbody) {
+            console.error('Top pod memory metrics table not found in elements');
+            return;
+        }
+
+        tbody.innerHTML = '';
+
+        if (!metrics || !Array.isArray(metrics) || metrics.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="4" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">No top pod memory metrics available</td>';
+            tbody.appendChild(row);
+            return;
+        }
+
+        metrics.forEach(metric => {
+            try {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50';
+
+                // Handle potential missing or invalid values
+                const timestamp = metric.timestamp ? new Date(metric.timestamp).toLocaleString() : 'N/A';
+                const nodeIP = metric.nodeIp || 'N/A';
+                const podName = metric.podName || 'N/A';
+                const memoryPct = typeof metric.memoryPct === 'number' ? metric.memoryPct.toFixed(2) : 'N/A';
+
+                row.innerHTML = `
+                    <td class="p-3">${timestamp}</td>
+                    <td class="p-3">${nodeIP}</td>
+                    <td class="p-3">${podName}</td>
+                    <td class="p-3 text-right">${memoryPct}${typeof metric.memoryPct === 'number' ? '%' : ''}</td>
+                `;
+                tbody.appendChild(row);
+            } catch (error) {
+                console.error('Error processing top pod memory metric:', error);
+            }
+        });
+    }
+
+    displayKafkaTopicMetrics(metrics) {
+        console.log('Displaying Kafka topic metrics:', metrics);
+        const tbody = this.elements.kafkaTopicMetricsTable;
+        if (!tbody) {
+            console.error('Kafka topic metrics table not found in elements');
+            return;
+        }
+
+        tbody.innerHTML = '';
+
+        if (!metrics || !Array.isArray(metrics) || metrics.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="3" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">No Kafka topic metrics available</td>';
+            tbody.appendChild(row);
+            return;
+        }
+
+        // Group metrics by topic and get the latest for each topic
+        const latestMetricsByTopic = {};
+        metrics.forEach(metric => {
+            if (metric.topic && typeof metric.oneMinuteRate === 'number') {
+                if (!latestMetricsByTopic[metric.topic] ||
+                    metric.timestamp > latestMetricsByTopic[metric.topic].timestamp) {
+                    latestMetricsByTopic[metric.topic] = metric;
+                }
+            }
+        });
+
+        // Convert to array and sort by OneMinuteRate (highest first)
+        const sortedMetrics = Object.values(latestMetricsByTopic)
+            .sort((a, b) => b.oneMinuteRate - a.oneMinuteRate);
+
+        sortedMetrics.forEach(metric => {
+            try {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50';
+
+                // Handle potential missing or invalid values
+                const timestamp = metric.timestamp ? new Date(metric.timestamp).toLocaleString() : 'N/A';
+                const topic = metric.topic || 'N/A';
+                const oneMinuteRate = typeof metric.oneMinuteRate === 'number' ? metric.oneMinuteRate.toFixed(2) : 'N/A';
+
+                row.innerHTML = `
+                    <td class="p-3">${timestamp}</td>
+                    <td class="p-3">${topic}</td>
+                    <td class="p-3 text-right">${oneMinuteRate}</td>
+                `;
+                tbody.appendChild(row);
+            } catch (error) {
+                console.error('Error processing Kafka topic metric:', error);
+            }
+        });
+    }
+
+    populateNodeFilterDropdown() {
+        const nodeFilterSelect = this.elements.nodeFilterSelect;
+        if (!nodeFilterSelect) return;
+
+        // Clear existing options except "All Nodes"
+        while (nodeFilterSelect.children.length > 1) {
+            nodeFilterSelect.removeChild(nodeFilterSelect.lastChild);
+        }
+
+        // Extract unique node IPs from the top pod memory metrics
+        const nodeIPs = new Set();
+        this.allTopPodMemoryMetrics.forEach(metric => {
+            if (metric.nodeIp) {
+                nodeIPs.add(metric.nodeIp);
+            }
+        });
+
+        // Add node options
+        Array.from(nodeIPs).sort().forEach(nodeIP => {
+            const option = document.createElement('option');
+            option.value = nodeIP;
+            option.textContent = nodeIP;
+            nodeFilterSelect.appendChild(option);
+        });
+
+        console.log(`Populated node filter dropdown with ${nodeIPs.size} nodes`);
+    }
+
+    filterTopPodMemoryMetrics() {
+        const selectedNode = this.elements.nodeFilterSelect.value;
+
+        let filteredMetrics;
+        if (!selectedNode) {
+            // Show global top 5 pods across all nodes
+            filteredMetrics = this.getGlobalTop5Pods();
+        } else {
+            // Filter by selected node (show top 5 for that specific node)
+            filteredMetrics = this.allTopPodMemoryMetrics.filter(metric => metric.nodeIp === selectedNode);
+        }
+
+        this.displayTopPodMemoryMetrics(filteredMetrics);
+    }
+
+    getGlobalTop5Pods() {
+        // Sort all pods globally by memory utilization (highest first) and take top 5
+        return this.allTopPodMemoryMetrics
+            .sort((a, b) => (b.memoryPct || 0) - (a.memoryPct || 0))
+            .slice(0, 5);
+    }
+     // O11y Source Management Methods
 
     loadO11ySources() {
         console.log('Loading o11y sources...');
@@ -2184,9 +2381,125 @@ class VuDataSimManager {
         this.updateO11ySourceCount();
     }
 
+    async updateSSHStatuses() {
+        // Fetch SSH status for enabled nodes (only once per hour)
+        const now = Date.now();
+        const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+
+        if (now - this.lastSshStatusUpdate > oneHour || Object.keys(this.sshStatuses).length === 0) {
+            try {
+                console.log('Fetching SSH status (hourly update)...');
+                const sshResponse = await this.callAPI('/api/ssh/status');
+                if (sshResponse.success && sshResponse.data) {
+                    this.sshStatuses = {};
+                    sshResponse.data.forEach(status => {
+                        this.sshStatuses[status.nodeName] = status;
+                    });
+                    this.lastSshStatusUpdate = now;
+                    console.log('SSH status updated:', this.sshStatuses);
+                }
+            } catch (error) {
+                console.error('Error fetching SSH status:', error);
+            }
+        }
+
+        // Update only the status column in existing rows
+        const tbody = document.getElementById('cluster-table-body');
+        const rows = tbody.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const nodeName = row.cells[0]?.textContent?.trim();
+            const node = this.nodeData[nodeName];
+
+            if (node && node.status !== 'inactive') { // Only update enabled nodes
+                const sshStatus = this.sshStatuses[nodeName];
+                let statusDisplay = '';
+
+                if (sshStatus) {
+                    const timestamp = new Date(sshStatus.lastChecked).toLocaleString();
+                    if (sshStatus.status === 'connected') {
+                        statusDisplay = `
+                            <div class="flex flex-col items-start gap-1">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-success/20 dark:bg-success-dark/20 px-3 py-1 text-xs font-medium text-success dark:text-success-dark">
+                                    <span class="h-2 w-2 rounded-full bg-success"></span>SSH Connected
+                                </div>
+                                <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                                    Last checked: ${timestamp}
+                                </div>
+                            </div>
+                        `;
+                    } else if (sshStatus.status === 'disconnected') {
+                        statusDisplay = `
+                            <div class="flex flex-col items-start gap-1">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-danger/20 dark:bg-danger-dark/20 px-3 py-1 text-xs font-medium text-danger dark:text-danger-dark">
+                                    <span class="h-2 w-2 rounded-full bg-danger"></span>SSH Disconnected
+                                </div>
+                                <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                                    Last checked: ${timestamp}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        statusDisplay = `
+                            <div class="flex flex-col items-start gap-1">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-warning/20 dark:bg-warning-dark/20 px-3 py-1 text-xs font-medium text-warning dark:text-warning-dark">
+                                    <span class="h-2 w-2 rounded-full bg-warning"></span>SSH ${sshStatus.status}
+                                </div>
+                                <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                                    Last checked: ${timestamp}
+                                </div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    statusDisplay = `
+                        <div class="inline-flex items-center gap-2 rounded-full bg-warning/20 dark:bg-warning-dark/20 px-3 py-1 text-xs font-medium text-warning dark:text-warning-dark">
+                            <span class="h-2 w-2 rounded-full bg-warning"></span>Checking SSH...
+                        </div>
+                    `;
+                }
+
+                // Update only the status cell (index 1)
+                if (row.cells[1]) {
+                    row.cells[1].innerHTML = statusDisplay;
+                }
+            }
+        });
+    }
+
+    async fetchFinalVuDataSimMetrics() {
+        try {
+            // Fetch metrics from the correct node where node_metrics_api is running
+            const response = await fetch('http://216.48.191.10:8086/api/system/metrics');
+            if (!response.ok) throw new Error('Failed to fetch metrics');
+            const metrics = await response.json();
+            this.displayFinalVuDataSimMetrics(metrics);
+        } catch (error) {
+            console.error('Error fetching finalvudatasim metrics:', error);
+            this.displayFinalVuDataSimMetrics({}); // Show empty row on error
+        }
+    }
+
+    displayFinalVuDataSimMetrics(metrics) {
+        const tbody = document.getElementById('finalvudatasim-metrics-body');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        // Robust running detection: if running is true OR pid is present and > 0
+        const isRunning = metrics.running || (metrics.pid && metrics.pid > 0);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="p-4">${isRunning ? '<span class="text-success font-bold">Yes</span>' : '<span class="text-danger font-bold">No</span>'}</td>
+            <td class="p-4">${metrics.pid && metrics.pid > 0 ? metrics.pid : '-'}</td>
+            <td class="p-4">${metrics.start_time ? metrics.start_time : '-'}</td>
+            <td class="p-4">${typeof metrics.cpu_percent === 'number' ? metrics.cpu_percent.toFixed(2) : '-'}</td>
+            <td class="p-4">${typeof metrics.mem_mb === 'number' ? metrics.mem_mb.toFixed(2) : '-'}</td>
+            <td class="p-4">${metrics.cmdline ? metrics.cmdline : '-'}</td>
+        `;
+        tbody.appendChild(row);
+    }
 }
 
-// Initialize the application when DOM is loaded
+// Initialize the application when DOM is loadedFinalVu
 document.addEventListener('DOMContentLoaded', () => {
     window.vuDataSimManager = new VuDataSimManager();
 });
@@ -2200,6 +2513,7 @@ window.testNodeManagement = function () {
         console.error('vuDataSimManager not initialized');
     }
 };
+
 
 // Test function to manually load O11y sources
 window.testLoadO11ySources = function() {
@@ -2228,3 +2542,7 @@ window.testO11yElements = function() {
 };
 
 
+// Export for potential module usage
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = VuDataSimManager;
+}
