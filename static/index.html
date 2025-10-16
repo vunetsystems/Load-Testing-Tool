@@ -536,10 +536,27 @@
                                                 Last updated: Never
                                             </div>
                                         </div>
-                                        <button id="refresh-clickhouse-metrics-btn" class="group flex items-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 px-4 py-2 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
-                                            <span class="material-symbols-outlined">refresh</span>
-                                            <span>Refresh Metrics</span>
-                                        </button>
+                                       <div class="flex items-center gap-4">
+                                            <div class="flex items-center gap-2">
+                                                <input type="text" id="metrics-time-range" placeholder="Select time range" class="px-4 py-2 rounded-lg border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark text-sm">
+                                                <div class="flex gap-1">
+                                                    <button id="preset-1min" class="px-3 py-1 text-xs rounded border border-primary/50 dark:border-primary-dark/50 text-primary dark:text-primary-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10">1m</button>
+                                                    <button id="preset-5min" class="px-3 py-1 text-xs rounded border border-primary/50 dark:border-primary-dark/50 text-primary dark:text-primary-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10">5m</button>
+                                                    <button id="preset-15min" class="px-3 py-1 text-xs rounded border border-primary/50 dark:border-primary-dark/50 text-primary dark:text-primary-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10">15m</button>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Node:</span>
+                                                <select id="node-filter-select" class="px-3 py-2 rounded-lg border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark text-sm focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark">
+                                                    <option value="">All Nodes</option>
+                                                    <!-- Node options will be populated dynamically -->
+                                                </select>
+                                            </div>
+                                            <button id="refresh-clickhouse-metrics-btn" class="group flex items-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 px-4 py-2 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
+                                                <span class="material-symbols-outlined">refresh</span>
+                                                <span>Refresh Metrics</span>
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <!-- Metrics Tables -->
@@ -626,7 +643,55 @@
                                             </div>
                                         </div>
 
-                                        <!-- System Metrics -->
+                                        <!-- Top Pods by Memory Utilization -->
+                                        <div>
+                                            <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                                                <span class="material-symbols-outlined text-primary dark:text-primary-dark">memory</span>
+                                                Top 5 Pods by Memory Utilization per Node
+                                            </h4>
+                                            <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
+                                                <table class="w-full text-left text-sm">
+                                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
+                                                        <tr>
+                                                            <th class="p-3 font-semibold">Timestamp</th>
+                                                            <th class="p-3 font-semibold">Node IP</th>
+                                                            <th class="p-3 font-semibold">Pod Name</th>
+                                                            <th class="p-3 font-semibold text-right">Memory %</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="top-pod-memory-metrics-table" class="divide-y divide-subtle-light dark:divide-subtle-dark">
+                                                        <tr>
+                                                            <td colspan="4" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">Loading top pod memory metrics...</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <!-- Messages In Per Sec by Topic -->
+                                        <div>
+                                            <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                                                <span class="material-symbols-outlined text-primary dark:text-primary-dark">speed</span>
+                                                Messages In Per Sec by Topic
+                                            </h4>
+                                            <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
+                                                <table class="w-full text-left text-sm">
+                                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
+                                                        <tr>
+                                                            <th class="p-3 font-semibold">Timestamp</th>
+                                                            <th class="p-3 font-semibold">Topic</th>
+                                                            <th class="p-3 font-semibold text-right">Messages In/sec</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="kafka-topic-metrics-table" class="divide-y divide-subtle-light dark:divide-subtle-dark">
+                                                        <tr>
+                                                            <td colspan="3" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">Loading Kafka topic metrics...</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <!-- System Metrics
                                         <div>
                                             <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
                                                 <span class="material-symbols-outlined text-success dark:text-success-dark">memory</span>
@@ -653,7 +718,6 @@
                                             </div>
                                         </div>
 
-                                        <!-- Database Metrics -->
                                         <div>
                                             <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
                                                 <span class="material-symbols-outlined text-warning dark:text-warning-dark">database</span>
@@ -680,7 +744,6 @@
                                             </div>
                                         </div>
 
-                                        <!-- Container Metrics -->
                                         <div>
                                             <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
                                                 <span class="material-symbols-outlined text-danger dark:text-danger-dark">widgets</span>
@@ -706,7 +769,9 @@
                                                     </tbody>
                                                 </table>
                                             </div>
-                                        </div>
+                                        </div> -->
+
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -817,6 +882,12 @@
         </main>
     </div>
 
+    <!-- Include a time picker library (e.g., Flatpickr) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
+    <!-- Your application scripts -->
+    <script src="/static/metrics.js"></script>
     <script src="/static/script.js?v=2024102502"></script>
 </body>
 </html>

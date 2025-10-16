@@ -7,14 +7,22 @@ import (
 	"vuDataSim/src/logger"
 )
 
+// TimeRange represents a time window for metrics queries
+type TimeRange struct {
+	From time.Time `json:"from"`
+	To   time.Time `json:"to"`
+}
+
 // ClickHouseMetrics represents aggregated metrics from ClickHouse
 type ClickHouseMetrics struct {
 	KafkaProducerMetrics []KafkaProducerMetric `json:"kafkaProducerMetrics,omitempty"`
+	KafkaTopicMetrics    []KafkaTopicMetric    `json:"kafkaTopicMetrics,omitempty"`
 	SystemMetrics        []SystemMetric        `json:"systemMetrics,omitempty"`
 	DatabaseMetrics      []DatabaseMetric      `json:"databaseMetrics,omitempty"`
 	ContainerMetrics     []ContainerMetric     `json:"containerMetrics,omitempty"`
 	PodResourceMetrics   []PodResourceMetric   `json:"podResourceMetrics,omitempty"`
 	PodStatusMetrics     []PodStatusMetric     `json:"podStatusMetrics,omitempty"`
+	TopPodMemoryMetrics  []TopPodMemoryMetric  `json:"topPodMemoryMetrics,omitempty"`
 	LastUpdated          time.Time             `json:"lastUpdated"`
 }
 
@@ -84,6 +92,21 @@ type PodStatusMetric struct {
 	RunningContainers    uint64 `json:"runningContainers"`
 	NonRunningContainers uint64 `json:"nonRunningContainers"`
 	DerivedStatus        string `json:"derivedStatus"`
+}
+
+// TopPodMemoryMetric represents top pods by memory utilization per node
+type TopPodMemoryMetric struct {
+	Timestamp time.Time `json:"timestamp"`
+	NodeIP    string    `json:"nodeIp"`
+	PodName   string    `json:"podName"`
+	MemoryPct float64   `json:"memoryPct"`
+}
+
+// KafkaTopicMetric represents Kafka topic metrics (Messages In Per Sec by Topic)
+type KafkaTopicMetric struct {
+	Timestamp     time.Time `json:"timestamp"`
+	Topic         string    `json:"topic"`
+	OneMinuteRate float64   `json:"oneMinuteRate"`
 }
 
 // getKafkaProducerMetrics retrieves latest Kafka producer metrics
@@ -271,22 +294,57 @@ func (ch *ClickHouseClient) getContainerMetrics(ctx context.Context, limit int) 
 	return metrics, nil
 }
 
-// CollectMetrics gathers all metrics from ClickHouse
-func (c *ClickHouseClient) CollectMetrics() (*ClickHouseMetrics, error) {
-	var err error
+// GetKafkaTopicMetrics fetches Messages In Per Sec (OneMinuteRate) by Topic for specific topics from monitoring DB
+func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRange) ([]KafkaTopicMetric, error) {
+	if monitoringDBClient == nil {
+		return nil, fmt.Errorf("monitoring DB client not initialized")
+	}
+
+	query := `
+		SELECT
+			toStartOfInterval(timestamp, toIntervalSecond(60)) AS timestamp,
+			topic AS metric,
+			sum(OneMinuteRate) AS OneMinuteRate
+		FROM kafka_Broker_Topic_Metrics
+		WHERE
+			timestamp BETWEEN ? AND ?
+			AND name='MessagesInPerSec'
+			AND topic IN (?)
+		GROUP BY timestamp, topic
+		ORDER BY timestamp, topic
+		LIMIT 500
+	`
+
+	rows, err := monitoringDBClient.Client.Query(ctx, query, timeRange.From, timeRange.To, topics)
+	if err != nil {
+		return nil, fmt.Errorf("error querying Kafka topic metrics: %v", err)
+	}
+	defer rows.Close()
+
+	var metrics []KafkaTopicMetric
+	for rows.Next() {
+		var m KafkaTopicMetric
+		if err := rows.Scan(&m.Timestamp, &m.Topic, &m.OneMinuteRate); err != nil {
+			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan Kafka topic metric row: %v", err))
+			continue
+		}
+		metrics = append(metrics, m)
+	}
+
+	return metrics, nil
+}
+
+// CollectMetrics gathers all metrics from ClickHouse for a specific time range
+func (c *ClickHouseClient) CollectMetrics(timeRange TimeRange) (*ClickHouseMetrics, error) {
+	ctx := context.Background()
 	metrics := &ClickHouseMetrics{
 		LastUpdated: time.Now(),
 	}
 
-	// List of pods to monitor
-	monitoredPods := []string{
-		"linuxmonitor-8d545644d-wv77v",
-		"apache-metrics-6d7f45d5d8-vbmcf",
-		"mssql-telegraf-pipeline-dcffcd5f6-kqmch",
-	}
+	// List of pods to monitor (loaded from config)
 
 	// Collect pod resource metrics
-	podResourceMetrics, err := c.GetPodResourceMetrics(monitoredPods)
+	podResourceMetrics, err := c.GetPodResourceMetrics(ctx, monitoredPods, timeRange)
 	if err != nil {
 		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Error collecting pod resource metrics: %v", err), "error")
 	} else {
@@ -294,11 +352,36 @@ func (c *ClickHouseClient) CollectMetrics() (*ClickHouseMetrics, error) {
 	}
 
 	// Collect pod status metrics
-	podStatusMetrics, err := c.GetPodStatusMetrics(monitoredPods)
+	podStatusMetrics, err := c.GetPodStatusMetrics(ctx, monitoredPods, timeRange)
 	if err != nil {
 		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Error collecting pod status metrics: %v", err), "error")
 	} else {
 		metrics.PodStatusMetrics = podStatusMetrics
+	}
+
+	// Collect top pods by memory utilization per node
+	topPodMemoryMetrics, err := c.GetTopPodsByMemoryUtilization(ctx, monitoredNodes, timeRange)
+	if err != nil {
+		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Error collecting top pod memory metrics: %v", err), "error")
+	} else {
+		metrics.TopPodMemoryMetrics = topPodMemoryMetrics
+	}
+
+	// Collect Kafka topic metrics for specific topics
+	kafkaTopics := []string{
+		"apache-metrics-input",
+		"azure-firewall-input",
+		"azure-redis-cache-input",
+		"vuazure-storage-blob-input",
+		"linux-monitor-input",
+		"mongo-metrics-input",
+		"mssql-telegraf",
+	}
+	kafkaTopicMetrics, err := GetKafkaTopicMetrics(ctx, kafkaTopics, timeRange)
+	if err != nil {
+		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Error collecting Kafka topic metrics: %v", err), "error")
+	} else {
+		metrics.KafkaTopicMetrics = kafkaTopicMetrics
 	}
 
 	// Temporarily disabled Kafka metrics
@@ -354,25 +437,30 @@ func (c *ClickHouseClient) CollectMetrics() (*ClickHouseMetrics, error) {
 	return metrics, nil
 }
 
-// GetPodResourceMetrics fetches resource utilization for specific pods
-func (c *ClickHouseClient) GetPodResourceMetrics(pods []string) ([]PodResourceMetric, error) {
+// GetPodResourceMetrics fetches resource utilization for specific pods within a time range
+func (c *ClickHouseClient) GetPodResourceMetrics(ctx context.Context, pods []string, timeRange TimeRange) ([]PodResourceMetric, error) {
 	query := `
         SELECT
             cluster_identifiers AS cluster_id,
             kubernetes_pod_name AS pod_name,
-            avg(kubernetes_pod_cpu_usage_limit_pct) AS cpu_percentage,
-            avg(kubernetes_pod_memory_usage_limit_pct) AS memory_percentage,
-            max(timestamp) AS latest_timestamp
+            AVG(kubernetes_pod_cpu_usage_limit_pct) AS avg_cpu_pct,
+            AVG(kubernetes_pod_memory_usage_limit_pct) AS avg_memory_pct,
+            MAX(timestamp) AS latest_timestamp
         FROM
             vmetrics_kubernetes_kubelet_metrics_view
         WHERE
             type = 'pod'
+						AND
+			cluster_identifiers = 'perf-cluster'
             AND kubernetes_pod_name IN (?)
+            AND timestamp BETWEEN ? AND ?
         GROUP BY
             cluster_identifiers,
-            kubernetes_pod_name`
+            kubernetes_pod_name
+        ORDER BY
+            latest_timestamp DESC`
 
-	rows, err := c.Client.Query(context.Background(), query, pods)
+	rows, err := c.Client.Query(ctx, query, pods, timeRange.From, timeRange.To)
 	if err != nil {
 		return nil, fmt.Errorf("error querying pod resource metrics: %v", err)
 	}
@@ -390,8 +478,8 @@ func (c *ClickHouseClient) GetPodResourceMetrics(pods []string) ([]PodResourceMe
 	return metrics, nil
 }
 
-// GetPodStatusMetrics fetches status information for specific pods
-func (c *ClickHouseClient) GetPodStatusMetrics(pods []string) ([]PodStatusMetric, error) {
+// GetPodStatusMetrics fetches status information for specific pods within a time range
+func (c *ClickHouseClient) GetPodStatusMetrics(ctx context.Context, pods []string, timeRange TimeRange) ([]PodStatusMetric, error) {
 	query := `
         WITH
         pod_latest AS (
@@ -404,7 +492,10 @@ func (c *ClickHouseClient) GetPodStatusMetrics(pods []string) ([]PodStatusMetric
         FROM vmetrics_kubernetes_kube_state_metrics_view
         WHERE
             type = 'state_pod'
+			AND
+			cluster_identifiers = 'perf-cluster'
             AND kubernetes_pod_name IN (?)
+            AND timestamp BETWEEN ? AND ?
         GROUP BY cluster_identifiers, kubernetes_namespace, kubernetes_pod_name
         ),
         container_latest AS (
@@ -458,7 +549,7 @@ func (c *ClickHouseClient) GetPodStatusMetrics(pods []string) ([]PodStatusMetric
             AND c.kubernetes_namespace = p.kubernetes_namespace
             AND c.kubernetes_pod_name = p.kubernetes_pod_name`
 
-	rows, err := c.Client.Query(context.Background(), query, pods, pods)
+	rows, err := c.Client.Query(ctx, query, pods, timeRange.From, timeRange.To, pods)
 	if err != nil {
 		return nil, fmt.Errorf("error querying pod status metrics: %v", err)
 	}
@@ -486,13 +577,164 @@ func (c *ClickHouseClient) GetPodStatusMetrics(pods []string) ([]PodStatusMetric
 	return metrics, nil
 }
 
-// collectClickHouseMetrics collects all metrics from ClickHouse
-func CollectClickHouseMetrics() (*ClickHouseMetrics, error) {
+// GetTopPodsByMemoryUtilization fetches top 5 pods by memory utilization for each monitored node
+/*func (c *ClickHouseClient) GetTopPodsByMemoryUtilization(ctx context.Context, nodes []string, timeRange TimeRange) ([]TopPodMemoryMetric, error) {
+	query := `
+	       WITH pod_memory_stats AS (
+	           SELECT
+	               target,
+	               kubernetes_pod_name,
+	               quantile(0.95)(kubernetes_pod_memory_usage_node_pct) as memory_pct_95,
+	               count() as sample_count
+	           FROM
+	               vmetrics_kubernetes_kubelet_metrics_view
+	           WHERE
+	               type = 'pod'
+	               AND target IN (?)
+	               AND timestamp BETWEEN ? AND ?
+	           GROUP BY target, kubernetes_pod_name
+	           HAVING sample_count > 0
+	       ),
+	       ranked_pods AS (
+	           SELECT
+	               target,
+	               kubernetes_pod_name,
+	               memory_pct_95,
+	               ROW_NUMBER() OVER (PARTITION BY target ORDER BY memory_pct_95 DESC) as pod_rank
+	           FROM pod_memory_stats
+	       ),
+	       top_5_per_node AS (
+	           SELECT target, kubernetes_pod_name, memory_pct_95
+	           FROM ranked_pods
+	           WHERE pod_rank <= 5
+	       ),
+	       latest_pod_metrics AS (
+	           SELECT
+	               target,
+	               kubernetes_pod_name,
+	               argMax(timestamp, timestamp) as latest_timestamp,
+	               argMax(kubernetes_pod_memory_usage_node_pct, timestamp) as latest_memory_pct
+	           FROM vmetrics_kubernetes_kubelet_metrics_view
+	           WHERE
+	               type = 'pod'
+	               AND target IN (?)
+	               AND timestamp BETWEEN ? AND ?
+	               AND (target, kubernetes_pod_name) IN (
+	                   SELECT target, kubernetes_pod_name
+	                   FROM top_5_per_node
+	               )
+	           GROUP BY target, kubernetes_pod_name
+	       )
+	       SELECT
+	           lpm.latest_timestamp as timestamp,
+	           lpm.target,
+	           lpm.kubernetes_pod_name as pod_name,
+	           lpm.latest_memory_pct as memory_pct
+	       FROM latest_pod_metrics lpm
+	       JOIN top_5_per_node t5
+	           ON lpm.target = t5.target
+	           AND lpm.kubernetes_pod_name = t5.kubernetes_pod_name
+	       ORDER BY lpm.target, lpm.latest_memory_pct DESC`
+
+	rows, err := c.Client.Query(ctx, query, nodes, timeRange.From, timeRange.To, nodes, timeRange.From, timeRange.To)
+	if err != nil {
+		return nil, fmt.Errorf("error querying top pods by memory utilization: %v", err)
+	}
+	defer rows.Close()
+
+	var metrics []TopPodMemoryMetric
+	for rows.Next() {
+		var m TopPodMemoryMetric
+		var memoryPct32 float32
+		if err := rows.Scan(&m.Timestamp, &m.NodeIP, &m.PodName, &memoryPct32); err != nil {
+			return nil, fmt.Errorf("error scanning top pod memory metrics: %v", err)
+		}
+		m.MemoryPct = float64(memoryPct32)
+		metrics = append(metrics, m)
+	}
+
+	return metrics, nil
+}*/
+
+func (c *ClickHouseClient) GetTopPodsByMemoryUtilization(ctx context.Context, nodes []string, timeRange TimeRange) ([]TopPodMemoryMetric, error) {
+	query := `
+        WITH pod_memory_stats AS (
+            SELECT
+                target,
+                kubernetes_pod_name,
+                quantile(0.95)(kubernetes_pod_memory_usage_node_pct) AS memory_pct_95
+            FROM vmetrics_kubernetes_kubelet_metrics_view
+            WHERE type = 'pod'
+                AND target IN (?)
+                AND timestamp BETWEEN ? AND ?
+            GROUP BY target, kubernetes_pod_name
+        ),
+        ranked_pods AS (
+            SELECT
+                target,
+                kubernetes_pod_name,
+                memory_pct_95,
+                ROW_NUMBER() OVER (PARTITION BY target ORDER BY memory_pct_95 DESC) AS pod_rank
+            FROM pod_memory_stats
+        ),
+        top_5_per_node AS (
+            SELECT target, kubernetes_pod_name, memory_pct_95
+            FROM ranked_pods
+            WHERE pod_rank <= 5
+        ),
+        latest_pod_metrics AS (
+            SELECT
+                target,
+                kubernetes_pod_name,
+                argMax(timestamp, timestamp) AS latest_timestamp,
+                argMax(kubernetes_pod_memory_usage_node_pct, timestamp) AS latest_memory_pct
+            FROM vmetrics_kubernetes_kubelet_metrics_view
+            WHERE type = 'pod'
+                AND target IN (?)
+                AND timestamp BETWEEN ? AND ?
+                AND (target, kubernetes_pod_name) IN (
+                    SELECT target, kubernetes_pod_name
+                    FROM top_5_per_node
+                )
+            GROUP BY target, kubernetes_pod_name
+        )
+        SELECT
+            latest_timestamp AS timestamp,
+            target AS node_ip,
+            kubernetes_pod_name AS pod_name,
+            latest_memory_pct AS memory_pct
+        FROM latest_pod_metrics
+        ORDER BY node_ip, memory_pct DESC
+		
+    `
+
+	rows, err := c.Client.Query(ctx, query, nodes, timeRange.From, timeRange.To, nodes, timeRange.From, timeRange.To)
+	if err != nil {
+		return nil, fmt.Errorf("error querying top pods by memory utilization: %v", err)
+	}
+	defer rows.Close()
+
+	var metrics []TopPodMemoryMetric
+	for rows.Next() {
+		var m TopPodMemoryMetric
+		var memoryPct float32
+		if err := rows.Scan(&m.Timestamp, &m.NodeIP, &m.PodName, &memoryPct); err != nil {
+			return nil, fmt.Errorf("error scanning top pod memory metrics: %v", err)
+		}
+		m.MemoryPct = float64(memoryPct)
+		metrics = append(metrics, m)
+	}
+
+	return metrics, nil
+}
+
+// collectClickHouseMetrics collects all metrics from ClickHouse for a specific time range
+func CollectClickHouseMetrics(timeRange TimeRange) (*ClickHouseMetrics, error) {
 	if clickHouseClient == nil {
 		return nil, fmt.Errorf("ClickHouse client not initialized")
 	}
 
-	metrics, err := clickHouseClient.CollectMetrics()
+	metrics, err := clickHouseClient.CollectMetrics(timeRange)
 	if err != nil {
 		logger.LogError("System", "ClickHouse", fmt.Sprintf("Error collecting metrics: %v", err))
 		return nil, err

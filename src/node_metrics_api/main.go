@@ -17,7 +17,7 @@ import (
 
 // Application configuration
 const (
-	DefaultPort     = "8085"
+	DefaultPort     = "8086"
 	MetricsInterval = 1 * time.Second
 )
 
@@ -32,7 +32,9 @@ type FinalVuDataSimMetrics struct {
 	Timestamp  time.Time `json:"timestamp,omitempty"`
 }
 
-// MetricsCollector handles system metrics collection
+// SystemMetrics represents basic system metrics (removed - only process metrics now)
+
+// MetricsCollector handles process metrics collection
 type MetricsCollector struct {
 	currentMetrics FinalVuDataSimMetrics
 	mutex          sync.RWMutex
@@ -88,7 +90,17 @@ func (mc *MetricsCollector) updateMetrics() {
 				metrics.Cmdline = strings.Join(psFields[2:], " ")
 			}
 		}
+	} else {
+		metrics.Running = false
+		metrics.PID = 0
+		metrics.StartTime = ""
+		metrics.CPUPercent = 0
+		metrics.MemMB = 0
+		metrics.Cmdline = ""
 	}
+	metrics.Timestamp = time.Now()
+
+	// Store only process metrics
 	mc.currentMetrics = metrics
 }
 
@@ -110,7 +122,18 @@ func (mc *MetricsCollector) handleMetrics(w http.ResponseWriter, r *http.Request
 
 	metrics := mc.GetCurrentMetrics()
 
-	if err := json.NewEncoder(w).Encode(metrics); err != nil {
+	resp := map[string]interface{}{
+		"nodeId":      mc.nodeID,
+		"timestamp":   metrics.Timestamp,
+		"running":     metrics.Running,
+		"pid":         metrics.PID,
+		"start_time":  metrics.StartTime,
+		"cpu_percent": metrics.CPUPercent,
+		"mem_mb":      metrics.MemMB,
+		"cmdline":     metrics.Cmdline,
+	}
+
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		log.Printf("Error encoding metrics JSON: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
