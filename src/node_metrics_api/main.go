@@ -118,6 +118,10 @@ func (mc *MetricsCollector) handleMetrics(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	// Add CORS headers to allow requests from main manager
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 
 	metrics := mc.GetCurrentMetrics()
@@ -149,6 +153,10 @@ func (mc *MetricsCollector) handleHealth(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	// Add CORS headers to allow requests from main manager
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 
 	health := map[string]interface{}{
@@ -244,6 +252,10 @@ func main() {
 
 	// Add health check for root path
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Add CORS headers to allow requests from main manager
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{
 			"status":  "Node Metrics API is running",
