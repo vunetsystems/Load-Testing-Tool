@@ -287,7 +287,7 @@ class VuDataSimManager {
         // SSH status updates - Update every hour
         setInterval(() => {
             console.log('Hourly SSH status check triggered');
-            this.updateDashboardDisplay();
+            this.updateSSHStatuses();
         }, 60 * 60 * 1000); // 1 hour in milliseconds
 
         // Load logs initially and set up polling for live logs
@@ -307,6 +307,18 @@ class VuDataSimManager {
 
                 this.nodeData = response.data.nodeData;
                 console.log('Loaded nodeData from dashboard API:', this.nodeData);
+
+                // Load host information from nodes API to ensure we have host field for metrics matching
+                const nodesResponse = await this.callAPI('/api/nodes');
+                if (nodesResponse.success && nodesResponse.data) {
+                    nodesResponse.data.forEach(node => {
+                        if (this.nodeData[node.name]) {
+                            this.nodeData[node.name].host = node.host;
+                            console.log(`Added host ${node.host} to node ${node.name}`);
+                        }
+                    });
+                }
+
                 this.updateDashboardDisplay();
                 this.updateNodeStatusIndicators();
                 this.populateNodeFilters();
@@ -323,11 +335,11 @@ class VuDataSimManager {
                         this.nodeData[nodeId] = {
                             cpu: 0,           // Will be updated with real data
                             memory: 0,        // Will be updated with real data
-                            totalCpu: 4.0,
+                            totalCpu: 8.0,
                             totalMemory: 8.0,
                             status: node.enabled ? 'active' : 'inactive',
                             host: node.host  // Store the host IP for matching with metrics target
-                    
+
                         };
                         console.log(`Converted node ${nodeId} with host ${node.host} and status ${this.nodeData[nodeId].status}`);
                     });
@@ -449,8 +461,26 @@ class VuDataSimManager {
                 row.classList.add('opacity-60');
             }
 
-            // Calculate memory usage in GB
-            const usedMemory = node.totalMemory * (node.memory / 100);
+            // Calculate CPU usage - use real metrics if available
+            let cpuDisplay = '';
+            const realMetrics = this.clusterMetrics ? Object.values(this.clusterMetrics).find(m => m.target === node.host) : null;
+            if (realMetrics) {
+                const availableCpu = realMetrics.cpu_cores * 0.1; // Show 10% as available for example
+                cpuDisplay = `${availableCpu.toFixed(1)} / ${realMetrics.cpu_cores.toFixed(1)} cores`;
+            } else {
+                // Fallback to old calculation
+                cpuDisplay = `${(node.totalCpu - (node.totalCpu * node.cpu / 100)).toFixed(1)} / ${node.totalCpu} cores`;
+            }
+
+            // Calculate memory usage - use real metrics if available
+            let memoryDisplay = '';
+            if (realMetrics) {
+                memoryDisplay = `${realMetrics.used_memory_gb.toFixed(1)} / ${realMetrics.total_memory_gb.toFixed(1)} GB`;
+            } else {
+                // Fallback to old calculation
+                const usedMemory = node.totalMemory * (node.memory / 100);
+                memoryDisplay = `${usedMemory.toFixed(1)} / ${node.totalMemory} GB`;
+            }
 
             // Determine status display based on SSH connectivity for enabled nodes
             let statusDisplay = '';
@@ -510,8 +540,8 @@ class VuDataSimManager {
             row.innerHTML = `
                 <td class="p-4 font-medium">${nodeId}</td>
                 <td class="p-4">${statusDisplay}</td>
-                <td class="p-4 text-right number-animate" data-field="cpu">${(node.totalCpu - (node.totalCpu * node.cpu / 100)).toFixed(1)} / ${node.totalCpu} cores</td>
-                <td class="p-4 text-right number-animate" data-field="memory">${usedMemory.toFixed(1)} / ${node.totalMemory} GB</td>
+                <td class="p-4 text-right number-animate" data-field="cpu">${cpuDisplay}</td>
+                <td class="p-4 text-right number-animate" data-field="memory">${memoryDisplay}</td>
             `;
 
             tbody.appendChild(row);
@@ -2261,43 +2291,88 @@ class VuDataSimManager {
         this.updateO11ySourceCount();
     }
 
-    updateClusterTableOnly() {
+    async updateSSHStatuses() {
+        // Fetch SSH status for enabled nodes (only once per hour)
+        const now = Date.now();
+        const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+
+        if (now - this.lastSshStatusUpdate > oneHour || Object.keys(this.sshStatuses).length === 0) {
+            try {
+                console.log('Fetching SSH status (hourly update)...');
+                const sshResponse = await this.callAPI('/api/ssh/status');
+                if (sshResponse.success && sshResponse.data) {
+                    this.sshStatuses = {};
+                    sshResponse.data.forEach(status => {
+                        this.sshStatuses[status.nodeName] = status;
+                    });
+                    this.lastSshStatusUpdate = now;
+                    console.log('SSH status updated:', this.sshStatuses);
+                }
+            } catch (error) {
+                console.error('Error fetching SSH status:', error);
+            }
+        }
+
+        // Update only the status column in existing rows
         const tbody = document.getElementById('cluster-table-body');
         const rows = tbody.querySelectorAll('tr');
 
-        console.log('Updating cluster table with metrics:', this.clusterMetrics);
-
         rows.forEach(row => {
             const nodeName = row.cells[0]?.textContent?.trim();
-            console.log('Processing node:', nodeName);
+            const node = this.nodeData[nodeName];
 
-            // Find metrics by matching the target field instead of node name
-            let matchingMetrics = null;
-            for (const [key, metrics] of Object.entries(this.clusterMetrics)) {
-                if (metrics.target === nodeName) {
-                    matchingMetrics = metrics;
-                    console.log('Found metrics for node:', nodeName, 'using target match with key:', key);
-                    break;
-                }
-            }
+            if (node && node.status !== 'inactive') { // Only update enabled nodes
+                const sshStatus = this.sshStatuses[nodeName];
+                let statusDisplay = '';
 
-            if (matchingMetrics) {
-                // Update CPU column (index 2) - show available/total format
-                if (row.cells[2]) {
-                    const availableCpu = matchingMetrics.cpu_cores * 0.1; // Example: show 10% available
-                    const newCpuText = `${availableCpu.toFixed(1)} / ${matchingMetrics.cpu_cores.toFixed(1)} cores`;
-                    console.log('Updating CPU for node:', nodeName, 'to:', newCpuText);
-                    row.cells[2].textContent = newCpuText;
+                if (sshStatus) {
+                    const timestamp = new Date(sshStatus.lastChecked).toLocaleString();
+                    if (sshStatus.status === 'connected') {
+                        statusDisplay = `
+                            <div class="flex flex-col items-start gap-1">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-success/20 dark:bg-success-dark/20 px-3 py-1 text-xs font-medium text-success dark:text-success-dark">
+                                    <span class="h-2 w-2 rounded-full bg-success"></span>SSH Connected
+                                </div>
+                                <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                                    Last checked: ${timestamp}
+                                </div>
+                            </div>
+                        `;
+                    } else if (sshStatus.status === 'disconnected') {
+                        statusDisplay = `
+                            <div class="flex flex-col items-start gap-1">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-danger/20 dark:bg-danger-dark/20 px-3 py-1 text-xs font-medium text-danger dark:text-danger-dark">
+                                    <span class="h-2 w-2 rounded-full bg-danger"></span>SSH Disconnected
+                                </div>
+                                <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                                    Last checked: ${timestamp}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        statusDisplay = `
+                            <div class="flex flex-col items-start gap-1">
+                                <div class="inline-flex items-center gap-2 rounded-full bg-warning/20 dark:bg-warning-dark/20 px-3 py-1 text-xs font-medium text-warning dark:text-warning-dark">
+                                    <span class="h-2 w-2 rounded-full bg-warning"></span>SSH ${sshStatus.status}
+                                </div>
+                                <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                                    Last checked: ${timestamp}
+                                </div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    statusDisplay = `
+                        <div class="inline-flex items-center gap-2 rounded-full bg-warning/20 dark:bg-warning-dark/20 px-3 py-1 text-xs font-medium text-warning dark:text-warning-dark">
+                            <span class="h-2 w-2 rounded-full bg-warning"></span>Checking SSH...
+                        </div>
+                    `;
                 }
 
-                // Update Memory column (index 3) - show used/total format
-                if (row.cells[3]) {
-                    const newMemText = `${matchingMetrics.used_memory_gb.toFixed(1)} / ${matchingMetrics.total_memory_gb.toFixed(1)} GB`;
-                    console.log('Updating Memory for node:', nodeName, 'to:', newMemText);
-                    row.cells[3].textContent = newMemText;
+                // Update only the status cell (index 1)
+                if (row.cells[1]) {
+                    row.cells[1].innerHTML = statusDisplay;
                 }
-            } else {
-                console.log('No metrics found for node:', nodeName, 'by target matching');
             }
         });
     }
