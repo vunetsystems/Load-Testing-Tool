@@ -586,12 +586,40 @@ class VuDataSimManager {
 
                 this.elements.cpuMemoryValue.textContent = `${availableCpu.toFixed(1)}/${totalAvgCpu.toFixed(1)} cores / ${usedMemory.toFixed(1)}/${totalAvgMemory.toFixed(1)} GB`;
             }
+    
         }
+    }
 
+    updateClusterTableOnly() {
+        // Update only the metrics columns in existing cluster table rows
+        const tbody = document.getElementById('cluster-table-body');
+        if (!tbody) return;
 
+        const rows = tbody.querySelectorAll('tr');
 
+        rows.forEach(row => {
+            const nodeName = row.cells[0]?.textContent?.trim();
+            const node = this.nodeData[nodeName];
 
+            if (node) {
+                // Find real metrics for this node by matching host
+                const realMetrics = this.clusterMetrics ?
+                    Object.values(this.clusterMetrics).find(m => m.target === node.host) : null;
 
+                // Update CPU column (index 2)
+                if (row.cells[2] && realMetrics) {
+                    const availableCpu = realMetrics.cpu_cores * 0.1; // Show 10% as available for example
+                    row.cells[2].textContent = `${availableCpu.toFixed(1)} / ${realMetrics.cpu_cores.toFixed(1)} cores`;
+                    row.cells[2].classList.add('number-animate');
+                }
+
+                // Update Memory column (index 3)
+                if (row.cells[3] && realMetrics) {
+                    row.cells[3].textContent = `${realMetrics.used_memory_gb.toFixed(1)} / ${realMetrics.total_memory_gb.toFixed(1)} GB`;
+                    row.cells[3].classList.add('number-animate');
+                }
+            }
+        });
     }
 
     animateNumber(element, newValue) {
@@ -2469,11 +2497,20 @@ class VuDataSimManager {
 
     async fetchFinalVuDataSimMetrics() {
         try {
-            // Fetch metrics from the correct node where node_metrics_api is running
-            const response = await fetch('http://216.48.191.10:8086/api/system/metrics');
-            if (!response.ok) throw new Error('Failed to fetch metrics');
-            const metrics = await response.json();
-            this.displayFinalVuDataSimMetrics(metrics);
+            // Use proxy endpoint instead of direct call to avoid CORS
+            const response = await this.callAPI('/api/proxy/metrics');
+            console.log('=== FINALVUDATASIM PROCESS METRICS ===');
+            console.log('Full response:', response);
+            console.log('Response data:', response.data);
+            console.log('Response success:', response.success);
+            // The proxy endpoint returns the raw metrics data directly, not wrapped in success/data structure
+            if (response && response.running !== undefined) {
+                console.log('Valid process metrics data received, displaying...');
+                this.displayFinalVuDataSimMetrics(response);
+            } else {
+                console.log('No valid process metrics data in response');
+                this.displayFinalVuDataSimMetrics({}); // Show empty row on error
+            }
         } catch (error) {
             console.error('Error fetching finalvudatasim metrics:', error);
             this.displayFinalVuDataSimMetrics({}); // Show empty row on error

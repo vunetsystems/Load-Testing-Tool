@@ -1,0 +1,40 @@
+kafka_topics:
+    - name: "mongodb"
+  # - name: "linuxmonitor"
+  #   inputTopic:
+  #     - name: "linux-monitor-input"
+  #   outputTopic:
+  #     - name: "linux-monitor-additional-metrics"
+  #       tableName: "vmetrics_linux_monitor_additional_metrics"
+  #       typeField: "type"
+  #       sourceField: "target"
+  #     - name: "linux-monitor-process-metrics"
+  #       tableName: "vmetrics_linux_monitor_process_metrics"
+  #       typeField: "type"
+  #       sourceField: "target"
+  #     - name: "linux-monitor-resource-metrics"
+  #       tableName: "vmetrics_linux_monitor_resource_metrics"
+  #       typeField: "type"
+  #       sourceField: "target"
+  #     - name: "linux-monitor-storage-metrics"
+  #       tableName: "vmetrics_linux_monitor_storage_metrics"
+  #       typeField: "type"
+  #       sourceField: "target"
+
+  # - name: "apachemonitor"
+  #   inputTopic:
+  #     - name: "apache-monitor-input"
+  #   outputTopic:
+  #     - name: "apache-monitor-metrics"
+  #       tableName: "vmetrics_apache_monitor_metrics"
+  #       typeField: "type"
+  #       sourceField: "target"
+
+  # - name: "mongodbmonitor"
+  #   inputTopic:
+  #     - name: "mongodb-monitor-input"
+  #   outputTopic:
+  #     - name: "mongodb-monitor-metrics"
+  #       tableName: "vmetrics_mongodb_monitor_metrics"
+  #       typeField: "type"
+  #       sourceField: "target"

@@ -18,59 +18,100 @@ import (
 
 // Get real CPU usage from node via SSH
 func getNodeCPUUsage(nodeConfig node_control.NodeConfig) (float64, error) {
-	// Use 'vmstat' for more reliable CPU metrics
-	cmd := "vmstat 1 2 | tail -1 | awk '{print $13}'"
-	output, err := sshExec(nodeConfig, cmd)
+	output, err := executeCPUCommand(nodeConfig)
 	if err != nil {
-		// Fallback to top command if vmstat fails
-		cmd = "top -bn1 | grep 'Cpu(s)' | sed 's/.*, *\\([0-9.]*\\)%* id.*/\\1/' | awk '{print 100 - $1}'"
-		output, err = sshExec(nodeConfig, cmd)
-		if err != nil {
-			return 0, fmt.Errorf("failed to execute CPU command: %v", err)
-		}
+		return 0, err
 	}
 
-	// Parse CPU usage from output (vmstat returns idle %, top returns usage %)
-	var cpuUsage float64
+	cpuUsage, err := parseCPUUsage(output)
+	if err != nil {
+		return 0, err
+	}
+
+	return validateAndClampCPUUsage(cpuUsage), nil
+}
+
+// executeCPUCommand executes CPU monitoring command with fallback strategy
+func executeCPUCommand(nodeConfig node_control.NodeConfig) (string, error) {
+	// Use 'vmstat' for more reliable CPU metrics
+	vmstatCmd := "vmstat 1 2 | tail -1 | awk '{print $13}'"
+	output, err := sshExec(nodeConfig, vmstatCmd)
+	if err == nil {
+		return output, nil
+	}
+
+	// Fallback to top command if vmstat fails
+	topCmd := "top -bn1 | grep 'Cpu(s)' | sed 's/.*, *\\([0-9.]*\\)%* id.*/\\1/' | awk '{print 100 - $1}'"
+	output, err = sshExec(nodeConfig, topCmd)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute CPU command: %v", err)
+	}
+
+	return output, nil
+}
+
+// parseCPUUsage parses CPU usage from command output
+func parseCPUUsage(output string) (float64, error) {
 	cleanOutput := strings.TrimSpace(output)
 
 	if strings.Contains(cleanOutput, "%") {
-		// Contains % symbol, likely from top command
-		cpuUsage, err = strconv.ParseFloat(strings.TrimSuffix(cleanOutput, "%"), 64)
-		if err != nil {
-			// Try regex extraction as fallback
-			re := regexp.MustCompile(`\d+\.?\d*`)
-			matches := re.FindAllString(cleanOutput, -1)
-			if len(matches) > 0 {
-				cpuUsage, _ = strconv.ParseFloat(matches[len(matches)-1], 64)
-			} else {
-				return 0, fmt.Errorf("failed to parse CPU usage from output: %q", cleanOutput)
-			}
-		}
-	} else {
-		// No % symbol, likely from vmstat (idle percentage)
-		idle, err := strconv.ParseFloat(cleanOutput, 64)
-		if err != nil {
-			// Try regex extraction as fallback
-			re := regexp.MustCompile(`\d+\.?\d*`)
-			matches := re.FindAllString(cleanOutput, -1)
-			if len(matches) > 0 {
-				idle, _ = strconv.ParseFloat(matches[len(matches)-1], 64)
-			} else {
-				return 0, fmt.Errorf("failed to parse idle CPU from output: %q", cleanOutput)
-			}
-		}
-		cpuUsage = 100 - idle // Convert idle % to usage %
+		return parseCPUFromTopOutput(cleanOutput)
+	}
+	return parseCPUFromVmstatOutput(cleanOutput)
+}
+
+// parseCPUFromTopOutput parses CPU usage from top command output (contains % symbol)
+func parseCPUFromTopOutput(output string) (float64, error) {
+	cpuUsage, err := strconv.ParseFloat(strings.TrimSuffix(output, "%"), 64)
+	if err == nil {
+		return cpuUsage, nil
 	}
 
-	// Ensure CPU usage is within valid range
+	// Try regex extraction as fallback
+	return extractNumericValue(output, "CPU usage")
+}
+
+// parseCPUFromVmstatOutput parses idle CPU from vmstat output (no % symbol)
+func parseCPUFromVmstatOutput(output string) (float64, error) {
+	idle, err := strconv.ParseFloat(output, 64)
+	if err == nil {
+		return 100 - idle, nil // Convert idle % to usage %
+	}
+
+	// Try regex extraction as fallback
+	idle, err = extractNumericValue(output, "idle CPU")
+	if err != nil {
+		return 0, err
+	}
+
+	return 100 - idle, nil
+}
+
+// extractNumericValue extracts numeric value using regex fallback
+func extractNumericValue(output, valueType string) (float64, error) {
+	re := regexp.MustCompile(`\d+\.?\d*`)
+	matches := re.FindAllString(output, -1)
+	if len(matches) == 0 {
+		return 0, fmt.Errorf("failed to parse %s from output: %q", valueType, output)
+	}
+
+	value, err := strconv.ParseFloat(matches[len(matches)-1], 64)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse %s from output: %q", valueType, output)
+	}
+
+	return value, nil
+}
+
+// validateAndClampCPUUsage ensures CPU usage is within valid range [0, 100]
+func validateAndClampCPUUsage(cpuUsage float64) float64 {
 	if cpuUsage < 0 {
-		cpuUsage = 0
-	} else if cpuUsage > 100 {
-		cpuUsage = 100
+		return 0
 	}
-
-	return cpuUsage, nil
+	if cpuUsage > 100 {
+		return 100
+	}
+	return cpuUsage
 }
 
 // Get real memory usage from node via SSH

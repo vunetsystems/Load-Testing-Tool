@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +13,7 @@ import (
 
 	"vuDataSim/src/bin_control"
 	"vuDataSim/src/clickhouse"
+	"vuDataSim/src/kafka_ch_reset"
 	"vuDataSim/src/logger"
 	"vuDataSim/src/node_control"
 	"vuDataSim/src/o11y_source_manager"
@@ -58,6 +60,7 @@ var appState = &AppState{
 var nodeManager = node_control.NewNodeManager()
 var binaryControl *bin_control.BinaryControl
 var o11yManager = o11y_source_manager.NewO11ySourceManager()
+var kafkaHandler = kafka_ch_reset.NewKafkaHandler()
 
 // Initialize application
 func init() {
@@ -101,12 +104,6 @@ func main() {
 	// Source configs are loaded dynamically when needed
 
 	// Check for CLI node management commands
-	if len(os.Args) > 1 {
-		command := os.Args[1]
-		if node_control.HandleNodeManagementCLI(command, os.Args[2:]) {
-			return // Exit after handling CLI command
-		}
-	}
 
 	logger.Info().Str("version", AppVersion).Msg("Starting vuDataSim Cluster Manager")
 	logger.Info().Str("static_dir", StaticDir).Msg("Serving static files")
@@ -177,6 +174,21 @@ func main() {
 	api.HandleFunc("/clickhouse/metrics", handleAPIGetClickHouseMetrics).Methods("GET")
 	api.HandleFunc("/clickhouse/health", handleAPIClickHouseHealth).Methods("GET")
 
+	// Kafka and ClickHouse Reset API endpoints
+	api.HandleFunc("/kafka/topics", kafkaHandler.GetTopics).Methods("GET")
+	api.HandleFunc("/kafka/recreate", kafkaHandler.RecreateTopics).Methods("POST")
+	api.HandleFunc("/kafka/status", kafkaHandler.GetTopicStatus).Methods("GET")
+	api.HandleFunc("/kafka/describe/{topic}", kafkaHandler.DescribeTopic).Methods("GET")
+	api.HandleFunc("/kafka/delete/{topic}", kafkaHandler.DeleteTopic).Methods("DELETE")
+	api.HandleFunc("/kafka/create", kafkaHandler.CreateTopic).Methods("POST")
+	api.HandleFunc("/clickhouse/truncate", kafkaHandler.TruncateClickHouseTables).Methods("POST")
+
+	// Proxy endpoint for node metrics API
+	api.HandleFunc("/proxy/metrics", handleProxyMetrics).Methods("GET")
+
+	// Process metrics endpoint - collects finalvudatasim metrics directly via SSH
+	api.HandleFunc("/process/metrics", handleAPIGetProcessMetrics).Methods("GET")
+
 	// Initialize ClickHouse client
 	if err := clickhouse.InitClickHouse("src/configs/config.yaml"); err != nil {
 		logger.Warn().Err(err).Msg("Failed to initialize ClickHouse client - metrics will not be available")
@@ -216,4 +228,34 @@ func main() {
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Server error: %v", err)
 	}
+}
+
+// handleProxyMetrics proxies requests to the node metrics API server
+func handleProxyMetrics(w http.ResponseWriter, r *http.Request) {
+	// Enable CORS for this endpoint
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+
+	// Make request to the metrics API server
+	resp, err := http.Get("http://216.48.191.10:8086/api/system/metrics")
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to fetch metrics from metrics API server")
+		http.Error(w, "Failed to fetch metrics", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to read metrics response")
+		http.Error(w, "Failed to read metrics response", http.StatusInternalServerError)
+		return
+	}
+
+	// Forward the response to the client
+	w.WriteHeader(resp.StatusCode)
+	w.Write(body)
 }

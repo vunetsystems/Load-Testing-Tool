@@ -70,25 +70,93 @@ func (mc *MetricsCollector) updateMetrics() {
 	output, err := exec.Command("pgrep", "-f", "finalvudatasim").Output()
 	if err == nil && len(output) > 0 {
 		lines := strings.Split(strings.TrimSpace(string(output)), "\n")
-		pidStr := lines[0]
-		pid, err := strconv.Atoi(pidStr)
-		if err == nil {
-			metrics.Running = true
-			metrics.PID = pid
-
-			// Get process start time
-			startTimeOut, _ := exec.Command("ps", "-p", pidStr, "-o", "lstart=").Output()
-			metrics.StartTime = strings.TrimSpace(string(startTimeOut))
-
-			// Get CPU and memory usage
-			psOut, _ := exec.Command("ps", "-p", pidStr, "-o", "%cpu,rss,cmd").Output()
-			psFields := strings.Fields(string(psOut))
-			if len(psFields) >= 3 {
-				metrics.CPUPercent, _ = strconv.ParseFloat(psFields[0], 64)
-				memKB, _ := strconv.ParseFloat(psFields[1], 64)
-				metrics.MemMB = memKB / 1024.0
-				metrics.Cmdline = strings.Join(psFields[2:], " ")
+		// Find the actual finalvudatasim process (not wrapper processes)
+		// Since pgrep finds both processes, we need to check each one
+		// The actual binary process should be the one with the exact command "./finalvudatasim"
+		var actualPid string
+		for _, line := range lines {
+			pidStr := strings.TrimSpace(line)
+			if pidStr != "" {
+				// Check if this is the actual binary process
+				psCheck, _ := exec.Command("ps", "-p", pidStr, "-o", "cmd=").Output()
+				cmdLine := strings.TrimSpace(string(psCheck))
+				// Look for processes where the command is exactly "./finalvudatasim"
+				if cmdLine == "./finalvudatasim" {
+					actualPid = pidStr
+					break
+				}
 			}
+		}
+
+		// If we didn't find the exact match, try to find the process with highest CPU usage
+		// as a fallback (the actual working process)
+		if actualPid == "" {
+			var highestPid string
+			var highestCpu float64 = 0
+			for _, line := range lines {
+				pidStr := strings.TrimSpace(line)
+				if pidStr != "" {
+					psOut, _ := exec.Command("ps", "-p", pidStr, "-o", "pcpu=").Output()
+					psLines := strings.Split(strings.TrimSpace(string(psOut)), "\n")
+					if len(psLines) >= 2 {
+						dataLine := strings.TrimSpace(psLines[1])
+						if cpu, err := strconv.ParseFloat(dataLine, 64); err == nil && cpu > highestCpu {
+							highestCpu = cpu
+							highestPid = pidStr
+						}
+					}
+				}
+			}
+			if highestPid != "" {
+				actualPid = highestPid
+			}
+		}
+
+		if actualPid != "" {
+			pid, err := strconv.Atoi(actualPid)
+			if err == nil {
+				metrics.Running = true
+				metrics.PID = pid
+
+				// Get process start time
+				startTimeOut, _ := exec.Command("ps", "-p", actualPid, "-o", "lstart=").Output()
+				metrics.StartTime = strings.TrimSpace(string(startTimeOut))
+
+				// Get CPU and memory usage - use more detailed ps command
+				psOut, _ := exec.Command("ps", "-p", actualPid, "-o", "pcpu,rss,cmd").Output()
+				log.Printf("Raw ps output for PID %s: %q", actualPid, string(psOut))
+
+				psLines := strings.Split(strings.TrimSpace(string(psOut)), "\n")
+				log.Printf("ps lines: %v", psLines)
+
+				if len(psLines) >= 2 {
+					// Skip header line and get the actual data
+					dataLine := psLines[1]
+					log.Printf("Data line: %q", dataLine)
+					psFields := strings.Fields(dataLine)
+					log.Printf("Parsed fields: %v", psFields)
+
+					if len(psFields) >= 3 {
+						if cpu, err := strconv.ParseFloat(psFields[0], 64); err == nil {
+							metrics.CPUPercent = cpu
+							log.Printf("Parsed CPU: %f", cpu)
+						}
+						if memKB, err := strconv.ParseFloat(psFields[1], 64); err == nil {
+							metrics.MemMB = memKB / 1024.0
+							log.Printf("Parsed memory: %f KB -> %f MB", memKB, metrics.MemMB)
+						}
+						metrics.Cmdline = strings.Join(psFields[2:], " ")
+						log.Printf("Parsed cmdline: %s", metrics.Cmdline)
+					}
+				}
+			}
+		} else {
+			metrics.Running = false
+			metrics.PID = 0
+			metrics.StartTime = ""
+			metrics.CPUPercent = 0
+			metrics.MemMB = 0
+			metrics.Cmdline = ""
 		}
 	} else {
 		metrics.Running = false
@@ -264,12 +332,13 @@ func main() {
 		})
 	})
 
-	// Start server
+	// Start server - explicitly bind to all interfaces (0.0.0.0)
 	log.Printf("Server listening on port %s", portStr)
-	log.Printf("Metrics endpoint: http://localhost:%s/api/system/metrics", portStr)
-	log.Printf("Health endpoint: http://localhost:%s/api/system/health", portStr)
+	log.Printf("Metrics endpoint: http://0.0.0.0:%s/api/system/metrics", portStr)
+	log.Printf("Health endpoint: http://0.0.0.0:%s/api/system/health", portStr)
 
-	if err := http.ListenAndServe(":"+portStr, nil); err != nil {
+	// Explicitly bind to 0.0.0.0 to ensure IPv4 connectivity
+	if err := http.ListenAndServe("0.0.0.0:"+portStr, nil); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }
