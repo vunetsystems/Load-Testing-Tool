@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 	"strings"
+
+	"vuDataSim/src/logger"
+	"vuDataSim/src/node_control"
 )
 
 // handleNodeManagementCLI handles CLI commands for node management
@@ -57,7 +60,24 @@ func handleAddNodeCLI(args []string) {
 		enabled = args[len(args)-1] == "true"
 	}
 
-	err := nodeManager.AddNode(name, host, user, keyPath, confDir, binaryDir, description, enabled)
+	// Create node manager instance and load configuration
+	nodeManager := node_control.NewNodeManager()
+	err := nodeManager.LoadNodesConfig()
+	if err != nil {
+		log.Printf("Warning: Failed to load nodes config: %v", err)
+		log.Println("Continuing with default configuration")
+	}
+
+	err = nodeManager.AddNode(node_control.AddNodeRequest{
+		Name:        name,
+		Host:        host,
+		User:        user,
+		KeyPath:     keyPath,
+		ConfDir:     confDir,
+		BinaryDir:   binaryDir,
+		Description: description,
+		Enabled:     enabled,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,7 +89,16 @@ func handleRemoveNodeCLI(args []string) {
 	}
 
 	name := args[0]
-	err := nodeManager.RemoveNode(name)
+
+	// Create node manager instance and load configuration
+	nodeManager := node_control.NewNodeManager()
+	err := nodeManager.LoadNodesConfig()
+	if err != nil {
+		logger.Warn().Str("module", "cli_handlers").Err(err).Msg("Failed to load nodes config")
+		logger.Info().Str("module", "cli_handlers").Msg("Continuing with default configuration")
+	}
+
+	err = nodeManager.RemoveNode(name)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,7 +110,16 @@ func handleEnableNodeCLI(args []string) {
 	}
 
 	name := args[0]
-	err := nodeManager.EnableNode(name)
+
+	// Create node manager instance and load configuration
+	nodeManager := node_control.NewNodeManager()
+	err := nodeManager.LoadNodesConfig()
+	if err != nil {
+		logger.Warn().Str("module", "cli_handlers").Err(err).Msg("Failed to load nodes config")
+		logger.Info().Str("module", "cli_handlers").Msg("Continuing with default configuration")
+	}
+
+	err = nodeManager.EnableNode(name)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -93,13 +131,30 @@ func handleDisableNodeCLI(args []string) {
 	}
 
 	name := args[0]
-	err := nodeManager.DisableNode(name)
+
+	// Create node manager instance and load configuration
+	nodeManager := node_control.NewNodeManager()
+	err := nodeManager.LoadNodesConfig()
+	if err != nil {
+		logger.Warn().Str("module", "cli_handlers").Err(err).Msg("Failed to load nodes config")
+		logger.Info().Str("module", "cli_handlers").Msg("Continuing with default configuration")
+	}
+
+	err = nodeManager.DisableNode(name)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func handleListNodesCLI() {
+	// Create node manager instance and load configuration
+	nodeManager := node_control.NewNodeManager()
+	err := nodeManager.LoadNodesConfig()
+	if err != nil {
+		log.Printf("Warning: Failed to load nodes config: %v", err)
+		log.Println("Continuing with default configuration")
+	}
+
 	nodes := nodeManager.GetNodes()
 	if len(nodes) == 0 {
 		fmt.Println("No nodes configured")
@@ -127,6 +182,14 @@ func handleListNodesCLI() {
 }
 
 func handleListEnabledNodesCLI() {
+	// Create node manager instance and load configuration
+	nodeManager := node_control.NewNodeManager()
+	err := nodeManager.LoadNodesConfig()
+	if err != nil {
+		log.Printf("Warning: Failed to load nodes config: %v", err)
+		log.Println("Continuing with default configuration")
+	}
+
 	enabledNodes := nodeManager.GetEnabledNodes()
 	if len(enabledNodes) == 0 {
 		fmt.Println("No enabled nodes")

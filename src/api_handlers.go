@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"vuDataSim/src/clickhouse"
@@ -364,6 +365,17 @@ func handleCreateNode(w http.ResponseWriter, r *http.Request, nodeName string) {
 		Enabled     bool   `json:"enabled"`
 	}
 
+	addNodeReq := node_control.AddNodeRequest{
+		Name:        nodeName,
+		Host:        nodeData.Host,
+		User:        nodeData.User,
+		KeyPath:     nodeData.KeyPath,
+		ConfDir:     nodeData.ConfDir,
+		BinaryDir:   nodeData.BinaryDir,
+		Description: nodeData.Description,
+		Enabled:     nodeData.Enabled,
+	}
+
 	if err := json.NewDecoder(r.Body).Decode(&nodeData); err != nil {
 		sendJSONResponse(w, http.StatusBadRequest, APIResponse{
 			Success: false,
@@ -372,8 +384,7 @@ func handleCreateNode(w http.ResponseWriter, r *http.Request, nodeName string) {
 		return
 	}
 
-	err := nodeManager.AddNode(nodeName, nodeData.Host, nodeData.User, nodeData.KeyPath,
-		nodeData.ConfDir, nodeData.BinaryDir, nodeData.Description, nodeData.Enabled)
+	err := nodeManager.AddNode(addNodeReq)
 
 	if err != nil {
 		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
@@ -1079,6 +1090,98 @@ func handleAPIGetClusterMetrics(w http.ResponseWriter, r *http.Request) {
 		Message: "Cluster metrics retrieved successfully",
 		Data:    metrics,
 	})
+}
+
+// ProcessMetrics represents finalvudatasim process metrics for a node
+type ProcessMetrics struct {
+	NodeID     string    `json:"nodeId"`
+	Running    bool      `json:"running"`
+	PID        int       `json:"pid,omitempty"`
+	StartTime  string    `json:"start_time,omitempty"`
+	CPUPercent float64   `json:"cpu_percent,omitempty"`
+	MemMB      float64   `json:"mem_mb,omitempty"`
+	Cmdline    string    `json:"cmdline,omitempty"`
+	Timestamp  time.Time `json:"timestamp"`
+	Error      string    `json:"error,omitempty"`
+}
+
+// handleAPIGetProcessMetrics handles GET /api/process/metrics
+func handleAPIGetProcessMetrics(w http.ResponseWriter, r *http.Request) {
+	enabledNodes := nodeManager.GetEnabledNodes()
+	if len(enabledNodes) == 0 {
+		sendJSONResponse(w, http.StatusOK, APIResponse{
+			Success: true,
+			Message: "No enabled nodes found",
+			Data:    []ProcessMetrics{},
+		})
+		return
+	}
+
+	var allMetrics []ProcessMetrics
+	for nodeName, nodeConfig := range enabledNodes {
+		metrics := collectProcessMetricsForNode(nodeName, &nodeConfig)
+		allMetrics = append(allMetrics, metrics)
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: fmt.Sprintf("Retrieved process metrics for %d nodes", len(allMetrics)),
+		Data:    allMetrics,
+	})
+}
+
+// collectProcessMetricsForNode collects finalvudatasim process metrics for a specific node via SSH
+func collectProcessMetricsForNode(nodeName string, nodeConfig *node_control.NodeConfig) ProcessMetrics {
+	metrics := ProcessMetrics{
+		NodeID:    nodeName,
+		Timestamp: time.Now(),
+	}
+
+	// Use SSH to collect process metrics from the remote node
+	// Use the same SSH execution method as used in node_manager.go
+
+	// Check if finalvudatasim process is running using SSHExecWithOutput
+	output, err := nodeManager.SSHExecWithOutput(*nodeConfig, "pgrep -f finalvudatasim")
+	if err != nil || output == "" {
+		metrics.Running = false
+		return metrics
+	}
+
+	lines := strings.Split(strings.TrimSpace(output), "\n")
+	if len(lines) == 0 {
+		metrics.Running = false
+		return metrics
+	}
+
+	pidStr := lines[0]
+	pid, err := strconv.Atoi(pidStr)
+	if err != nil {
+		metrics.Error = fmt.Sprintf("Invalid PID: %s", pidStr)
+		return metrics
+	}
+
+	metrics.Running = true
+	metrics.PID = pid
+
+	// Get process start time
+	startTimeOut, err := nodeManager.SSHExecWithOutput(*nodeConfig, fmt.Sprintf("ps -p %s -o lstart=", pidStr))
+	if err == nil && startTimeOut != "" {
+		metrics.StartTime = strings.TrimSpace(startTimeOut)
+	}
+
+	// Get CPU and memory usage
+	psOut, err := nodeManager.SSHExecWithOutput(*nodeConfig, fmt.Sprintf("ps -p %s -o %%cpu,rss,cmd", pidStr))
+	if err == nil && psOut != "" {
+		psFields := strings.Fields(psOut)
+		if len(psFields) >= 3 {
+			metrics.CPUPercent, _ = strconv.ParseFloat(psFields[0], 64)
+			memKB, _ := strconv.ParseFloat(psFields[1], 64)
+			metrics.MemMB = memKB / 1024.0
+			metrics.Cmdline = strings.Join(psFields[2:], " ")
+		}
+	}
+
+	return metrics
 }
 
 // getLogType determines the log type based on zerolog level

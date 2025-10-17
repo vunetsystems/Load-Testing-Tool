@@ -4,4 +4,22 @@ cluster_settings:
     connection_timeout: 10
     max_retries: 3
     sync_timeout: 60
-nodes: {}
+nodes:
+    164.52.214.184:
+        host: 164.52.214.184
+        user: vunet
+        key_path: ~/.ssh/id_rsa
+        conf_dir: /home/vunet/Oct16
+        binary_dir: /home/vunet/Oct16/bin
+        metrics_port: 0
+        description: /home/vunet/Oct16
+        enabled: false
+    216.48.191.10:
+        host: 216.48.191.10
+        user: vunet
+        key_path: ~/.ssh/id_rsa
+        conf_dir: /home/vunet/Oct17
+        binary_dir: /home/vunet/Oct17/bin
+        metrics_port: 0
+        description: /home/vunet/Oct17
+        enabled: false

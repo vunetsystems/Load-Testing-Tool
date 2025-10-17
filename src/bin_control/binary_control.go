@@ -108,9 +108,23 @@ func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryContr
 	log.Printf("Starting binary on node %s: %s", nodeName, binaryPath)
 
 	// Run binary in background using nohup, redirect output
-	cmd := fmt.Sprintf("cd %s && nohup ./finalvudatasim > /dev/null 2>&1 &", node.BinaryDir)
-	if err := bc.sshExec(node, cmd); err != nil {
+	startCmd := fmt.Sprintf("cd %s && nohup ./finalvudatasim > /dev/null 2>&1 & echo $!", node.BinaryDir)
+	pidOut, err := bc.sshExecWithOutput(node, startCmd)
+	if err != nil {
 		return response(false, fmt.Sprintf("Failed to start binary on node %s: %v", nodeName, err)), err
+	}
+	pidStr := strings.TrimSpace(pidOut)
+	pid, err := strconv.Atoi(pidStr)
+	if err != nil || pid <= 0 {
+		return response(false, fmt.Sprintf("Failed to get PID for started binary on node %s", nodeName)), fmt.Errorf("failed to get PID")
+	}
+
+	// Schedule kill after timeout (in seconds)
+	if timeout > 0 {
+		killCmd := fmt.Sprintf("(sleep %d; kill %d) >/dev/null 2>&1 &", timeout*60, pid) // timeout in minutes
+		if err := bc.sshExec(node, killCmd); err != nil {
+			log.Printf("Warning: failed to schedule kill for binary on node %s: %v", nodeName, err)
+		}
 	}
 
 	time.Sleep(2 * time.Second)
@@ -130,11 +144,12 @@ func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryContr
 		"timeout":    timeout,
 		"binaryPath": binaryPath,
 		"status":     newStatus,
+		"pid":        pid,
 	}
 
 	return &BinaryControlResponse{
 		Success: true,
-		Message: fmt.Sprintf("Binary started successfully on node %s", nodeName),
+		Message: fmt.Sprintf("Binary started successfully on node %s (PID %d) with timeout %d min", nodeName, pid, timeout),
 		Data:    data,
 	}, nil
 }
@@ -270,10 +285,10 @@ func (bc *BinaryControl) StopMetricsBinary(nodeName string, timeout int) (*Binar
 	}
 
 	data := map[string]interface{}{
-		"nodeName":   nodeName,
-		"action":     "stop_metrics",
-		"timeout":    timeout,
-		"status":     status,
+		"nodeName": nodeName,
+		"action":   "stop_metrics",
+		"timeout":  timeout,
+		"status":   status,
 	}
 
 	return &BinaryControlResponse{
