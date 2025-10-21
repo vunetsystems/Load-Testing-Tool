@@ -3,6 +3,7 @@ package bin_control
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
@@ -215,40 +216,77 @@ func (bc *BinaryControl) StartMetricsBinary(nodeName string, timeout int) (*Bina
 		return response(false, fmt.Sprintf("Node %s is disabled", nodeName)), fmt.Errorf("node %s disabled", nodeName)
 	}
 
+	binaryPath := fmt.Sprintf("%s/node_metrics_api", node.BinaryDir)
+	log.Printf("Starting node_metrics_api on node %s: %s", nodeName, binaryPath)
+
 	// Check if already running
 	output, err := bc.sshExecWithOutput(node, "pgrep -f node_metrics_api")
 	if err == nil && output != "" {
 		return response(false, fmt.Sprintf("node_metrics_api already running on node %s", nodeName)), fmt.Errorf("metrics binary already running")
 	}
 
-	binaryPath := fmt.Sprintf("%s/node_metrics_api", node.BinaryDir)
-	log.Printf("Starting node_metrics_api on node %s: %s", nodeName, binaryPath)
-
-	// Run metrics binary in background on port 8086
-	cmd := fmt.Sprintf("cd %s && nohup ./node_metrics_api --port 8086 > /dev/null 2>&1 &", node.BinaryDir)
-	if err := bc.sshExec(node, cmd); err != nil {
-		return response(false, fmt.Sprintf("Failed to start node_metrics_api on node %s: %v", nodeName, err)), err
+	// First ensure binary exists and is executable
+	checkCmd := fmt.Sprintf("test -x %s && echo 'Binary exists and is executable'", binaryPath)
+	if output, err := bc.sshExecWithOutput(node, checkCmd); err != nil {
+		return response(false, fmt.Sprintf("node_metrics_api binary not found or not executable on node %s: %v", nodeName, err)), err
+	} else {
+		log.Printf("Binary check result: %s", output)
 	}
 
-	time.Sleep(2 * time.Second)
+	// Start metrics binary with proper logging
+	log.Printf("Starting binary with command: cd %s && ./node_metrics_api --port 8086", node.BinaryDir)
+	startCmd := fmt.Sprintf("cd %s && ./node_metrics_api --port 8086 > metrics_api.log 2>&1", node.BinaryDir)
+	if err := bc.sshExec(node, startCmd); err != nil {
+		// Get error logs if startup failed
+		logOutput, _ := bc.sshExecWithOutput(node, fmt.Sprintf("cd %s && cat metrics_api.log 2>/dev/null || echo 'No log file found'", node.BinaryDir))
+		return response(false, fmt.Sprintf("Failed to start node_metrics_api on node %s: %v. Startup log: %s", nodeName, err, logOutput)), err
+	}
 
+	log.Printf("Binary start command sent, waiting for startup...")
+	time.Sleep(3 * time.Second)
+
+	// Check if binary is actually running
 	output, err = bc.sshExecWithOutput(node, "pgrep -f node_metrics_api")
-	status := "stopped"
-	if err == nil && output != "" {
-		status = "running"
+	if err != nil || output == "" {
+		// Get startup error logs
+		logOutput, _ := bc.sshExecWithOutput(node, fmt.Sprintf("cd %s && cat metrics_api.log 2>/dev/null || echo 'No error log available'", node.BinaryDir))
+		return response(false, fmt.Sprintf("node_metrics_api failed to start on node %s. Process check failed: %v, Startup log: %s", nodeName, err, logOutput)), fmt.Errorf("binary startup failed")
 	}
+
+	log.Printf("Binary process found running, performing health check...")
+
+	// Verify the binary is actually responding on port 8086
+	time.Sleep(2 * time.Second)
+	healthURL := fmt.Sprintf("http://%s:8086/api/system/health", node.Host)
+	client := &http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Get(healthURL)
+	if err != nil {
+		logOutput, _ := bc.sshExecWithOutput(node, fmt.Sprintf("cd %s && cat metrics_api.log", node.BinaryDir))
+		return response(false, fmt.Sprintf("node_metrics_api not responding on node %s. Health check failed: %v, Log: %s", nodeName, err, logOutput)), err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		logOutput, _ := bc.sshExecWithOutput(node, fmt.Sprintf("cd %s && cat metrics_api.log", node.BinaryDir))
+		return response(false, fmt.Sprintf("node_metrics_api health check failed on node %s. Status: %d, Log: %s", nodeName, resp.StatusCode, logOutput)), fmt.Errorf("health check failed")
+	}
+
+	log.Printf("node_metrics_api successfully started and verified on node %s", nodeName)
 
 	data := map[string]interface{}{
-		"nodeName":   nodeName,
-		"action":     "start_metrics",
-		"timeout":    timeout,
-		"binaryPath": binaryPath,
-		"status":     status,
+		"nodeName":     nodeName,
+		"action":       "start_metrics",
+		"timeout":      timeout,
+		"binaryPath":   binaryPath,
+		"status":       "running",
+		"healthCheck":  "passed",
+		"port":         8086,
+		"healthUrl":    healthURL,
 	}
 
 	return &BinaryControlResponse{
 		Success: true,
-		Message: fmt.Sprintf("node_metrics_api started on node %s", nodeName),
+		Message: fmt.Sprintf("node_metrics_api started successfully on node %s", nodeName),
 		Data:    data,
 	}, nil
 }
@@ -262,39 +300,147 @@ func (bc *BinaryControl) StopMetricsBinary(nodeName string, timeout int) (*Binar
 		return response(false, fmt.Sprintf("Node %s is disabled", nodeName)), fmt.Errorf("node %s disabled", nodeName)
 	}
 
+	log.Printf("Stopping node_metrics_api on node %s", nodeName)
+
+	// Check if binary is actually running
 	output, err := bc.sshExecWithOutput(node, "pgrep -f node_metrics_api")
 	if err != nil || output == "" {
 		return response(false, fmt.Sprintf("node_metrics_api not running on node %s", nodeName)), fmt.Errorf("metrics binary not running")
 	}
 
+	log.Printf("Found running node_metrics_api processes: %s", output)
+
+	// Kill all matching processes
 	pids := strings.Split(output, "\n")
+	stoppedCount := 0
 	for _, pidStr := range pids {
+		pidStr = strings.TrimSpace(pidStr)
+		if pidStr == "" {
+			continue
+		}
+
 		pid, err := strconv.Atoi(pidStr)
-		if err == nil {
-			killCmd := fmt.Sprintf("kill %d", pid)
-			_ = bc.sshExec(node, killCmd)
+		if err != nil {
+			log.Printf("Warning: Invalid PID %s: %v", pidStr, err)
+			continue
+		}
+
+		// Try graceful kill first
+		killCmd := fmt.Sprintf("kill %d", pid)
+		if err := bc.sshExec(node, killCmd); err != nil {
+			log.Printf("Graceful kill failed for PID %d, trying force kill", pid)
+			// Force kill if graceful fails
+			killCmd = fmt.Sprintf("kill -9 %d", pid)
+			if err := bc.sshExec(node, killCmd); err != nil {
+				log.Printf("Warning: Failed to kill process %d: %v", pid, err)
+			}
+		} else {
+			stoppedCount++
+			log.Printf("Successfully stopped process %d", pid)
 		}
 	}
 
-	time.Sleep(2 * time.Second)
+	log.Printf("Waiting for processes to stop...")
+	time.Sleep(3 * time.Second)
 
+	// Verify all processes are stopped
 	output, err = bc.sshExecWithOutput(node, "pgrep -f node_metrics_api")
 	status := "running"
 	if err != nil || output == "" {
 		status = "stopped"
+		log.Printf("node_metrics_api successfully stopped on node %s", nodeName)
+	} else {
+		log.Printf("Warning: Some node_metrics_api processes may still be running: %s", output)
 	}
 
 	data := map[string]interface{}{
-		"nodeName": nodeName,
-		"action":   "stop_metrics",
-		"timeout":  timeout,
-		"status":   status,
+		"nodeName":     nodeName,
+		"action":       "stop_metrics",
+		"timeout":      timeout,
+		"status":       status,
+		"stoppedCount": stoppedCount,
+		"remaining":    output,
 	}
 
 	return &BinaryControlResponse{
 		Success: true,
-		Message: fmt.Sprintf("node_metrics_api stopped on node %s", nodeName),
+		Message: fmt.Sprintf("node_metrics_api stop operation completed on node %s (stopped %d processes)", nodeName, stoppedCount),
 		Data:    data,
+	}, nil
+}
+
+// DebugMetricsBinary provides detailed debugging information for the metrics binary on a node
+func (bc *BinaryControl) DebugMetricsBinary(nodeName string) (*BinaryControlResponse, error) {
+	node, ok := bc.nodesConfig.Nodes[nodeName]
+	if !ok {
+		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
+	}
+
+	binaryPath := fmt.Sprintf("%s/node_metrics_api", node.BinaryDir)
+	debugInfo := make(map[string]interface{})
+
+	// 1. Check if binary file exists and is executable
+	log.Printf("=== DEBUG INFO FOR NODE %s ===", nodeName)
+
+	// Check binary file
+	fileCheck, err := bc.sshExecWithOutput(node, fmt.Sprintf("ls -la %s", binaryPath))
+	debugInfo["binary_file_info"] = fileCheck
+	if err != nil {
+		debugInfo["binary_exists"] = false
+		debugInfo["binary_error"] = err.Error()
+	} else {
+		debugInfo["binary_exists"] = true
+	}
+
+	// Check if executable
+	execCheck, err := bc.sshExecWithOutput(node, fmt.Sprintf("test -x %s && echo 'executable' || echo 'not executable'", binaryPath))
+	debugInfo["is_executable"] = strings.TrimSpace(execCheck) == "executable"
+
+	// 2. Check running processes
+	processes, err := bc.sshExecWithOutput(node, "pgrep -f node_metrics_api")
+	if err != nil {
+		debugInfo["processes_running"] = false
+		debugInfo["process_error"] = err.Error()
+	} else {
+		debugInfo["processes_running"] = true
+		debugInfo["process_list"] = strings.Split(processes, "\n")
+	}
+
+	// 3. Check port availability
+	portCheck, err := bc.sshExecWithOutput(node, "netstat -tlnp 2>/dev/null | grep :8086 || ss -tlnp 2>/dev/null | grep :8086 || echo 'port check command not available'")
+	debugInfo["port_8086_status"] = portCheck
+	if err != nil {
+		debugInfo["port_check_error"] = err.Error()
+	}
+
+	// 4. Check for error logs
+	logContent, err := bc.sshExecWithOutput(node, fmt.Sprintf("cd %s && cat metrics_api.log 2>/dev/null || echo 'No log file found'", node.BinaryDir))
+	debugInfo["startup_log"] = logContent
+	if err != nil {
+		debugInfo["log_read_error"] = err.Error()
+	}
+
+	// 5. Try to start binary manually and capture immediate output
+	log.Printf("Attempting manual start for debugging...")
+	manualStartCmd := fmt.Sprintf("cd %s && timeout 10s ./node_metrics_api --port 8086 2>&1 || echo 'Manual start failed or timed out'", node.BinaryDir)
+	manualOutput, err := bc.sshExecWithOutput(node, manualStartCmd)
+	debugInfo["manual_start_output"] = manualOutput
+	if err != nil {
+		debugInfo["manual_start_error"] = err.Error()
+	}
+
+	// 6. Check system resources
+	diskSpace, _ := bc.sshExecWithOutput(node, "df -h .")
+	memory, _ := bc.sshExecWithOutput(node, "free -h")
+	debugInfo["disk_space"] = diskSpace
+	debugInfo["memory_info"] = memory
+
+	log.Printf("=== DEBUG INFO COLLECTION COMPLETE ===")
+
+	return &BinaryControlResponse{
+		Success: true,
+		Message: fmt.Sprintf("Debug information collected for node %s", nodeName),
+		Data:    debugInfo,
 	}, nil
 }
 

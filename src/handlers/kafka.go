@@ -1,4 +1,4 @@
-package kafka_ch_reset
+package handlers
 
 import (
 	"encoding/json"
@@ -6,16 +6,11 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"vuDataSim/src/kafka_ch_reset"
 	"vuDataSim/src/logger"
 	"github.com/gorilla/mux"
 )
 
-// APIResponse represents a standard API response
-type APIResponse struct {
-	Success bool        `json:"success"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
-}
 
 // sendJSONResponse sends a JSON response
 func sendJSONResponse(w http.ResponseWriter, status int, response APIResponse) {
@@ -26,13 +21,13 @@ func sendJSONResponse(w http.ResponseWriter, status int, response APIResponse) {
 
 // KafkaHandler handles Kafka-related API endpoints
 type KafkaHandler struct {
-	kafkaManager *KafkaManager
+	kafkaManager *kafka_ch_reset.KafkaManager
 }
 
 // NewKafkaHandler creates a new KafkaHandler instance
 func NewKafkaHandler() *KafkaHandler {
-	configPath := filepath.Join("src", "kafka_ch_reset", "config.yaml")
-	kafkaManager := NewKafkaManager(configPath)
+	configPath := filepath.Join("src", "configs", "topics_tables.yaml")
+	kafkaManager := kafka_ch_reset.NewKafkaManager(configPath)
 
 	// Load configuration
 	if err := kafkaManager.LoadConfig(); err != nil {
@@ -63,7 +58,7 @@ func (kh *KafkaHandler) GetTopics(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// RecreateTopics handles POST /api/kafka/recreate - recreates all topics
+// RecreateTopics handles POST /api/kafka/recreate - recreates topics for enabled o11y sources
 func (kh *KafkaHandler) RecreateTopics(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		sendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
@@ -73,14 +68,14 @@ func (kh *KafkaHandler) RecreateTopics(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Info().Msg("Starting Kafka topic recreation process")
+	logger.Info().Msg("Starting Kafka topic recreation for enabled o11y sources from conf.yml")
 
-	result, err := kh.kafkaManager.RecreateTopics()
+	result, err := kh.kafkaManager.RecreateTopicsForO11ySources()
 	if err != nil {
-		logger.Error().Err(err).Msg("Failed to recreate Kafka topics")
+		logger.Error().Err(err).Msg("Failed to recreate Kafka topics for enabled o11y sources")
 		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
-			Message: fmt.Sprintf("Failed to recreate topics: %v", err),
+			Message: fmt.Sprintf("Failed to recreate topics for enabled o11y sources: %v", err),
 			Data:    result,
 		})
 		return
@@ -88,17 +83,17 @@ func (kh *KafkaHandler) RecreateTopics(w http.ResponseWriter, r *http.Request) {
 
 	success := result["success"].(bool)
 	if success {
-		logger.Info().Msg("Successfully completed Kafka topic recreation")
+		logger.Info().Msg("Successfully completed Kafka topic recreation for enabled o11y sources")
 		sendJSONResponse(w, http.StatusOK, APIResponse{
 			Success: true,
-			Message: "All topics recreated successfully",
+			Message: "Topics recreated successfully for enabled o11y sources",
 			Data:    result,
 		})
 	} else {
-		logger.Warn().Msg("Kafka topic recreation completed with errors")
+		logger.Warn().Msg("Kafka topic recreation for enabled o11y sources completed with errors")
 		sendJSONResponse(w, http.StatusPartialContent, APIResponse{
 			Success: false,
-			Message: "Topic recreation completed with some errors",
+			Message: "Topic recreation for enabled o11y sources completed with some errors",
 			Data:    result,
 		})
 	}
@@ -276,6 +271,47 @@ func (kh *KafkaHandler) CreateTopic(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// RecreateTopicsForO11ySources handles POST /api/kafka/recreate/o11y - recreates topics for enabled o11y sources from conf.yml
+func (kh *KafkaHandler) RecreateTopicsForO11ySources(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		sendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
+			Success: false,
+			Message: "Method not allowed. Use POST.",
+		})
+		return
+	}
+
+	logger.Info().Msg("Starting Kafka topic recreation for enabled o11y sources from conf.yml")
+
+	result, err := kh.kafkaManager.RecreateTopicsForO11ySources()
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to recreate Kafka topics for enabled o11y sources")
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to recreate topics for enabled o11y sources: %v", err),
+			Data:    result,
+		})
+		return
+	}
+
+	success := result["success"].(bool)
+	if success {
+		logger.Info().Msg("Successfully completed Kafka topic recreation for enabled o11y sources")
+		sendJSONResponse(w, http.StatusOK, APIResponse{
+			Success: true,
+			Message: "Topics recreated successfully for enabled o11y sources",
+			Data:    result,
+		})
+	} else {
+		logger.Warn().Msg("Kafka topic recreation for enabled o11y sources completed with errors")
+		sendJSONResponse(w, http.StatusPartialContent, APIResponse{
+			Success: false,
+			Message: "Topic recreation for enabled o11y sources completed with some errors",
+			Data:    result,
+		})
+	}
+}
+
 // TruncateClickHouseTables handles POST /api/clickhouse/truncate - truncates ClickHouse tables
 func (kh *KafkaHandler) TruncateClickHouseTables(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -305,15 +341,11 @@ func (kh *KafkaHandler) TruncateClickHouseTables(w http.ResponseWriter, r *http.
 }
 
 // getAllTableNames extracts all table names from the configuration
-func getAllTableNames(km *KafkaManager) []string {
+func getAllTableNames(km *kafka_ch_reset.KafkaManager) []string {
 	tableNames := make([]string, 0)
 
 	for _, topicGroup := range km.GetAllTopics() {
-		for _, outputTopic := range topicGroup.OutputTopic {
-			if outputTopic.TableName != "" {
-				tableNames = append(tableNames, outputTopic.TableName)
-			}
-		}
+		tableNames = append(tableNames, topicGroup.ClickhouseTables...)
 	}
 
 	return tableNames

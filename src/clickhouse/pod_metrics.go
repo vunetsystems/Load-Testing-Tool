@@ -295,27 +295,47 @@ func (ch *ClickHouseClient) getContainerMetrics(ctx context.Context, limit int) 
 }
 
 // GetKafkaTopicMetrics fetches Messages In Per Sec (OneMinuteRate) by Topic for specific topics from monitoring DB
-func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRange) ([]KafkaTopicMetric, error) {
+func GetKafkaTopicMetrics(ctx context.Context, topics []string) ([]KafkaTopicMetric, error) {
 	if monitoringDBClient == nil {
 		return nil, fmt.Errorf("monitoring DB client not initialized")
 	}
 
+	brokers := []string{
+		"http://kafka-cluster-cp-kafka-0.broker-headless.vsmaps:8778/jolokia",
+		"http://kafka-cluster-cp-kafka-1.broker-headless.vsmaps:8778/jolokia",
+		"http://kafka-cluster-cp-kafka-2.broker-headless.vsmaps:8778/jolokia",
+	}
+
 	query := `
 		SELECT
-			toStartOfInterval(timestamp, toIntervalSecond(60)) AS timestamp,
-			topic AS metric,
-			sum(OneMinuteRate) AS OneMinuteRate
-		FROM kafka_Broker_Topic_Metrics
+			t.topic AS metric,
+			t.timestamp AS timestamp,
+			sum(t.OneMinuteRate) AS OneMinuteRate
+		FROM kafka_Broker_Topic_Metrics AS t
+		INNER JOIN (
+			SELECT
+				topic,
+				max(timestamp) AS latest_ts
+			FROM kafka_Broker_Topic_Metrics
+			WHERE
+				name = 'MessagesInPerSec'
+				AND jolokia_agent_url IN (?)
+				AND timestamp >= now() - INTERVAL 10 MINUTE
+			GROUP BY topic
+		) AS latest
+		ON t.topic = latest.topic AND t.timestamp = latest.latest_ts
 		WHERE
-			timestamp BETWEEN ? AND ?
-			AND name='MessagesInPerSec'
-			AND topic IN (?)
-		GROUP BY timestamp, topic
-		ORDER BY timestamp, topic
-		LIMIT 500
+			t.name = 'MessagesInPerSec'
+			AND t.jolokia_agent_url IN (?)
+			AND t.topic IN (?)
+		GROUP BY
+			t.topic,
+			t.timestamp
+		ORDER BY
+			t.timestamp DESC
 	`
 
-	rows, err := monitoringDBClient.Client.Query(ctx, query, timeRange.From, timeRange.To, topics)
+	rows, err := monitoringDBClient.Client.Query(ctx, query, brokers, brokers, topics)
 	if err != nil {
 		return nil, fmt.Errorf("error querying Kafka topic metrics: %v", err)
 	}
@@ -324,7 +344,7 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 	var metrics []KafkaTopicMetric
 	for rows.Next() {
 		var m KafkaTopicMetric
-		if err := rows.Scan(&m.Timestamp, &m.Topic, &m.OneMinuteRate); err != nil {
+		if err := rows.Scan(&m.Topic, &m.Timestamp, &m.OneMinuteRate); err != nil {
 			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan Kafka topic metric row: %v", err))
 			continue
 		}
@@ -333,6 +353,8 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 
 	return metrics, nil
 }
+
+
 
 // CollectMetrics gathers all metrics from ClickHouse for a specific time range
 func (c *ClickHouseClient) CollectMetrics(timeRange TimeRange) (*ClickHouseMetrics, error) {
@@ -377,7 +399,7 @@ func (c *ClickHouseClient) CollectMetrics(timeRange TimeRange) (*ClickHouseMetri
 		"mongo-metrics-input",
 		"mssql-telegraf",
 	}
-	kafkaTopicMetrics, err := GetKafkaTopicMetrics(ctx, kafkaTopics, timeRange)
+	kafkaTopicMetrics, err := GetKafkaTopicMetrics(ctx, kafkaTopics)
 	if err != nil {
 		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Error collecting Kafka topic metrics: %v", err), "error")
 	} else {
@@ -743,4 +765,33 @@ func CollectClickHouseMetrics(timeRange TimeRange) (*ClickHouseMetrics, error) {
 	// Debug log the collected metrics
 
 	return metrics, nil
+}
+
+// Package-level wrapper functions using the global clickHouseClient
+
+// GetPodResourceMetrics fetches resource utilization for specific pods within a time range
+func GetPodResourceMetrics(ctx context.Context, pods []string, timeRange TimeRange) ([]PodResourceMetric, error) {
+	if clickHouseClient == nil {
+		return nil, fmt.Errorf("ClickHouse client not initialized")
+	}
+
+	return clickHouseClient.GetPodResourceMetrics(ctx, pods, timeRange)
+}
+
+// GetPodStatusMetrics fetches status information for specific pods within a time range
+func GetPodStatusMetrics(ctx context.Context, pods []string, timeRange TimeRange) ([]PodStatusMetric, error) {
+	if clickHouseClient == nil {
+		return nil, fmt.Errorf("ClickHouse client not initialized")
+	}
+
+	return clickHouseClient.GetPodStatusMetrics(ctx, pods, timeRange)
+}
+
+// GetTopPodsByMemoryUtilization fetches top 5 pods by memory utilization for each monitored node
+func GetTopPodsByMemoryUtilization(ctx context.Context, nodes []string, timeRange TimeRange) ([]TopPodMemoryMetric, error) {
+	if clickHouseClient == nil {
+		return nil, fmt.Errorf("ClickHouse client not initialized")
+	}
+
+	return clickHouseClient.GetTopPodsByMemoryUtilization(ctx, nodes, timeRange)
 }

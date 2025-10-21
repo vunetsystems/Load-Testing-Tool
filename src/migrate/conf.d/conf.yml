@@ -4,7 +4,7 @@ include_module_dirs:
   AWS_ALB:
     enabled: false
   Apache:
-    enabled: true
+    enabled: false
   Azure_API_Management:
     enabled: false
   Azure_App_Gateway:

@@ -238,6 +238,57 @@ Expected response:
 curl -X POST http://localhost:8086/api/clickhouse/truncate
 ```
 
+### 5. Recreate Topics for Specific O11y Sources
+```bash
+curl -X POST http://localhost:8086/api/kafka/recreate/o11y \
+  -H "Content-Type: application/json" \
+  -d '{
+    "o11ySources": ["MongoDB", "LinuxMonitor"]
+  }'
+```
+
+Expected response:
+```json
+{
+  "success": true,
+  "message": "Topics recreated successfully for specified o11y sources",
+  "data": {
+    "success": true,
+    "results": {
+      "mongo-metrics-input": "Successfully recreated topic mongo-metrics-input with 3 partitions and replication factor 1",
+      "mongo-metrics": "Successfully recreated topic mongo-metrics with 3 partitions and replication factor 1",
+      "linux-monitor-input": "Successfully recreated topic linux-monitor-input with 3 partitions and replication factor 1",
+      "linux-monitor-resource-metrics": "Successfully recreated topic linux-monitor-resource-metrics with 3 partitions and replication factor 1"
+    },
+    "errors": []
+  }
+}
+```
+
+#### Test with Single O11y Source
+```bash
+curl -X POST http://localhost:8086/api/kafka/recreate/o11y \
+  -H "Content-Type: application/json" \
+  -d '{
+    "o11ySources": ["Apache"]
+  }'
+```
+
+#### Test Error Cases
+```bash
+# Empty sources list
+curl -X POST http://localhost:8086/api/kafka/recreate/o11y \
+  -H "Content-Type: application/json" \
+  -d '{
+    "o11ySources": []
+  }'
+
+# Invalid JSON
+curl -X POST http://localhost:8086/api/kafka/recreate/o11y \
+  -H "Content-Type: application/json" \
+  -d 'invalid json'
+```
+
 ## Implementation Notes
 
 - **Error Handling**: The system gracefully handles errors and continues processing other topics
@@ -245,6 +296,19 @@ curl -X POST http://localhost:8086/api/clickhouse/truncate
 - **In-Memory Storage**: Partition and replication factors are stored in memory during the recreation process
 - **Partial Success**: The system reports both successful operations and errors
 - **ClickHouse Integration**: Currently a placeholder - needs actual ClickHouse client implementation
+
+## O11y Source Name Translation
+
+The system automatically translates o11y source names between different configuration files:
+
+| conf.yml Name | topics_tables.yaml Name | Notes |
+|---------------|------------------------|-------|
+| `LinuxMonitor` | `Linux Monitor` | Space added |
+| `MongoDB` | `MongoDB` | Same name |
+| `Mssql` | `MSSQL` | Case change |
+| `Apache` | `Apache` | Same name |
+
+This translation ensures compatibility between the main configuration and topic definitions.
 
 ## Future Enhancements
 

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"time"
+	"vuDataSim/src/handlers"
 
 	"github.com/rs/cors"
 )
@@ -34,32 +35,34 @@ func corsMiddleware(next http.Handler) http.Handler {
 func serveStatic(w http.ResponseWriter, r *http.Request) {
 	// Serve index.html for root path
 	if r.URL.Path == "/" {
-		http.ServeFile(w, r, StaticDir+"/index.html")
+		http.ServeFile(w, r, handlers.StaticDir+"/index.html")
 		return
 	}
 
 	// Serve other static files with proper MIME types
-	staticPath := StaticDir + r.URL.Path
+	staticPath := handlers.StaticDir + r.URL.Path
+
+	const contentTypeHeader = "Content-Type"
 
 	// Set proper MIME types based on file extension
 	ext := filepath.Ext(r.URL.Path)
 	switch ext {
 	case ".css":
-		w.Header().Set("Content-Type", "text/css")
+		w.Header().Set(contentTypeHeader, "text/css")
 	case ".js":
-		w.Header().Set("Content-Type", "application/javascript")
+		w.Header().Set(contentTypeHeader, "application/javascript")
 	case ".html":
-		w.Header().Set("Content-Type", "text/html")
+		w.Header().Set(contentTypeHeader, "text/html")
 	case ".json":
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set(contentTypeHeader, "application/json")
 	case ".ico":
-		w.Header().Set("Content-Type", "image/x-icon")
+		w.Header().Set(contentTypeHeader, "image/x-icon")
 	case ".png":
-		w.Header().Set("Content-Type", "image/png")
+		w.Header().Set(contentTypeHeader, "image/png")
 	case ".jpg", ".jpeg":
-		w.Header().Set("Content-Type", "image/jpeg")
+		w.Header().Set(contentTypeHeader, "image/jpeg")
 	case ".svg":
-		w.Header().Set("Content-Type", "image/svg+xml")
+		w.Header().Set(contentTypeHeader, "image/svg+xml")
 	}
 
 	http.ServeFile(w, r, staticPath)
