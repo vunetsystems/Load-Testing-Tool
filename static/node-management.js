@@ -78,7 +78,7 @@ class NodeManagement {
                 this.manager.showNotification(`Node ${nodeName} added successfully`, 'success');
                 this.clearNodeForm();
                 this.refreshNodesTable();
-                this.manager.loadNodes(); // Refresh the dashboard nodes too
+                this.manager.dashboard.loadNodes(); // Refresh the dashboard nodes too
             } else {
                 throw new Error(response.message || 'Failed to add node');
             }
@@ -168,7 +168,7 @@ class NodeManagement {
             if (response.success) {
                 this.manager.showNotification(`Node ${nodeName} ${enable ? 'enabled' : 'disabled'} successfully`, 'success');
                 this.refreshNodesTable();
-                this.manager.loadNodes(); // Refresh the dashboard nodes too
+                this.manager.dashboard.loadNodes(); // Refresh the dashboard nodes too
             } else {
                 throw new Error(response.message || 'Failed to update node');
             }
@@ -189,7 +189,7 @@ class NodeManagement {
             if (response.success) {
                 this.manager.showNotification(`Node ${nodeName} removed successfully`, 'success');
                 this.refreshNodesTable();
-                this.manager.loadNodes(); // Refresh the dashboard nodes too
+                this.manager.dashboard.loadNodes(); // Refresh the dashboard nodes too
             } else {
                 throw new Error(response.message || 'Failed to remove node');
             }
@@ -251,7 +251,7 @@ class NodeManagement {
                 this.manager.showNotification(`Node ${this.editNodeName} updated successfully`, 'success');
                 this.clearNodeForm();
                 this.refreshNodesTable();
-                this.manager.loadNodes(); // Refresh the dashboard nodes too
+                this.manager.dashboard.loadNodes(); // Refresh the dashboard nodes too
                 this.exitEditMode();
             } else {
                 throw new Error(response.message || 'Failed to update node');

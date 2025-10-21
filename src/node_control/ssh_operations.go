@@ -2,6 +2,7 @@ package node_control
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -35,9 +36,9 @@ func (nm *NodeManager) SSHExecWithOutput(nodeConfig NodeConfig, command string) 
 }
 
 func (nm *NodeManager) copyFilesToNode(nodeName string, nodeConfig NodeConfig) error {
-	localMainBinary := "src/finalvudatasim"
+	localMainBinary := "src/migrate/finalvudatasim"
 	localMetricsBinary := "src/node_metrics_api/build/node_metrics_api"
-	localConfDir := "src/conf.d"
+	localConfDir := "src/migrate/conf.d"
 
 	log.Printf("DEBUG: Deployment paths for node %s:", nodeName)
 	log.Printf("  Main binary path: %s", localMainBinary)
@@ -180,17 +181,29 @@ func (nm *NodeManager) sshExec(nodeConfig NodeConfig, command string) error {
 		"-i", nodeConfig.KeyPath,
 		"-o", "StrictHostKeyChecking=no",
 		"-o", "UserKnownHostsFile=/dev/null",
+		"-o", "ConnectTimeout=10",
+		"-o", "LogLevel=ERROR",
 		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
 		command,
 	}
 
 	cmd := exec.Command("ssh", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 
-	err := cmd.Run()
+	// Capture stderr for proper error reporting
+	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		return fmt.Errorf("SSH command failed: %v", err)
+		return fmt.Errorf("failed to create stderr pipe: %v", err)
+	}
+
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("failed to start SSH command: %v", err)
+	}
+
+	// Read stderr
+	stderrBytes, _ := io.ReadAll(stderr)
+
+	if err := cmd.Wait(); err != nil {
+		return fmt.Errorf("SSH command failed: %v, stderr: %s", err, string(stderrBytes))
 	}
 
 	return nil

@@ -164,3 +164,13 @@ func GetClickHouseHealth() (map[string]interface{}, error) {
 		"last_checked": time.Now(),
 	}, nil
 }
+
+// GetMonitoredPods returns the list of monitored pods
+func GetMonitoredPods() []string {
+	return monitoredPods
+}
+
+// GetMonitoredNodes returns the list of monitored nodes
+func GetMonitoredNodes() []string {
+	return monitoredNodes
+}

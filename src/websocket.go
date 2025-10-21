@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"vuDataSim/src/handlers"
 
 	"github.com/gorilla/websocket"
 )
@@ -25,12 +26,12 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 
 	// Register client
-	appState.mutex.Lock()
-	appState.clients[conn] = true
-	appState.mutex.Unlock()
+	handlers.AppState.Mutex.Lock()
+	handlers.AppState.Clients[conn] = true
+	handlers.AppState.Mutex.Unlock()
 
 	// Send initial state
-	initialState, _ := json.Marshal(appState)
+	initialState, _ := json.Marshal(handlers.AppState)
 	conn.WriteMessage(websocket.TextMessage, initialState)
 
 	// Listen for client messages
@@ -48,35 +49,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Unregister client
-	appState.mutex.Lock()
-	delete(appState.clients, conn)
-	appState.mutex.Unlock()
-}
-
-// Broadcast updates to all WebSocket clients
-func (state *AppState) broadcastUpdate() {
-	data, err := json.Marshal(state)
-	if err != nil {
-		log.Printf("Error marshaling state: %v", err)
-		return
-	}
-
-	state.mutex.RLock()
-	clients := make([]*websocket.Conn, 0, len(state.clients))
-	for client := range state.clients {
-		clients = append(clients, client)
-	}
-	state.mutex.RUnlock()
-
-	for _, client := range clients {
-		go func(c *websocket.Conn) {
-			if err := c.WriteMessage(websocket.TextMessage, data); err != nil {
-				log.Printf("WebSocket write error: %v", err)
-				state.mutex.Lock()
-				delete(state.clients, c)
-				state.mutex.Unlock()
-				c.Close()
-			}
-		}(client)
-	}
+	handlers.AppState.Mutex.Lock()
+	delete(handlers.AppState.Clients, conn)
+	handlers.AppState.Mutex.Unlock()
 }

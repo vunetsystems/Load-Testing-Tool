@@ -6,25 +6,25 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
-
+	"sync"
+	"vuDataSim/src/logger"
 	"gopkg.in/yaml.v3"
 )
 
-// TopicConfig represents the configuration for a topic group
-type TopicConfig struct {
-	Name        string      `yaml:"name"`
-	InputTopic  []TopicInfo `yaml:"inputTopic"`
-	OutputTopic []TopicInfo `yaml:"outputTopic"`
+// TopicName represents a topic name structure
+type TopicName struct {
+	Name string `yaml:"name"`
 }
 
-// TopicInfo represents individual topic information
-type TopicInfo struct {
-	Name        string `yaml:"name"`
-	TableName   string `yaml:"tableName"`
-	TypeField   string `yaml:"typeField"`
-	SourceField string `yaml:"sourceField"`
+// TopicConfig represents the configuration for a topic group
+type TopicConfig struct {
+	Name             string      `yaml:"name"`
+	InputTopic       []TopicName `yaml:"inputTopic"`
+	OutputTopic      []TopicName `yaml:"outputTopic"`
+	ClickhouseTables []string    `yaml:"clickhouseTables"`
 }
+
+
 
 // TopicMetadata stores partition and replication factor for a topic
 type TopicMetadata struct {
@@ -39,6 +39,35 @@ type KafkaManager struct {
 	topics     []TopicConfig
 }
 
+// O11ySourceConfig represents the configuration for o11y sources from conf.yml
+type O11ySourceConfig struct {
+	DataGenerationTime struct {
+		Type string `yaml:"type"`
+	} `yaml:"data_generation_time"`
+	IncludeModuleDirs map[string]struct {
+		Enabled bool `yaml:"enabled"`
+	} `yaml:"include_module_dirs"`
+}
+
+// Source name translation dictionary to map between conf.yml and topics_tables.yaml naming conventions
+var sourceNameTranslation = map[string]string{
+	"LinuxMonitor":      "Linux Monitor",
+	"MongoDB":           "MongoDB",
+	"Mssql":             "MSSQL",
+	"Apache":            "Apache",
+	"Azure_Firewall":    "Azure Firewall",
+	"Azure_Redis_Cache": "Azure Redis Cache",
+}
+
+// translateSourceName translates source names between conf.yml and topics_tables.yaml naming conventions
+func (km *KafkaManager) translateSourceName(sourceName string) string {
+	if translatedName, exists := sourceNameTranslation[sourceName]; exists {
+		return translatedName
+	}
+	// Return original name if no translation found
+	return sourceName
+}
+
 // NewKafkaManager creates a new KafkaManager instance
 func NewKafkaManager(configPath string) *KafkaManager {
 	return &KafkaManager{
@@ -46,18 +75,31 @@ func NewKafkaManager(configPath string) *KafkaManager {
 	}
 }
 
+// SourcesConfig represents the wrapper structure for sources
+type SourcesConfig struct {
+	Sources []TopicConfig `yaml:"sources"`
+}
+
 // LoadConfig loads the topic configuration from YAML file
 func (km *KafkaManager) LoadConfig() error {
+	fmt.Printf("Loading config from: %s\n", km.configPath)
 	data, err := exec.Command("cat", km.configPath).Output()
 	if err != nil {
 		return fmt.Errorf("failed to read config file: %v", err)
 	}
 
-	err = yaml.Unmarshal(data, &km.topics)
+	var config SourcesConfig
+	err = yaml.Unmarshal(data, &config)
 	if err != nil {
 		return fmt.Errorf("failed to parse YAML config: %v", err)
 	}
 
+	fmt.Printf("Loaded %d topic configurations\n", len(config.Sources))
+	for i, source := range config.Sources {
+		fmt.Printf("Source %d: %s\n", i, source.Name)
+	}
+
+	km.topics = config.Sources
 	return nil
 }
 
@@ -66,42 +108,6 @@ func (km *KafkaManager) GetAllTopics() []TopicConfig {
 	return km.topics
 }
 
-// RecreateTopics recreates all input and output topics
-func (km *KafkaManager) RecreateTopics() (map[string]interface{}, error) {
-	result := map[string]interface{}{
-		"success": true,
-		"results": make(map[string]string),
-		"errors":  make([]string, 0),
-	}
-
-	// Step 1: Recreate all input topics first
-	for _, topicGroup := range km.topics {
-		for _, inputTopic := range topicGroup.InputTopic {
-			topicResult, err := km.recreateTopic(inputTopic.Name)
-			if err != nil {
-				result["success"] = false
-				result["errors"] = append(result["errors"].([]string), fmt.Sprintf("Failed to recreate input topic %s: %v", inputTopic.Name, err))
-			} else {
-				result["results"].(map[string]string)[inputTopic.Name] = topicResult
-			}
-		}
-	}
-
-	// Step 2: Recreate all output topics
-	for _, topicGroup := range km.topics {
-		for _, outputTopic := range topicGroup.OutputTopic {
-			topicResult, err := km.recreateTopic(outputTopic.Name)
-			if err != nil {
-				result["success"] = false
-				result["errors"] = append(result["errors"].([]string), fmt.Sprintf("Failed to recreate output topic %s: %v", outputTopic.Name, err))
-			} else {
-				result["results"].(map[string]string)[outputTopic.Name] = topicResult
-			}
-		}
-	}
-
-	return result, nil
-}
 
 // DescribeTopic describes a single topic and returns its metadata
 func (km *KafkaManager) DescribeTopic(topicName string) (*TopicMetadata, error) {
@@ -150,54 +156,170 @@ func (km *KafkaManager) CreateTopic(topicName string, partitionCount, replicatio
 	return nil
 }
 
-// recreateTopic handles the recreation of a single topic
-func (km *KafkaManager) recreateTopic(topicName string) (string, error) {
-	// For now, let's simulate the process with individual commands
-	// In a real implementation, you'd need to handle the interactive session properly
-
-	// Step 2: Describe the topic to get metadata
-	describeCmd := fmt.Sprintf("kafka-topics --bootstrap-server localhost:9092 --describe --topic %s", topicName)
-
-	// Execute kubectl exec with the describe command
-	cmd := exec.Command("kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", describeCmd)
-
-	output, err := cmd.Output()
+// LoadO11yConfig loads the o11y source configuration from conf.yml file
+func (km *KafkaManager) LoadO11yConfig(confPath string) (*O11ySourceConfig, error) {
+	data, err := exec.Command("cat", confPath).Output()
 	if err != nil {
-		return "", fmt.Errorf("failed to describe topic %s: %v", topicName, err)
+		return nil, fmt.Errorf("failed to read o11y config file: %v", err)
 	}
 
-	// Parse the output to extract partition count and replication factor
-	metadata, err := km.parseTopicDescription(string(output))
+	var config O11ySourceConfig
+	err = yaml.Unmarshal(data, &config)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse topic description for %s: %v", topicName, err)
+		return nil, fmt.Errorf("failed to parse YAML o11y config: %v", err)
 	}
 
-	// Step 3: Delete the topic
-	deleteCmd := fmt.Sprintf("kafka-topics --bootstrap-server localhost:9092 --delete --topic %s", topicName)
-	cmd = exec.Command("kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", deleteCmd)
+	return &config, nil
+}
 
-	_, err = cmd.Output()
+// recreateSingleTopic recreates a single topic by describing, deleting, and creating it
+func (km *KafkaManager) recreateSingleTopic(topicName string) (string, error) {
+	// Step 1: Describe the topic to get its metadata
+	metadata, err := km.DescribeTopic(topicName)
 	if err != nil {
-		// Note: Delete might fail if topic doesn't exist, which is okay
-		fmt.Printf("Warning: Failed to delete topic %s (might not exist): %v\n", topicName, err)
+		// If topic doesn't exist, we'll create it with default settings
+		logger.Info().Str("topic", topicName).Msg("Topic does not exist, will create with default settings")
+	} else {
+		logger.Info().Str("topic", topicName).
+			Int("partitions", metadata.PartitionCount).
+			Int("replicationFactor", metadata.ReplicationFactor).
+			Msg("Found existing topic metadata")
 	}
 
-	// Wait a moment for deletion to complete
-	time.Sleep(2 * time.Second)
+	// Step 2: Delete the topic (ignore errors if topic doesn't exist)
+	err = km.DeleteTopic(topicName)
+	if err != nil {
+		logger.Warn().Err(err).Str("topic", topicName).Msg("Failed to delete topic (may not exist)")
+	} else {
+		logger.Info().Str("topic", topicName).Msg("Topic deleted successfully")
+	}
 
-	// Step 4: Recreate the topic with stored metadata
-	createCmd := fmt.Sprintf("kafka-topics --bootstrap-server localhost:9092 --create --topic %s --partitions %d --replication-factor %d",
-		topicName, metadata.PartitionCount, metadata.ReplicationFactor)
+	// Step 3: Create the topic with the same or default settings
+	partitionCount := 1
+	replicationFactor := 1
 
-	cmd = exec.Command("kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", createCmd)
+	if metadata != nil {
+		partitionCount = metadata.PartitionCount
+		replicationFactor = metadata.ReplicationFactor
+	}
 
-	_, err = cmd.Output()
+	err = km.CreateTopic(topicName, partitionCount, replicationFactor)
 	if err != nil {
 		return "", fmt.Errorf("failed to create topic %s: %v", topicName, err)
 	}
 
-	return fmt.Sprintf("Successfully recreated topic %s with %d partitions and replication factor %d",
-		topicName, metadata.PartitionCount, metadata.ReplicationFactor), nil
+	logger.Info().Str("topic", topicName).
+		Int("partitions", partitionCount).
+		Int("replicationFactor", replicationFactor).
+		Msg("Topic created successfully")
+
+	return "recreated", nil
+}
+
+// RecreateTopicsForO11ySources recreates topics for enabled o11y sources from conf.yml using parallel processing
+func (km *KafkaManager) RecreateTopicsForO11ySources() (map[string]interface{}, error) {
+	result := map[string]interface{}{
+		"success": true,
+		"results": make(map[string]string),
+		"errors":  make([]string, 0),
+		"processed_sources": make([]string, 0),
+	}
+
+	// Step 1: Load o11y configuration from conf.yml
+	confPath := "src/migrate/conf.d/conf.yml"
+	o11yConfig, err := km.LoadO11yConfig(confPath)
+	if err != nil {
+		result["success"] = false
+		result["errors"] = append(result["errors"].([]string), fmt.Sprintf("Failed to load o11y config: %v", err))
+		return result, err
+	}
+
+	// Step 2: Find enabled o11y sources
+	enabledSources := make([]string, 0)
+	for sourceName, sourceConfig := range o11yConfig.IncludeModuleDirs {
+		if sourceConfig.Enabled {
+			enabledSources = append(enabledSources, sourceName)
+			logger.Info().Str("source", sourceName).Msg("Found enabled o11y source")
+		}
+	}
+
+	if len(enabledSources) == 0 {
+		result["success"] = false
+		result["errors"] = append(result["errors"].([]string), "No enabled o11y sources found in conf.yml")
+		return result, fmt.Errorf("no enabled o11y sources found")
+	}
+
+	result["processed_sources"] = enabledSources
+
+	// Step 3: Collect all topics that need to be recreated
+	var allTopics []string
+	sourceMap := make(map[string]*TopicConfig)
+
+	for _, sourceName := range enabledSources {
+		translatedName := km.translateSourceName(sourceName)
+		logger.Info().Str("source", sourceName).Str("translated", translatedName).Msg("Processing enabled source")
+
+		// Find the topic configuration for this source
+		var sourceTopicConfig *TopicConfig
+		for _, topicConfig := range km.topics {
+			if topicConfig.Name == translatedName {
+				sourceTopicConfig = &topicConfig
+				break
+			}
+		}
+
+		if sourceTopicConfig == nil {
+			errMsg := fmt.Sprintf("No topic configuration found for source: %s (translated: %s)", sourceName, translatedName)
+			result["success"] = false
+			result["errors"] = append(result["errors"].([]string), errMsg)
+			logger.Error().Str("source", sourceName).Str("translated", translatedName).Msg("No topic configuration found")
+			continue
+		}
+
+		sourceMap[sourceName] = sourceTopicConfig
+
+		// Collect all input and output topics
+		for _, inputTopic := range sourceTopicConfig.InputTopic {
+			allTopics = append(allTopics, inputTopic.Name)
+		}
+		for _, outputTopic := range sourceTopicConfig.OutputTopic {
+			allTopics = append(allTopics, outputTopic.Name)
+		}
+	}
+
+	// Step 4: Process all topics in parallel using goroutines
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+
+	// Channel to collect errors from goroutines
+	errorChan := make(chan string, len(allTopics))
+
+	for _, topicName := range allTopics {
+		wg.Add(1)
+		go func(topic string) {
+			defer wg.Done()
+
+			topicResult, err := km.recreateSingleTopic(topic)
+			mu.Lock()
+			if err != nil {
+				result["success"] = false
+				errorMsg := fmt.Sprintf("Failed to recreate topic %s: %v", topic, err)
+				result["errors"] = append(result["errors"].([]string), errorMsg)
+				errorChan <- errorMsg
+			} else {
+				result["results"].(map[string]string)[topic] = topicResult
+			}
+			mu.Unlock()
+		}(topicName)
+	}
+
+	// Wait for all goroutines to complete
+	wg.Wait()
+	close(errorChan)
+
+	logger.Info().Int("total_topics", len(allTopics)).Msg("Completed parallel topic recreation")
+
+	return result, nil
 }
 
 // parseTopicDescription parses the output of kafka-topics --describe command

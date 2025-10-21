@@ -347,31 +347,3 @@ func isNumeric(s string) bool {
 	_, err := strconv.ParseFloat(s, 64)
 	return err == nil
 }
-
-// checkSSHConnectivity checks SSH connectivity for a single node
-func checkSSHConnectivity(nodeName string, nodeConfig node_control.NodeConfig) SSHStatus {
-	status := SSHStatus{
-		NodeName:    nodeName,
-		LastChecked: time.Now().Format("2006-01-02 15:04:05"),
-	}
-
-	// Test SSH connection with a simple command
-	testCmd := "echo 'SSH connection test'"
-	output, err := nodeManager.SSHExecWithOutput(nodeConfig, testCmd)
-
-	if err != nil {
-		status.Status = "disconnected"
-		status.Message = fmt.Sprintf("SSH connection failed: %v", err)
-		logger.LogWarning(nodeName, "SSH", fmt.Sprintf("Connection check failed: %v", err))
-	} else if strings.TrimSpace(output) == "SSH connection test" {
-		status.Status = "connected"
-		status.Message = "SSH connection successful"
-		logger.LogSuccess(nodeName, "SSH", "Connection check passed")
-	} else {
-		status.Status = "error"
-		status.Message = fmt.Sprintf("Unexpected SSH response: %s", output)
-		logger.LogWarning(nodeName, "SSH", fmt.Sprintf("Unexpected response: %s", output))
-	}
-
-	return status
-}

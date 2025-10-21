@@ -1,0 +1,10 @@
+{
+  "globalUserCount": 10,
+  "testDuration": "6h",
+  "rampUpDuration": 10,
+  "maxDuration": 10,
+  "enabledScripts": [
+    "overall-1.sh"
+  ],
+  "intervalBetweenTests": 300
+}

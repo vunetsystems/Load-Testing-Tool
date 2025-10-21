@@ -1,8 +1,8 @@
 package o11y_source_manager
 
 import (
-	"fmt"
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"vuDataSim/src/node_control"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -33,13 +34,13 @@ type MainConfig struct {
 
 // SourceConfig represents an individual o11y source main configuration
 type SourceConfig struct {
-	Enabled           bool     `yaml:"enabled"`
+	Enabled           bool      `yaml:"enabled"`
 	UniqueKey         UniqueKey `yaml:"uniquekey"`
-	IncludeSubModules []string `yaml:"Include_sub_modules"`
+	IncludeSubModules []string  `yaml:"Include_sub_modules"`
 }
 
 type ModuleDirConfig struct {
-    Enabled bool `yaml:"enabled"`
+	Enabled bool `yaml:"enabled"`
 }
 
 // UniqueKey represents the uniquekey configuration
@@ -110,7 +111,7 @@ func (osm *O11ySourceManager) LoadMaxEPSConfig() error {
 
 // LoadMainConfig loads the main configuration from conf.d/conf.yml
 func (osm *O11ySourceManager) LoadMainConfig() error {
-	configPath := "src/conf.d/conf.yml"
+	configPath := "src/migrate/conf.d/conf.yml"
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		return fmt.Errorf("main config file not found: %s", configPath)
 	}
@@ -250,7 +251,6 @@ func (osm *O11ySourceManager) calculateProportionalDistribution(selectedSources 
 		}
 	}
 
-
 	if len(exceededSources) > 0 {
 		return nil, fmt.Errorf("distributed EPS exceeds maximum limits for sources: %s", strings.Join(exceededSources, "; "))
 	}
@@ -263,13 +263,13 @@ func (osm *O11ySourceManager) calculateProportionalDistribution(selectedSources 
 func (osm *O11ySourceManager) applyEPSDistribution(sourceEPSMap map[string]int) error {
 	log.Printf("DEBUG: Starting applyEPSDistribution with %d sources", len(sourceEPSMap))
 	log.Printf("DEBUG: Current IncludeModuleDirs before processing has %d entries", len(osm.mainConfig.IncludeModuleDirs))
-	
+
 	// Ensure the map is initialized
 	if osm.mainConfig.IncludeModuleDirs == nil {
 		log.Println("DEBUG: IncludeModuleDirs is nil, initializing...")
 		osm.mainConfig.IncludeModuleDirs = make(map[string]ModuleDirConfig)
 	}
-	
+
 	// Get all available sources from max EPS config to ensure we have all sources in the map
 	for sourceName := range osm.maxEPSConfig.MaxEPS {
 		if _, exists := osm.mainConfig.IncludeModuleDirs[sourceName]; !exists {
@@ -277,9 +277,9 @@ func (osm *O11ySourceManager) applyEPSDistribution(sourceEPSMap map[string]int) 
 			osm.mainConfig.IncludeModuleDirs[sourceName] = ModuleDirConfig{Enabled: false}
 		}
 	}
-	
+
 	log.Printf("DEBUG: After ensuring all sources exist, IncludeModuleDirs has %d entries", len(osm.mainConfig.IncludeModuleDirs))
-	
+
 	// First, disable ALL sources in main config
 	for sourceName := range osm.mainConfig.IncludeModuleDirs {
 		config := osm.mainConfig.IncludeModuleDirs[sourceName]
@@ -308,7 +308,7 @@ func (osm *O11ySourceManager) applyEPSDistribution(sourceEPSMap map[string]int) 
 		if err != nil {
 			return fmt.Errorf("failed to update config for source %s: %v", sourceName, err)
 		}
-		
+
 		// Enable this source in main config
 		config := osm.mainConfig.IncludeModuleDirs[sourceName]
 		config.Enabled = true
@@ -318,7 +318,7 @@ func (osm *O11ySourceManager) applyEPSDistribution(sourceEPSMap map[string]int) 
 		log.Printf("Updated %s: EPS=%d, MainKeys=%d, SubKeys=%d, Enabled=true",
 			sourceName, assignedEPS, requiredMainKeys, totalSubKeys)
 	}
-	
+
 	log.Printf("DEBUG: After enabling selected sources, IncludeModuleDirs has %d entries", len(osm.mainConfig.IncludeModuleDirs))
 	log.Printf("DEBUG: About to call saveMainConfig...")
 
@@ -329,7 +329,7 @@ func (osm *O11ySourceManager) applyEPSDistribution(sourceEPSMap map[string]int) 
 // calculateTotalSubModuleKeys calculates total submodule unique keys for a source
 func (osm *O11ySourceManager) calculateTotalSubModuleKeys(sourceName string) int {
 	totalKeys := 0
-	sourcePath := filepath.Join("src/conf.d", sourceName)
+	sourcePath := filepath.Join("src/migrate/conf.d", sourceName)
 
 	// Load source config to get submodule list
 	configPath := filepath.Join(sourcePath, "conf.yml")
@@ -394,7 +394,7 @@ func (osm *O11ySourceManager) calculateTotalSubModuleKeys(sourceName string) int
 
 // updateSourceConfig updates the NumUniqKey field in a source's conf.yml file
 func (osm *O11ySourceManager) updateSourceConfig(sourceName string, numUniqKey int) error {
-	configPath := filepath.Join("src/conf.d", sourceName, "conf.yml")
+	configPath := filepath.Join("src/migrate/conf.d", sourceName, "conf.yml")
 
 	// Read file as text to preserve formatting
 	data, err := os.ReadFile(configPath)
@@ -430,62 +430,62 @@ func (osm *O11ySourceManager) updateSourceConfig(sourceName string, numUniqKey i
 // saveMainConfig saves the main configuration to its YAML file.
 // NOTE: This approach is more robust but will remove comments and reformat the file.
 func (osm *O11ySourceManager) saveMainConfig() error {
-    configPath := "src/conf.d/conf.yml"
-    log.Printf("DEBUG: Attempting to save main config to %s", configPath)
-    log.Printf("DEBUG: Current IncludeModuleDirs has %d entries", len(osm.mainConfig.IncludeModuleDirs))
+	configPath := "src/migrate/conf.d/conf.yml"
+	log.Printf("DEBUG: Attempting to save main config to %s", configPath)
+	log.Printf("DEBUG: Current IncludeModuleDirs has %d entries", len(osm.mainConfig.IncludeModuleDirs))
 
-    // --- Create a temporary structure to match the file's layout ---
-    // This ensures the output YAML has the correct top-level keys.
-    fullConfig := make(map[string]interface{})
+	// --- Create a temporary structure to match the file's layout ---
+	// This ensures the output YAML has the correct top-level keys.
+	fullConfig := make(map[string]interface{})
 
-    // Read the original file to get all top-level keys (like logging, output.kafka, etc.)
-    data, err := os.ReadFile(configPath)
-    if err != nil {
-        log.Printf("DEBUG: Failed to read original config file to preserve keys: %v", err)
-        return fmt.Errorf("failed to read main config file: %v", err)
-    }
-    
-    // Unmarshal into a generic map to preserve all other sections
-    err = yaml.Unmarshal(data, &fullConfig)
-    if err != nil {
-        log.Printf("DEBUG: Failed to unmarshal original config: %v", err)
-        return fmt.Errorf("failed to unmarshal original main config: %v", err)
-    }
+	// Read the original file to get all top-level keys (like logging, output.kafka, etc.)
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		log.Printf("DEBUG: Failed to read original config file to preserve keys: %v", err)
+		return fmt.Errorf("failed to read main config file: %v", err)
+	}
 
-    // --- Convert IncludeModuleDirs to the format expected by YAML marshaling ---
-    // The issue is that the struct values need to be converted to map[string]interface{}
-    moduleDirsMap := make(map[string]interface{})
-    for sourceName, config := range osm.mainConfig.IncludeModuleDirs {
-        moduleDirsMap[sourceName] = map[string]interface{}{
-            "enabled": config.Enabled,
-        }
-    }
-    
-    log.Printf("DEBUG: Converted %d sources to map format", len(moduleDirsMap))
+	// Unmarshal into a generic map to preserve all other sections
+	err = yaml.Unmarshal(data, &fullConfig)
+	if err != nil {
+		log.Printf("DEBUG: Failed to unmarshal original config: %v", err)
+		return fmt.Errorf("failed to unmarshal original main config: %v", err)
+	}
 
-    // --- Overwrite the 'include_module_dirs' section with our updated data ---
-    fullConfig["include_module_dirs"] = moduleDirsMap
+	// --- Convert IncludeModuleDirs to the format expected by YAML marshaling ---
+	// The issue is that the struct values need to be converted to map[string]interface{}
+	moduleDirsMap := make(map[string]interface{})
+	for sourceName, config := range osm.mainConfig.IncludeModuleDirs {
+		moduleDirsMap[sourceName] = map[string]interface{}{
+			"enabled": config.Enabled,
+		}
+	}
 
-    // --- Marshal the updated configuration map to YAML ---
-    var buf bytes.Buffer
-    encoder := yaml.NewEncoder(&buf)
-    encoder.SetIndent(2) // Keep the indentation clean
-    err = encoder.Encode(fullConfig)
-    if err != nil {
-        log.Printf("DEBUG: Failed to marshal updated config map: %v", err)
-        return fmt.Errorf("failed to marshal updated main config: %v", err)
-    }
+	log.Printf("DEBUG: Converted %d sources to map format", len(moduleDirsMap))
 
-    // --- Write the new YAML content to the file ---
-    log.Println("DEBUG: YAML marshalled successfully. Writing back to file...")
-    err = os.WriteFile(configPath, buf.Bytes(), 0644)
-    if err != nil {
-        log.Printf("DEBUG: FAILED to write updated main config file: %v", err)
-        return fmt.Errorf("failed to write updated main config file: %v", err)
-    }
+	// --- Overwrite the 'include_module_dirs' section with our updated data ---
+	fullConfig["include_module_dirs"] = moduleDirsMap
 
-    log.Println("DEBUG: Successfully saved main config file.")
-    return nil
+	// --- Marshal the updated configuration map to YAML ---
+	var buf bytes.Buffer
+	encoder := yaml.NewEncoder(&buf)
+	encoder.SetIndent(2) // Keep the indentation clean
+	err = encoder.Encode(fullConfig)
+	if err != nil {
+		log.Printf("DEBUG: Failed to marshal updated config map: %v", err)
+		return fmt.Errorf("failed to marshal updated main config: %v", err)
+	}
+
+	// --- Write the new YAML content to the file ---
+	log.Println("DEBUG: YAML marshalled successfully. Writing back to file...")
+	err = os.WriteFile(configPath, buf.Bytes(), 0644)
+	if err != nil {
+		log.Printf("DEBUG: FAILED to write updated main config file: %v", err)
+		return fmt.Errorf("failed to write updated main config file: %v", err)
+	}
+
+	log.Println("DEBUG: Successfully saved main config file.")
+	return nil
 }
 
 // calculateCurrentEPS calculates the current total EPS across all enabled sources
@@ -514,7 +514,7 @@ func (osm *O11ySourceManager) calculateCurrentEPS() int {
 
 // loadSourceConfig loads configuration for a specific o11y source
 func (osm *O11ySourceManager) loadSourceConfig(sourceName string) (*SourceConfig, error) {
-	configPath := filepath.Join("src/conf.d", sourceName, "conf.yml")
+	configPath := filepath.Join("src/migrate/conf.d", sourceName, "conf.yml")
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		return nil, fmt.Errorf("source config file not found: %s", configPath)
 	}
@@ -568,7 +568,7 @@ func (osm *O11ySourceManager) getSourceEPSBreakdown() map[string]SourceEPSInfo {
 					continue
 				}
 
-				subModulePath := filepath.Join("src/conf.d", sourceName, subModuleName+".yml")
+				subModulePath := filepath.Join("src/migrate/conf.d", sourceName, subModuleName+".yml")
 				if _, err := os.Stat(subModulePath); os.IsNotExist(err) {
 					info.SubModuleKeys[subModuleName] = sourceConfig.UniqueKey.NumUniqKey
 					continue
@@ -634,7 +634,7 @@ func (osm *O11ySourceManager) GetSourceDetails(sourceName string) (*SourceEPSInf
 			continue
 		}
 
-		subModulePath := filepath.Join("src/conf.d", sourceName, subModuleName+".yml")
+		subModulePath := filepath.Join("src/migrate/conf.d", sourceName, subModuleName+".yml")
 		if _, err := os.Stat(subModulePath); os.IsNotExist(err) {
 			info.SubModuleKeys[subModuleName] = sourceConfig.UniqueKey.NumUniqKey
 			continue
@@ -733,10 +733,10 @@ type ConfDNodeResult struct {
 
 // ConfDDistributionResponse represents the response after conf.d distribution
 type ConfDDistributionResponse struct {
-	Success           bool                        `json:"success"`
-	Message           string                      `json:"message"`
-	Data              map[string]interface{}      `json:"data,omitempty"`
-	Distribution      map[string]ConfDNodeResult  `json:"distribution"`
+	Success      bool                       `json:"success"`
+	Message      string                     `json:"message"`
+	Data         map[string]interface{}     `json:"data,omitempty"`
+	Distribution map[string]ConfDNodeResult `json:"distribution"`
 }
 
 // DistributeConfD distributes the conf.d directory to all enabled nodes
@@ -744,7 +744,7 @@ type ConfDDistributionResponse struct {
 // DistributeConfD distributes the conf.d directory to all enabled nodes
 func (osm *O11ySourceManager) DistributeConfD() (*ConfDDistributionResponse, error) {
 	log.Println("Starting conf.d distribution to all enabled nodes...")
-	
+
 	// Load node manager to access node configurations
 	nodeManager := osm.getNodeManager()
 	if nodeManager == nil {
@@ -753,7 +753,7 @@ func (osm *O11ySourceManager) DistributeConfD() (*ConfDDistributionResponse, err
 			Message: "Node manager not available",
 		}, fmt.Errorf("node manager not available")
 	}
-	
+
 	// Get enabled nodes
 	enabledNodes := nodeManager.GetEnabledNodes()
 	if len(enabledNodes) == 0 {
@@ -764,18 +764,18 @@ func (osm *O11ySourceManager) DistributeConfD() (*ConfDDistributionResponse, err
 			Data: map[string]interface{}{
 				"distributedNodes": 0,
 				"totalNodes":       0,
-				"successRate":     "0/0",
+				"successRate":      "0/0",
 			},
 			Distribution: make(map[string]ConfDNodeResult),
 		}, nil
 	}
-	
+
 	log.Printf("Found %d enabled nodes to distribute conf.d to", len(enabledNodes))
-	
+
 	// Create temporary tar file from local conf.d directory
 	tempTarFile := "/tmp/confd_backup.tar.gz"
-	localConfDir := "src/conf.d"
-	
+	localConfDir := "src/migrate/conf.d"
+
 	// Check if local conf.d directory exists
 	if _, err := os.Stat(localConfDir); os.IsNotExist(err) {
 		return &ConfDDistributionResponse{
@@ -783,35 +783,35 @@ func (osm *O11ySourceManager) DistributeConfD() (*ConfDDistributionResponse, err
 			Message: fmt.Sprintf("Local conf.d directory not found: %s", localConfDir),
 		}, fmt.Errorf("local conf.d directory not found: %s", localConfDir)
 	}
-	
+
 	// Create tar command - include the conf.d directory itself
 	tarCmd := exec.Command("tar", "-czf", tempTarFile, "-C", filepath.Dir(localConfDir), filepath.Base(localConfDir))
 	log.Printf("Creating temporary tar file: tar -czf %s -C %s %s", tempTarFile, filepath.Dir(localConfDir), filepath.Base(localConfDir))
-	
+
 	if err := tarCmd.Run(); err != nil {
 		return &ConfDDistributionResponse{
 			Success: false,
 			Message: fmt.Sprintf("Failed to create tar file: %v", err),
 		}, fmt.Errorf("failed to create tar file: %v", err)
 	}
-	
+
 	defer func() {
 		// Clean up temporary tar file
 		if err := os.Remove(tempTarFile); err != nil {
 			log.Printf("Warning: Failed to remove temporary tar file %s: %v", tempTarFile, err)
 		}
 	}()
-	
+
 	// Distribute to each enabled node
 	distributionResults := make(map[string]ConfDNodeResult)
 	successCount := 0
-	
+
 	for nodeName, nodeConfig := range enabledNodes {
 		log.Printf("Distributing conf.d to node: %s (host: %s, conf_dir: %s)", nodeName, nodeConfig.Host, nodeConfig.ConfDir)
-		
+
 		result := osm.distributeConfDToNode(nodeName, nodeConfig, tempTarFile)
 		distributionResults[nodeName] = result
-		
+
 		if result.Success {
 			successCount++
 			log.Printf("✓ Successfully distributed conf.d to node: %s", nodeName)
@@ -819,10 +819,10 @@ func (osm *O11ySourceManager) DistributeConfD() (*ConfDDistributionResponse, err
 			log.Printf("✗ Failed to distribute conf.d to node: %s - %s", nodeName, result.Message)
 		}
 	}
-	
+
 	successRate := fmt.Sprintf("%d/%d", successCount, len(enabledNodes))
 	message := fmt.Sprintf("Conf.d distribution completed: %s nodes successful", successRate)
-	
+
 	response := &ConfDDistributionResponse{
 		Success: successCount == len(enabledNodes),
 		Message: message,
@@ -833,7 +833,7 @@ func (osm *O11ySourceManager) DistributeConfD() (*ConfDDistributionResponse, err
 		},
 		Distribution: distributionResults,
 	}
-	
+
 	log.Printf("✓ Conf.d distribution completed successfully to %d/%d nodes", successCount, len(enabledNodes))
 	return response, nil
 }
@@ -841,11 +841,11 @@ func (osm *O11ySourceManager) DistributeConfD() (*ConfDDistributionResponse, err
 // distributeConfDToNode distributes conf.d to a single node
 func (osm *O11ySourceManager) distributeConfDToNode(nodeName string, nodeConfig node_control.NodeConfig, tempTarFile string) ConfDNodeResult {
 	log.Printf("Starting conf.d replacement for node %s", nodeConfig.Host)
-	
+
 	// nodeConfig.ConfDir is the parent directory where conf.d should be placed (e.g., /path/to/)
 	// We need to create /path/to/conf.d
 	targetConfDir := filepath.Join(nodeConfig.ConfDir, "conf.d")
-	
+
 	// Remove existing conf.d directory on remote node
 	log.Printf("Removing existing conf.d directory on remote node: rm -rf %s", targetConfDir)
 	err := osm.sshExec(nodeConfig, fmt.Sprintf("rm -rf %s", targetConfDir))
@@ -856,7 +856,7 @@ func (osm *O11ySourceManager) distributeConfDToNode(nodeName string, nodeConfig 
 			Message:  fmt.Sprintf("Failed to remove existing conf.d directory: %v", err),
 		}
 	}
-	
+
 	// Ensure parent directory exists
 	log.Printf("Creating parent directory if needed: mkdir -p %s", nodeConfig.ConfDir)
 	err = osm.sshExec(nodeConfig, fmt.Sprintf("mkdir -p %s", nodeConfig.ConfDir))
@@ -867,7 +867,7 @@ func (osm *O11ySourceManager) distributeConfDToNode(nodeName string, nodeConfig 
 			Message:  fmt.Sprintf("Failed to create parent directory: %v", err),
 		}
 	}
-	
+
 	// Copy tar file to a temporary location
 	remoteTarPath := filepath.Join("/tmp", "confd_backup_"+nodeName+".tar.gz")
 	log.Printf("Copying tar file to remote node: scp %s to %s", tempTarFile, remoteTarPath)
@@ -879,7 +879,7 @@ func (osm *O11ySourceManager) distributeConfDToNode(nodeName string, nodeConfig 
 			Message:  fmt.Sprintf("Failed to copy tar file: %v", err),
 		}
 	}
-	
+
 	// Extract tar file to the target directory
 	// The tar contains "conf.d/" so it will create conf.d in nodeConfig.ConfDir
 	extractAndCleanupCmd := fmt.Sprintf(
@@ -888,7 +888,7 @@ func (osm *O11ySourceManager) distributeConfDToNode(nodeName string, nodeConfig 
 		remoteTarPath,
 		remoteTarPath,
 	)
-	
+
 	log.Printf("Extracting tar file on remote node: %s", extractAndCleanupCmd)
 	err = osm.sshExec(nodeConfig, extractAndCleanupCmd)
 	if err != nil {
@@ -898,7 +898,7 @@ func (osm *O11ySourceManager) distributeConfDToNode(nodeName string, nodeConfig 
 			Message:  fmt.Sprintf("Failed to extract tar file: %v", err),
 		}
 	}
-	
+
 	// Verify the conf.d directory exists in the target location
 	verifyCmd := fmt.Sprintf("test -d %s", targetConfDir)
 	log.Printf("Verifying conf.d directory exists at: %s", targetConfDir)
@@ -907,14 +907,14 @@ func (osm *O11ySourceManager) distributeConfDToNode(nodeName string, nodeConfig 
 		// Additional debug: list the parent directory to see what was created
 		listCmd := fmt.Sprintf("ls -la %s", nodeConfig.ConfDir)
 		osm.sshExec(nodeConfig, listCmd)
-		
+
 		return ConfDNodeResult{
 			NodeName: nodeName,
 			Success:  false,
 			Message:  fmt.Sprintf("Conf.d directory not found after extraction at %s: %v", targetConfDir, err),
 		}
 	}
-	
+
 	log.Printf("✓ Conf.d replacement completed for node %s at %s", nodeConfig.Host, targetConfDir)
 	return ConfDNodeResult{
 		NodeName: nodeName,

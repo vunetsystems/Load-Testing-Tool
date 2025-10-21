@@ -78,8 +78,3 @@ type NodeMetrics struct {
 	LastUpdate  time.Time `json:"lastUpdate"`
 }
 
-type APIResponse struct {
-	Success bool        `json:"success"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
-}

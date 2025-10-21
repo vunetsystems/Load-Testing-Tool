@@ -1,0 +1,79 @@
+sources:
+  - name: "MongoDB"
+    inputTopic:
+      - name: "mongo-metrics-input"
+    outputTopic:
+      - name: "mongo-metrics"
+      - name: "mongo-top-stats"
+      - name: "mongo-shard-stats"
+      - name: "mongo-col-stats"
+      - name: "mongo-db-stats"
+    clickhouseTables:
+      - "vmetrics_mongo_metrics_performance_metrics"
+      - "vmetrics_mongo_top_stats_performance_metrics"
+      - "vmetrics_mongo_shard_stats_performance_metrics"
+      - "vmetrics_mongo_col_stats_performance_metrics"
+      - "vmetrics_mongo_db_stats_performance_metrics"
+
+  - name: "MSSQL"
+    inputTopic:
+      - name: "mssql-telegraf"
+    outputTopic:
+      - name: "mssql-memory-clerks"
+      - name: "mssql-database-io"
+      - name: "mssql-net-response"
+      - name: "mssql-hadr-replica"
+      - name: "mssql-schedulers"
+      - name: "mssql-requests"
+      - name: "mssql-server-properties"
+      - name: "mssql-performance"
+      - name: "mssql-hadr-dbreplica"
+      - name: "mssql-session"
+      - name: "mssql-telegraf-health"
+      - name: "mssql-volume-space"
+      - name: "mssql-cpu"
+      - name: "mssql-waitstats"
+      - name: "mssql-cluster"
+      - name: "mssql-recentbackup"
+    clickhouseTables:
+      - "vmetrics_mssql_monitor_memory_clerks"
+      - "vmetrics_mssql_monitor_IO_statistics"
+      - "vmetrics_mssql_monitor_net_response"
+      - "vmetrics_mssql_monitor_hadr_replica_states"
+      - "vmetrics_mssql_monitor_server_schedulers"
+      - "vmetrics_mssql_monitor_server_requests"
+      - "vmetrics_mssql_monitor_server_properties"
+      - "vmetrics_mssql_monitor_server_performance"
+      - "vmetrics_mssql_monitor_hadr_dbreplica_states"
+      - "vmetrics_mssql_monitor_sql_session"
+      - "vmetrics_mssql_monitor_telegraf_health"
+      - "vmetrics_mssql_monitor_server_volume_space"
+      - "vmetrics_mssql_monitor_server_cpu"
+      - "vmetrics_mssql_monitor_server_waitstats"
+      - "vmetrics_mssql_monitor_cluster"
+      - "vmetrics_mssql_monitor_server_recent_backup"
+
+  - name: "Apache"
+    inputTopic:
+      - name: "apache-logs-input"
+      - name: "apache-metrics-input"
+    outputTopic:
+      - name: "apache-logs"
+      - name: "apache-metrics"
+    clickhouseTables:
+      - "vlogs_apachelogs"
+      - "vmetrics_apachemetrics"
+
+  - name: "Linux Monitor"
+    inputTopic:
+      - name: "linux-monitor-input"
+    outputTopic:
+      - name: "linux-monitor-additional-metrics"
+      - name: "linux-monitor-process-metrics"
+      - name: "linux-monitor-resource-metrics"
+      - name: "linux-monitor-storage-metrics"
+    clickhouseTables:
+      - "vmetrics_linux_monitor_additional_metrics"
+      - "vmetrics_linux_monitor_process_metrics"
+      - "vmetrics_linux_monitor_resource_metrics"
+      - "vmetrics_linux_monitor_storage_metrics"

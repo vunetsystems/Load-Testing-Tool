@@ -4,7 +4,7 @@ class BinaryControl {
         this.manager = manager;
     }
 
-    openBinaryControlModal() {
+    async openBinaryControlModal() {
         console.log('Opening binary control modal');
         const modal = this.manager.elements.binaryControlModal;
 
@@ -14,7 +14,22 @@ class BinaryControl {
         }
 
         modal.classList.remove('hidden');
-        this.populateBinaryNodeSelect();
+
+        // Clear previous SSH output and add opening message
+        const sshOutput = this.manager.elements.binarySshOutput;
+        if (sshOutput) {
+            sshOutput.innerHTML = '';
+            this.addSshOutput('=== Binary Control Modal Opened ===');
+            this.addSshOutput('Loading nodes for selection...');
+        }
+
+        try {
+            await this.populateBinaryNodeSelect();
+        } catch (error) {
+            console.error('Error in populateBinaryNodeSelect:', error);
+            this.addSshOutput(`✗ ERROR in populateBinaryNodeSelect: ${error.message}`);
+        }
+
         this.refreshAllBinaryStatuses();
     }
 
@@ -31,33 +46,105 @@ class BinaryControl {
         this.clearBinaryForm();
     }
 
-    populateBinaryNodeSelect() {
+    async populateBinaryNodeSelect() {
+        console.log('populateBinaryNodeSelect called');
+        this.addSshOutput('populateBinaryNodeSelect function started');
+
         const nodeSelect = this.manager.elements.binaryNodeSelect;
-        if (!nodeSelect) return;
+        if (!nodeSelect) {
+            console.error('Binary node select element not found!');
+            this.addSshOutput('✗ ERROR: Binary node select element not found!');
+            return;
+        }
+        this.addSshOutput('✓ Found binary node select element');
 
         console.log('Populating binary node select with nodeData:', this.manager.nodeData);
 
         // Clear existing options except the first one
+        const initialCount = nodeSelect.children.length;
         while (nodeSelect.children.length > 1) {
             nodeSelect.removeChild(nodeSelect.lastChild);
         }
+        this.addSshOutput(`Cleared ${initialCount - 1} existing options from dropdown`);
 
-        // Add enabled nodes (both active and error status nodes are enabled)
+        let nodesData = [];
+
+        // If nodeData is empty or not populated, load from API
+        if (!this.manager.nodeData || Object.keys(this.manager.nodeData).length === 0) {
+            console.log('nodeData is empty, loading nodes from API...');
+            this.addSshOutput('nodeData is empty, loading nodes from API...');
+            try {
+                this.addSshOutput('Calling /api/nodes endpoint...');
+                const response = await this.manager.callAPI('/api/nodes');
+                console.log('API Response:', response);
+                this.addSshOutput(`API response received: ${JSON.stringify(response)}`);
+
+                if (response.success && response.data) {
+                    nodesData = response.data;
+                    console.log('Loaded nodes from API:', nodesData);
+                    this.addSshOutput(`✓ API returned ${nodesData.length} nodes`);
+                    this.addSshOutput(`Raw API data: ${JSON.stringify(nodesData)}`);
+                } else {
+                    console.error('Failed to load nodes from API:', response);
+                    this.addSshOutput(`✗ ERROR: API failed - ${response.message || 'Unknown error'}`);
+                    return;
+                }
+            } catch (error) {
+                console.error('Error loading nodes from API:', error);
+                this.addSshOutput(`✗ ERROR: ${error.message}`);
+                return;
+            }
+        } else {
+            // Convert nodeData format to API format for consistency
+            nodesData = Object.keys(this.manager.nodeData).map(nodeId => {
+                const node = this.manager.nodeData[nodeId];
+                return {
+                    name: nodeId,
+                    host: node.host || '',
+                    enabled: node.status === 'active' || node.status === 'error'
+                };
+            });
+            this.addSshOutput(`Using existing nodeData with ${nodesData.length} nodes`);
+        }
+
+        // Add enabled nodes
         let addedNodes = 0;
-        Object.keys(this.manager.nodeData).forEach(nodeId => {
-            const node = this.manager.nodeData[nodeId];
-            console.log(`Checking node ${nodeId}: status=${node.status}, enabled=${node.status !== 'inactive'}`);
-            if (node.status === 'active' || node.status === 'error') {
+        this.addSshOutput(`Processing ${nodesData.length} nodes for dropdown...`);
+        nodesData.forEach((node, index) => {
+            console.log(`Node ${index + 1}:`, node);
+            this.addSshOutput(`Node ${index + 1}: ${JSON.stringify(node)}`);
+            console.log(`Checking node ${node.name}: enabled=${node.enabled}`);
+            if (node.enabled) {
                 const option = document.createElement('option');
-                option.value = nodeId;
-                option.textContent = nodeId;
+                option.value = node.name;
+                option.textContent = node.name;
                 nodeSelect.appendChild(option);
                 addedNodes++;
-                console.log(`Added node ${nodeId} to binary select`);
+                console.log(`Added node ${node.name} to binary select`);
+                this.addSshOutput(`✓ Added enabled node: ${node.name}`);
+            } else {
+                this.addSshOutput(`- Skipped disabled node: ${node.name}`);
             }
         });
 
         console.log(`Total nodes added to binary select: ${addedNodes}`);
+        this.addSshOutput(`Total nodes added to binary select: ${addedNodes}`);
+
+        // Final debug output
+        this.addSshOutput(`=== FINAL DEBUG SUMMARY ===`);
+        this.addSshOutput(`Total nodes processed: ${nodesData.length}`);
+        this.addSshOutput(`Enabled nodes added: ${addedNodes}`);
+        this.addSshOutput(`Dropdown options count: ${nodeSelect.children.length}`);
+
+        if (addedNodes === 0) {
+            this.addSshOutput('⚠ WARNING: No enabled nodes found!');
+            this.addSshOutput('This means either:');
+            this.addSshOutput('1. No nodes are configured');
+            this.addSshOutput('2. All nodes are disabled');
+            this.addSshOutput('3. Node data format is incorrect');
+        } else {
+            this.addSshOutput(`✓ Successfully loaded ${addedNodes} nodes for selection`);
+        }
     }
 
     async refreshAllBinaryStatuses() {
