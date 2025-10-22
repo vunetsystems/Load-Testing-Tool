@@ -11,8 +11,30 @@ import (
 )
 
 func GetDashboardData(w http.ResponseWriter, r *http.Request) {
-	AppState.Mutex.RLock()
-	defer AppState.Mutex.RUnlock()
+	AppState.Mutex.Lock()
+	defer AppState.Mutex.Unlock()
+
+	// Populate AppState.NodeData with current node information from NodeManager
+	nodes := NodeManager.GetNodes()
+	AppState.NodeData = make(map[string]*node_control.NodeMetrics)
+
+	for name, config := range nodes {
+		AppState.NodeData[name] = &node_control.NodeMetrics{
+			NodeID:     name,
+			Status:     "active",
+			EPS:        0,
+			KafkaLoad:  0,
+			CHLoad:     0,
+			CPU:        0,
+			Memory:     0,
+			TotalCPU:   8.0,
+			TotalMemory: 8.0,
+			LastUpdate: time.Now(),
+		}
+		if !config.Enabled {
+			AppState.NodeData[name].Status = "inactive"
+		}
+	}
 
 	response := APIResponse{
 		Success: true,

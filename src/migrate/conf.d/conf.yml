@@ -28,11 +28,11 @@ include_module_dirs:
   K8s:
     enabled: false
   LinuxMonitor:
-    enabled: true
+    enabled: false
   MongoDB:
     enabled: false
   Mssql:
-    enabled: false
+    enabled: true
   Nginx:
     enabled: false
   ServiceMonitor:

@@ -15,11 +15,14 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function initializeMonitoring() {
-    console.log('Initializing monitoring dashboard...');
+    console.log('initializeMonitoring: Starting monitoring dashboard initialization...');
 
     // Initialize the real-time updates manager
+    console.log('initializeMonitoring: Creating RealtimeUpdatesManager...');
     realtimeManager = new RealtimeUpdatesManager();
+    console.log('initializeMonitoring: RealtimeUpdatesManager created, calling initialize...');
     await realtimeManager.initialize();
+    console.log('initializeMonitoring: RealtimeUpdatesManager initialized');
 
     // Update last update timestamp
     updateLastUpdateTime();
@@ -30,7 +33,7 @@ async function initializeMonitoring() {
     // Initialize any charts or visualizations
     initializeCharts();
 
-    console.log('Monitoring dashboard initialized');
+    console.log('initializeMonitoring: Monitoring dashboard initialized successfully');
 }
 
 function setupNavigation() {
@@ -99,6 +102,7 @@ function updatePageTitle(sectionName) {
         const titles = {
             'overview': 'Monitoring Overview',
             'performance': 'Kafka Metrics',
+            'pod-metrics': 'Pod Metrics',
             'system': 'System Health',
             'logs': 'Log Analysis',
             'alerts': 'Alerts & Notifications'
@@ -156,6 +160,9 @@ async function refreshAllData() {
     }
     if (window.kafkaManager) {
         await window.kafkaManager.refresh();
+    }
+    if (window.podMetricsManager) {
+        await window.podMetricsManager.refresh();
     }
     if (window.systemHealthManager) {
         await window.systemHealthManager.refresh();
@@ -226,18 +233,33 @@ function showPerformanceTab(tabName) {
 
     // Trigger specific data loading for the selected tab
     if (realtimeManager) {
+        console.log('showPerformanceTab: Switching to tab:', tabName);
+        console.log('showPerformanceTab: realtimeManager available:', !!realtimeManager);
+
         switch (tabName) {
             case 'kafka':
+                console.log('showPerformanceTab: Refreshing kafka manager');
                 if (realtimeManager.kafkaManager) {
                     realtimeManager.kafkaManager.refresh();
                 }
                 break;
+            case 'pod':
+                console.log('showPerformanceTab: Refreshing pod metrics manager');
+                console.log('showPerformanceTab: podMetricsManager available:', !!realtimeManager.podMetricsManager);
+                if (realtimeManager.podMetricsManager) {
+                    realtimeManager.podMetricsManager.refresh();
+                } else {
+                    console.error('showPerformanceTab: podMetricsManager not available');
+                }
+                break;
             case 'cluster':
+                console.log('showPerformanceTab: Refreshing cluster manager');
                 if (realtimeManager.clusterManager) {
                     realtimeManager.clusterManager.refresh();
                 }
                 break;
             case 'system':
+                console.log('showPerformanceTab: Refreshing system health manager');
                 if (realtimeManager.systemHealthManager) {
                     realtimeManager.systemHealthManager.refresh();
                 }

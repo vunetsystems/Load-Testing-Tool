@@ -18,11 +18,8 @@ echo "======================================="
 declare -a scripts=(
  # "/home/vunet/k6_final/k6_dashboard_name/traces/overall-1.sh 15m 1 1 10"
   "/home/vunet/k6_final/k6_dashboard_name/linux-mssql-dashboard/overall-1.sh 6h 5 5 10"
-  "/home/vunet/k6_final/k6_dashboard_name/linux-mssql-dashboard/overall-1.sh 6h 10 10 10"
-  "/home/vunet/k6_final/k6_dashboard_name/linux-mssql-dashboard/overall-1.sh 6h 25 25 10"
-  "/home/vunet/k6_final/k6_dashboard_name/linux-mssql-dashboard/overall-1.sh 6h 50 50 10"
-#  "/home/vunet/k6_final/k6_dashboard_name/login/overall.sh 5 5 10"
-#  "/home/vunet/k6_final/k6_dashboard_name/reports/overall.sh 1 1 10"
+  "/home/vunet/k6_final/k6_dashboard_name/login/overall.sh 5 5 10"
+  "/home/vunet/k6_final/k6_dashboard_name/reports/overall.sh 1 1 10"
 #  "/home/vunet/k6_final/k6_dashboard_name/log_analytics/overall-1.sh 1 1 15m"
 )
 

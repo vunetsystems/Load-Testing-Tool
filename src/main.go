@@ -134,6 +134,9 @@ func main() {
 	api.HandleFunc("/clickhouse/kafka-topics", handlers.HandleAPIGetKafkaTopicMetrics).Methods("GET")
 	api.HandleFunc("/clickhouse/pod-metrics", handlers.HandleAPIGetPodMetrics).Methods("GET")
 
+	// Kubernetes API endpoints
+	api.HandleFunc("/kubernetes/pods", handlers.HandleAPIGetKubernetesPods).Methods("GET")
+
 	// Kafka and ClickHouse Reset API endpoints
 	api.HandleFunc("/kafka/topics", kafkaHandler.GetTopics).Methods("GET")
 	api.HandleFunc("/kafka/recreate", kafkaHandler.RecreateTopicsForO11ySources).Methods("POST")
@@ -142,6 +145,7 @@ func main() {
 	api.HandleFunc("/kafka/delete/{topic}", kafkaHandler.DeleteTopic).Methods("DELETE")
 	api.HandleFunc("/kafka/create", kafkaHandler.CreateTopic).Methods("POST")
 	api.HandleFunc("/clickhouse/truncate", kafkaHandler.TruncateClickHouseTables).Methods("POST")
+	api.HandleFunc("/clickhouse/tables", kafkaHandler.GetClickHouseTableNames).Methods("GET")
 
 	// K6 Load Testing API endpoints
 	api.HandleFunc("/k6/config", handlers.HandleAPIGetK6Config).Methods("GET")
