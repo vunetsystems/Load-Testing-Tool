@@ -4,6 +4,27 @@ class O11ySources {
         this.manager = manager;
         this.o11ySources = [];
         this.selectedO11ySources = [];
+        this.currentMode = 'custom'; // 'custom' or 'category'
+        this.selectedCategory = null;
+
+        // Define category mappings
+        this.categories = {
+            category1: {
+                name: 'Category 1 (Azure Services)',
+                sources: ['Azure_Firewall', 'Azure_Redis_Cache'],
+                description: 'Azure Firewall and Azure Redis Cache monitoring'
+            },
+            category2: {
+                name: 'Category 2 (Web & Database)',
+                sources: ['Apache', 'MongoDB'],
+                description: 'Apache web server and MongoDB database monitoring'
+            },
+            category3: {
+                name: 'Category 3 (System & Database)',
+                sources: ['LinuxMonitor', 'Mssql'],
+                description: 'Linux system monitoring and Microsoft SQL Server'
+            }
+        };
     }
 
     loadO11ySources() {
@@ -14,6 +35,7 @@ class O11ySources {
                 if (response.success && response.data) {
                     console.log('Sources data:', response.data);
                     this.populateO11ySourcesSelect(response.data);
+                    this.initializeModeSwitching();
                     console.log('Loaded o11y sources:', response.data.length, 'sources');
                 } else {
                     console.error('Failed to load o11y sources:', response.message);
@@ -390,5 +412,151 @@ class O11ySources {
         this.updateO11ySourceDisplay();
         this.updateO11ySourceCheckboxes();
         this.updateO11ySourceCount();
+    }
+
+    // Category-based selection methods
+
+    initializeModeSwitching() {
+        const modeSelect = this.manager.elements.o11ySourceMode;
+        const categoryModeDiv = this.manager.elements.o11yCategoryMode;
+        const categorySelect = this.manager.elements.o11yCategorySelect;
+
+        if (!modeSelect || !categoryModeDiv || !categorySelect) {
+            console.error('Mode switching elements not found');
+            return;
+        }
+
+        // Set up mode change handler
+        modeSelect.addEventListener('change', (e) => {
+            this.switchMode(e.target.value);
+        });
+
+        // Set up category selection handler
+        categorySelect.addEventListener('change', (e) => {
+            this.selectCategory(e.target.value);
+        });
+
+        // Initialize to custom mode
+        this.switchMode('custom');
+    }
+
+    switchMode(mode) {
+        console.log('Switching mode to:', mode);
+        this.currentMode = mode;
+
+        const modeSelect = this.manager.elements.o11ySourceMode;
+        const categoryModeDiv = this.manager.elements.o11yCategoryMode;
+        const customModeDiv = this.manager.elements.o11ySourcesContainer;
+
+        if (mode === 'category') {
+            // Show category mode, hide custom mode
+            categoryModeDiv.classList.remove('hidden');
+            customModeDiv.classList.add('hidden');
+            modeSelect.value = 'category';
+
+            // Clear custom selections when switching to category mode
+            this.clearAllO11ySources();
+        } else {
+            // Show custom mode, hide category mode
+            categoryModeDiv.classList.add('hidden');
+            customModeDiv.classList.remove('hidden');
+            modeSelect.value = 'custom';
+
+            // Clear category selection when switching to custom mode
+            this.deselectCategory();
+        }
+    }
+
+    initializeCategoryHandlers() {
+        // Add click handlers to category options
+        Object.keys(this.categories).forEach(categoryKey => {
+            const categoryElement = document.getElementById(categoryKey);
+            if (categoryElement) {
+                categoryElement.addEventListener('click', () => {
+                    this.selectCategory(categoryKey);
+                });
+            }
+        });
+    }
+
+    selectCategory(categoryKey) {
+        console.log('Selecting category:', categoryKey);
+
+        if (!categoryKey || !this.categories[categoryKey]) {
+            this.deselectCategory();
+            return;
+        }
+
+        this.selectedCategory = categoryKey;
+        const category = this.categories[categoryKey];
+
+        // Update selected category info display
+        this.updateSelectedCategoryInfo(category);
+
+        // Select the corresponding o11y sources
+        this.selectSourcesForCategory(category.sources);
+    }
+
+    updateSelectedCategoryInfo(category) {
+        const infoElement = this.manager.elements.selectedCategoryInfo;
+        const nameElement = this.manager.elements.selectedCategoryName;
+        const sourcesElement = this.manager.elements.selectedCategorySources;
+
+        if (infoElement && nameElement && sourcesElement) {
+            nameElement.textContent = category.name;
+            sourcesElement.textContent = category.sources.join(', ');
+            infoElement.classList.remove('hidden');
+        }
+    }
+
+    deselectCategory() {
+        console.log('Deselecting category');
+        this.selectedCategory = null;
+
+        // Reset category dropdown
+        const categorySelect = this.manager.elements.o11yCategorySelect;
+        if (categorySelect) {
+            categorySelect.value = '';
+        }
+
+        // Clear selections
+        this.clearAllO11ySources();
+
+        // Hide selected category info
+        const infoElement = this.manager.elements.selectedCategoryInfo;
+        if (infoElement) {
+            infoElement.classList.add('hidden');
+        }
+    }
+
+    selectSourcesForCategory(sourceNames) {
+        console.log('Selecting sources for category:', sourceNames);
+
+        // Clear existing selections
+        this.selectedO11ySources = [];
+
+        // Select sources that exist in our available sources
+        sourceNames.forEach(sourceName => {
+            if (this.o11ySources.includes(sourceName)) {
+                this.selectedO11ySources.push(sourceName);
+            } else {
+                console.warn(`Source ${sourceName} not found in available sources`);
+            }
+        });
+
+        // Update UI
+        this.updateO11ySourceDisplay();
+        this.updateO11ySourceCheckboxes();
+        this.updateO11ySourceCount();
+
+        console.log(`Selected ${this.selectedO11ySources.length} sources for category`);
+    }
+
+    getSelectedCategory() {
+        return this.selectedCategory;
+    }
+
+    getCurrentMode() {
+        return this.currentMode;
     }
 }

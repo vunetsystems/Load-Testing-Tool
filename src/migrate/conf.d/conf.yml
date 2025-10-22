@@ -4,7 +4,7 @@ include_module_dirs:
   AWS_ALB:
     enabled: false
   Apache:
-    enabled: false
+    enabled: true
   Azure_API_Management:
     enabled: false
   Azure_App_Gateway:
@@ -30,9 +30,9 @@ include_module_dirs:
   LinuxMonitor:
     enabled: false
   MongoDB:
-    enabled: false
-  Mssql:
     enabled: true
+  Mssql:
+    enabled: false
   Nginx:
     enabled: false
   ServiceMonitor:
