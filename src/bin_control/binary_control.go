@@ -457,7 +457,7 @@ func (bc *BinaryControl) GetBinaryStatus(nodeName string) (*BinaryStatus, error)
 		}, nil
 	}
 
-	output, err := bc.sshExecWithOutput(node, "pgrep -f finalvudatasim")
+	output, err := bc.sshExecWithOutput(node, "pgrep -f './finalvudatasim'")
 	if err != nil || output == "" {
 		return &BinaryStatus{
 			NodeName:    nodeName,
@@ -482,7 +482,7 @@ func (bc *BinaryControl) GetBinaryStatus(nodeName string) (*BinaryStatus, error)
 		startTime = "Unknown"
 	}
 
-	processInfo, err := bc.sshExecWithOutput(node, fmt.Sprintf("ps -p %d -o pid,ppid,pcpu,pmem,etime,comm", pid))
+	processInfo, err := bc.sshExecWithOutput(node, fmt.Sprintf("ps -p %d -o pid,ppid,pcpu,pmem,etime,cmd", pid))
 	if err != nil {
 		processInfo = fmt.Sprintf("PID: %d", pid)
 	}

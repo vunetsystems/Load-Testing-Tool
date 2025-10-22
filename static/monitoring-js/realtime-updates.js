@@ -4,6 +4,7 @@ class RealtimeUpdatesManager {
     constructor() {
         this.clusterManager = null;
         this.kafkaManager = null;
+        this.podMetricsManager = null;
         this.systemHealthManager = null;
         this.isInitialized = false;
         this.updateInterval = 30000; // 30 seconds
@@ -18,16 +19,22 @@ class RealtimeUpdatesManager {
 
         try {
             // Initialize managers
+            console.log('RealtimeUpdatesManager: Initializing managers...');
             this.clusterManager = new ClusterMetricsManager();
             this.kafkaManager = new KafkaMetricsManager();
+            this.podMetricsManager = new PodMetricsManager();
             this.systemHealthManager = new SystemHealthManager();
+            console.log('RealtimeUpdatesManager: Managers created');
 
             // Initialize each manager
+            console.log('RealtimeUpdatesManager: Starting manager initialization...');
             await Promise.all([
                 this.clusterManager.initialize(),
                 this.kafkaManager.initialize(),
+                this.podMetricsManager.initialize(),
                 this.systemHealthManager.initialize()
             ]);
+            console.log('RealtimeUpdatesManager: All managers initialized successfully');
 
             this.isInitialized = true;
             this.lastUpdate = new Date();
@@ -56,6 +63,7 @@ class RealtimeUpdatesManager {
             await Promise.all([
                 this.clusterManager.refresh(),
                 this.kafkaManager.refresh(),
+                this.podMetricsManager.refresh(),
                 this.systemHealthManager.refresh()
             ]);
 
@@ -84,6 +92,7 @@ class RealtimeUpdatesManager {
             managers: {
                 cluster: this.clusterManager ? this.clusterManager.getMetrics() : null,
                 kafka: this.kafkaManager ? this.kafkaManager.getMetrics() : null,
+                pod: this.podMetricsManager ? this.podMetricsManager.getMetrics() : null,
                 systemHealth: this.systemHealthManager ? this.systemHealthManager.getHealthData() : null
             }
         };
@@ -106,16 +115,31 @@ class RealtimeUpdatesManager {
         if (!this.isInitialized) return;
 
         // Update data when switching to a section
+        console.log('RealtimeUpdatesManager: Section changed to:', sectionName);
+        console.log('RealtimeUpdatesManager: podMetricsManager available:', !!this.podMetricsManager);
+
         switch (sectionName) {
             case 'overview':
+                console.log('RealtimeUpdatesManager: Refreshing cluster manager for overview');
                 // Overview uses cluster metrics
                 this.clusterManager.refresh();
                 break;
             case 'performance':
+                console.log('RealtimeUpdatesManager: Refreshing kafka manager for performance');
                 // Performance section uses Kafka metrics
                 this.kafkaManager.refresh();
                 break;
+            case 'pod-metrics':
+                console.log('RealtimeUpdatesManager: Refreshing pod metrics manager');
+                // Pod metrics section uses pod metrics
+                if (this.podMetricsManager) {
+                    this.podMetricsManager.refresh();
+                } else {
+                    console.error('RealtimeUpdatesManager: podMetricsManager not available for refresh');
+                }
+                break;
             case 'system':
+                console.log('RealtimeUpdatesManager: Refreshing system health manager');
                 // System section uses system health and pod metrics
                 this.systemHealthManager.refresh();
                 break;

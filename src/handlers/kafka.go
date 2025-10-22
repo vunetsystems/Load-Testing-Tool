@@ -312,7 +312,7 @@ func (kh *KafkaHandler) RecreateTopicsForO11ySources(w http.ResponseWriter, r *h
 	}
 }
 
-// TruncateClickHouseTables handles POST /api/clickhouse/truncate - truncates ClickHouse tables
+// TruncateClickHouseTables handles POST /api/clickhouse/truncate - truncates ClickHouse tables for enabled o11y sources
 func (kh *KafkaHandler) TruncateClickHouseTables(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		sendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
@@ -322,21 +322,72 @@ func (kh *KafkaHandler) TruncateClickHouseTables(w http.ResponseWriter, r *http.
 		return
 	}
 
-	// Placeholder for ClickHouse table truncation logic
-	// This will be implemented later as requested by the user
+	logger.Info().Msg("Starting ClickHouse table truncation for enabled o11y sources")
 
-	logger.Info().Msg("ClickHouse table truncation requested (placeholder implementation)")
+	result, err := kh.kafkaManager.TruncateClickHouseTablesForO11ySources()
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to truncate ClickHouse tables for enabled o11y sources")
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to truncate ClickHouse tables: %v", err),
+			Data:    result,
+		})
+		return
+	}
 
-	result := map[string]interface{}{
-		"message": "ClickHouse table truncation not yet implemented",
-		"status":  "pending",
-		"tables": getAllTableNames(kh.kafkaManager),
+	success := result["success"].(bool)
+	truncatedTables := result["truncated_tables"].([]string)
+	totalTruncated := len(truncatedTables)
+	totalErrors := len(result["errors"].([]string))
+
+	if success && totalErrors == 0 {
+		logger.Info().Int("truncated", totalTruncated).Msg("Successfully completed ClickHouse table truncation")
+		sendJSONResponse(w, http.StatusOK, APIResponse{
+			Success: true,
+			Message: fmt.Sprintf("Successfully truncated %d ClickHouse tables for enabled o11y sources", totalTruncated),
+			Data:    result,
+		})
+	} else if totalTruncated > 0 {
+		logger.Warn().Int("truncated", totalTruncated).Int("errors", totalErrors).Msg("ClickHouse table truncation completed with some errors")
+		sendJSONResponse(w, http.StatusPartialContent, APIResponse{
+			Success: true,
+			Message: fmt.Sprintf("Truncated %d ClickHouse tables with %d errors", totalTruncated, totalErrors),
+			Data:    result,
+		})
+	} else {
+		logger.Error().Int("errors", totalErrors).Msg("Failed to truncate any ClickHouse tables")
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to truncate ClickHouse tables: %d errors occurred", totalErrors),
+			Data:    result,
+		})
+	}
+}
+
+// GetClickHouseTableNames handles GET /api/clickhouse/tables - returns table names for enabled o11y sources
+func (kh *KafkaHandler) GetClickHouseTableNames(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		sendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
+			Success: false,
+			Message: "Method not allowed",
+		})
+		return
+	}
+
+	tableResult, err := kh.kafkaManager.GetTableNamesForO11ySources()
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to get ClickHouse table names for enabled o11y sources")
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to get ClickHouse table names: %v", err),
+		})
+		return
 	}
 
 	sendJSONResponse(w, http.StatusOK, APIResponse{
 		Success: true,
-		Message: "ClickHouse truncation request received (implementation pending)",
-		Data:    result,
+		Message: "ClickHouse table names retrieved successfully for enabled o11y sources",
+		Data:    tableResult,
 	})
 }
 

@@ -13,6 +13,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
     <link rel="stylesheet" href="/static/styles.css">
+    <!-- ECharts library -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -87,6 +89,10 @@
                         <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-subtle-light dark:border-subtle-dark text-text-secondary-light dark:text-text-secondary-dark font-medium transition-colors hover:bg-subtle-light dark:hover:bg-subtle-dark" data-section="performance">
                             <span class="material-symbols-outlined text-sm mr-2">speed</span>
                             Kafka Metrics
+                        </button>
+                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-subtle-light dark:border-subtle-dark text-text-secondary-light dark:text-text-secondary-dark font-medium transition-colors hover:bg-subtle-light dark:hover:bg-subtle-dark" data-section="pod-metrics">
+                            <span class="material-symbols-outlined text-sm mr-2">apps</span>
+                            Pod Metrics
                         </button>
                         <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-subtle-light dark:border-subtle-dark text-text-secondary-light dark:text-text-secondary-dark font-medium transition-colors hover:bg-subtle-light dark:hover:bg-subtle-dark" data-section="system">
                             <span class="material-symbols-outlined text-sm mr-2">memory</span>
@@ -319,6 +325,10 @@
                                 <span class="material-symbols-outlined text-sm mr-2">speed</span>
                                 Kafka Metrics
                             </button>
+                            <button class="performance-tab py-4 px-1 border-b-2 border-transparent text-text-secondary-light dark:text-text-secondary-dark hover:text-text-light dark:hover:text-text-dark font-medium text-sm" data-tab="pod">
+                                <span class="material-symbols-outlined text-sm mr-2">apps</span>
+                                Pod Metrics
+                            </button>
                             <button class="performance-tab py-4 px-1 border-b-2 border-transparent text-text-secondary-light dark:text-text-secondary-dark hover:text-text-light dark:hover:text-text-dark font-medium text-sm" data-tab="cluster">
                                 <span class="material-symbols-outlined text-sm mr-2">hub</span>
                                 Cluster Metrics
@@ -376,9 +386,184 @@
                             <!-- Kafka topic cards will be populated here -->
                         </div>
 
+                        <!-- Kafka Charts Section -->
+                        <div class="kafka-charts-section grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            <!-- Message Rate Trend Chart -->
+                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-semibold">Message Rate Trends</h3>
+                                    <div class="flex gap-2">
+                                        <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-primary/20 text-primary dark:bg-primary-dark/20 dark:text-primary-dark" data-chart="trend" data-type="line">Line</button>
+                                        <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark" data-chart="trend" data-type="area">Area</button>
+                                    </div>
+                                </div>
+                                <div id="kafka-trend-chart" class="h-64"></div>
+                            </div>
+
+                            <!-- Topic Comparison Chart -->
+                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-semibold">Topic Comparison</h3>
+                                    <div class="flex gap-2">
+                                        <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-primary/20 text-primary dark:bg-primary-dark/20 dark:text-primary-dark" data-chart="comparison" data-type="bar">Bar</button>
+                                        <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark" data-chart="comparison" data-type="horizontalBar">Horizontal</button>
+                                    </div>
+                                </div>
+                                <div id="kafka-comparison-chart" class="h-64"></div>
+                            </div>
+                        </div>
+
+                        <!-- Topic Distribution Chart -->
+                        <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold">Topic Distribution</h3>
+                                <div class="flex gap-2">
+                                    <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-primary/20 text-primary dark:bg-primary-dark/20 dark:text-primary-dark" data-chart="distribution" data-type="pie">Pie</button>
+                                    <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark" data-chart="distribution" data-type="doughnut">Doughnut</button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div id="kafka-distribution-chart" class="h-64"></div>
+                                <div class="kafka-topics-legend flex flex-col justify-center">
+                                    <!-- Legend will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Kafka Metrics Table -->
                         <div class="kafka-metrics-table rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md overflow-hidden">
                             <!-- Kafka metrics table will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Pod Metrics Tab -->
+                    <div id="pod-tab" class="performance-tab-content hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Total Pods</p>
+                                        <p class="text-2xl font-bold mt-2" id="pod-total-pods">-</p>
+                                    </div>
+                                    <span class="material-symbols-outlined text-primary dark:text-primary-dark text-3xl">apps</span>
+                                </div>
+                            </div>
+                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Running Pods</p>
+                                        <p class="text-2xl font-bold mt-2" id="pod-running-pods">-</p>
+                                    </div>
+                                    <span class="material-symbols-outlined text-success dark:text-success-dark text-3xl">check_circle</span>
+                                </div>
+                            </div>
+                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Failed Pods</p>
+                                        <p class="text-2xl font-bold mt-2" id="pod-failed-pods">-</p>
+                                    </div>
+                                    <span class="material-symbols-outlined text-warning dark:text-warning-dark text-3xl">error</span>
+                                </div>
+                            </div>
+                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Avg CPU Usage</p>
+                                        <p class="text-2xl font-bold mt-2" id="pod-avg-cpu">-</p>
+                                    </div>
+                                    <span class="material-symbols-outlined text-info dark:text-info-dark text-3xl">memory</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pod Resource Metrics -->
+                        <div class="pod-resource-metrics mb-8">
+                            <h3 class="text-xl font-semibold mb-4">Pod Resource Utilization</h3>
+                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md overflow-hidden">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
+                                        <tr>
+                                            <th class="p-4 font-semibold">Pod Name</th>
+                                            <th class="p-4 font-semibold">CPU Usage</th>
+                                            <th class="p-4 font-semibold">Memory Usage</th>
+                                            <th class="p-4 font-semibold">Last Update</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pod-resource-body" class="divide-y divide-subtle-light dark:divide-subtle-dark">
+                                        <!-- Pod resource data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Pod Status Metrics -->
+                        <div class="pod-status-metrics mb-8">
+                            <h3 class="text-xl font-semibold mb-4">Pod Status Overview</h3>
+                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md overflow-hidden">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
+                                        <tr>
+                                            <th class="p-4 font-semibold">Pod Name</th>
+                                            <th class="p-4 font-semibold">Node</th>
+                                            <th class="p-4 font-semibold">Phase</th>
+                                            <th class="p-4 font-semibold">Status</th>
+                                            <th class="p-4 font-semibold">Running Containers</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pod-status-body" class="divide-y divide-subtle-light dark:divide-subtle-dark">
+                                        <!-- Pod status data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Top Memory Pods -->
+                        <div class="top-memory-pods mb-8">
+                            <h3 class="text-xl font-semibold mb-4">Top Memory Usage by Pod</h3>
+                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md overflow-hidden">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
+                                        <tr>
+                                            <th class="p-4 font-semibold">Node</th>
+                                            <th class="p-4 font-semibold">Pod Name</th>
+                                            <th class="p-4 font-semibold">Memory Usage</th>
+                                            <th class="p-4 font-semibold">Last Update</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="top-memory-body" class="divide-y divide-subtle-light dark:divide-subtle-dark">
+                                        <!-- Top memory data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Kubernetes Pods Overview -->
+                        <div class="kubernetes-pods-overview">
+                            <h3 class="text-xl font-semibold mb-4">Kubernetes Pods Overview</h3>
+                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md overflow-hidden">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
+                                        <tr>
+                                            <th class="p-4 font-semibold">Namespace</th>
+                                            <th class="p-4 font-semibold">Name</th>
+                                            <th class="p-4 font-semibold">Node</th>
+                                            <th class="p-4 font-semibold">Ready</th>
+                                            <th class="p-4 font-semibold">Status</th>
+                                            <th class="p-4 font-semibold">CPU</th>
+                                            <th class="p-4 font-semibold">Memory</th>
+                                            <th class="p-4 font-semibold">Restarts</th>
+                                            <th class="p-4 font-semibold">Last Restart</th>
+                                            <th class="p-4 font-semibold">IP</th>
+                                            <th class="p-4 font-semibold">QoS</th>
+                                            <th class="p-4 font-semibold">Age</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="kubernetes-pods-body" class="divide-y divide-subtle-light dark:divide-subtle-dark">
+                                        <!-- Kubernetes pods data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
@@ -539,6 +724,7 @@
     <script src="/static/monitoring-js/realtime-updates.js"></script>
     <script src="/static/monitoring-js/cluster-metrics.js"></script>
     <script src="/static/monitoring-js/kafka-metrics.js"></script>
+    <script src="/static/monitoring-js/pod-metrics.js"></script>
     <script src="/static/monitoring-js/system-health.js"></script>
     <script src="/static/monitoring-js/monitoring.js"></script>
 </body>

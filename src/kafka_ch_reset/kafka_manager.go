@@ -368,6 +368,144 @@ func (km *KafkaManager) parseTopicDescription(output string) (*TopicMetadata, er
 	return metadata, nil
 }
 
+// GetTableNamesForO11ySources returns table names for enabled o11y sources from conf.yml
+func (km *KafkaManager) GetTableNamesForO11ySources() (map[string]interface{}, error) {
+	result := map[string]interface{}{
+		"success": true,
+		"results": make(map[string][]string),
+		"errors":  make([]string, 0),
+		"processed_sources": make([]string, 0),
+	}
+
+	// Step 1: Load o11y configuration from conf.yml
+	confPath := "src/migrate/conf.d/conf.yml"
+	o11yConfig, err := km.LoadO11yConfig(confPath)
+	if err != nil {
+		result["success"] = false
+		result["errors"] = append(result["errors"].([]string), fmt.Sprintf("Failed to load o11y config: %v", err))
+		return result, err
+	}
+
+	// Step 2: Find enabled o11y sources
+	enabledSources := make([]string, 0)
+	for sourceName, sourceConfig := range o11yConfig.IncludeModuleDirs {
+		if sourceConfig.Enabled {
+			enabledSources = append(enabledSources, sourceName)
+			logger.Info().Str("source", sourceName).Msg("Found enabled o11y source")
+		}
+	}
+
+	if len(enabledSources) == 0 {
+		result["success"] = false
+		result["errors"] = append(result["errors"].([]string), "No enabled o11y sources found in conf.yml")
+		return result, fmt.Errorf("no enabled o11y sources found")
+	}
+
+	result["processed_sources"] = enabledSources
+
+	// Step 3: Collect all table names for enabled sources
+	var allTables []string
+	sourceTableMap := make(map[string][]string)
+
+	for _, sourceName := range enabledSources {
+		translatedName := km.translateSourceName(sourceName)
+		logger.Info().Str("source", sourceName).Str("translated", translatedName).Msg("Processing enabled source for table names")
+
+		// Find the topic configuration for this source
+		var sourceTopicConfig *TopicConfig
+		for _, topicConfig := range km.topics {
+			if topicConfig.Name == translatedName {
+				sourceTopicConfig = &topicConfig
+				break
+			}
+		}
+
+		if sourceTopicConfig == nil {
+			errMsg := fmt.Sprintf("No topic configuration found for source: %s (translated: %s)", sourceName, translatedName)
+			result["success"] = false
+			result["errors"] = append(result["errors"].([]string), errMsg)
+			logger.Error().Str("source", sourceName).Str("translated", translatedName).Msg("No topic configuration found")
+			continue
+		}
+
+		// Collect all ClickHouse tables for this source
+		sourceTables := sourceTopicConfig.ClickhouseTables
+		sourceTableMap[sourceName] = sourceTables
+		allTables = append(allTables, sourceTables...)
+
+		logger.Info().Str("source", sourceName).Int("table_count", len(sourceTables)).Msg("Found ClickHouse tables")
+	}
+
+	result["results"] = sourceTableMap
+	result["all_tables"] = allTables
+	result["total_tables"] = len(allTables)
+
+	logger.Info().Int("total_sources", len(enabledSources)).Int("total_tables", len(allTables)).Msg("Completed table name collection for enabled o11y sources")
+
+	return result, nil
+}
+
+// TruncateClickHouseTablesForO11ySources truncates ClickHouse tables for enabled o11y sources
+func (km *KafkaManager) TruncateClickHouseTablesForO11ySources() (map[string]interface{}, error) {
+	result := map[string]interface{}{
+		"success": true,
+		"results": make(map[string]string),
+		"errors":  make([]string, 0),
+		"processed_sources": make([]string, 0),
+		"truncated_tables": make([]string, 0),
+	}
+
+	// Step 1: Get table names for enabled o11y sources
+	tableResult, err := km.GetTableNamesForO11ySources()
+	if err != nil {
+		result["success"] = false
+		result["errors"] = append(result["errors"].([]string), fmt.Sprintf("Failed to get table names: %v", err))
+		return result, err
+	}
+
+	// Check if table collection was successful
+	if !tableResult["success"].(bool) {
+		result["success"] = false
+		result["errors"] = tableResult["errors"].([]string)
+		return result, fmt.Errorf("failed to collect table names")
+	}
+
+	sourceTableMap := tableResult["results"].(map[string][]string)
+	processedSources := tableResult["processed_sources"].([]string)
+	result["processed_sources"] = processedSources
+
+	// Step 2: Truncate each table
+	for sourceName, tables := range sourceTableMap {
+		for _, tableName := range tables {
+			logger.Info().Str("source", sourceName).Str("table", tableName).Msg("Truncating ClickHouse table")
+
+			// Execute truncate command
+			truncateCmd := fmt.Sprintf("clickhouse-client --query \"TRUNCATE TABLE vusmart.%s ON CLUSTER vusmart\"", tableName)
+			cmd := exec.Command("kubectl", "exec", "chi-clickhouse-vusmart-0-0-0", "-n", "vsmaps", "--", "bash", "-c", truncateCmd)
+
+			output, err := cmd.Output()
+			if err != nil {
+				errMsg := fmt.Sprintf("Failed to truncate table %s: %v (output: %s)", tableName, err, string(output))
+				result["success"] = false
+				result["errors"] = append(result["errors"].([]string), errMsg)
+				result["results"].(map[string]string)[tableName] = fmt.Sprintf("failed: %v", err)
+				logger.Error().Err(err).Str("table", tableName).Msg("Failed to truncate table")
+			} else {
+				result["results"].(map[string]string)[tableName] = "truncated"
+				result["truncated_tables"] = append(result["truncated_tables"].([]string), tableName)
+				logger.Info().Str("table", tableName).Msg("Table truncated successfully")
+			}
+		}
+	}
+
+	totalTruncated := len(result["truncated_tables"].([]string))
+	totalErrors := len(result["errors"].([]string))
+
+	logger.Info().Int("truncated", totalTruncated).Int("errors", totalErrors).Msg("Completed ClickHouse table truncation")
+
+	return result, nil
+}
+
 // GetTopicStatus returns the status of all topics
 func (km *KafkaManager) GetTopicStatus() (map[string]interface{}, error) {
 	result := make(map[string]interface{})

@@ -47,7 +47,6 @@ class VuDataSimManager {
         console.log('- o11ySourcesList:', document.getElementById('o11y-sources-list'));
 
         this.elements = {
-            syncBtn: document.getElementById('sync-btn'),
             logNodeFilter: document.getElementById('log-node'),
             logModuleFilter: document.getElementById('log-module'),
             logsContainer: document.getElementById('logs-container'),
@@ -152,7 +151,6 @@ class VuDataSimManager {
 
     bindEvents() {
         // Button event listeners
-        this.elements.syncBtn?.addEventListener('click', () => this.dashboard.refreshRealData());
 
         // O11y source management event listeners
         this.elements.syncConfigsBtn?.addEventListener('click', () => this.o11ySources.syncConfigs());

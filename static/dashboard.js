@@ -65,25 +65,6 @@ class DashboardManager {
         }
     }
 
-    async refreshRealData() {
-        // Show loading state
-        this.manager.elements.syncBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span><span>Refreshing...</span>';
-        this.manager.elements.syncBtn.disabled = true;
-
-        try {
-            // Refresh real data from nodes
-            await this.loadNodes();
-            this.manager.showNotification('Real node data refreshed successfully', 'success');
-        } catch (error) {
-            console.error('Error refreshing real data:', error);
-            this.manager.showNotification('Failed to refresh real data: ' + error.message, 'error');
-        } finally {
-            // Reset button state
-            this.manager.elements.syncBtn.innerHTML = '<span class="material-symbols-outlined transition-transform group-hover:rotate-180">sync</span><span>Refresh Real Data</span>';
-            this.manager.elements.syncBtn.disabled = false;
-        }
-    }
-
     async updateDashboardDisplay() {
         // Update cluster table dynamically
         const tbody = document.getElementById('cluster-table-body');

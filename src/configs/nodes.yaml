@@ -18,8 +18,8 @@ nodes:
         host: 216.48.191.10
         user: vunet
         key_path: ~/.ssh/id_rsa
-        conf_dir: /home/vunet/216.48.191.10
-        binary_dir: /home/vunet/216.48.191.10/bin
+        conf_dir: /home/vunet/oct21
+        binary_dir: /home/vunet/oct21/bin
         metrics_port: 0
-        description: /home/vunet/216.48.191.10
+        description: /home/vunet/oct21
         enabled: true
