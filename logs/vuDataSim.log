@@ -2104,3 +2104,240 @@
 {"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-22T17:05:42+05:30","message":"Failed to fetch metrics from metrics API server"}
 {"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-22T17:05:44+05:30","message":"Failed to fetch metrics from metrics API server"}
 {"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-22T17:05:45+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"info","version":"1.0.0","time":"2025-10-23T10:48:34+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-23T10:48:34+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T10:48:34+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T10:48:34+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-23T10:48:34+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T10:48:34+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-23T10:48:35+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-23T10:48:35+05:30","message":"Monitoring DB client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-23T10:48:35+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-23T10:48:35+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-23T10:48:35+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-23T10:48:35+05:30","message":"Open in browser"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:48:44+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:48:47+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:48:50+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:48:53+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:48:56+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:48:59+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:02+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:05+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:08+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T10:49:11+05:30","message":"Fetched metrics for 0 nodes"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:11+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:14+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:17+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:20+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:23+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:26+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:29+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:32+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:35+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:38+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T10:49:41+05:30","message":"Fetched metrics for 0 nodes"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:41+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:44+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:47+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:50+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:53+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:56+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:49:59+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:50:02+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:50:05+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:50:08+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:50:11+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T10:50:11+05:30","message":"Fetched metrics for 0 nodes"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:50:14+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"info","version":"1.0.0","time":"2025-10-23T10:53:35+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-23T10:53:35+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T10:53:35+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T10:53:35+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-23T10:53:35+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T10:53:35+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-23T10:53:35+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-23T10:53:35+05:30","message":"Monitoring DB client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-23T10:53:35+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-23T10:53:35+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-23T10:53:35+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-23T10:53:35+05:30","message":"Open in browser"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:35+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:38+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:41+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T10:53:41+05:30","message":"Fetched metrics for 0 nodes"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:44+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:44+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:47+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:47+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:50+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:50+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:53+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:53+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:56+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:56+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:59+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:53:59+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:02+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:02+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:05+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:05+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:08+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:08+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:11+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:11+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:14+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:14+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:17+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:17+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:20+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:20+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:23+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:23+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:26+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:26+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:29+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:29+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:32+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:32+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:35+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:35+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:38+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:38+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:41+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:44+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:47+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:50+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:53+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:56+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:54:59+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:02+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:02+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:05+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:08+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:11+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:14+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:17+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:20+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:23+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:26+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:29+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:32+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:35+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:38+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:41+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:44+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:47+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:50+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:53+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:56+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:55:59+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:59:11+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:59:11+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:59:18+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:59:18+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:59:18+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:59:26+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:59:29+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:59:32+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:59:35+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:59:38+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:59:41+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T10:59:44+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"info","version":"1.0.0","time":"2025-10-23T11:01:07+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-23T11:01:07+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:01:07+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:01:07+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-23T11:01:14+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: connection timed out"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: connection timed out","time":"2025-10-23T11:01:14+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-23T11:01:14+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-23T11:01:14+05:30","message":"Open in browser"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:01:25+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"info","node":"164.52.214.184","module":"node_control","type":"success","time":"2025-10-23T11:01:28+05:30","message":"Node disabled successfully"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:01:28+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:01:30+05:30","message":"Node disabled successfully"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:01:31+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:01:36+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:01:39+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:01:42+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:01:45+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:01:48+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:01:51+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:01:52+05:30","message":"Enable node process started"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:01:52+05:30","message":"Attempting to enable node"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","enabled":false,"metrics_port":0,"time":"2025-10-23T11:01:52+05:30","message":"Found node configuration"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:01:52+05:30","message":"Saving node configuration"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:01:52+05:30","message":"Node enabled successfully in configuration"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:01:52+05:30","message":"Starting fresh deployment"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:01:52+05:30","message":"Triggering fresh deployment to ensure both binaries are present"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","binary_dir":"/home/vunet/oct21/bin","conf_dir":"/home/vunet/oct21","time":"2025-10-23T11:01:52+05:30","message":"Node deployment configuration"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:01:53+05:30","message":"Fresh deployment completed successfully"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","port":0,"time":"2025-10-23T11:01:53+05:30","message":"Verifying metrics server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:01:54+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:01:57+05:30","message":"Enable node process started"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:01:57+05:30","message":"Attempting to enable node"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","enabled":true,"metrics_port":0,"time":"2025-10-23T11:01:57+05:30","message":"Found node configuration"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:01:57+05:30","message":"Saving node configuration"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:01:57+05:30","message":"Node enabled successfully in configuration"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:01:57+05:30","message":"Starting fresh deployment"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:01:57+05:30","message":"Triggering fresh deployment to ensure both binaries are present"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","binary_dir":"/home/vunet/oct21/bin","conf_dir":"/home/vunet/oct21","time":"2025-10-23T11:01:57+05:30","message":"Node deployment configuration"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:01:57+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","node":"216.48.191.10","error":"HTTP request to metrics server failed: Get \"http://216.48.191.10:0/api/system/health\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)","time":"2025-10-23T11:01:58+05:30","message":"Metrics server verification failed"}
+{"level":"warn","node":"216.48.191.10","time":"2025-10-23T11:01:58+05:30","message":"Node enabled but metrics server may not be running properly"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:01:58+05:30","message":"Enable node process completed"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:01:59+05:30","message":"Fresh deployment completed successfully"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","port":0,"time":"2025-10-23T11:01:59+05:30","message":"Verifying metrics server"}
+{"level":"error","node":"216.48.191.10","error":"HTTP request to metrics server failed: Get \"http://216.48.191.10:0/api/system/health\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)","time":"2025-10-23T11:02:04+05:30","message":"Metrics server verification failed"}
+{"level":"warn","node":"216.48.191.10","time":"2025-10-23T11:02:04+05:30","message":"Node enabled but metrics server may not be running properly"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:02:04+05:30","message":"Enable node process completed"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:02:11+05:30","message":"Node disabled successfully"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:02:13+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:02:16+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"info","node":"164.52.214.184","module":"node_control","time":"2025-10-23T11:02:17+05:30","message":"Enable node process started"}
+{"level":"info","node":"164.52.214.184","module":"node_control","time":"2025-10-23T11:02:17+05:30","message":"Attempting to enable node"}
+{"level":"info","node":"164.52.214.184","host":"164.52.214.184","enabled":false,"metrics_port":0,"time":"2025-10-23T11:02:17+05:30","message":"Found node configuration"}
+{"level":"info","node":"164.52.214.184","time":"2025-10-23T11:02:17+05:30","message":"Saving node configuration"}
+{"level":"info","node":"164.52.214.184","module":"node_control","type":"success","time":"2025-10-23T11:02:17+05:30","message":"Node enabled successfully in configuration"}
+{"level":"info","node":"164.52.214.184","time":"2025-10-23T11:02:17+05:30","message":"Starting fresh deployment"}
+{"level":"info","node":"164.52.214.184","time":"2025-10-23T11:02:17+05:30","message":"Triggering fresh deployment to ensure both binaries are present"}
+{"level":"info","node":"164.52.214.184","host":"164.52.214.184","binary_dir":"/home/vunet/oct21/bin","conf_dir":"/home/vunet/oct21","time":"2025-10-23T11:02:17+05:30","message":"Node deployment configuration"}
+{"level":"info","node":"164.52.214.184","module":"node_control","type":"success","time":"2025-10-23T11:02:18+05:30","message":"Fresh deployment completed successfully"}
+{"level":"info","node":"164.52.214.184","host":"164.52.214.184","port":0,"time":"2025-10-23T11:02:18+05:30","message":"Verifying metrics server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:02:19+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:02:19+05:30","message":"Enable node process started"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:02:19+05:30","message":"Attempting to enable node"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","enabled":false,"metrics_port":0,"time":"2025-10-23T11:02:19+05:30","message":"Found node configuration"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:02:19+05:30","message":"Saving node configuration"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:02:19+05:30","message":"Node enabled successfully in configuration"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:02:19+05:30","message":"Starting fresh deployment"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:02:19+05:30","message":"Triggering fresh deployment to ensure both binaries are present"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","binary_dir":"/home/vunet/oct21/bin","conf_dir":"/home/vunet/oct21","time":"2025-10-23T11:02:19+05:30","message":"Node deployment configuration"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:02:21+05:30","message":"Fresh deployment completed successfully"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","port":0,"time":"2025-10-23T11:02:21+05:30","message":"Verifying metrics server"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:02:22+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","node":"164.52.214.184","error":"HTTP request to metrics server failed: Get \"http://164.52.214.184:0/api/system/health\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)","time":"2025-10-23T11:02:23+05:30","message":"Metrics server verification failed"}
+{"level":"warn","node":"164.52.214.184","time":"2025-10-23T11:02:23+05:30","message":"Node enabled but metrics server may not be running properly"}
+{"level":"info","node":"164.52.214.184","time":"2025-10-23T11:02:23+05:30","message":"Enable node process completed"}
+{"level":"error","error":"Get \"http://216.48.191.10:8086/api/system/metrics\": dial tcp 216.48.191.10:8086: connect: connection refused","time":"2025-10-23T11:02:25+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"error","node":"216.48.191.10","error":"HTTP request to metrics server failed: Get \"http://216.48.191.10:0/api/system/health\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)","time":"2025-10-23T11:02:26+05:30","message":"Metrics server verification failed"}
+{"level":"warn","node":"216.48.191.10","time":"2025-10-23T11:02:26+05:30","message":"Node enabled but metrics server may not be running properly"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:02:26+05:30","message":"Enable node process completed"}
+{"level":"info","version":"1.0.0","time":"2025-10-23T11:12:09+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-23T11:12:09+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:12:09+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:12:09+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-23T11:12:17+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: connection timed out"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: connection timed out","time":"2025-10-23T11:12:17+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-23T11:12:17+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-23T11:12:17+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:12:40+05:30","message":"Enable node process started"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:12:40+05:30","message":"Attempting to enable node"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","enabled":false,"metrics_port":0,"time":"2025-10-23T11:12:40+05:30","message":"Found node configuration"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:12:40+05:30","message":"Saving node configuration"}
+{"level":"error","node":"216.48.191.10","error":"failed to write nodes config file: write src/configs/nodes.yaml: no space left on device","time":"2025-10-23T11:12:40+05:30","message":"Failed to save node configuration"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:12:44+05:30","message":"Enable node process started"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:12:44+05:30","message":"Attempting to enable node"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","enabled":true,"metrics_port":0,"time":"2025-10-23T11:12:44+05:30","message":"Found node configuration"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:12:44+05:30","message":"Saving node configuration"}
+{"level":"error","node":"216.48.191.10","error":"failed to write nodes config file: write src/configs/nodes.yaml: no space left on device","time":"2025-10-23T11:12:44+05:30","message":"Failed to save node configuration"}

@@ -84,7 +84,9 @@ func HandleProxyMetrics(w http.ResponseWriter, r *http.Request) {
 	resp, err := http.Get("http://216.48.191.10:8086/api/system/metrics")
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to fetch metrics from metrics API server")
-		http.Error(w, "Failed to fetch metrics", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to fetch metrics"})
 		return
 	}
 	defer resp.Body.Close()
@@ -93,7 +95,9 @@ func HandleProxyMetrics(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to read metrics response")
-		http.Error(w, "Failed to read metrics response", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to read metrics response"})
 		return
 	}
 
