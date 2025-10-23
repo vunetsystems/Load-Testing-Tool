@@ -306,3 +306,35 @@ func HandleAPIGetO11yCategories(w http.ResponseWriter, r *http.Request) {
 		Message: fmt.Sprintf("Retrieved %d categories", len(config.Categories)),
 	})
 }
+
+// HandleAPISplitEPS Handles POST /api/o11y/eps/split
+func HandleAPISplitEPS(w http.ResponseWriter, r *http.Request) {
+	var request o11y_source_manager.EPSSplitRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		SendJSONResponse(w, http.StatusBadRequest, APIResponse{
+			Success: false,
+			Message: "Invalid JSON payload",
+		})
+		return
+	}
+
+	response, err := O11yManager.SplitEPSBasedOnNodes(request)
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	statusCode := http.StatusOK
+	if !response.Success {
+		statusCode = http.StatusBadRequest
+	}
+
+	SendJSONResponse(w, statusCode, APIResponse{
+		Success: response.Success,
+		Message: response.Message,
+		Data:    response.Data,
+	})
+}

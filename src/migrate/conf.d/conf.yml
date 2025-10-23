@@ -1,53 +1,17 @@
 data_generation_time:
   type: real-time
 include_module_dirs:
-  AWS_ALB:
-    enabled: false
   Apache:
-    enabled: true
-  Azure_API_Management:
-    enabled: false
-  Azure_App_Gateway:
     enabled: false
   Azure_Firewall:
-    enabled: false
-  Azure_Load_Balancer:
-    enabled: false
+    enabled: true
   Azure_Redis_Cache:
-    enabled: false
-  AzureStorageBlob:
-    enabled: false
-  BRUM:
-    enabled: false
-  CiscoIoSSwitch:
-    enabled: false
-  DNS_Monitoring:
-    enabled: false
-  IBMMQ:
-    enabled: false
-  K8s:
-    enabled: false
+    enabled: true
   LinuxMonitor:
     enabled: false
   MongoDB:
-    enabled: true
+    enabled: false
   Mssql:
-    enabled: false
-  Nginx:
-    enabled: false
-  ServiceMonitor:
-    enabled: false
-  SyntheticBrowserMonitoring:
-    enabled: false
-  Tomcat:
-    enabled: false
-  Traces:
-    enabled: false
-  WebLogic:
-    enabled: false
-  exampleLogs:
-    enabled: false
-  ibm_was:
     enabled: false
 logging:
   console: false
