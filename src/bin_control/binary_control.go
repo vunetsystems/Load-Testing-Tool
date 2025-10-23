@@ -92,6 +92,11 @@ func (bc *BinaryControl) GetEnabledNodes() map[string]NodeConfig {
 }
 
 func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryControlResponse, error) {
+	// Reload configuration to ensure we have the latest nodes
+	if err := bc.LoadNodesConfig(); err != nil {
+		return response(false, fmt.Sprintf("Failed to reload config: %v", err)), err
+	}
+
 	node, ok := bc.nodesConfig.Nodes[nodeName]
 	if !ok {
 		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
@@ -109,23 +114,9 @@ func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryContr
 	log.Printf("Starting binary on node %s: %s", nodeName, binaryPath)
 
 	// Run binary in background using nohup, redirect output
-	startCmd := fmt.Sprintf("cd %s && nohup ./finalvudatasim > /dev/null 2>&1 & echo $!", node.BinaryDir)
-	pidOut, err := bc.sshExecWithOutput(node, startCmd)
-	if err != nil {
+	startCmd := fmt.Sprintf("cd %s && nohup ./finalvudatasim > /dev/null 2>&1 &", node.BinaryDir)
+	if err := bc.sshExec(node, startCmd); err != nil {
 		return response(false, fmt.Sprintf("Failed to start binary on node %s: %v", nodeName, err)), err
-	}
-	pidStr := strings.TrimSpace(pidOut)
-	pid, err := strconv.Atoi(pidStr)
-	if err != nil || pid <= 0 {
-		return response(false, fmt.Sprintf("Failed to get PID for started binary on node %s", nodeName)), fmt.Errorf("failed to get PID")
-	}
-
-	// Schedule kill after timeout (in seconds)
-	if timeout > 0 {
-		killCmd := fmt.Sprintf("(sleep %d; kill %d) >/dev/null 2>&1 &", timeout*60, pid) // timeout in minutes
-		if err := bc.sshExec(node, killCmd); err != nil {
-			log.Printf("Warning: failed to schedule kill for binary on node %s: %v", nodeName, err)
-		}
 	}
 
 	time.Sleep(2 * time.Second)
@@ -139,23 +130,40 @@ func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryContr
 		}, nil
 	}
 
+	if newStatus.Status != "running" {
+		return response(false, fmt.Sprintf("Binary failed to start on node %s, status: %s", nodeName, newStatus.Status)), fmt.Errorf("binary startup failed")
+	}
+
+	// Schedule kill after timeout (in seconds) using the correct PID
+	if timeout > 0 {
+		killCmd := fmt.Sprintf("(sleep %d; kill %d) >/dev/null 2>&1 &", timeout*60, newStatus.PID) // timeout in minutes
+		if err := bc.sshExec(node, killCmd); err != nil {
+			log.Printf("Warning: failed to schedule kill for binary on node %s: %v", nodeName, err)
+		}
+	}
+
 	data := map[string]interface{}{
 		"nodeName":   nodeName,
 		"action":     "start",
 		"timeout":    timeout,
 		"binaryPath": binaryPath,
 		"status":     newStatus,
-		"pid":        pid,
+		"pid":        newStatus.PID,
 	}
 
 	return &BinaryControlResponse{
 		Success: true,
-		Message: fmt.Sprintf("Binary started successfully on node %s (PID %d) with timeout %d min", nodeName, pid, timeout),
+		Message: fmt.Sprintf("Binary started successfully on node %s (PID %d) with timeout %d min", nodeName, newStatus.PID, timeout),
 		Data:    data,
 	}, nil
 }
 
 func (bc *BinaryControl) StopBinary(nodeName string, timeout int) (*BinaryControlResponse, error) {
+	// Reload configuration to ensure we have the latest nodes
+	if err := bc.LoadNodesConfig(); err != nil {
+		return response(false, fmt.Sprintf("Failed to reload config: %v", err)), err
+	}
+
 	node, ok := bc.nodesConfig.Nodes[nodeName]
 	if !ok {
 		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
@@ -208,6 +216,11 @@ func (bc *BinaryControl) StopBinary(nodeName string, timeout int) (*BinaryContro
 }
 
 func (bc *BinaryControl) StartMetricsBinary(nodeName string, timeout int) (*BinaryControlResponse, error) {
+	// Reload configuration to ensure we have the latest nodes
+	if err := bc.LoadNodesConfig(); err != nil {
+		return response(false, fmt.Sprintf("Failed to reload config: %v", err)), err
+	}
+
 	node, ok := bc.nodesConfig.Nodes[nodeName]
 	if !ok {
 		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
@@ -292,6 +305,11 @@ func (bc *BinaryControl) StartMetricsBinary(nodeName string, timeout int) (*Bina
 }
 
 func (bc *BinaryControl) StopMetricsBinary(nodeName string, timeout int) (*BinaryControlResponse, error) {
+	// Reload configuration to ensure we have the latest nodes
+	if err := bc.LoadNodesConfig(); err != nil {
+		return response(false, fmt.Sprintf("Failed to reload config: %v", err)), err
+	}
+
 	node, ok := bc.nodesConfig.Nodes[nodeName]
 	if !ok {
 		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
@@ -371,6 +389,11 @@ func (bc *BinaryControl) StopMetricsBinary(nodeName string, timeout int) (*Binar
 
 // DebugMetricsBinary provides detailed debugging information for the metrics binary on a node
 func (bc *BinaryControl) DebugMetricsBinary(nodeName string) (*BinaryControlResponse, error) {
+	// Reload configuration to ensure we have the latest nodes
+	if err := bc.LoadNodesConfig(); err != nil {
+		return response(false, fmt.Sprintf("Failed to reload config: %v", err)), err
+	}
+
 	node, ok := bc.nodesConfig.Nodes[nodeName]
 	if !ok {
 		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
@@ -445,6 +468,11 @@ func (bc *BinaryControl) DebugMetricsBinary(nodeName string) (*BinaryControlResp
 }
 
 func (bc *BinaryControl) GetBinaryStatus(nodeName string) (*BinaryStatus, error) {
+	// Reload configuration to ensure we have the latest nodes
+	if err := bc.LoadNodesConfig(); err != nil {
+		return nil, fmt.Errorf("failed to reload config: %v", err)
+	}
+
 	node, ok := bc.nodesConfig.Nodes[nodeName]
 	if !ok {
 		return nil, fmt.Errorf("node %s not found", nodeName)
@@ -498,6 +526,14 @@ func (bc *BinaryControl) GetBinaryStatus(nodeName string) (*BinaryStatus, error)
 }
 
 func (bc *BinaryControl) GetAllBinaryStatuses() (*BinaryControlResponse, error) {
+	// Reload configuration to ensure we have the latest nodes
+	if err := bc.LoadNodesConfig(); err != nil {
+		return &BinaryControlResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to reload config: %v", err),
+		}, err
+	}
+
 	enabledNodes := bc.GetEnabledNodes()
 	if len(enabledNodes) == 0 {
 		return &BinaryControlResponse{

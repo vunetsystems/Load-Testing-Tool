@@ -3,11 +3,44 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"vuDataSim/src/o11y_source_manager"
 
 	"github.com/gorilla/mux"
+	"gopkg.in/yaml.v3"
 )
+
+// Category represents a single category configuration
+type Category struct {
+	Name        string   `yaml:"name" json:"name"`
+	Description string   `yaml:"description" json:"description"`
+	Sources     []string `yaml:"sources" json:"sources"`
+}
+
+// CategoriesConfig represents the entire categories configuration
+type CategoriesConfig struct {
+	Categories map[string]Category `yaml:"categories" json:"categories"`
+}
+
+// LoadCategoriesConfig loads categories from the YAML file
+func LoadCategoriesConfig() (*CategoriesConfig, error) {
+	configPath := filepath.Join("src", "configs", "categories.yaml")
+
+	data, err := ioutil.ReadFile(configPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read categories config file: %v", err)
+	}
+
+	var config CategoriesConfig
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse categories config YAML: %v", err)
+	}
+
+	return &config, nil
+}
 
 func HandleAPIGetO11ySources(w http.ResponseWriter, r *http.Request) {
 	// Initialize o11y manager if not already done
@@ -253,4 +286,23 @@ func HandleAPIDistributeConfD(w http.ResponseWriter, r *http.Request) {
 	apiResponse.Data.(map[string]interface{})["distribution"] = response.Distribution
 
 	SendJSONResponse(w, statusCode, apiResponse)
+}
+
+// HandleAPIGetO11yCategories Handles GET /api/o11y/categories
+func HandleAPIGetO11yCategories(w http.ResponseWriter, r *http.Request) {
+	// Load categories from YAML file
+	config, err := LoadCategoriesConfig()
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to load categories config: %v", err),
+		})
+		return
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Data:    config.Categories,
+		Message: fmt.Sprintf("Retrieved %d categories", len(config.Categories)),
+	})
 }

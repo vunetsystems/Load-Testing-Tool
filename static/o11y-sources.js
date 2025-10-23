@@ -7,24 +7,8 @@ class O11ySources {
         this.currentMode = 'custom'; // 'custom' or 'category'
         this.selectedCategory = null;
 
-        // Define category mappings
-        this.categories = {
-            category1: {
-                name: 'Category 1 (Azure Services)',
-                sources: ['Azure_Firewall', 'Azure_Redis_Cache'],
-                description: 'Azure Firewall and Azure Redis Cache monitoring'
-            },
-            category2: {
-                name: 'Category 2 (Web & Database)',
-                sources: ['Apache', 'MongoDB'],
-                description: 'Apache web server and MongoDB database monitoring'
-            },
-            category3: {
-                name: 'Category 3 (System & Database)',
-                sources: ['LinuxMonitor', 'Mssql'],
-                description: 'Linux system monitoring and Microsoft SQL Server'
-            }
-        };
+        // Categories will be loaded from API
+        this.categories = {};
     }
 
     loadO11ySources() {
@@ -35,6 +19,8 @@ class O11ySources {
                 if (response.success && response.data) {
                     console.log('Sources data:', response.data);
                     this.populateO11ySourcesSelect(response.data);
+                    // Load categories after sources are loaded
+                    this.loadCategories();
                     this.initializeModeSwitching();
                     console.log('Loaded o11y sources:', response.data.length, 'sources');
                 } else {
@@ -46,6 +32,51 @@ class O11ySources {
                 console.error('Error loading o11y sources:', error);
                 this.manager.showNotification('Error loading O11y sources: ' + error.message, 'error');
             });
+    }
+
+    loadCategories() {
+        console.log('Loading o11y categories...');
+        this.manager.callAPI('/api/o11y/categories')
+            .then(response => {
+                console.log('O11y categories API response:', response);
+                if (response.success && response.data) {
+                    console.log('Categories data:', response.data);
+                    this.categories = response.data;
+                    this.populateCategorySelect();
+                    console.log('Loaded o11y categories:', Object.keys(response.data).length, 'categories');
+                } else {
+                    console.error('Failed to load o11y categories:', response.message);
+                    this.manager.showNotification('Failed to load O11y categories: ' + response.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading o11y categories:', error);
+                this.manager.showNotification('Error loading O11y categories: ' + error.message, 'error');
+            });
+    }
+
+    populateCategorySelect() {
+        const categorySelect = this.manager.elements.o11yCategorySelect;
+        if (!categorySelect) {
+            console.error('o11yCategorySelect element not found!');
+            return;
+        }
+
+        // Clear existing options except the first one
+        while (categorySelect.children.length > 1) {
+            categorySelect.removeChild(categorySelect.lastChild);
+        }
+
+        // Add categories from API data
+        Object.keys(this.categories).forEach(categoryKey => {
+            const category = this.categories[categoryKey];
+            const option = document.createElement('option');
+            option.value = categoryKey;
+            option.textContent = `${category.name} (${category.sources.join(', ')})`;
+            categorySelect.appendChild(option);
+        });
+
+        console.log(`Populated ${Object.keys(this.categories).length} categories in dropdown`);
     }
 
     populateO11ySourcesSelect(sources) {
