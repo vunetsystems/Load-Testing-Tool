@@ -1,0 +1,34 @@
+# O11y source categories configuration
+# This file defines categories for grouping o11y sources in the frontend
+categories:
+  category1:
+    name: "Azure Services"
+    description: "Azure Firewall and Azure Redis Cache monitoring"
+    sources:
+      - "Azure_Firewall"
+      - "Azure_Redis_Cache"
+    max_eps_per_node: 100000
+
+  category2:
+    name: "Web & Database"
+    description: "Apache web server and MongoDB database monitoring"
+    sources:
+      - "Apache"
+      - "MongoDB"
+    max_eps_per_node: 50000
+
+  category3:
+    name: "System & Database"
+    description: "Linux system monitoring and Microsoft SQL Server"
+    sources:
+      - "LinuxMonitor"
+      - "Mssql"
+    max_eps_per_node: 50000
+
+  # Additional categories can be added here as needed
+  # category4:
+  #   name: "Category 4 (Network Services)"
+  #   description: "Network monitoring and infrastructure services"
+  #   sources:
+  #     - "CiscoIoSSwitch"
+  #     - "Nginx"

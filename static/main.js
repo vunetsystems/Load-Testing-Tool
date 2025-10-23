@@ -119,6 +119,9 @@ class VuDataSimManager {
             // Chart value elements
             cpuMemoryValue: document.getElementById('cpu-memory-value'),
 
+            // Kafka & ClickHouse cleaning elements
+            kafkaClickHouseCleanBtn: document.getElementById('kafka-clickhouse-clean-btn'),
+
             // ClickHouse metrics elements
             clickHouseMetricsBtn: document.getElementById('clickhouse-metrics-btn'),
             clickHouseMetricsModal: document.getElementById('clickhouse-metrics-modal'),
@@ -198,6 +201,18 @@ class VuDataSimManager {
             });
         } else {
             console.error('Binary Control button not found!');
+        }
+
+        // Kafka & ClickHouse cleaning event listeners
+        console.log('Kafka & ClickHouse Clean Button element:', this.elements.kafkaClickHouseCleanBtn);
+
+        if (this.elements.kafkaClickHouseCleanBtn) {
+            this.elements.kafkaClickHouseCleanBtn.addEventListener('click', () => {
+                console.log('Kafka & ClickHouse Clean button clicked!');
+                this.cleanKafkaAndClickHouse();
+            });
+        } else {
+            console.error('Kafka & ClickHouse Clean button not found!');
         }
 
         // ClickHouse metrics event listeners
@@ -428,6 +443,53 @@ class VuDataSimManager {
         setTimeout(() => {
             notification.remove();
         }, 3000);
+    }
+
+    async cleanKafkaAndClickHouse() {
+        try {
+            // Disable the button and show loading state
+            const button = this.elements.kafkaClickHouseCleanBtn;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Cleaning...</span>';
+            button.disabled = true;
+
+            console.log('Starting Kafka and ClickHouse cleaning process...');
+
+            // Step 1: Call Kafka recreate API
+            console.log('Step 1: Calling Kafka recreate API...');
+            const kafkaResponse = await this.callAPI('/api/kafka/recreate', 'POST');
+
+            if (!kafkaResponse.success) {
+                throw new Error(`Kafka recreate failed: ${kafkaResponse.message || 'Unknown error'}`);
+            }
+
+            console.log('Kafka recreate successful:', kafkaResponse);
+
+            // Step 2: Call ClickHouse truncate API
+            console.log('Step 2: Calling ClickHouse truncate API...');
+            const clickhouseResponse = await this.callAPI('/api/clickhouse/truncate', 'POST');
+
+            if (!clickhouseResponse.success) {
+                throw new Error(`ClickHouse truncate failed: ${clickhouseResponse.message || 'Unknown error'}`);
+            }
+
+            console.log('ClickHouse truncate successful:', clickhouseResponse);
+
+            // Both operations successful
+            this.showNotification('Successfully cleaned Kafka topics and truncated ClickHouse tables!', 'success');
+
+        } catch (error) {
+            console.error('Error during Kafka and ClickHouse cleaning:', error);
+
+            // Show error message
+            this.showNotification(`Cleaning failed: ${error.message}`, 'error');
+
+        } finally {
+            // Re-enable the button and restore original text
+            const button = this.elements.kafkaClickHouseCleanBtn;
+            button.innerHTML = '<span class="material-symbols-outlined">cleaning_services</span><span>Clean Kafka & ClickHouse</span>';
+            button.disabled = false;
+        }
     }
 }
 

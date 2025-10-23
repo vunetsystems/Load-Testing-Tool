@@ -2341,3 +2341,128 @@
 {"level":"info","node":"216.48.191.10","host":"216.48.191.10","enabled":true,"metrics_port":0,"time":"2025-10-23T11:12:44+05:30","message":"Found node configuration"}
 {"level":"info","node":"216.48.191.10","time":"2025-10-23T11:12:44+05:30","message":"Saving node configuration"}
 {"level":"error","node":"216.48.191.10","error":"failed to write nodes config file: write src/configs/nodes.yaml: no space left on device","time":"2025-10-23T11:12:44+05:30","message":"Failed to save node configuration"}
+{"level":"info","version":"1.0.0","time":"2025-10-23T11:29:28+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-23T11:29:28+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:29:28+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:29:28+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-23T11:29:36+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: connection timed out"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: connection timed out","time":"2025-10-23T11:29:36+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-23T11:29:36+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-23T11:29:36+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:30:53+05:30","message":"Node added successfully"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:30:55+05:30","message":"Node disabled successfully"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:31:02+05:30","message":"Enable node process started"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:31:02+05:30","message":"Attempting to enable node"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","enabled":false,"metrics_port":0,"time":"2025-10-23T11:31:02+05:30","message":"Found node configuration"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:31:02+05:30","message":"Saving node configuration"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:31:02+05:30","message":"Node enabled successfully in configuration"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:31:02+05:30","message":"Starting fresh deployment"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:31:02+05:30","message":"Triggering fresh deployment to ensure both binaries are present"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","binary_dir":"/home/vunet/oct23/bin","conf_dir":"/home/vunet/oct23","time":"2025-10-23T11:31:02+05:30","message":"Node deployment configuration"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:31:04+05:30","message":"Fresh deployment completed successfully"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","port":0,"time":"2025-10-23T11:31:04+05:30","message":"Verifying metrics server"}
+{"level":"error","node":"216.48.191.10","error":"HTTP request to metrics server failed: Get \"http://216.48.191.10:0/api/system/health\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)","time":"2025-10-23T11:31:09+05:30","message":"Metrics server verification failed"}
+{"level":"warn","node":"216.48.191.10","time":"2025-10-23T11:31:09+05:30","message":"Node enabled but metrics server may not be running properly"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:31:09+05:30","message":"Enable node process completed"}
+{"level":"info","version":"1.0.0","time":"2025-10-23T11:39:52+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-23T11:39:52+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:39:52+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:39:52+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-23T11:39:59+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: connection timed out"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: connection timed out","time":"2025-10-23T11:39:59+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-23T11:39:59+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-23T11:39:59+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-23T11:40:35+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-23T11:40:35+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:40:35+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:40:35+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-23T11:40:42+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: connection timed out"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: connection timed out","time":"2025-10-23T11:40:42+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-23T11:40:42+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-23T11:40:42+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-23T11:42:30+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-23T11:42:30+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:42:30+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:42:30+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","version":"1.0.0","time":"2025-10-23T11:42:52+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-23T11:42:52+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:42:52+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:42:52+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-23T11:42:59+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: connection timed out"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: connection timed out","time":"2025-10-23T11:42:59+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-23T11:42:59+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-23T11:42:59+05:30","message":"Open in browser"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:44:47+05:30","message":"Node added successfully"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:44:50+05:30","message":"Node disabled successfully"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:44:58+05:30","message":"Enable node process started"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:44:58+05:30","message":"Attempting to enable node"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","enabled":false,"metrics_port":0,"time":"2025-10-23T11:44:58+05:30","message":"Found node configuration"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:44:58+05:30","message":"Saving node configuration"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:44:58+05:30","message":"Node enabled successfully in configuration"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:44:58+05:30","message":"Starting fresh deployment"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:44:58+05:30","message":"Triggering fresh deployment to ensure both binaries are present"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","binary_dir":"/home/vunet/oct23/bin","conf_dir":"/home/vunet/oct23","time":"2025-10-23T11:44:58+05:30","message":"Node deployment configuration"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:45:00+05:30","message":"Fresh deployment completed successfully"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","port":0,"time":"2025-10-23T11:45:00+05:30","message":"Verifying metrics server"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:45:00+05:30","message":"Enable node process started"}
+{"level":"info","node":"216.48.191.10","module":"node_control","time":"2025-10-23T11:45:00+05:30","message":"Attempting to enable node"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","enabled":true,"metrics_port":0,"time":"2025-10-23T11:45:00+05:30","message":"Found node configuration"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:45:00+05:30","message":"Saving node configuration"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:45:00+05:30","message":"Node enabled successfully in configuration"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:45:00+05:30","message":"Starting fresh deployment"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:45:00+05:30","message":"Triggering fresh deployment to ensure both binaries are present"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","binary_dir":"/home/vunet/oct23/bin","conf_dir":"/home/vunet/oct23","time":"2025-10-23T11:45:00+05:30","message":"Node deployment configuration"}
+{"level":"info","node":"216.48.191.10","module":"node_control","type":"success","time":"2025-10-23T11:45:01+05:30","message":"Fresh deployment completed successfully"}
+{"level":"info","node":"216.48.191.10","host":"216.48.191.10","port":0,"time":"2025-10-23T11:45:01+05:30","message":"Verifying metrics server"}
+{"level":"error","node":"216.48.191.10","error":"HTTP request to metrics server failed: Get \"http://216.48.191.10:0/api/system/health\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)","time":"2025-10-23T11:45:05+05:30","message":"Metrics server verification failed"}
+{"level":"warn","node":"216.48.191.10","time":"2025-10-23T11:45:05+05:30","message":"Node enabled but metrics server may not be running properly"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:45:05+05:30","message":"Enable node process completed"}
+{"level":"error","node":"216.48.191.10","error":"HTTP request to metrics server failed: Get \"http://216.48.191.10:0/api/system/health\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)","time":"2025-10-23T11:45:06+05:30","message":"Metrics server verification failed"}
+{"level":"warn","node":"216.48.191.10","time":"2025-10-23T11:45:06+05:30","message":"Node enabled but metrics server may not be running properly"}
+{"level":"info","node":"216.48.191.10","time":"2025-10-23T11:45:06+05:30","message":"Enable node process completed"}
+{"level":"info","version":"1.0.0","time":"2025-10-23T11:46:17+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-23T11:46:17+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:46:17+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T11:46:17+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-23T11:46:24+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: connection timed out"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: connection timed out","time":"2025-10-23T11:46:24+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-23T11:46:24+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-23T11:46:24+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-23T12:02:29+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-23T12:02:29+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T12:02:29+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T12:02:29+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-23T12:02:36+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: connection timed out"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: connection timed out","time":"2025-10-23T12:02:36+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-23T12:02:36+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-23T12:02:36+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-23T12:03:03+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-23T12:03:03+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T12:03:03+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T12:03:03+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-23T12:03:10+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: connection timed out"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: connection timed out","time":"2025-10-23T12:03:10+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-23T12:03:10+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-23T12:03:10+05:30","message":"Open in browser"}
+{"level":"info","node":"vunet","module":"node_control","type":"success","time":"2025-10-23T12:04:47+05:30","message":"Node added successfully"}
+{"level":"info","node":"vunet","module":"SSH","type":"success","time":"2025-10-23T12:08:19+05:30","message":"Connection check passed"}
+{"level":"info","node":"vunet","module":"SSH","type":"success","time":"2025-10-23T12:11:26+05:30","message":"Connection check passed"}
+{"level":"info","node":"vunet","module":"SSH","type":"success","time":"2025-10-23T12:13:24+05:30","message":"Connection check passed"}
+{"level":"info","version":"1.0.0","time":"2025-10-23T12:49:09+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-23T12:49:09+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T12:49:09+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T12:49:09+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-23T12:49:16+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: connection timed out"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: connection timed out","time":"2025-10-23T12:49:16+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-23T12:49:16+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-23T12:49:16+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-23T12:49:37+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-23T12:49:37+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T12:49:37+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-23T12:49:37+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-23T12:49:45+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: connection timed out"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: connection timed out","time":"2025-10-23T12:49:45+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-23T12:49:45+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-23T12:49:45+05:30","message":"Open in browser"}
+{"level":"info","node":"vunet","module":"SSH","type":"success","time":"2025-10-23T14:36:52+05:30","message":"Connection check passed"}
+{"level":"info","node":"vunet","module":"SSH","type":"success","time":"2025-10-23T14:45:39+05:30","message":"Connection check passed"}

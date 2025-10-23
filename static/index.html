@@ -213,6 +213,10 @@
 
             <!-- Action Buttons -->
             <div class="mt-auto space-y-3">
+                <button id="kafka-clickhouse-clean-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-warning/50 dark:border-warning-dark/50 py-3 text-warning dark:text-warning-dark font-semibold transition-colors hover:bg-warning/10 dark:hover:bg-warning-dark/10">
+                    <span class="material-symbols-outlined">cleaning_services</span>
+                    <span>Clean Kafka & ClickHouse</span>
+                </button>
                 <button id="binary-control-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-success/50 dark:border-success-dark/50 py-3 text-success dark:text-success-dark font-semibold transition-colors hover:bg-success/10 dark:hover:bg-success-dark/10">
                     <span class="material-symbols-outlined">play_arrow</span>
                     <span>Binary Control</span>
@@ -277,39 +281,6 @@
                     </div>
                 </div>
 
-                <!-- Live Charts Section -->
-                <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                    <div class="lg:col-span-2">
-                        <h3 class="text-xl font-semibold mb-4">Live Charts</h3>
-                        <div class="grid grid-cols-1 gap-6">
-                            <!-- Real-time System Resources Chart -->
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                <p class="font-medium flex items-center gap-2 text-text-secondary-light dark:text-text-secondary-dark">
-                                    <span class="material-symbols-outlined text-lg">memory</span>Real-time System Resources
-                                </p>
-                                <div class="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-2">Live data from your actual nodes</div>
-                                <p id="cpu-memory-value" class="text-4xl font-bold mt-2 number-animate">2.3<span class="text-text-secondary-light dark:text-text-secondary-dark">/</span>4.0<span class="text-text-secondary-light dark:text-text-secondary-dark"> cores / </span>2.0<span class="text-text-secondary-light dark:text-text-secondary-dark">/</span>8.0<span class="text-text-secondary-light dark:text-text-secondary-dark"> GB</span></p>
-                                <div class="flex items-center gap-1 text-sm text-success dark:text-success-dark mt-1">
-                                    <span class="material-symbols-outlined text-base">sync</span>
-                                    <span>Updated every 3 seconds</span>
-                                </div>
-                                <div class="h-32 mt-4">
-                                    <svg id="cpu-memory-chart" class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 35">
-                                        <defs>
-                                            <linearGradient id="chartGradient4" x1="0%" x2="0%" y1="0%" y2="100%">
-                                                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"></stop>
-                                                <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"></stop>
-                                            </linearGradient>
-                                        </defs>
-                                        <path d="M0 35 L0 18 L10 8 L20 13 L30 3 L40 10 L50 23 L60 20 L70 16 L80 26 L90 18 L100 22 L100 35 Z" fill="url(#chartGradient4)"></path>
-                                        <path class="chart-path" d="M0 18 L10 8 L20 13 L30 3 L40 10 L50 23 L60 20 L70 16 L80 26 L90 18 L100 22" fill="none" stroke="#3b82f6" stroke-width="2.5"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
 
                 <!-- Node Management Modal -->
                 <div id="node-management-modal" class="fixed inset-0 z-50 hidden">
