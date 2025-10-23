@@ -3,6 +3,7 @@ package o11y_source_manager
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -70,6 +71,19 @@ type EPSDistributionResponse struct {
 	Data    map[string]interface{} `json:"data,omitempty"`
 }
 
+// Category represents a single category configuration
+type Category struct {
+	Name          string   `yaml:"name" json:"name"`
+	Description   string   `yaml:"description" json:"description"`
+	Sources       []string `yaml:"sources" json:"sources"`
+	MaxEpsPerNode int      `yaml:"max_eps_per_node" json:"maxEpsPerNode"`
+}
+
+// CategoriesConfig represents the entire categories configuration
+type CategoriesConfig struct {
+	Categories map[string]Category `yaml:"categories" json:"categories"`
+}
+
 // SourceEPSInfo represents EPS information for a source
 type SourceEPSInfo struct {
 	SourceName     string         `json:"sourceName"`
@@ -86,6 +100,115 @@ func NewO11ySourceManager() *O11ySourceManager {
 		maxEPSConfig: MaxEPSConfig{MaxEPS: make(map[string]int)},
 		mainConfig:   MainConfig{},
 	}
+}
+
+// LoadCategoriesConfig loads categories from the YAML file
+func (osm *O11ySourceManager) LoadCategoriesConfig() (*CategoriesConfig, error) {
+	configPath := filepath.Join(osm.configsDir, "categories.yaml")
+
+	data, err := ioutil.ReadFile(configPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read categories config file: %v", err)
+	}
+
+	var config CategoriesConfig
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse categories config YAML: %v", err)
+	}
+
+	return &config, nil
+}
+
+// EPSSplitRequest represents a request to split EPS based on nodes
+type EPSSplitRequest struct {
+	TotalEPS int    `json:"totalEps"`
+	Type     string `json:"type"`     // "custom" or "category"
+	Category string `json:"category,omitempty"` // if type is "category"
+}
+
+// SplitEPSBasedOnNodes splits the EPS based on enabled nodes and validates
+func (osm *O11ySourceManager) SplitEPSBasedOnNodes(request EPSSplitRequest) (*EPSDistributionResponse, error) {
+	// Get enabled nodes
+	nodeManager := osm.getNodeManager()
+	if nodeManager == nil {
+		return &EPSDistributionResponse{
+			Success: false,
+			Message: "Node manager not available",
+		}, fmt.Errorf("node manager not available")
+	}
+
+	enabledNodes := nodeManager.GetEnabledNodes()
+	numEnabledNodes := len(enabledNodes)
+	if numEnabledNodes == 0 {
+		return &EPSDistributionResponse{
+			Success: false,
+			Message: "No enabled nodes found",
+		}, fmt.Errorf("no enabled nodes")
+	}
+
+	splitEPS := request.TotalEPS / numEnabledNodes
+
+	// Validate based on type
+	if request.Type == "category" {
+		if request.Category == "" {
+			return &EPSDistributionResponse{
+				Success: false,
+				Message: "Category name required for category type",
+			}, fmt.Errorf("category name required")
+		}
+
+		config, err := osm.LoadCategoriesConfig()
+		if err != nil {
+			return &EPSDistributionResponse{
+				Success: false,
+				Message: "Failed to load categories config",
+			}, err
+		}
+
+		cat, exists := config.Categories[request.Category]
+		if !exists {
+			return &EPSDistributionResponse{
+				Success: false,
+				Message: "Category not found",
+			}, fmt.Errorf("category not found")
+		}
+
+		if splitEPS > cat.MaxEpsPerNode {
+			return &EPSDistributionResponse{
+				Success: false,
+				Message: fmt.Sprintf("Split EPS %d exceeds max EPS per node %d for category %s", splitEPS, cat.MaxEpsPerNode, request.Category),
+			}, fmt.Errorf("exceeds max EPS per node")
+		}
+	} else if request.Type == "custom" {
+		if splitEPS > 50000 {
+			return &EPSDistributionResponse{
+				Success: false,
+				Message: fmt.Sprintf("Split EPS %d exceeds 50K for custom", splitEPS),
+			}, fmt.Errorf("exceeds 50K")
+		}
+	} else {
+		return &EPSDistributionResponse{
+			Success: false,
+			Message: "Invalid type, must be 'custom' or 'category'",
+		}, fmt.Errorf("invalid type")
+	}
+
+	// If success, return the split EPS
+	data := map[string]interface{}{
+		"splitEps":        splitEPS,
+		"numEnabledNodes": numEnabledNodes,
+		"type":            request.Type,
+	}
+	if request.Type == "category" {
+		data["category"] = request.Category
+	}
+
+	return &EPSDistributionResponse{
+		Success: true,
+		Message: "EPS split successfully",
+		Data:    data,
+	}, nil
 }
 
 // LoadMaxEPSConfig loads the maximum EPS configuration from YAML file
@@ -169,8 +292,31 @@ func (osm *O11ySourceManager) DistributeEPS(request EPSDistributionRequest) (*EP
 		}, fmt.Errorf("no sources selected")
 	}
 
-	// Calculate proportional distribution
-	sourceEPSMap, err := osm.calculateProportionalDistribution(request.SelectedSources, request.TotalEPS)
+	// Split EPS based on enabled nodes
+	nodeManager := osm.getNodeManager()
+	if nodeManager == nil {
+		return &EPSDistributionResponse{
+			Success: false,
+			Message: "Node manager not available",
+		}, fmt.Errorf("node manager not available")
+	}
+
+	enabledNodes := nodeManager.GetEnabledNodes()
+	numEnabledNodes := len(enabledNodes)
+	if numEnabledNodes == 0 {
+		return &EPSDistributionResponse{
+			Success: false,
+			Message: "No enabled nodes found",
+		}, fmt.Errorf("no enabled nodes")
+	}
+
+	splitEPS := request.TotalEPS / numEnabledNodes
+
+	// Use splitEPS for distribution
+	totalEPSForDistribution := splitEPS
+
+	// Calculate proportional distribution using split EPS
+	sourceEPSMap, err := osm.calculateProportionalDistribution(request.SelectedSources, totalEPSForDistribution)
 	if err != nil {
 		return &EPSDistributionResponse{
 			Success: false,
@@ -190,6 +336,8 @@ func (osm *O11ySourceManager) DistributeEPS(request EPSDistributionRequest) (*EP
 	// Prepare response data with new NumUniqKey values
 	responseData := map[string]interface{}{
 		"totalEps":        request.TotalEPS,
+		"splitEps":        splitEPS,
+		"numEnabledNodes": numEnabledNodes,
 		"selectedSources": request.SelectedSources,
 		"sourceBreakdown": osm.getSourceEPSBreakdown(),
 		"newTotalEps":     osm.calculateCurrentEPS(),
@@ -198,7 +346,7 @@ func (osm *O11ySourceManager) DistributeEPS(request EPSDistributionRequest) (*EP
 
 	return &EPSDistributionResponse{
 		Success: true,
-		Message: fmt.Sprintf("Successfully distributed %d EPS across %d sources", request.TotalEPS, len(request.SelectedSources)),
+		Message: fmt.Sprintf("Successfully distributed %d EPS (split: %d) across %d sources", totalEPSForDistribution, splitEPS, len(request.SelectedSources)),
 		Data:    responseData,
 	}, nil
 }

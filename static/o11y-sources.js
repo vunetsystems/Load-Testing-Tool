@@ -147,13 +147,72 @@ class O11ySources {
         // Show loading state
         this.setSyncButtonLoading(true);
 
-        console.log('Syncing configs for sources:', selectedSources, 'EPS:', selectedEPS);
+        console.log('Syncing configs for sources:', selectedSources, 'EPS:', selectedEPS, 'Mode:', this.currentMode);
 
-        // Call EPS distribution API first
-       // Call EPS distribution API first
-        this.manager.callAPI('/api/o11y/eps/distribute', 'POST', {
-            selectedSources: selectedSources,
-            totalEps: selectedEPS
+        // Determine type and category for split API
+        const splitRequest = {
+            totalEps: selectedEPS,
+            type: this.currentMode
+        };
+
+        if (this.currentMode === 'category' && this.selectedCategory) {
+            splitRequest.category = this.selectedCategory;
+        }
+
+        // Call EPS split API first
+        this.manager.callAPI('/api/o11y/eps/split', 'POST', splitRequest)
+        .then(splitResponse => {
+            console.log('EPS split response:', splitResponse);
+
+            if (!splitResponse.success) {
+                // Split failed, show error and stop
+                const splitErrorMessage = splitResponse.message || 'EPS split failed';
+                console.error('EPS split failed:', splitErrorMessage);
+                this.showSyncError(splitErrorMessage);
+                this.manager.showNotification('Failed to sync configs: ' + splitErrorMessage, 'error');
+                return Promise.reject(new Error(splitErrorMessage));
+            }
+
+            console.log('EPS split successful, proceeding to distribution...');
+
+            // Proceed to EPS distribution
+            return this.manager.callAPI('/api/o11y/eps/distribute', 'POST', {
+                selectedSources: selectedSources,
+                totalEps: selectedEPS
+            });
+        })
+        .then(epsResponse => {
+            console.log('EPS distribution response:', epsResponse);
+            console.log('EPS distribution success:', epsResponse.success);
+
+            if (!epsResponse.success) {
+                // Provide specific error message for EPS distribution failure
+                let epsErrorMessage = epsResponse.message || 'EPS distribution failed';
+                console.error('EPS distribution failed with message:', epsErrorMessage);
+
+                if (epsErrorMessage.includes('Total EPS must be greater than 0')) {
+                    epsErrorMessage = 'Invalid EPS value. Please enter a value greater than 0.';
+                } else if (epsErrorMessage.includes('no sources selected')) {
+                    epsErrorMessage = 'No o11y sources selected. Please select at least one source.';
+                } else if (epsErrorMessage.includes('max EPS not configured')) {
+                    epsErrorMessage = 'EPS configuration not found for selected sources. Please check your configuration.';
+                } else if (epsErrorMessage.includes('exceeds maximum limits')) {
+                    epsErrorMessage = 'Selected EPS exceeds maximum allowed limits for one or more sources.';
+                }
+
+                // Immediately show error and stop processing - NO conf.d distribution will be called
+                console.log('Stopping sync process due to EPS distribution failure');
+                this.showSyncError(epsErrorMessage);
+                this.manager.showNotification('Failed to sync configs: ' + epsErrorMessage, 'error');
+
+                // Return a rejected promise to stop the chain
+                return Promise.reject(new Error(epsErrorMessage));
+            }
+
+            // Only proceed to conf.d distribution if EPS distribution succeeded
+            console.log('EPS distribution successful, proceeding to conf.d distribution...');
+            console.log('About to call conf.d distribution API...');
+            return this.manager.callAPI('/api/o11y/confd/distribute', 'POST');
         })
         .then(epsResponse => {
             console.log('EPS distribution response:', epsResponse);
@@ -228,7 +287,9 @@ class O11ySources {
             // Provide more specific error messages based on error content
             let userFriendlyMessage = error.message;
 
-            if (error.message.includes('EPS distribution failed')) {
+            if (error.message.includes('EPS split failed')) {
+                userFriendlyMessage = 'Failed to split EPS based on available nodes. Please check node configuration and EPS limits.';
+            } else if (error.message.includes('EPS distribution failed')) {
                 userFriendlyMessage = 'Failed to distribute EPS settings. Please check your o11y source configuration and EPS values.';
             } else if (error.message.includes('Conf.d distribution failed')) {
                 userFriendlyMessage = 'Failed to distribute configuration files to nodes. Please check node connectivity.';

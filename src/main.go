@@ -121,6 +121,7 @@ func main() {
 	api.HandleFunc("/o11y/sources", handlers.HandleAPIGetO11ySources).Methods("GET")
 	api.HandleFunc("/o11y/sources/{source}", handlers.HandleAPIGetO11ySourceDetails).Methods("GET")
 	api.HandleFunc("/o11y/categories", handlers.HandleAPIGetO11yCategories).Methods("GET")
+	api.HandleFunc("/o11y/eps/split", handlers.HandleAPISplitEPS).Methods("POST")
 	api.HandleFunc("/o11y/eps/distribute", handlers.HandleAPIDistributeEPS).Methods("POST")
 	api.HandleFunc("/o11y/eps/current", handlers.HandleAPIGetCurrentEPS).Methods("GET")
 	api.HandleFunc("/o11y/sources/{source}/enable", handlers.HandleAPIEnableO11ySource).Methods("POST")
