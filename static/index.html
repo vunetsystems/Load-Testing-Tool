@@ -225,7 +225,7 @@
                     <span class="material-symbols-outlined">monitoring</span>
                     <span>ClickHouse Metrics</span>
                 </button>
-                <button id="monitoring-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-info/50 dark:border-info-dark/50 py-3 text-info dark:text-info-dark font-semibold transition-colors hover:bg-info/10 dark:hover:bg-info-dark/10">
+                <button id="monitoring-btn" onclick="window.location.href='/static/monitoring.html'" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-info/50 dark:border-info-dark/50 py-3 text-info dark:text-info-dark font-semibold transition-colors hover:bg-info/10 dark:hover:bg-info-dark/10">
                     <span class="material-symbols-outlined">analytics</span>
                     <span>Monitoring</span>
                 </button>
@@ -786,9 +786,9 @@
                 </div>
 
                 <!-- Logs Preview -->
-                <div>
+                <div class="logs-preview-box rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
                     <h3 class="text-xl font-semibold my-4">Logs Preview</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div class="relative">
                             <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2" for="log-node">Filter by Node</label>
                             <span class="material-symbols-outlined absolute left-3 top-10 text-text-secondary-light dark:text-text-secondary-dark">dns</span>
@@ -806,57 +806,63 @@
                                 <option>Module B</option>
                             </select>
                         </div>
+                        <div class="flex items-end">
+                            <button id="reload-logs-btn" class="group flex items-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 px-4 py-2 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
+                                <span class="material-symbols-outlined">refresh</span>
+                                <span>Reload Logs</span>
+                            </button>
+                        </div>
                     </div>
                     <div id="logs-container" class="h-64 overflow-y-auto rounded-xl bg-gray-900 dark:bg-black p-4 font-mono text-xs text-text-secondary-dark border border-subtle-dark shadow-inner">
                         <div class="space-y-1">
                             <p class="animate-fade-in">
-                                <span class="text-sky-400">2024-01-20 14:30:00</span> - 
-                                <span class="text-purple-400">Node 1</span> - 
+                                <span class="text-sky-400">2024-01-20 14:30:00</span> -
+                                <span class="text-purple-400">Node 1</span> -
                                 <span class="text-emerald-400">Module A</span>: Starting simulation...
                             </p>
                             <p class="animate-fade-in" style="animation-delay: 50ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:05</span> - 
-                                <span class="text-purple-400">Node 1</span> - 
+                                <span class="text-sky-400">2024-01-20 14:30:05</span> -
+                                <span class="text-purple-400">Node 1</span> -
                                 <span class="text-emerald-400">Module A</span>: Simulation running...
                             </p>
                             <p class="animate-fade-in" style="animation-delay: 100ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:10</span> - 
-                                <span class="text-purple-400">Node 1</span> - 
+                                <span class="text-sky-400">2024-01-20 14:30:10</span> -
+                                <span class="text-purple-400">Node 1</span> -
                                 <span class="text-emerald-400">Module A</span>: EPS: 9800, Kafka: 4900, CH: 1950
                             </p>
                             <p class="animate-fade-in" style="animation-delay: 150ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:15</span> - 
-                                <span class="text-purple-400">Node 1</span> - 
+                                <span class="text-sky-400">2024-01-20 14:30:15</span> -
+                                <span class="text-purple-400">Node 1</span> -
                                 <span class="text-emerald-400">Module A</span>: EPS: 9900, Kafka: 4950, CH: 1980
                             </p>
                             <p class="animate-fade-in" style="animation-delay: 200ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:20</span> - 
-                                <span class="text-purple-400">Node 1</span> - 
+                                <span class="text-sky-400">2024-01-20 14:30:20</span> -
+                                <span class="text-purple-400">Node 1</span> -
                                 <span class="text-emerald-400">Module A</span>: EPS: 10100, Kafka: 5050, CH: 2020
                             </p>
                             <p class="animate-fade-in" style="animation-delay: 250ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:25</span> - 
-                                <span class="text-purple-400">Node 2</span> - 
+                                <span class="text-sky-400">2024-01-20 14:30:25</span> -
+                                <span class="text-purple-400">Node 2</span> -
                                 <span class="text-yellow-400">Module B</span>: Initializing...
                             </p>
                             <p class="animate-fade-in" style="animation-delay: 300ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:30</span> - 
-                                <span class="text-purple-400">Node 3</span> - 
+                                <span class="text-sky-400">2024-01-20 14:30:30</span> -
+                                <span class="text-purple-400">Node 3</span> -
                                 <span class="text-emerald-400">Module A</span>: Heartbeat OK.
                             </p>
                             <p class="animate-fade-in" style="animation-delay: 350ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:35</span> - 
-                                <span class="text-purple-400">Node 5</span> - 
+                                <span class="text-sky-400">2024-01-20 14:30:35</span> -
+                                <span class="text-purple-400">Node 5</span> -
                                 <span class="text-emerald-400">Module A</span>: Load at 75% capacity.
                             </p>
                             <p class="animate-fade-in" style="animation-delay: 400ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:40</span> - 
-                                <span class="text-purple-400">Node 1</span> - 
+                                <span class="text-sky-400">2024-01-20 14:30:40</span> -
+                                <span class="text-purple-400">Node 1</span> -
                                 <span class="text-emerald-400">Module A</span>: Metric update successful.
                             </p>
                             <p class="animate-fade-in" style="animation-delay: 450ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:45</span> - 
-                                <span class="text-red-400">Node 4</span> - 
+                                <span class="text-sky-400">2024-01-20 14:30:45</span> -
+                                <span class="text-red-400">Node 4</span> -
                                 <span class="text-gray-500">System</span>: Node is Inactive. No logs to display.
                             </p>
                         </div>

@@ -1,0 +1,58 @@
+{"level":"warn","error":"failed to write nodes config file: open src/configs/nodes.yaml: no such file or directory","time":"2025-10-24T11:31:03+05:30","message":"Failed to load nodes config"}
+{"level":"warn","time":"2025-10-24T11:31:03+05:30","message":"Node management features may not be available"}
+{"level":"warn","error":"failed to write app config file: open src/configs/config.yaml: no such file or directory","time":"2025-10-24T11:31:03+05:30","message":"Failed to load app config"}
+{"level":"warn","time":"2025-10-24T11:31:03+05:30","message":"App configuration features may not be available"}
+{"level":"info","version":"1.0.0","time":"2025-10-24T11:31:03+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-24T11:31:03+05:30","message":"Serving static files"}
+{"level":"warn","error":"failed to load config: failed to read config file: open src/configs/config.yaml: no such file or directory","time":"2025-10-24T11:31:03+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-24T11:31:03+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-24T11:31:03+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-24T11:33:12+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-24T11:33:12+05:30","message":"Serving static files"}
+{"level":"warn","error":"failed to load config: failed to read config file: open src/configs/config.yaml: no such file or directory","time":"2025-10-24T11:33:12+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-24T11:33:12+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-24T11:33:12+05:30","message":"Open in browser"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:17+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:17+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"info","node":"System","module":"Kubernetes","type":"info","time":"2025-10-24T11:33:17+05:30","message":"Fetching pod data from Kubernetes API"}
+{"level":"error","node":"System","module":"Kubernetes","type":"error","time":"2025-10-24T11:33:17+05:30","message":"Failed to connect to Kubernetes API: Get \"http://127.0.0.1:8001/api/v1/pods\": dial tcp 127.0.0.1:8001: connect: connection refused"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:17+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:17+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"info","node":"System","module":"Kubernetes","type":"info","time":"2025-10-24T11:33:17+05:30","message":"Fetching pod data from Kubernetes API"}
+{"level":"error","node":"System","module":"Kubernetes","type":"error","time":"2025-10-24T11:33:17+05:30","message":"Failed to connect to Kubernetes API: Get \"http://127.0.0.1:8001/api/v1/pods\": dial tcp 127.0.0.1:8001: connect: connection refused"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:18+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"info","node":"System","module":"Kubernetes","type":"info","time":"2025-10-24T11:33:18+05:30","message":"Fetching pod data from Kubernetes API"}
+{"level":"error","node":"System","module":"Kubernetes","type":"error","time":"2025-10-24T11:33:18+05:30","message":"Failed to connect to Kubernetes API: Get \"http://127.0.0.1:8001/api/v1/pods\": dial tcp 127.0.0.1:8001: connect: connection refused"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:18+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:23+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:23+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"info","node":"System","module":"Kubernetes","type":"info","time":"2025-10-24T11:33:23+05:30","message":"Fetching pod data from Kubernetes API"}
+{"level":"error","node":"System","module":"Kubernetes","type":"error","time":"2025-10-24T11:33:23+05:30","message":"Failed to connect to Kubernetes API: Get \"http://127.0.0.1:8001/api/v1/pods\": dial tcp 127.0.0.1:8001: connect: connection refused"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:29+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:29+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:29+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"info","node":"System","module":"Kubernetes","type":"info","time":"2025-10-24T11:33:29+05:30","message":"Fetching pod data from Kubernetes API"}
+{"level":"error","node":"System","module":"Kubernetes","type":"error","time":"2025-10-24T11:33:29+05:30","message":"Failed to connect to Kubernetes API: Get \"http://127.0.0.1:8001/api/v1/pods\": dial tcp 127.0.0.1:8001: connect: connection refused"}
+{"level":"info","node":"System","module":"Kubernetes","type":"info","time":"2025-10-24T11:33:29+05:30","message":"Fetching pod data from Kubernetes API"}
+{"level":"error","node":"System","module":"Kubernetes","type":"error","time":"2025-10-24T11:33:29+05:30","message":"Failed to connect to Kubernetes API: Get \"http://127.0.0.1:8001/api/v1/pods\": dial tcp 127.0.0.1:8001: connect: connection refused"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:29+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:35+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"info","node":"System","module":"Kubernetes","type":"info","time":"2025-10-24T11:33:35+05:30","message":"Fetching pod data from Kubernetes API"}
+{"level":"error","node":"System","module":"Kubernetes","type":"error","time":"2025-10-24T11:33:35+05:30","message":"Failed to connect to Kubernetes API: Get \"http://127.0.0.1:8001/api/v1/pods\": dial tcp 127.0.0.1:8001: connect: connection refused"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:35+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:37+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-24T11:33:37+05:30","message":"Failed to get pod resource metrics: ClickHouse client not initialized"}
+{"level":"info","node":"System","module":"Kubernetes","type":"info","time":"2025-10-24T11:33:37+05:30","message":"Fetching pod data from Kubernetes API"}
+{"level":"error","node":"System","module":"Kubernetes","type":"error","time":"2025-10-24T11:33:37+05:30","message":"Failed to connect to Kubernetes API: Get \"http://127.0.0.1:8001/api/v1/pods\": dial tcp 127.0.0.1:8001: connect: connection refused"}
+{"level":"info","version":"1.0.0","time":"2025-10-24T11:53:03+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-24T11:53:03+05:30","message":"Serving static files"}
+{"level":"warn","error":"failed to load config: failed to read config file: open src/configs/config.yaml: no such file or directory","time":"2025-10-24T11:53:03+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-24T11:53:03+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-24T11:53:03+05:30","message":"Open in browser"}
+{"level":"error","node":"e2e-108-10","error":"failed to copy files to node: local main binary file src/migrate/finalvudatasim not found","time":"2025-10-24T11:54:25+05:30","message":"Failed to add node"}
+{"level":"error","node":"e2e-82-158","error":"failed to copy files to node: local main binary file src/migrate/finalvudatasim not found","time":"2025-10-24T11:54:25+05:30","message":"Failed to add node"}
+{"level":"error","node":"e2e-82-181","error":"failed to copy files to node: local main binary file src/migrate/finalvudatasim not found","time":"2025-10-24T11:54:25+05:30","message":"Failed to add node"}
+{"level":"error","node":"e2e-82-234","error":"failed to copy files to node: local main binary file src/migrate/finalvudatasim not found","time":"2025-10-24T11:54:25+05:30","message":"Failed to add node"}
+{"level":"error","node":"e2e-83-134","error":"failed to copy files to node: local main binary file src/migrate/finalvudatasim not found","time":"2025-10-24T11:54:25+05:30","message":"Failed to add node"}
+{"level":"error","node":"e2e-83-184","error":"failed to copy files to node: local main binary file src/migrate/finalvudatasim not found","time":"2025-10-24T11:54:25+05:30","message":"Failed to add node"}
+{"level":"error","node":"e2e-83-212","error":"failed to copy files to node: local main binary file src/migrate/finalvudatasim not found","time":"2025-10-24T11:54:25+05:30","message":"Failed to add node"}
