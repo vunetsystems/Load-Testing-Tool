@@ -32,13 +32,28 @@ type FinalVuDataSimMetrics struct {
 	Timestamp  time.Time `json:"timestamp,omitempty"`
 }
 
-// SystemMetrics represents basic system metrics (removed - only process metrics now)
+// SystemMetrics represents basic system metrics
+type SystemMetrics struct {
+	CPUUsage   float64   `json:"cpu_usage"`
+	MemTotal   float64   `json:"mem_total_mb"`
+	MemUsed    float64   `json:"mem_used_mb"`
+	MemFree    float64   `json:"mem_free_mb"`
+	DiskTotal  float64   `json:"disk_total_gb"`
+	DiskUsed   float64   `json:"disk_used_gb"`
+	DiskFree   float64   `json:"disk_free_gb"`
+	LoadAvg1   float64   `json:"load_avg_1"`
+	LoadAvg5   float64   `json:"load_avg_5"`
+	LoadAvg15  float64   `json:"load_avg_15"`
+	Uptime     string    `json:"uptime"`
+	Timestamp  time.Time `json:"timestamp"`
+}
 
-// MetricsCollector handles process metrics collection
+// MetricsCollector handles process and system metrics collection
 type MetricsCollector struct {
-	currentMetrics FinalVuDataSimMetrics
-	mutex          sync.RWMutex
-	nodeID         string
+	currentMetrics    FinalVuDataSimMetrics
+	currentSysMetrics SystemMetrics
+	mutex             sync.RWMutex
+	nodeID            string
 }
 
 // NewMetricsCollector creates a new metrics collector
@@ -168,15 +183,121 @@ func (mc *MetricsCollector) updateMetrics() {
 	}
 	metrics.Timestamp = time.Now()
 
-	// Store only process metrics
+	// Store process metrics
 	mc.currentMetrics = metrics
+
+	// Collect system metrics
+	sysMetrics := SystemMetrics{}
+
+	// CPU usage (from /proc/stat)
+	if cpuData, err := os.ReadFile("/proc/stat"); err == nil {
+		lines := strings.Split(string(cpuData), "\n")
+		if len(lines) > 0 {
+			fields := strings.Fields(lines[0])
+			if len(fields) >= 8 {
+				var total, idle uint64
+				for i := 1; i < len(fields); i++ {
+					if val, err := strconv.ParseUint(fields[i], 10, 64); err == nil {
+						total += val
+						if i == 4 { // idle is the 5th field (index 4)
+							idle = val
+						}
+					}
+				}
+				if total > 0 {
+					sysMetrics.CPUUsage = float64(total-idle) / float64(total) * 100
+				}
+			}
+		}
+	}
+
+	// Memory info (from /proc/meminfo)
+	if memData, err := os.ReadFile("/proc/meminfo"); err == nil {
+		lines := strings.Split(string(memData), "\n")
+		for _, line := range lines {
+			fields := strings.Fields(line)
+			if len(fields) >= 2 {
+				switch fields[0] {
+				case "MemTotal:":
+					if val, err := strconv.ParseFloat(fields[1], 64); err == nil {
+						sysMetrics.MemTotal = val / 1024 // Convert KB to MB
+					}
+				case "MemFree:":
+					if val, err := strconv.ParseFloat(fields[1], 64); err == nil {
+						sysMetrics.MemFree = val / 1024 // Convert KB to MB
+					}
+				}
+			}
+		}
+		sysMetrics.MemUsed = sysMetrics.MemTotal - sysMetrics.MemFree
+	}
+
+	// Disk usage (using df command for root filesystem)
+	if dfOut, err := exec.Command("df", "-BG", "/").Output(); err == nil {
+		lines := strings.Split(strings.TrimSpace(string(dfOut)), "\n")
+		if len(lines) >= 2 {
+			fields := strings.Fields(lines[1])
+			if len(fields) >= 4 {
+				if total, err := strconv.ParseFloat(strings.TrimSuffix(fields[1], "G"), 64); err == nil {
+					sysMetrics.DiskTotal = total
+				}
+				if used, err := strconv.ParseFloat(strings.TrimSuffix(fields[2], "G"), 64); err == nil {
+					sysMetrics.DiskUsed = used
+				}
+				if avail, err := strconv.ParseFloat(strings.TrimSuffix(fields[3], "G"), 64); err == nil {
+					sysMetrics.DiskFree = avail
+				}
+			}
+		}
+	}
+
+	// Load average (from /proc/loadavg)
+	if loadData, err := os.ReadFile("/proc/loadavg"); err == nil {
+		fields := strings.Fields(string(loadData))
+		if len(fields) >= 3 {
+			if val, err := strconv.ParseFloat(fields[0], 64); err == nil {
+				sysMetrics.LoadAvg1 = val
+			}
+			if val, err := strconv.ParseFloat(fields[1], 64); err == nil {
+				sysMetrics.LoadAvg5 = val
+			}
+			if val, err := strconv.ParseFloat(fields[2], 64); err == nil {
+				sysMetrics.LoadAvg15 = val
+			}
+		}
+	}
+
+	// Uptime (from /proc/uptime)
+	if uptimeData, err := os.ReadFile("/proc/uptime"); err == nil {
+		fields := strings.Fields(string(uptimeData))
+		if len(fields) >= 1 {
+			if val, err := strconv.ParseFloat(fields[0], 64); err == nil {
+				days := int(val / 86400)
+				hours := int((val - float64(days*86400)) / 3600)
+				minutes := int((val - float64(days*86400+hours*3600)) / 60)
+				sysMetrics.Uptime = fmt.Sprintf("%dd %dh %dm", days, hours, minutes)
+			}
+		}
+	}
+
+	sysMetrics.Timestamp = time.Now()
+
+	// Store system metrics
+	mc.currentSysMetrics = sysMetrics
 }
 
-// GetCurrentMetrics returns the current metrics (thread-safe)
+// GetCurrentMetrics returns the current process metrics (thread-safe)
 func (mc *MetricsCollector) GetCurrentMetrics() FinalVuDataSimMetrics {
 	mc.mutex.RLock()
 	defer mc.mutex.RUnlock()
 	return mc.currentMetrics
+}
+
+// GetCurrentSystemMetrics returns the current system metrics (thread-safe)
+func (mc *MetricsCollector) GetCurrentSystemMetrics() SystemMetrics {
+	mc.mutex.RLock()
+	defer mc.mutex.RUnlock()
+	return mc.currentSysMetrics
 }
 
 // HTTP handler for /api/system/metrics
@@ -193,16 +314,32 @@ func (mc *MetricsCollector) handleMetrics(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json")
 
 	metrics := mc.GetCurrentMetrics()
+	sysMetrics := mc.GetCurrentSystemMetrics()
 
 	resp := map[string]interface{}{
 		"nodeId":      mc.nodeID,
 		"timestamp":   metrics.Timestamp,
-		"running":     metrics.Running,
-		"pid":         metrics.PID,
-		"start_time":  metrics.StartTime,
-		"cpu_percent": metrics.CPUPercent,
-		"mem_mb":      metrics.MemMB,
-		"cmdline":     metrics.Cmdline,
+		"process": map[string]interface{}{
+			"running":     metrics.Running,
+			"pid":         metrics.PID,
+			"start_time":  metrics.StartTime,
+			"cpu_percent": metrics.CPUPercent,
+			"mem_mb":      metrics.MemMB,
+			"cmdline":     metrics.Cmdline,
+		},
+		"system": map[string]interface{}{
+			"cpu_usage":    sysMetrics.CPUUsage,
+			"mem_total_mb": sysMetrics.MemTotal,
+			"mem_used_mb":  sysMetrics.MemUsed,
+			"mem_free_mb":  sysMetrics.MemFree,
+			"disk_total_gb": sysMetrics.DiskTotal,
+			"disk_used_gb":  sysMetrics.DiskUsed,
+			"disk_free_gb":  sysMetrics.DiskFree,
+			"load_avg_1":   sysMetrics.LoadAvg1,
+			"load_avg_5":   sysMetrics.LoadAvg5,
+			"load_avg_15":  sysMetrics.LoadAvg15,
+			"uptime":       sysMetrics.Uptime,
+		},
 	}
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {

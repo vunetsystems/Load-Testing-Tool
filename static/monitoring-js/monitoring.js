@@ -41,7 +41,7 @@ function setupNavigation() {
     const backButton = document.getElementById('back-to-dashboard-btn');
     if (backButton) {
         backButton.addEventListener('click', function() {
-            window.location.href = '/static/index.html';
+            window.location.href = '/';
         });
     }
 
@@ -278,7 +278,7 @@ function initializeCharts() {
 const monitoringButton = document.getElementById('monitoring-btn');
 if (monitoringButton) {
     monitoringButton.addEventListener('click', function() {
-        window.location.href = 'http://164.52.213.158:8086/static/monitoring.html';
+        window.location.href = '/static/monitoring.html';
     });
 }
 

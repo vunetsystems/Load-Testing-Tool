@@ -6,6 +6,15 @@ class LogsManager {
         this.lastLogUpdate = 0;
     }
 
+    bindReloadButton() {
+        const reloadBtn = document.getElementById('reload-logs-btn');
+        if (reloadBtn) {
+            reloadBtn.addEventListener('click', () => this.clearLogs());
+        } else {
+            console.error('Reload logs button not found');
+        }
+    }
+
     async loadLogs() {
         try {
             const response = await this.manager.callAPI('/api/logs?limit=50');
@@ -74,6 +83,11 @@ class LogsManager {
 
             container.appendChild(logElement);
         });
+    }
+
+    clearLogs() {
+        this.logEntries = [];
+        this.displayLogs([]);
     }
 
     getLogTypeClass(type) {

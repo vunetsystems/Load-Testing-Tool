@@ -14,6 +14,7 @@ class VuDataSimManager {
         this.clickHouseMetrics = new ClickHouseMetrics(this);
         this.o11ySources = new O11ySources(this);
         this.logsManager = new LogsManager(this);
+        this.logsManager.bindReloadButton(); // Bind the reload button after initialization
         this.metricsManager = new MetricsManager(this);
 
         this.initializeComponents();
@@ -140,6 +141,9 @@ class VuDataSimManager {
             kafkaTopicMetricsTable: document.getElementById('kafka-topic-metrics-table'),
             nodeFilterSelect: document.getElementById('node-filter-select'),
 
+            // Monitoring button
+            monitoringBtn: document.getElementById('monitoring-btn'),
+
             // Real-time status
         };
 
@@ -226,6 +230,18 @@ class VuDataSimManager {
             });
         } else {
             console.error('ClickHouse Metrics button not found!');
+        }
+
+        // Monitoring button event listeners
+        console.log('Monitoring Button element:', this.elements.monitoringBtn);
+
+        if (this.elements.monitoringBtn) {
+            this.elements.monitoringBtn.addEventListener('click', () => {
+                console.log('Monitoring button clicked!');
+                window.location.href = '/static/monitoring.html';
+            });
+        } else {
+            console.error('Monitoring button not found!');
         }
 
         // Modal event listeners
