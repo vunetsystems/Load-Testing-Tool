@@ -34,18 +34,19 @@ type FinalVuDataSimMetrics struct {
 
 // SystemMetrics represents basic system metrics
 type SystemMetrics struct {
-	CPUUsage   float64   `json:"cpu_usage"`
-	MemTotal   float64   `json:"mem_total_mb"`
-	MemUsed    float64   `json:"mem_used_mb"`
-	MemFree    float64   `json:"mem_free_mb"`
-	DiskTotal  float64   `json:"disk_total_gb"`
-	DiskUsed   float64   `json:"disk_used_gb"`
-	DiskFree   float64   `json:"disk_free_gb"`
-	LoadAvg1   float64   `json:"load_avg_1"`
-	LoadAvg5   float64   `json:"load_avg_5"`
-	LoadAvg15  float64   `json:"load_avg_15"`
-	Uptime     string    `json:"uptime"`
-	Timestamp  time.Time `json:"timestamp"`
+	CPUUsage    float64   `json:"cpu_usage"`
+	CPUCores    int       `json:"cpu_cores"`
+	MemTotal    float64   `json:"mem_total_mb"`
+	MemUsed     float64   `json:"mem_used_mb"`
+	MemFree     float64   `json:"mem_free_mb"`
+	DiskTotal   float64   `json:"disk_total_gb"`
+	DiskUsed    float64   `json:"disk_used_gb"`
+	DiskFree    float64   `json:"disk_free_gb"`
+	LoadAvg1    float64   `json:"load_avg_1"`
+	LoadAvg5    float64   `json:"load_avg_5"`
+	LoadAvg15   float64   `json:"load_avg_15"`
+	Uptime      string    `json:"uptime"`
+	Timestamp   time.Time `json:"timestamp"`
 }
 
 // MetricsCollector handles process and system metrics collection
@@ -189,6 +190,18 @@ func (mc *MetricsCollector) updateMetrics() {
 	// Collect system metrics
 	sysMetrics := SystemMetrics{}
 
+	// CPU cores (from /proc/cpuinfo)
+	if cpuInfo, err := os.ReadFile("/proc/cpuinfo"); err == nil {
+		lines := strings.Split(string(cpuInfo), "\n")
+		coreCount := 0
+		for _, line := range lines {
+			if strings.HasPrefix(line, "processor") {
+				coreCount++
+			}
+		}
+		sysMetrics.CPUCores = coreCount
+	}
+
 	// CPU usage (from /proc/stat)
 	if cpuData, err := os.ReadFile("/proc/stat"); err == nil {
 		lines := strings.Split(string(cpuData), "\n")
@@ -328,17 +341,18 @@ func (mc *MetricsCollector) handleMetrics(w http.ResponseWriter, r *http.Request
 			"cmdline":     metrics.Cmdline,
 		},
 		"system": map[string]interface{}{
-			"cpu_usage":    sysMetrics.CPUUsage,
-			"mem_total_mb": sysMetrics.MemTotal,
-			"mem_used_mb":  sysMetrics.MemUsed,
-			"mem_free_mb":  sysMetrics.MemFree,
+			"cpu_usage":     sysMetrics.CPUUsage,
+			"cpu_cores":     sysMetrics.CPUCores,
+			"mem_total_mb":  sysMetrics.MemTotal,
+			"mem_used_mb":   sysMetrics.MemUsed,
+			"mem_free_mb":   sysMetrics.MemFree,
 			"disk_total_gb": sysMetrics.DiskTotal,
 			"disk_used_gb":  sysMetrics.DiskUsed,
 			"disk_free_gb":  sysMetrics.DiskFree,
-			"load_avg_1":   sysMetrics.LoadAvg1,
-			"load_avg_5":   sysMetrics.LoadAvg5,
-			"load_avg_15":  sysMetrics.LoadAvg15,
-			"uptime":       sysMetrics.Uptime,
+			"load_avg_1":    sysMetrics.LoadAvg1,
+			"load_avg_5":    sysMetrics.LoadAvg5,
+			"load_avg_15":   sysMetrics.LoadAvg15,
+			"uptime":        sysMetrics.Uptime,
 		},
 	}
 
