@@ -182,21 +182,6 @@
                     <span>Sync Configs</span>
                 </button>
 
-                <!-- Sync Status Messages -->
-                <div id="sync-status-container" class="hidden">
-                    <div id="sync-success-message" class="p-3 rounded-lg bg-success/20 dark:bg-success-dark/20 border border-success/30 dark:border-success-dark/30 hidden">
-                        <div class="flex items-center gap-2 text-success dark:text-success-dark">
-                            <span class="material-symbols-outlined text-sm">check_circle</span>
-                            <span class="text-sm font-medium">Configs synced successfully!</span>
-                        </div>
-                    </div>
-                    <div id="sync-error-message" class="p-3 rounded-lg bg-danger/20 dark:bg-danger-dark/20 border border-danger/30 dark:border-danger-dark/30 hidden">
-                        <div class="flex items-center gap-2 text-danger dark:text-danger-dark">
-                            <span class="material-symbols-outlined text-sm">error</span>
-                            <span class="text-sm font-medium">Failed to sync configs. Please try again.</span>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="text-sm text-text-secondary-light dark:text-text-secondary-dark">
                     <div class="flex items-center gap-2 mb-2">
@@ -256,6 +241,66 @@
             </div>
 
             <div class="space-y-8">
+                <!-- Configuration Sync Status Visualization -->
+                <div class="mt-8">
+                    <div class="w-full max-w-2xl rounded-xl bg-surface-light dark:bg-surface-dark p-6 sm:p-8 shadow-lg border border-subtle-light dark:border-subtle-dark">
+                        <!-- Headline -->
+                        <h3 class="text-text-light dark:text-text-dark tracking-tight text-2xl font-bold leading-tight text-left pb-4">Configuration Sync Status</h3>
+                        <!-- Progress Bar -->
+                        <div class="flex flex-col gap-2 mb-8">
+                            <div class="flex gap-4 justify-between items-center">
+                                <p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Overall Progress</p>
+                                <p class="text-primary dark:text-primary-dark text-sm font-semibold leading-normal" id="sync-progress-percent">0%</p>
+                            </div>
+                            <div class="rounded-full h-2 bg-subtle-light dark:bg-subtle-dark">
+                                <div class="h-2 rounded-full bg-primary dark:bg-primary-dark transition-all duration-500" style="width: 0%;" id="sync-progress-bar"></div>
+                            </div>
+                            <p class="text-text-secondary-light dark:text-text-secondary-dark text-xs font-normal leading-normal" id="sync-status-text">No sync in progress</p>
+                        </div>
+                        <!-- Timeline / Stepper -->
+                        <div class="grid grid-cols-[auto_1fr] gap-x-4">
+                            <!-- Step 1: Pending -->
+                            <div class="flex flex-col items-center">
+                                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500" id="step1-container">
+                                    <span class="material-symbols-outlined text-xl" id="step1-icon">schedule</span>
+                                </div>
+                                <div class="w-0.5 grow bg-gray-300 dark:bg-gray-600"></div>
+                            </div>
+                            <div class="pb-8">
+                                <div class="p-4 rounded-lg bg-subtle-light/50 dark:bg-subtle-dark/50 border border-subtle-light dark:border-subtle-dark hover:shadow-md transition-shadow" id="step1-box">
+                                    <p class="text-text-secondary-light dark:text-text-secondary-dark text-base font-semibold leading-normal" id="step1-title">EPS Split</p>
+                                    <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal" id="step1-text">Pending</p>
+                                </div>
+                            </div>
+                            <!-- Step 2: Pending -->
+                            <div class="flex flex-col items-center">
+                                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark" id="step2-container">
+                                    <span class="material-symbols-outlined text-xl" id="step2-icon">schedule</span>
+                                </div>
+                                <div class="w-0.5 grow bg-subtle-light dark:bg-subtle-dark"></div>
+                            </div>
+                            <div class="pb-8">
+                                <div class="p-4 rounded-lg bg-subtle-light/50 dark:bg-subtle-dark/50 border border-subtle-light dark:border-subtle-dark hover:shadow-md transition-shadow" id="step2-box">
+                                    <p class="text-text-secondary-light dark:text-text-secondary-dark text-base font-semibold leading-normal" id="step2-title">EPS Distribute</p>
+                                    <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal" id="step2-text">Pending</p>
+                                </div>
+                            </div>
+                            <!-- Step 3: Pending -->
+                            <div class="flex flex-col items-center">
+                                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark" id="step3-container">
+                                    <span class="material-symbols-outlined text-xl" id="step3-icon">schedule</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="p-4 rounded-lg bg-subtle-light/50 dark:bg-subtle-dark/50 border border-subtle-light dark:border-subtle-dark hover:shadow-md transition-shadow" id="step3-box">
+                                    <p class="text-text-secondary-light dark:text-text-secondary-dark text-base font-semibold leading-normal" id="step3-title">Conf.d Distribute</p>
+                                    <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal" id="step3-text">Pending</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Cluster Overview Table -->
                 <div>
                     <div class="flex items-center gap-2 mb-4">
@@ -873,19 +918,24 @@
                     </div>
                 </div>
 
-                <!-- Live finalvudatasim Process Metrics Table -->
+                <!-- Live Node Metrics Table -->
                 <div class="mt-8">
-                    <h3 class="text-xl font-semibold mb-4">Live finalvudatasim Process Metrics</h3>
+                    <h3 class="text-xl font-semibold mb-4">Live Node Metrics</h3>
                     <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
                                 <tr>
-                                    <th class="p-4 font-semibold">Running</th>
+                                    <th class="p-4 font-semibold">Node</th>
+                                    <th class="p-4 font-semibold">Process Running</th>
                                     <th class="p-4 font-semibold">PID</th>
                                     <th class="p-4 font-semibold">Start Time</th>
                                     <th class="p-4 font-semibold">CPU %</th>
                                     <th class="p-4 font-semibold">Memory (MB)</th>
-                                    <th class="p-4 font-semibold">Cmdline</th>
+                                    <th class="p-4 font-semibold">System CPU %</th>
+                                    <th class="p-4 font-semibold">System Memory (GB)</th>
+                                    <th class="p-4 font-semibold">Disk Used (GB)</th>
+                                    <th class="p-4 font-semibold">Load Avg</th>
+                                    <th class="p-4 font-semibold">Uptime</th>
                                 </tr>
                             </thead>
                             <tbody id="finalvudatasim-metrics-body">

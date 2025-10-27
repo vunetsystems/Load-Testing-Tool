@@ -4,15 +4,15 @@ include_module_dirs:
   Apache:
     enabled: false
   Azure_Firewall:
-    enabled: true
-  Azure_Redis_Cache:
-    enabled: true
-  LinuxMonitor:
     enabled: false
+  Azure_Redis_Cache:
+    enabled: false
+  LinuxMonitor:
+    enabled: true
   MongoDB:
     enabled: false
   Mssql:
-    enabled: false
+    enabled: true
 logging:
   console: false
   directory: /home/vunet/vuDataSim/vuDataSim/logs/

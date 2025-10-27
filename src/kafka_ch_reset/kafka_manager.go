@@ -1,6 +1,7 @@
 package kafka_ch_reset
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"regexp"
@@ -172,49 +173,6 @@ func (km *KafkaManager) LoadO11yConfig(confPath string) (*O11ySourceConfig, erro
 	return &config, nil
 }
 
-// recreateSingleTopic recreates a single topic by describing, deleting, and creating it
-func (km *KafkaManager) recreateSingleTopic(topicName string) (string, error) {
-	// Step 1: Describe the topic to get its metadata
-	metadata, err := km.DescribeTopic(topicName)
-	if err != nil {
-		// If topic doesn't exist, we'll create it with default settings
-		logger.Info().Str("topic", topicName).Msg("Topic does not exist, will create with default settings")
-	} else {
-		logger.Info().Str("topic", topicName).
-			Int("partitions", metadata.PartitionCount).
-			Int("replicationFactor", metadata.ReplicationFactor).
-			Msg("Found existing topic metadata")
-	}
-
-	// Step 2: Delete the topic (ignore errors if topic doesn't exist)
-	err = km.DeleteTopic(topicName)
-	if err != nil {
-		logger.Warn().Err(err).Str("topic", topicName).Msg("Failed to delete topic (may not exist)")
-	} else {
-		logger.Info().Str("topic", topicName).Msg("Topic deleted successfully")
-	}
-
-	// Step 3: Create the topic with the same or default settings
-	partitionCount := 1
-	replicationFactor := 1
-
-	if metadata != nil {
-		partitionCount = metadata.PartitionCount
-		replicationFactor = metadata.ReplicationFactor
-	}
-
-	err = km.CreateTopic(topicName, partitionCount, replicationFactor)
-	if err != nil {
-		return "", fmt.Errorf("failed to create topic %s: %v", topicName, err)
-	}
-
-	logger.Info().Str("topic", topicName).
-		Int("partitions", partitionCount).
-		Int("replicationFactor", replicationFactor).
-		Msg("Topic created successfully")
-
-	return "recreated", nil
-}
 
 // RecreateTopicsForO11ySources recreates topics for enabled o11y sources from conf.yml using parallel processing
 func (km *KafkaManager) RecreateTopicsForO11ySources() (map[string]interface{}, error) {
@@ -287,35 +245,105 @@ func (km *KafkaManager) RecreateTopicsForO11ySources() (map[string]interface{}, 
 		}
 	}
 
-	// Step 4: Process all topics in parallel using goroutines
-	var wg sync.WaitGroup
+	// Step 4: Describe all topics in parallel first
+	metadataMap := make(map[string]*TopicMetadata)
 	var mu sync.Mutex
+	var describeError error
+	var wg sync.WaitGroup
 
-	// Channel to collect errors from goroutines
-	errorChan := make(chan string, len(allTopics))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	for _, topicName := range allTopics {
 		wg.Add(1)
 		go func(topic string) {
 			defer wg.Done()
-
-			topicResult, err := km.recreateSingleTopic(topic)
+			metadata, err := km.DescribeTopic(topic)
 			mu.Lock()
+			defer mu.Unlock()
 			if err != nil {
+				describeError = err
 				result["success"] = false
-				errorMsg := fmt.Sprintf("Failed to recreate topic %s: %v", topic, err)
+				errorMsg := fmt.Sprintf("Topic %s does not exist: %v", topic, err)
 				result["errors"] = append(result["errors"].([]string), errorMsg)
-				errorChan <- errorMsg
-			} else {
-				result["results"].(map[string]string)[topic] = topicResult
+				cancel() // Cancel all other goroutines
+				return
 			}
-			mu.Unlock()
+			metadataMap[topic] = metadata
 		}(topicName)
 	}
 
-	// Wait for all goroutines to complete
 	wg.Wait()
-	close(errorChan)
+
+	if describeError != nil {
+		logger.Error().Err(describeError).Msg("Stopping topic recreation due to describe error")
+		return result, describeError
+	}
+
+	logger.Info().Int("total_topics", len(allTopics)).Msg("All topics described successfully")
+
+	// Step 5: Delete all topics in parallel
+	for _, topicName := range allTopics {
+		wg.Add(1)
+		go func(topic string) {
+			defer wg.Done()
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				err := km.DeleteTopic(topic)
+				mu.Lock()
+				if err != nil {
+					result["success"] = false
+					errorMsg := fmt.Sprintf("Failed to delete topic %s: %v", topic, err)
+					result["errors"] = append(result["errors"].([]string), errorMsg)
+					cancel() // Cancel all other goroutines
+				}
+				mu.Unlock()
+			}
+		}(topicName)
+	}
+
+	wg.Wait()
+
+	if !result["success"].(bool) {
+		logger.Error().Msg("Stopping topic recreation due to delete errors")
+		return result, fmt.Errorf("delete errors occurred")
+	}
+
+	logger.Info().Int("total_topics", len(allTopics)).Msg("All topics deleted successfully")
+
+	// Step 6: Create all topics in parallel
+	for _, topicName := range allTopics {
+		wg.Add(1)
+		go func(topic string) {
+			defer wg.Done()
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				metadata := metadataMap[topic]
+				err := km.CreateTopic(topic, metadata.PartitionCount, metadata.ReplicationFactor)
+				mu.Lock()
+				if err != nil {
+					result["success"] = false
+					errorMsg := fmt.Sprintf("Failed to create topic %s: %v", topic, err)
+					result["errors"] = append(result["errors"].([]string), errorMsg)
+					cancel() // Cancel all other goroutines
+				} else {
+					result["results"].(map[string]string)[topic] = "recreated"
+				}
+				mu.Unlock()
+			}
+		}(topicName)
+	}
+
+	wg.Wait()
+
+	if !result["success"].(bool) {
+		logger.Error().Msg("Stopping topic recreation due to create errors")
+		return result, fmt.Errorf("create errors occurred")
+	}
 
 	logger.Info().Int("total_topics", len(allTopics)).Msg("Completed parallel topic recreation")
 

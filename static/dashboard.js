@@ -353,41 +353,129 @@ class DashboardManager {
 
     async fetchFinalVuDataSimMetrics() {
         try {
-            // Use proxy endpoint instead of direct call to avoid CORS
-            const response = await this.manager.callAPI('/api/proxy/metrics');
-            console.log('=== FINALVUDATASIM PROCESS METRICS ===');
-            console.log('Full response:', response);
-            console.log('Response data:', response.data);
-            console.log('Response success:', response.success);
-            // The proxy endpoint returns the raw metrics data directly, not wrapped in success/data structure
-            if (response && response.running !== undefined) {
-                console.log('Valid process metrics data received, displaying...');
-                this.displayFinalVuDataSimMetrics(response);
-            } else {
-                console.log('No valid process metrics data in response');
-                this.displayFinalVuDataSimMetrics({}); // Show empty row on error
+            // Directly fetch nodes from API instead of relying on loaded nodeData
+            console.log('Fetching nodes from API...');
+            const nodesResponse = await this.manager.callAPI('/api/nodes');
+            if (!nodesResponse.success || !nodesResponse.data) {
+                console.log('Failed to fetch nodes from API');
+                this.displayFinalVuDataSimMetrics([]);
+                return;
             }
+
+            // Filter for enabled nodes
+            const enabledNodes = nodesResponse.data.filter(node => node.enabled);
+            console.log('Enabled nodes found:', enabledNodes.map(n => n.name));
+
+            if (enabledNodes.length === 0) {
+                console.log('No enabled nodes found for metrics');
+                this.displayFinalVuDataSimMetrics([]);
+                return;
+            }
+
+            const allMetrics = [];
+
+            // Fetch metrics from each enabled node
+            for (const node of enabledNodes) {
+                try {
+                    console.log(`Fetching metrics from node: ${node.name}`);
+
+                    // Use proxy endpoint with node name parameter
+                    const response = await this.manager.callAPI(`/api/proxy/metrics/${node.name}`);
+                    console.log(`=== METRICS FROM ${node.name} ===`);
+                    console.log('Full response:', response);
+
+                    // The proxy endpoint returns the raw metrics data directly
+                    if (response && typeof response === 'object' && response.nodeId) {
+                        console.log(`Valid metrics data received from ${node.name}, adding to display...`);
+                        // Add node name to the response for display
+                        response.nodeName = node.name;
+                        allMetrics.push(response);
+                    } else {
+                        console.log(`No valid metrics data from ${node.name}, adding error entry`);
+                        // Add error entry for this node
+                        allMetrics.push({
+                            nodeId: node.name,
+                            nodeName: node.name,
+                            process: { running: false, pid: 0, start_time: 'N/A', cpu_percent: 0, mem_mb: 0, cmdline: 'N/A' },
+                            system: { cpu_usage: 0, cpu_cores: 0, mem_total_mb: 0, mem_used_mb: 0, mem_free_mb: 0, disk_total_gb: 0, disk_used_gb: 0, disk_free_gb: 0, load_avg_1: 0, load_avg_5: 0, load_avg_15: 0, uptime: 'N/A' },
+                            timestamp: new Date().toISOString(),
+                            error: 'Metrics unavailable'
+                        });
+                    }
+                } catch (nodeError) {
+                    console.error(`Error fetching metrics from ${node.name}:`, nodeError);
+                    // Add error entry for this node
+                    allMetrics.push({
+                        nodeId: node.name,
+                        nodeName: node.name,
+                        process: { running: false, pid: 0, start_time: 'N/A', cpu_percent: 0, mem_mb: 0, cmdline: 'N/A' },
+                        system: { cpu_usage: 0, cpu_cores: 0, mem_total_mb: 0, mem_used_mb: 0, mem_free_mb: 0, disk_total_gb: 0, disk_used_gb: 0, disk_free_gb: 0, load_avg_1: 0, load_avg_5: 0, load_avg_15: 0, uptime: 'N/A' },
+                        timestamp: new Date().toISOString(),
+                        error: 'Connection failed'
+                    });
+                }
+            }
+
+            console.log('All metrics collected:', allMetrics);
+            this.displayFinalVuDataSimMetrics(allMetrics);
+
         } catch (error) {
-            console.error('Error fetching finalvudatasim metrics:', error);
-            this.displayFinalVuDataSimMetrics({}); // Show empty row on error
+            console.error('Error in fetchFinalVuDataSimMetrics:', error);
+            this.displayFinalVuDataSimMetrics([]);
         }
     }
 
-    displayFinalVuDataSimMetrics(metrics) {
+    displayFinalVuDataSimMetrics(metricsArray) {
         const tbody = document.getElementById('finalvudatasim-metrics-body');
         if (!tbody) return;
         tbody.innerHTML = '';
-        // Robust running detection: if running is true OR pid is present and > 0
-        const isRunning = metrics.running || (metrics.pid && metrics.pid > 0);
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="p-4">${isRunning ? '<span class="text-success font-bold">Yes</span>' : '<span class="text-danger font-bold">No</span>'}</td>
-            <td class="p-4">${metrics.pid && metrics.pid > 0 ? metrics.pid : '-'}</td>
-            <td class="p-4">${metrics.start_time ? metrics.start_time : '-'}</td>
-            <td class="p-4">${typeof metrics.cpu_percent === 'number' ? metrics.cpu_percent.toFixed(2) : '-'}</td>
-            <td class="p-4">${typeof metrics.mem_mb === 'number' ? metrics.mem_mb.toFixed(2) : '-'}</td>
-            <td class="p-4">${metrics.cmdline ? metrics.cmdline : '-'}</td>
-        `;
-        tbody.appendChild(row);
+
+        if (!Array.isArray(metricsArray) || metricsArray.length === 0) {
+            // Show empty state
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td colspan="11" class="p-4 text-center text-text-secondary-light dark:text-text-secondary-dark">
+                    No metrics available
+                </td>
+            `;
+            tbody.appendChild(row);
+            return;
+        }
+
+        // Display metrics for each node
+        metricsArray.forEach(metrics => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200';
+
+            // Process metrics
+            const process = metrics.process || {};
+            const system = metrics.system || {};
+
+            // Robust running detection
+            const isRunning = process.running || (process.pid && process.pid > 0);
+
+            // Format load average
+            const loadAvg = system.load_avg_1 !== undefined ?
+                `${system.load_avg_1.toFixed(2)}, ${system.load_avg_5.toFixed(2)}, ${system.load_avg_15.toFixed(2)}` : '-';
+
+            // Format memory values
+            const memUsedGB = system.mem_used_mb ? (system.mem_used_mb / 1024).toFixed(1) : '-';
+            const memTotalGB = system.mem_total_mb ? (system.mem_total_mb / 1024).toFixed(1) : '-';
+
+            row.innerHTML = `
+                <td class="p-4 font-medium">${metrics.nodeName || metrics.nodeId || 'Unknown'}</td>
+                <td class="p-4">${isRunning ? '<span class="text-success font-bold">Yes</span>' : '<span class="text-danger font-bold">No</span>'}</td>
+                <td class="p-4">${process.pid && process.pid > 0 ? process.pid : '-'}</td>
+                <td class="p-4">${process.start_time && process.start_time !== '' ? process.start_time : '-'}</td>
+                <td class="p-4">${typeof process.cpu_percent === 'number' ? process.cpu_percent.toFixed(2) : '-'}</td>
+                <td class="p-4">${typeof process.mem_mb === 'number' ? process.mem_mb.toFixed(2) : '-'}</td>
+                <td class="p-4">${typeof system.cpu_usage === 'number' ? system.cpu_usage.toFixed(2) : '-'}</td>
+                <td class="p-4">${memUsedGB}/${memTotalGB} GB</td>
+                <td class="p-4">${typeof system.disk_used_gb === 'number' ? system.disk_used_gb.toFixed(1) : '-'}/${typeof system.disk_total_gb === 'number' ? system.disk_total_gb.toFixed(1) : '-'} GB</td>
+                <td class="p-4">${loadAvg}</td>
+                <td class="p-4">${system.uptime || '-'}</td>
+            `;
+            tbody.appendChild(row);
+        });
     }
 }

@@ -72,9 +72,24 @@ class VuDataSimManager {
             selectedCategorySources: document.getElementById('selected-category-sources'),
             epsSelect: document.getElementById('eps-select'),
             syncConfigsBtn: document.getElementById('sync-configs-btn'),
-            syncStatusContainer: document.getElementById('sync-status-container'),
-            syncSuccessMessage: document.getElementById('sync-success-message'),
-            syncErrorMessage: document.getElementById('sync-error-message'),
+            syncProgressPercent: document.getElementById('sync-progress-percent'),
+            syncProgressBar: document.getElementById('sync-progress-bar'),
+            syncStatusText: document.getElementById('sync-status-text'),
+            step1Icon: document.getElementById('step1-icon'),
+            step1Text: document.getElementById('step1-text'),
+            step1Title: document.getElementById('step1-title'),
+            step1Container: document.getElementById('step1-container'),
+            step1Box: document.getElementById('step1-box'),
+            step2Icon: document.getElementById('step2-icon'),
+            step2Text: document.getElementById('step2-text'),
+            step2Title: document.getElementById('step2-title'),
+            step2Container: document.getElementById('step2-container'),
+            step2Box: document.getElementById('step2-box'),
+            step3Icon: document.getElementById('step3-icon'),
+            step3Text: document.getElementById('step3-text'),
+            step3Title: document.getElementById('step3-title'),
+            step3Container: document.getElementById('step3-container'),
+            step3Box: document.getElementById('step3-box'),
 
             // Node management elements
             nodeManagementBtn: document.getElementById('node-management-btn'),
@@ -371,12 +386,16 @@ class VuDataSimManager {
     }
 
     async callAPI(endpoint, method = 'GET', data = null) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30-second timeout
+
         try {
             const config = {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                signal: controller.signal,
             };
 
             if (data) {
@@ -384,6 +403,7 @@ class VuDataSimManager {
             }
 
             const response = await fetch(`${this.apiBaseUrl}${endpoint}`, config);
+            clearTimeout(timeoutId);
 
             // Always get the response body, even for error status codes
             const responseData = await response.json();
@@ -400,9 +420,14 @@ class VuDataSimManager {
             // Return the actual response data for successful responses
             return responseData;
         } catch (error) {
+            clearTimeout(timeoutId);
             console.error('API call failed:', error);
 
-            // Only return mock response for actual network errors, not HTTP error responses
+            if (error.name === 'AbortError') {
+                throw new Error('Request timed out after 30 seconds');
+            }
+
+            // Only return mock response for actual network errors, not HTTP error responses or timeouts
             if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('CORS')) {
                 console.warn('Network error detected, returning mock response:', error.message);
                 return {
@@ -412,7 +437,7 @@ class VuDataSimManager {
                 };
             }
 
-            // For HTTP errors (including 500 errors), re-throw the error so calling code can handle it
+            // For HTTP errors (including 500 errors) and timeouts, re-throw the error so calling code can handle it
             throw error;
         }
     }
@@ -466,34 +491,24 @@ class VuDataSimManager {
     }
 
     async cleanKafkaAndClickHouse() {
-        try {
-            // Disable the button and show loading state
-            const button = this.elements.kafkaClickHouseCleanBtn;
-            const originalText = button.innerHTML;
-            button.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Cleaning...</span>';
-            button.disabled = true;
+        // Disable the button and show loading state
+        const button = this.elements.kafkaClickHouseCleanBtn;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Cleaning...</span>';
+        button.disabled = true;
 
+        // Add overall timeout for the entire operation (60 seconds)
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Operation timed out after 60 seconds')), 60000);
+        });
+
+        try {
             console.log('Starting Kafka and ClickHouse cleaning process...');
 
-            // Step 1: Call Kafka recreate API
-            console.log('Step 1: Calling Kafka recreate API...');
-            const kafkaResponse = await this.callAPI('/api/kafka/recreate', 'POST');
-
-            if (!kafkaResponse.success) {
-                throw new Error(`Kafka recreate failed: ${kafkaResponse.message || 'Unknown error'}`);
-            }
-
-            console.log('Kafka recreate successful:', kafkaResponse);
-
-            // Step 2: Call ClickHouse truncate API
-            console.log('Step 2: Calling ClickHouse truncate API...');
-            const clickhouseResponse = await this.callAPI('/api/clickhouse/truncate', 'POST');
-
-            if (!clickhouseResponse.success) {
-                throw new Error(`ClickHouse truncate failed: ${clickhouseResponse.message || 'Unknown error'}`);
-            }
-
-            console.log('ClickHouse truncate successful:', clickhouseResponse);
+            await Promise.race([
+                this.performCleaning(),
+                timeoutPromise
+            ]);
 
             // Both operations successful
             this.showNotification('Successfully cleaned Kafka topics and truncated ClickHouse tables!', 'success');
@@ -505,11 +520,32 @@ class VuDataSimManager {
             this.showNotification(`Cleaning failed: ${error.message}`, 'error');
 
         } finally {
-            // Re-enable the button and restore original text
-            const button = this.elements.kafkaClickHouseCleanBtn;
+            // Always re-enable the button and restore original text
             button.innerHTML = '<span class="material-symbols-outlined">cleaning_services</span><span>Clean Kafka & ClickHouse</span>';
             button.disabled = false;
         }
+    }
+
+    async performCleaning() {
+        // Step 1: Call Kafka recreate API
+        console.log('Step 1: Calling Kafka recreate API...');
+        const kafkaResponse = await this.callAPI('/api/kafka/recreate', 'POST');
+
+        if (!kafkaResponse.success) {
+            throw new Error(`Kafka recreate failed: ${kafkaResponse.message || 'Unknown error'}`);
+        }
+
+        console.log('Kafka recreate successful:', kafkaResponse);
+
+        // Step 2: Call ClickHouse truncate API
+        console.log('Step 2: Calling ClickHouse truncate API...');
+        const clickhouseResponse = await this.callAPI('/api/clickhouse/truncate', 'POST');
+
+        if (!clickhouseResponse.success) {
+            throw new Error(`ClickHouse truncate failed: ${clickhouseResponse.message || 'Unknown error'}`);
+        }
+
+        console.log('ClickHouse truncate successful:', clickhouseResponse);
     }
 
     async addAllClusterNodes() {
