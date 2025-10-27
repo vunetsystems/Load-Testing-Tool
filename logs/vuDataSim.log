@@ -199,3 +199,71 @@
 {"level":"error","node":"vunet","error":"HTTP request to metrics server failed: Get \"http://216.48.191.10:0/api/system/health\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)","time":"2025-10-24T12:05:24+05:30","message":"Metrics server verification failed"}
 {"level":"warn","node":"vunet","time":"2025-10-24T12:05:24+05:30","message":"Node enabled but metrics server may not be running properly"}
 {"level":"info","node":"vunet","time":"2025-10-24T12:05:24+05:30","message":"Enable node process completed"}
+{"level":"info","version":"1.0.0","time":"2025-10-27T12:09:57+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-27T12:09:57+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-27T12:09:57+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-27T12:09:57+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-27T12:10:00+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: no route to host"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: no route to host","time":"2025-10-27T12:10:00+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-27T12:10:00+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-27T12:10:00+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-27T12:12:30+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-27T12:12:30+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-27T12:12:30+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-27T12:12:30+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-27T12:12:33+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: no route to host"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: no route to host","time":"2025-10-27T12:12:33+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-27T12:12:33+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-27T12:12:33+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-27T12:25:18+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-27T12:25:18+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-27T12:25:18+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-27T12:25:18+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-27T12:25:21+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: no route to host"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: no route to host","time":"2025-10-27T12:25:21+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-27T12:25:21+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-27T12:25:21+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-27T12:25:51+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-27T12:25:51+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-27T12:25:51+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-27T12:25:51+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-27T12:25:54+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: no route to host"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: no route to host","time":"2025-10-27T12:25:54+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-27T12:25:54+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-27T12:25:54+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-27T12:27:44+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-27T12:27:44+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-27T12:27:44+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-27T12:27:44+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-27T12:27:47+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: no route to host"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: no route to host","time":"2025-10-27T12:27:47+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-27T12:27:47+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-27T12:27:47+05:30","message":"Open in browser"}
+{"level":"info","version":"1.0.0","time":"2025-10-27T12:28:00+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-27T12:28:00+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-27T12:28:00+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-27T12:28:00+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-27T12:28:03+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: no route to host"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: no route to host","time":"2025-10-27T12:28:03+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-27T12:28:03+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-27T12:28:03+05:30","message":"Open in browser"}
+{"level":"info","node":"e2e-108-10","module":"node_control","type":"success","time":"2025-10-27T12:28:13+05:30","message":"Node added successfully"}
+{"level":"info","node":"e2e-82-181","module":"node_control","type":"success","time":"2025-10-27T12:28:48+05:30","message":"Node added successfully"}
+{"level":"info","node":"e2e-82-234","module":"node_control","type":"success","time":"2025-10-27T12:29:22+05:30","message":"Node added successfully"}
+{"level":"info","node":"e2e-83-134","module":"node_control","type":"success","time":"2025-10-27T12:29:57+05:30","message":"Node added successfully"}
+{"level":"info","node":"e2e-83-184","module":"node_control","type":"success","time":"2025-10-27T12:29:59+05:30","message":"Node added successfully"}
+{"level":"info","node":"e2e-83-212","module":"node_control","type":"success","time":"2025-10-27T12:30:00+05:30","message":"Node added successfully"}
+{"level":"info","version":"1.0.0","time":"2025-10-27T12:34:06+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-27T12:34:06+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-27T12:34:06+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-27T12:34:06+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"error","node":"System","module":"ClickHouse","type":"error","time":"2025-10-27T12:34:09+05:30","message":"ClickHouse ping failed: dial tcp 10.32.3.50:9000: connect: no route to host"}
+{"level":"warn","error":"dial tcp 10.32.3.50:9000: connect: no route to host","time":"2025-10-27T12:34:09+05:30","message":"Failed to initialize ClickHouse client - metrics will not be available"}
+{"level":"info","port":"164.52.213.158:8086","time":"2025-10-27T12:34:09+05:30","message":"Server starting"}
+{"level":"info","url":"http://164.52.213.158:8086","time":"2025-10-27T12:34:09+05:30","message":"Open in browser"}
+{"level":"info","node":"e2e-108-10","module":"node_control","type":"success","time":"2025-10-27T12:34:19+05:30","message":"Node added successfully"}
+{"level":"info","node":"e2e-82-181","module":"node_control","type":"success","time":"2025-10-27T12:34:56+05:30","message":"Node added successfully"}
+{"level":"info","node":"e2e-82-234","module":"node_control","type":"success","time":"2025-10-27T12:35:33+05:30","message":"Node added successfully"}
+{"level":"info","node":"e2e-83-134","module":"node_control","type":"success","time":"2025-10-27T12:36:07+05:30","message":"Node added successfully"}
+{"level":"info","node":"e2e-83-184","module":"node_control","type":"success","time":"2025-10-27T12:36:08+05:30","message":"Node added successfully"}
+{"level":"info","node":"e2e-83-212","module":"node_control","type":"success","time":"2025-10-27T12:36:10+05:30","message":"Node added successfully"}

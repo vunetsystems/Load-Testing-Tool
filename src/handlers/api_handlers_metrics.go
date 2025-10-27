@@ -8,6 +8,8 @@ import (
 	"time"
 	"vuDataSim/src/clickhouse"
 	"vuDataSim/src/logger"
+
+	"github.com/gorilla/mux"
 )
 
 // MetricsRequest represents a request for metrics with a time range
@@ -81,16 +83,47 @@ func HandleProxyMetrics(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 
-	// Make request to the metrics API server
-	resp, err := http.Get("http://216.48.191.10:8086/api/system/metrics")
-	if err != nil {
-		logger.Error().Err(err).Msg("Failed to fetch metrics from metrics API server")
+	// Extract node name from URL path
+	vars := mux.Vars(r)
+	nodeName := vars["name"]
+
+	if nodeName == "" {
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to fetch metrics"})
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Node name is required"})
+		return
+	}
+
+	// Get node configuration
+	nodes := NodeManager.GetNodes()
+	nodeConfig, exists := nodes[nodeName]
+	if !exists {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Node not found"})
+		return
+	}
+
+	// Make request to the metrics API server using the node's IP
+	url := fmt.Sprintf("http://%s:8086/api/system/metrics", nodeConfig.Host)
+	resp, err := http.Get(url)
+	if err != nil {
+		logger.Error().Err(err).Str("node", nodeName).Str("url", url).Msg("Failed to fetch metrics from metrics API server")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Node metrics binary is not running on this VM"})
 		return
 	}
 	defer resp.Body.Close()
+
+	// Check if the response is successful
+	if resp.StatusCode != http.StatusOK {
+		logger.Error().Str("node", nodeName).Str("url", url).Int("status", resp.StatusCode).Msg("Metrics API server returned non-OK status")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Node metrics binary is not running on this VM"})
+		return
+	}
 
 	// Read the response body
 	body, err := io.ReadAll(resp.Body)
