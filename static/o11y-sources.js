@@ -160,7 +160,12 @@ class O11ySources {
         }
 
         // Call EPS split API first
-        this.manager.callAPI('/api/o11y/eps/split', 'POST', splitRequest)
+        this.updateSyncProgress(0, 'Starting sync...');
+        this.updateStep(1, 'in-progress', 'hourglass_top', 'In Progress...');
+        this.updateStep(2, 'pending', 'schedule', 'Pending');
+        this.updateStep(3, 'pending', 'schedule', 'Pending');
+
+        return this.manager.callAPI('/api/o11y/eps/split', 'POST', splitRequest)
         .then(splitResponse => {
             console.log('EPS split response:', splitResponse);
 
@@ -168,12 +173,16 @@ class O11ySources {
                 // Split failed, show error and stop
                 const splitErrorMessage = splitResponse.message || 'EPS split failed';
                 console.error('EPS split failed:', splitErrorMessage);
+                this.updateStep(1, 'failed', 'error', 'Failed');
                 this.showSyncError(splitErrorMessage);
                 this.manager.showNotification('Failed to sync configs: ' + splitErrorMessage, 'error');
                 return Promise.reject(new Error(splitErrorMessage));
             }
 
             console.log('EPS split successful, proceeding to distribution...');
+            this.updateSyncProgress(33, 'Step 1 of 3 completed');
+            this.updateStep(1, 'completed', 'check_circle', 'Completed in 1.5s');
+            this.updateStep(2, 'in-progress', 'hourglass_top', 'In Progress...');
 
             // Proceed to EPS distribution
             return this.manager.callAPI('/api/o11y/eps/distribute', 'POST', {
@@ -181,38 +190,11 @@ class O11ySources {
                 totalEps: selectedEPS
             });
         })
-        .then(epsResponse => {
-            console.log('EPS distribution response:', epsResponse);
-            console.log('EPS distribution success:', epsResponse.success);
-
-            if (!epsResponse.success) {
-                // Provide specific error message for EPS distribution failure
-                let epsErrorMessage = epsResponse.message || 'EPS distribution failed';
-                console.error('EPS distribution failed with message:', epsErrorMessage);
-
-                if (epsErrorMessage.includes('Total EPS must be greater than 0')) {
-                    epsErrorMessage = 'Invalid EPS value. Please enter a value greater than 0.';
-                } else if (epsErrorMessage.includes('no sources selected')) {
-                    epsErrorMessage = 'No o11y sources selected. Please select at least one source.';
-                } else if (epsErrorMessage.includes('max EPS not configured')) {
-                    epsErrorMessage = 'EPS configuration not found for selected sources. Please check your configuration.';
-                } else if (epsErrorMessage.includes('exceeds maximum limits')) {
-                    epsErrorMessage = 'Selected EPS exceeds maximum allowed limits for one or more sources.';
-                }
-
-                // Immediately show error and stop processing - NO conf.d distribution will be called
-                console.log('Stopping sync process due to EPS distribution failure');
-                this.showSyncError(epsErrorMessage);
-                this.manager.showNotification('Failed to sync configs: ' + epsErrorMessage, 'error');
-
-                // Return a rejected promise to stop the chain
-                return Promise.reject(new Error(epsErrorMessage));
+        .catch(error => {
+            if (error.message.includes('EPS split failed')) {
+                this.updateStep(1, 'failed', 'error', 'Failed');
             }
-
-            // Only proceed to conf.d distribution if EPS distribution succeeded
-            console.log('EPS distribution successful, proceeding to conf.d distribution...');
-            console.log('About to call conf.d distribution API...');
-            return this.manager.callAPI('/api/o11y/confd/distribute', 'POST');
+            throw error;
         })
         .then(epsResponse => {
             console.log('EPS distribution response:', epsResponse);
@@ -235,6 +217,8 @@ class O11ySources {
 
                 // Immediately show error and stop processing - NO conf.d distribution will be called
                 console.log('Stopping sync process due to EPS distribution failure');
+                this.updateStep(1, 'completed', 'check_circle', 'Completed in 1.5s');
+                this.updateStep(2, 'failed', 'error', 'Failed');
                 this.showSyncError(epsErrorMessage);
                 this.manager.showNotification('Failed to sync configs: ' + epsErrorMessage, 'error');
 
@@ -244,8 +228,18 @@ class O11ySources {
 
             // Only proceed to conf.d distribution if EPS distribution succeeded
             console.log('EPS distribution successful, proceeding to conf.d distribution...');
+            this.updateSyncProgress(66, 'Step 2 of 3 completed');
+            this.updateStep(2, 'completed', 'check_circle', 'Completed in 2.0s');
+            this.updateStep(3, 'in-progress', 'hourglass_top', 'In Progress...');
             console.log('About to call conf.d distribution API...');
             return this.manager.callAPI('/api/o11y/confd/distribute', 'POST');
+        })
+        .catch(error => {
+            if (error.message.includes('EPS distribution failed')) {
+                this.updateStep(1, 'completed', 'check_circle', 'Completed in 1.5s');
+                this.updateStep(2, 'failed', 'error', 'Failed');
+            }
+            throw error;
         })
         .then(confDResponse => {
             console.log('Conf.d distribution response:', confDResponse);
@@ -258,10 +252,13 @@ class O11ySources {
 
                 if (successCount === 0) {
                     // Complete failure
+                    this.updateStep(3, 'failed', 'error', 'Failed');
                     throw new Error(`Configuration distribution failed completely. All ${totalNodes} nodes failed: ${failedNodes.join(', ')}`);
                 } else {
                     // Partial success - show warning but don't fail completely
                     const warningMessage = `Configuration partially synced. ${successCount}/${totalNodes} nodes successful. Failed nodes: ${failedNodes.join(', ')}`;
+                    this.updateSyncProgress(100, 'Sync completed with warnings');
+                    this.updateStep(3, 'completed', 'check_circle', 'Completed with warnings');
                     this.showSyncSuccess();
                     this.manager.showNotification(warningMessage, 'warning');
                     console.warn('Partial sync success:', warningMessage);
@@ -270,12 +267,23 @@ class O11ySources {
             }
 
             if (!confDResponse.success) {
+                this.updateStep(3, 'failed', 'error', 'Failed');
                 throw new Error(confDResponse.message || 'Conf.d distribution failed');
             }
 
             // Both APIs succeeded completely
+            this.updateSyncProgress(100, 'Sync completed successfully');
+            this.updateStep(3, 'completed', 'check_circle', 'Completed in 3.0s');
             this.showSyncSuccess();
             this.manager.showNotification('Configs synced successfully!', 'success');
+        })
+        .catch(error => {
+            if (error.message.includes('Conf.d distribution failed')) {
+                this.updateStep(1, 'completed', 'check_circle', 'Completed in 1.5s');
+                this.updateStep(2, 'completed', 'check_circle', 'Completed in 2.0s');
+                this.updateStep(3, 'failed', 'error', 'Failed');
+            }
+            throw error;
         })
         .catch(error => {
             console.error('Error syncing configs:', error);
@@ -326,9 +334,10 @@ class O11ySources {
     }
 
     showSyncSuccess() {
-        this.hideSyncMessages();
-        this.manager.elements.syncSuccessMessage.classList.remove('hidden');
-        this.manager.elements.syncStatusContainer.classList.remove('hidden');
+        this.updateSyncProgress(100, 'Sync completed successfully');
+        this.updateStep(1, 'completed', 'check_circle', 'Completed in 1.5s');
+        this.updateStep(2, 'completed', 'check_circle', 'Completed in 2.0s');
+        this.updateStep(3, 'completed', 'check_circle', 'Completed in 3.0s');
 
         // Auto-hide after 5 seconds
         setTimeout(() => {
@@ -337,9 +346,7 @@ class O11ySources {
     }
 
     showSyncError(message) {
-        this.hideSyncMessages();
-        this.manager.elements.syncErrorMessage.classList.remove('hidden');
-        this.manager.elements.syncStatusContainer.classList.remove('hidden');
+        this.updateSyncProgress(0, `Sync failed: ${message}`);
 
         // Auto-hide after 8 seconds for errors
         setTimeout(() => {
@@ -348,9 +355,99 @@ class O11ySources {
     }
 
     hideSyncMessages() {
-        this.manager.elements.syncSuccessMessage.classList.add('hidden');
-        this.manager.elements.syncErrorMessage.classList.add('hidden');
-        this.manager.elements.syncStatusContainer.classList.add('hidden');
+        // Reset the visualization to initial state
+        this.updateSyncProgress(0, 'No sync in progress');
+        this.updateStep(1, 'pending', 'schedule', 'Pending');
+        this.updateStep(2, 'pending', 'schedule', 'Pending');
+        this.updateStep(3, 'pending', 'schedule', 'Pending');
+    }
+
+    updateSyncProgress(percent, statusText) {
+        if (this.manager.elements.syncProgressPercent) {
+            this.manager.elements.syncProgressPercent.textContent = `${percent}%`;
+        }
+        if (this.manager.elements.syncProgressBar) {
+            this.manager.elements.syncProgressBar.style.width = `${percent}%`;
+        }
+        if (this.manager.elements.syncStatusText) {
+            this.manager.elements.syncStatusText.textContent = statusText;
+        }
+    }
+
+    updateStep(stepNumber, status, icon, text) {
+        const container = this.manager.elements[`step${stepNumber}Container`];
+        const box = this.manager.elements[`step${stepNumber}Box`];
+        const iconElement = this.manager.elements[`step${stepNumber}Icon`];
+        const textElement = this.manager.elements[`step${stepNumber}Text`];
+        const titleElement = this.manager.elements[`step${stepNumber}Title`];
+
+        if (iconElement) {
+            iconElement.textContent = icon;
+        }
+        if (textElement) {
+            textElement.textContent = text;
+        }
+        if (titleElement) {
+            titleElement.className = `text-base font-semibold leading-normal ${this.getStepTitleClasses(status)}`;
+        }
+
+        // Update classes based on status
+        if (container && box) {
+            container.className = `flex items-center justify-center w-10 h-10 rounded-full ${this.getStepClasses(status)}`;
+            box.className = `p-4 rounded-lg ${this.getStepBoxClasses(status)} border ${this.getStepBorderClasses(status)} hover:shadow-md transition-shadow`;
+        }
+    }
+
+    getStepClasses(status) {
+        switch (status) {
+            case 'completed':
+                return 'bg-success/20 dark:bg-success-dark/20 text-success dark:text-success-dark';
+            case 'in-progress':
+                return 'bg-primary/20 dark:bg-primary-dark/20 text-primary dark:text-primary-dark animate-pulse';
+            case 'failed':
+                return 'bg-danger/20 dark:bg-danger-dark/20 text-danger dark:text-danger-dark';
+            default:
+                return 'bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark';
+        }
+    }
+
+    getStepBoxClasses(status) {
+        switch (status) {
+            case 'completed':
+                return 'bg-success/10 dark:bg-success-dark/10';
+            case 'in-progress':
+                return 'bg-primary/10 dark:bg-primary-dark/10';
+            case 'failed':
+                return 'bg-danger/10 dark:bg-danger-dark/10';
+            default:
+                return 'bg-subtle-light/50 dark:bg-subtle-dark/50';
+        }
+    }
+
+    getStepBorderClasses(status) {
+        switch (status) {
+            case 'completed':
+                return 'border-success/30 dark:border-success-dark/30';
+            case 'in-progress':
+                return 'border-primary/50 dark:border-primary-dark/50 ring-2 ring-primary/30 dark:ring-primary-dark/30';
+            case 'failed':
+                return 'border-danger/30 dark:border-danger-dark/30';
+            default:
+                return 'border-subtle-light dark:border-subtle-dark';
+        }
+    }
+
+    getStepTitleClasses(status) {
+        switch (status) {
+            case 'completed':
+                return 'text-success dark:text-success-dark';
+            case 'in-progress':
+                return 'text-primary dark:text-primary-dark';
+            case 'failed':
+                return 'text-danger dark:text-danger-dark';
+            default:
+                return 'text-text-secondary-light dark:text-text-secondary-dark';
+        }
     }
 
     // Custom Multi-Select Methods
