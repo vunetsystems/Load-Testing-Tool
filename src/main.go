@@ -107,6 +107,7 @@ func main() {
 
 	// Node management API endpoints
 	api.HandleFunc("/nodes", handlers.HandleAPINodes).Methods("GET")
+	api.HandleFunc("/nodes/add-all-cluster", handlers.HandleAPIAddAllClusterNodes).Methods("POST")
 	api.HandleFunc("/nodes/{name}", handlers.HandleAPINodeActions).Methods("POST", "PUT", "DELETE")
 	api.HandleFunc("/nodes/{name}/debug", handlers.HandleAPIDebugMetricsBinary).Methods("GET")
 	api.HandleFunc("/cluster-settings", handlers.HandleAPIClusterSettings).Methods("GET", "PUT")
@@ -159,7 +160,7 @@ func main() {
 	api.HandleFunc("/k6/logs", handlers.HandleAPIGetK6Logs).Methods("GET")
 
 	// Proxy endpoint for node metrics API
-	api.HandleFunc("/proxy/metrics", handlers.HandleProxyMetrics).Methods("GET")
+	api.HandleFunc("/proxy/metrics/{name}", handlers.HandleProxyMetrics).Methods("GET")
 
 	// Process metrics endpoint - collects finalvudatasim metrics directly via SSH
 	api.HandleFunc("/process/metrics", handlers.HandleAPIGetProcessMetrics).Methods("GET")

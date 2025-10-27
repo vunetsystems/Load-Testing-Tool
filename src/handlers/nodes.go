@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os/exec"
+	"strings"
 	"vuDataSim/src/clickhouse"
 	"vuDataSim/src/node_control"
 
@@ -288,5 +290,109 @@ func HandleAPIDebugMetricsBinary(w http.ResponseWriter, r *http.Request) {
 		Success: true,
 		Message: fmt.Sprintf("Debug information retrieved for node %s", nodeName),
 		Data:    debugInfo.Data,
+	})
+}
+
+func HandleAPIAddAllClusterNodes(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		SendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
+			Success: false,
+			Message: "Method not allowed",
+		})
+		return
+	}
+
+	// Execute kubectl command to get nodes
+	cmd := exec.Command("kubectl", "get", "nodes", "-o", "wide")
+	output, err := cmd.Output()
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to execute kubectl: %v", err),
+		})
+		return
+	}
+
+	// Parse kubectl output
+	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+	if len(lines) < 2 {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: "No nodes found in kubectl output",
+		})
+		return
+	}
+
+	// Skip header line
+	nodeLines := lines[1:]
+
+	currentNodeIP := "164.52.213.158"
+	addedNodes := []string{}
+	fetchedNodes := []map[string]string{}
+
+	for _, line := range nodeLines {
+		fields := strings.Fields(line)
+		if len(fields) < 7 {
+			continue
+		}
+
+		nodeName := fields[0]
+		nodeIP := fields[5] // INTERNAL-IP column
+		nodeRole := fields[2] // ROLES column
+
+		fetchedNodes = append(fetchedNodes, map[string]string{
+			"name": nodeName,
+			"ip":   nodeIP,
+			"role": nodeRole,
+		})
+
+		// Skip current node
+		if nodeIP == currentNodeIP {
+			continue
+		}
+
+		// Get defaults from config
+		appConfig, err := NodeManager.LoadAppConfig()
+		if err != nil {
+			SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+				Success: false,
+				Message: fmt.Sprintf("Failed to load app config: %v", err),
+			})
+			return
+		}
+
+		addNodeReq := node_control.AddNodeRequest{
+			Name:        nodeName,
+			Host:        nodeIP,
+			User:        appConfig.Network.RemoteUser,
+			KeyPath:     appConfig.Paths.RemoteSSHKey,
+			ConfDir:     appConfig.Paths.RemoteConfDir,
+			BinaryDir:   appConfig.Paths.RemoteBinaryDir,
+			Description: nodeRole,
+			Enabled:     true,
+		}
+
+		err = NodeManager.AddNode(addNodeReq)
+		if err != nil {
+			SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+				Success: false,
+				Message: fmt.Sprintf("Failed to add node %s: %v", nodeName, err),
+			})
+			return
+		}
+
+		addedNodes = append(addedNodes, nodeName)
+	}
+
+	response := map[string]interface{}{
+		"fetched_nodes": fetchedNodes,
+		"added_nodes":   addedNodes,
+		"current_node":  currentNodeIP,
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: fmt.Sprintf("Added %d nodes successfully", len(addedNodes)),
+		Data:    response,
 	})
 }

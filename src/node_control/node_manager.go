@@ -56,6 +56,7 @@ type PathsConfig struct {
 	LocalBackupsDir string `yaml:"local_backups_dir"`
 	LocalLogsDir    string `yaml:"local_logs_dir"`
 	RemoteBinaryDir string `yaml:"remote_binary_dir"`
+	RemoteConfDir   string `yaml:"remote_conf_dir"`
 	RemoteSSHKey    string `yaml:"remote_ssh_key"`
 }
 
@@ -133,23 +134,25 @@ func (nm *NodeManager) SaveNodesConfig() error {
 }
 
 // LoadAppConfig loads the application configuration from YAML file
-func (nm *NodeManager) LoadAppConfig() error {
+func (nm *NodeManager) LoadAppConfig() (AppConfig, error) {
 	if _, err := os.Stat(nm.appConfigPath); os.IsNotExist(err) {
 		// Create default app config if file doesn't exist
-		return nm.SaveAppConfig()
+		if err := nm.SaveAppConfig(); err != nil {
+			return AppConfig{}, err
+		}
 	}
 
 	data, err := os.ReadFile(nm.appConfigPath)
 	if err != nil {
-		return fmt.Errorf("failed to read app config file: %v", err)
+		return AppConfig{}, fmt.Errorf("failed to read app config file: %v", err)
 	}
 
 	err = yaml.Unmarshal(data, &nm.appConfig)
 	if err != nil {
-		return fmt.Errorf("failed to parse app config file: %v", err)
+		return AppConfig{}, fmt.Errorf("failed to parse app config file: %v", err)
 	}
 
-	return nil
+	return nm.appConfig, nil
 }
 
 // SaveAppConfig saves the application configuration to YAML file

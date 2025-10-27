@@ -121,6 +121,8 @@ class VuDataSimManager {
             cpuMemoryValue: document.getElementById('cpu-memory-value'),
 
             // Kafka & ClickHouse cleaning elements
+            // Add All Cluster Nodes button
+            addAllClusterNodesBtn: document.getElementById('add-all-cluster-nodes-btn'),
             kafkaClickHouseCleanBtn: document.getElementById('kafka-clickhouse-clean-btn'),
 
             // ClickHouse metrics elements
@@ -165,6 +167,8 @@ class VuDataSimManager {
     bindEvents() {
         // Button event listeners
 
+        // Add All Cluster Nodes button event listener
+        this.elements.addAllClusterNodesBtn?.addEventListener('click', () => this.addAllClusterNodes());
         // O11y source management event listeners
         this.elements.syncConfigsBtn?.addEventListener('click', () => this.o11ySources.syncConfigs());
 
@@ -504,6 +508,43 @@ class VuDataSimManager {
             // Re-enable the button and restore original text
             const button = this.elements.kafkaClickHouseCleanBtn;
             button.innerHTML = '<span class="material-symbols-outlined">cleaning_services</span><span>Clean Kafka & ClickHouse</span>';
+            button.disabled = false;
+        }
+    }
+
+    async addAllClusterNodes() {
+        try {
+            // Disable the button and show loading state
+            const button = this.elements.addAllClusterNodesBtn;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Adding Nodes...</span>';
+            button.disabled = true;
+
+            console.log('Starting to add all cluster nodes...');
+
+            // Call the API to add all cluster nodes
+            const response = await this.callAPI('/api/nodes/add-all-cluster', 'POST');
+
+            if (!response.success) {
+                throw new Error(response.message || 'Failed to add cluster nodes');
+            }
+
+            console.log('Successfully added cluster nodes:', response);
+
+            // Show success notification
+            this.showNotification(`Successfully added ${response.data.added_nodes.length} cluster nodes!`, 'success');
+
+            // Refresh the dashboard to show new nodes
+            await this.refreshDashboard();
+
+        } catch (error) {
+            console.error('Error adding cluster nodes:', error);
+            this.showNotification(`Failed to add cluster nodes: ${error.message}`, 'error');
+
+        } finally {
+            // Re-enable the button and restore original text
+            const button = this.elements.addAllClusterNodesBtn;
+            button.innerHTML = '<span class="material-symbols-outlined">add_circle</span><span>Add All Cluster Nodes</span>';
             button.disabled = false;
         }
     }
