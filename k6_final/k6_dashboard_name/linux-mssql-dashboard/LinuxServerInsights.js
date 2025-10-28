@@ -191,7 +191,7 @@ export default function () {
         }
 
         // Add time range parameters to the URL
-        const panelUrl = `https://164.52.213.158/vui/d/${DASHBOARD_CONFIG.id}/linux-server-insights?orgId=1&viewPanel=${panelId}&from=${encodeURIComponent(TIME_RANGE.from)}&to=${encodeURIComponent(TIME_RANGE.to)}`;
+        const panelUrl = `https://91.203.133.240/vui/d/${DASHBOARD_CONFIG.id}/linux-server-insights?orgId=1&viewPanel=${panelId}&from=${encodeURIComponent(TIME_RANGE.from)}&to=${encodeURIComponent(TIME_RANGE.to)}`;
         
         const panelRes = http.get(panelUrl, {
             headers: {
