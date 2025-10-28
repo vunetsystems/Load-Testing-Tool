@@ -1,247 +1,181 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Monitoring Dashboard - vuDataSim Cluster Manager</title>
-    <!-- TODO: For production, install Tailwind CSS locally instead of using CDN -->
-    <!-- Run: npm install -D tailwindcss postcss autoprefixer -->
-    <!-- Then: npx tailwindcss -i ./src/input.css -o ./static/styles.css --watch -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
-    <link rel="stylesheet" href="/static/styles.css">
-    <!-- ECharts library -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            DEFAULT: "#13b6ec",
-                            dark: "#13b6ec"
-                        },
-                        "background-light": "#f8fbfc",
-                        "background-dark": "#101d22",
-                        "surface-light": "#ffffff",
-                        "surface-dark": "#192c35",
-                        "subtle-light": "#e2e8f0",
-                        "subtle-dark": "#192c35",
-                        "text-light": "#0d181b",
-                        "text-dark": "#e7f0f3",
-                        "text-secondary-light": "#64748b",
-                        "text-secondary-dark": "#94a3b8",
-                        success: {
-                            DEFAULT: "#22c55e",
-                            dark: "#4ade80"
-                        },
-                        danger: {
-                            DEFAULT: "#ef4444",
-                            dark: "#f87171"
-                        },
-                        warning: {
-                            DEFAULT: "#f59e0b",
-                            dark: "#fbbf24"
-                        },
-                        info: {
-                            DEFAULT: "#06b6d4",
-                            dark: "#22d3ee"
-                        }
-                    },
-                    fontFamily: {
-                        display: ["Inter", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "0.5rem",
-                        lg: "0.75rem",
-                        xl: "1rem",
-                        full: "9999px",
-                    },
-                },
-            },
-        };
-    </script>
-</head>
-<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+    </head>
+<body class="font-display bg-slate-100 text-slate-800 antialiased">
     <div class="flex h-screen w-full">
-        <!-- Sidebar -->
-        <aside class="flex w-80 flex-col border-r border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6">
-            <div class="flex items-center gap-3 mb-10">
-                <span class="material-symbols-outlined text-primary dark:text-primary-dark text-4xl">
+        <aside class="flex w-80 flex-col border-r border-slate-200 bg-white p-6">
+            <div class="flex items-center gap-3 pb-6 mb-6 border-b border-slate-200">
+                <span class="material-symbols-outlined text-indigo-600 text-4xl">
                     analytics
                 </span>
-                <h1 class="text-2xl font-bold tracking-tight">Monitoring</h1>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900">Monitoring</h1>
             </div>
 
             <div class="space-y-6">
-                <!-- Monitoring Sections -->
                 <div>
-                    <h2 class="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">Monitoring Sections</h2>
-                    <div class="space-y-3">
-                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-primary/50 dark:border-primary-dark/50 text-primary dark:text-primary-dark font-medium transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10" data-section="overview">
+                    <h2 class="text-sm font-semibold mb-3 text-slate-500 uppercase tracking-wider">Monitoring Sections</h2>
+                    <div class="space-y-2">
+                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 font-semibold transition-colors" data-section="overview">
                             <span class="material-symbols-outlined text-sm mr-2">dashboard</span>
                             Overview
                         </button>
-                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-subtle-light dark:border-subtle-dark text-text-secondary-light dark:text-text-secondary-dark font-medium transition-colors hover:bg-subtle-light dark:hover:bg-subtle-dark" data-section="performance">
+                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-transparent text-slate-600 font-medium transition-colors hover:bg-slate-100 hover:text-slate-900" data-section="performance">
                             <span class="material-symbols-outlined text-sm mr-2">speed</span>
                             Kafka Metrics
                         </button>
-                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-subtle-light dark:border-subtle-dark text-text-secondary-light dark:text-text-secondary-dark font-medium transition-colors hover:bg-subtle-light dark:hover:bg-subtle-dark" data-section="pod-monitoring">
+                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-transparent text-slate-600 font-medium transition-colors hover:bg-slate-100 hover:text-slate-900" data-section="pod-monitoring">
                             <span class="material-symbols-outlined text-sm mr-2">pod</span>
                             Pod Monitoring
                         </button>
-                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-subtle-light dark:border-subtle-dark text-text-secondary-light dark:text-text-secondary-dark font-medium transition-colors hover:bg-subtle-light dark:hover:bg-subtle-dark" data-section="system">
+                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-transparent text-slate-600 font-medium transition-colors hover:bg-slate-100 hover:text-slate-900" data-section="system">
                             <span class="material-symbols-outlined text-sm mr-2">memory</span>
                             System Health
                         </button>
-                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-subtle-light dark:border-subtle-dark text-text-secondary-light dark:text-text-secondary-dark font-medium transition-colors hover:bg-subtle-light dark:hover:bg-subtle-dark" data-section="logs">
+                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-transparent text-slate-600 font-medium transition-colors hover:bg-slate-100 hover:text-slate-900" data-section="logs">
                             <span class="material-symbols-outlined text-sm mr-2">description</span>
                             Log Analysis
                         </button>
-                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-subtle-light dark:border-subtle-dark text-text-secondary-light dark:text-text-secondary-dark font-medium transition-colors hover:bg-subtle-light dark:hover:bg-subtle-dark" data-section="k6-monitoring">
+                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-transparent text-slate-600 font-medium transition-colors hover:bg-slate-100 hover:text-slate-900" data-section="k6-monitoring">
                             <span class="material-symbols-outlined text-sm mr-2">speed</span>
                             K6 Monitoring
                         </button>
-                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-subtle-light dark:border-subtle-dark text-text-secondary-light dark:text-text-secondary-dark font-medium transition-colors hover:bg-subtle-light dark:hover:bg-subtle-dark" data-section="alerts">
+                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-transparent text-slate-600 font-medium transition-colors hover:bg-slate-100 hover:text-slate-900" data-section="alerts">
                             <span class="material-symbols-outlined text-sm mr-2">notifications</span>
                             Alerts & Notifications
                         </button>
                     </div>
                 </div>
 
-                <!-- Quick Stats -->
                 <div>
-                    <h2 class="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">Quick Stats</h2>
+                    <h2 class="text-sm font-semibold mb-3 text-slate-500 uppercase tracking-wider">Quick Stats</h2>
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="p-3 rounded-lg bg-success/20 dark:bg-success-dark/20 border border-success/30 dark:border-success-dark/30">
-                            <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-1">System Status</div>
-                            <div class="text-lg font-bold text-success dark:text-success-dark">Healthy</div>
+                        <div class="p-3 rounded-lg bg-green-50 border border-green-200">
+                            <div class="text-xs text-slate-500 mb-1">System Status</div>
+                            <div class="text-lg font-bold text-green-700">Healthy</div>
                         </div>
-                        <div class="p-3 rounded-lg bg-primary/20 dark:bg-primary-dark/20 border border-primary/30 dark:border-primary-dark/30">
-                            <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-1">Active Nodes</div>
-                            <div class="text-lg font-bold text-primary dark:text-primary-dark">5/5</div>
+                        <div class="p-3 rounded-lg bg-indigo-50 border border-indigo-200">
+                            <div class="text-xs text-slate-500 mb-1">Active Nodes</div>
+                            <div class="text-lg font-bold text-indigo-700">5/5</div>
                         </div>
-                        <div class="p-3 rounded-lg bg-warning/20 dark:bg-warning-dark/20 border border-warning/30 dark:border-warning-dark/30">
-                            <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-1">Avg CPU</div>
-                            <div class="text-lg font-bold text-warning dark:text-warning-dark">67%</div>
+                        <div class="p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+                            <div class="text-xs text-slate-500 mb-1">Avg CPU</div>
+                            <div class="text-lg font-bold text-yellow-700">67%</div>
                         </div>
-                        <div class="p-3 rounded-lg bg-info/20 dark:bg-info-dark/20 border border-info/30 dark:border-info-dark/30">
-                            <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-1">Memory Usage</div>
-                            <div class="text-lg font-bold text-info dark:text-info-dark">4.2GB</div>
+                        <div class="p-3 rounded-lg bg-cyan-50 border border-cyan-200">
+                            <div class="text-xs text-slate-500 mb-1">Memory Usage</div>
+                            <div class="text-lg font-bold text-cyan-700">4.2GB</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="mt-auto space-y-3">
-                <button id="back-to-dashboard-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 py-3 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
+            <div class="mt-auto space-y-3 pt-6">
+                <button id="back-to-dashboard-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 py-2.5 text-slate-700 font-semibold transition-colors hover:bg-slate-50">
                     <span class="material-symbols-outlined">arrow_back</span>
                     <span>Back to Dashboard</span>
                 </button>
-                <button id="refresh-monitoring-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-success/50 dark:border-success-dark/50 py-3 text-success dark:text-success-dark font-semibold transition-colors hover:bg-success/10 dark:hover:bg-success-dark/10">
+                <button id="refresh-monitoring-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg py-2.5 font-semibold text-white bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 shadow-md hover:shadow-lg transition-all">
                     <span class="material-symbols-outlined">refresh</span>
                     <span>Refresh Data</span>
                 </button>
-                <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark text-center">
+                <div class="text-xs text-slate-500 text-center">
                     Real-time monitoring active
                 </div>
             </div>
         </aside>
 
-        <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto p-8 bg-background-light dark:bg-background-dark">
-            <!-- Header -->
+        <main class="flex-1 overflow-y-auto p-8">
             <div class="flex items-center justify-between mb-8">
                 <div>
-                    <h2 class="text-3xl font-bold tracking-tight" id="page-title">Monitoring Overview</h2>
-                    <p class="text-text-secondary-light dark:text-text-secondary-dark mt-2">Real-time system monitoring and performance metrics</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900" id="page-title">Monitoring Overview</h2>
+                    <p class="text-slate-500 mt-2">Real-time system monitoring and performance metrics</p>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-2">
                         <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-600"></span>
                         </span>
-                        <span class="text-sm text-success font-medium">LIVE</span>
+                        <span class="text-sm text-green-600 font-semibold">LIVE</span>
                     </div>
-                    <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Last updated: <span id="last-update">Never</span></span>
+                    <span class="text-sm text-slate-500">Last updated: <span id="last-update">Never</span></span>
                 </div>
             </div>
 
-            <!-- Monitoring Content Sections -->
             <div id="monitoring-content">
-                <!-- Overview Section (Default) -->
                 <div id="overview-section" class="space-y-8">
-                    <!-- Key Performance Indicators -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Total EPS</p>
-                                    <p class="text-2xl font-bold mt-2">124,500</p>
+                                    <p class="text-sm font-medium text-slate-500">Total EPS</p>
+                                    <p class="text-2xl font-bold mt-2 text-slate-900">124,500</p>
                                 </div>
-                                <span class="material-symbols-outlined text-primary dark:text-primary-dark text-3xl">speed</span>
+                                <span class="material-symbols-outlined text-indigo-500 text-3xl">speed</span>
                             </div>
                             <div class="mt-4 flex items-center text-sm">
-                                <span class="text-success dark:text-success-dark font-medium">+2.5%</span>
-                                <span class="text-text-secondary-light dark:text-text-secondary-dark ml-2">from last hour</span>
+                                <span class="text-green-600 font-medium">+2.5%</span>
+                                <span class="text-slate-500 ml-2">from last hour</span>
                             </div>
                         </div>
 
-                        <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Active Processes</p>
-                                    <p class="text-2xl font-bold mt-2">8</p>
+                                    <p class="text-sm font-medium text-slate-500">Active Processes</p>
+                                    <p class="text-2xl font-bold mt-2 text-slate-900">8</p>
                                 </div>
-                                <span class="material-symbols-outlined text-success dark:text-success-dark text-3xl">memory</span>
+                                <span class="material-symbols-outlined text-green-500 text-3xl">memory</span>
                             </div>
                             <div class="mt-4 flex items-center text-sm">
-                                <span class="text-success dark:text-success-dark font-medium">All Running</span>
-                                <span class="text-text-secondary-light dark:text-text-secondary-dark ml-2">Stable</span>
+                                <span class="text-green-600 font-medium">All Running</span>
+                                <span class="text-slate-500 ml-2">Stable</span>
                             </div>
                         </div>
 
-                        <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">System Load</p>
-                                    <p class="text-2xl font-bold mt-2">2.3</p>
+                                    <p class="text-sm font-medium text-slate-500">System Load</p>
+                                    <p class="text-2xl font-bold mt-2 text-slate-900">2.3</p>
                                 </div>
-                                <span class="material-symbols-outlined text-warning dark:text-warning-dark text-3xl">trending_up</span>
+                                <span class="material-symbols-outlined text-yellow-500 text-3xl">trending_up</span>
                             </div>
                             <div class="mt-4 flex items-center text-sm">
-                                <span class="text-warning dark:text-warning-dark font-medium">+0.3</span>
-                                <span class="text-text-secondary-light dark:text-text-secondary-dark ml-2">from baseline</span>
+                                <span class="text-yellow-600 font-medium">+0.3</span>
+                                <span class="text-slate-500 ml-2">from baseline</span>
                             </div>
                         </div>
 
-                        <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Error Rate</p>
-                                    <p class="text-2xl font-bold mt-2">0.02%</p>
+                                    <p class="text-sm font-medium text-slate-500">Error Rate</p>
+                                    <p class="text-2xl font-bold mt-2 text-slate-900">0.02%</p>
                                 </div>
-                                <span class="material-symbols-outlined text-info dark:text-info-dark text-3xl">error</span>
+                                <span class="material-symbols-outlined text-cyan-500 text-3xl">error</span>
                             </div>
                             <div class="mt-4 flex items-center text-sm">
-                                <span class="text-success dark:text-success-dark font-medium">-0.01%</span>
-                                <span class="text-text-secondary-light dark:text-text-secondary-dark ml-2">improvement</span>
+                                <span class="text-green-600 font-medium">-0.01%</span>
+                                <span class="text-slate-500 ml-2">improvement</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Charts Section -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <!-- CPU Usage Chart -->
-                        <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
-                            <h3 class="text-lg font-semibold mb-4">CPU Usage Trend</h3>
-                            <div class="h-64 flex items-center justify-center text-text-secondary-light dark:text-text-secondary-dark">
+                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                            <h3 class="text-lg font-semibold mb-4 text-slate-900">CPU Usage Trend</h3>
+                            <div class="h-64 flex items-center justify-center text-slate-400">
                                 <div class="text-center">
                                     <span class="material-symbols-outlined text-6xl mb-4">show_chart</span>
                                     <p>CPU Usage Chart</p>
@@ -250,10 +184,9 @@
                             </div>
                         </div>
 
-                        <!-- Memory Usage Chart -->
-                        <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
-                            <h3 class="text-lg font-semibold mb-4">Memory Usage Trend</h3>
-                            <div class="h-64 flex items-center justify-center text-text-secondary-light dark:text-text-secondary-dark">
+                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                            <h3 class="text-lg font-semibold mb-4 text-slate-900">Memory Usage Trend</h3>
+                            <div class="h-64 flex items-center justify-center text-slate-400">
                                 <div class="text-center">
                                     <span class="material-symbols-outlined text-6xl mb-4">memory</span>
                                     <p>Memory Usage Chart</p>
@@ -263,56 +196,55 @@
                         </div>
                     </div>
 
-                    <!-- Node Status Table -->
                     <div>
-                        <h3 class="text-xl font-semibold mb-4">Node Status Overview</h3>
-                        <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
+                        <h3 class="text-xl font-semibold mb-4 text-slate-900">Node Status Overview</h3>
+                        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                             <table class="w-full text-left text-sm">
-                                <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
+                                <thead class="bg-slate-50">
                                     <tr>
-                                        <th class="p-4 font-semibold">Node Name</th>
-                                        <th class="p-4 font-semibold">Status</th>
-                                        <th class="p-4 font-semibold">CPU Usage</th>
-                                        <th class="p-4 font-semibold">Memory Usage</th>
-                                        <th class="p-4 font-semibold">Last Update</th>
+                                        <th class="p-4 font-semibold text-slate-600 uppercase text-xs tracking-wider">Node Name</th>
+                                        <th class="p-4 font-semibold text-slate-600 uppercase text-xs tracking-wider">Status</th>
+                                        <th class="p-4 font-semibold text-slate-600 uppercase text-xs tracking-wider">CPU Usage</th>
+                                        <th class="p-4 font-semibold text-slate-600 uppercase text-xs tracking-wider">Memory Usage</th>
+                                        <th class="p-4 font-semibold text-slate-600 uppercase text-xs tracking-wider">Last Update</th>
                                     </tr>
                                 </thead>
-                                <tbody id="node-status-body" class="divide-y divide-subtle-light dark:divide-subtle-dark">
+                                <tbody id="node-status-body" class="divide-y divide-slate-200 text-slate-700">
                                     <tr>
                                         <td class="p-4">prod-node-1</td>
                                         <td class="p-4">
                                             <div class="flex items-center gap-2">
-                                                <span class="h-2 w-2 rounded-full bg-success"></span>
-                                                <span class="text-success font-medium">Online</span>
+                                                <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                                                <span class="text-green-700 font-medium">Online</span>
                                             </div>
                                         </td>
                                         <td class="p-4">67%</td>
                                         <td class="p-4">4.2 GB / 8 GB</td>
-                                        <td class="p-4 text-text-secondary-light dark:text-text-secondary-dark">2 seconds ago</td>
+                                        <td class="p-4 text-slate-500">2 seconds ago</td>
                                     </tr>
                                     <tr>
                                         <td class="p-4">prod-node-2</td>
                                         <td class="p-4">
                                             <div class="flex items-center gap-2">
-                                                <span class="h-2 w-2 rounded-full bg-success"></span>
-                                                <span class="text-success font-medium">Online</span>
+                                                <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                                                <span class="text-green-700 font-medium">Online</span>
                                             </div>
                                         </td>
                                         <td class="p-4">45%</td>
                                         <td class="p-4">3.1 GB / 8 GB</td>
-                                        <td class="p-4 text-text-secondary-light dark:text-text-secondary-dark">1 second ago</td>
+                                        <td class="p-4 text-slate-500">1 second ago</td>
                                     </tr>
                                     <tr>
                                         <td class="p-4">prod-node-3</td>
                                         <td class="p-4">
                                             <div class="flex items-center gap-2">
-                                                <span class="h-2 w-2 rounded-full bg-warning"></span>
-                                                <span class="text-warning font-medium">Warning</span>
+                                                <span class="h-2 w-2 rounded-full bg-yellow-500"></span>
+                                                <span class="text-yellow-700 font-medium">Warning</span>
                                             </div>
                                         </td>
                                         <td class="p-4">89%</td>
                                         <td class="p-4">6.8 GB / 8 GB</td>
-                                        <td class="p-4 text-text-secondary-light dark:text-text-secondary-dark">3 seconds ago</td>
+                                        <td class="p-4 text-slate-500">3 seconds ago</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -320,545 +252,538 @@
                     </div>
                 </div>
 
-                <!-- Performance Section -->
                 <div id="performance-section" class="hidden space-y-8">
-                    <!-- Performance Metrics Tabs -->
-                    <div class="border-b border-subtle-light dark:border-subtle-dark">
+                    <div class="border-b border-slate-200">
                         <nav class="flex space-x-8">
-                            <button class="performance-tab active py-4 px-1 border-b-2 border-primary dark:border-primary-dark text-primary dark:text-primary-dark font-medium text-sm" data-tab="kafka">
+                            <button class="performance-tab active py-4 px-1 border-b-2 border-indigo-600 text-indigo-600 font-semibold text-sm" data-tab="kafka">
                                 <span class="material-symbols-outlined text-sm mr-2">speed</span>
                                 Kafka Metrics
                             </button>
-                            <button class="performance-tab py-4 px-1 border-b-2 border-transparent text-text-secondary-light dark:text-text-secondary-dark hover:text-text-light dark:hover:text-text-dark font-medium text-sm" data-tab="cluster">
+                            <button class="performance-tab py-4 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300 font-medium text-sm" data-tab="cluster">
                                 <span class="material-symbols-outlined text-sm mr-2">hub</span>
                                 Cluster Metrics
                             </button>
-                            <button class="performance-tab py-4 px-1 border-b-2 border-transparent text-text-secondary-light dark:text-text-secondary-dark hover:text-text-light dark:hover:text-text-dark font-medium text-sm" data-tab="system">
+                            <button class="performance-tab py-4 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300 font-medium text-sm" data-tab="system">
                                 <span class="material-symbols-outlined text-sm mr-2">health_and_safety</span>
                                 System Health
                             </button>
                         </nav>
                     </div>
 
-                    <!-- Kafka Metrics Tab -->
                     <div id="kafka-tab" class="performance-tab-content">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Total Topics</p>
-                                        <p class="text-2xl font-bold mt-2" id="kafka-total-topics">-</p>
+                                        <p class="text-sm font-medium text-slate-500">Total Topics</p>
+                                        <p class="text-2xl font-bold mt-2 text-slate-900" id="kafka-total-topics">-</p>
                                     </div>
-                                    <span class="material-symbols-outlined text-primary dark:text-primary-dark text-3xl">topic</span>
+                                    <span class="material-symbols-outlined text-indigo-500 text-3xl">topic</span>
                                 </div>
                             </div>
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Total Messages/sec</p>
-                                        <p class="text-2xl font-bold mt-2" id="kafka-total-rate">-</p>
+                                        <p class="text-sm font-medium text-slate-500">Total Messages/sec</p>
+                                        <p class="text-2xl font-bold mt-2 text-slate-900" id="kafka-total-rate">-</p>
                                     </div>
-                                    <span class="material-symbols-outlined text-success dark:text-success-dark text-3xl">trending_up</span>
+                                    <span class="material-symbols-outlined text-green-500 text-3xl">trending_up</span>
                                 </div>
                             </div>
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Avg Latency</p>
-                                        <p class="text-2xl font-bold mt-2" id="kafka-avg-latency">-</p>
+                                        <p class="text-sm font-medium text-slate-500">Avg Latency</p>
+                                        <p class="text-2xl font-bold mt-2 text-slate-900" id="kafka-avg-latency">-</p>
                                     </div>
-                                    <span class="material-symbols-outlined text-info dark:text-info-dark text-3xl">timer</span>
+                                    <span class="material-symbols-outlined text-cyan-500 text-3xl">timer</span>
                                 </div>
                             </div>
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Error Rate</p>
-                                        <p class="text-2xl font-bold mt-2" id="kafka-error-rate">-</p>
+                                        <p class="text-sm font-medium text-slate-500">Error Rate</p>
+                                        <p class="text-2xl font-bold mt-2 text-slate-900" id="kafka-error-rate">-</p>
                                     </div>
-                                    <span class="material-symbols-outlined text-warning dark:text-warning-dark text-3xl">error</span>
+                                    <span class="material-symbols-outlined text-yellow-500 text-3xl">error</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Kafka Topics Overview -->
                         <div class="kafka-topics-overview grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                            <!-- Kafka topic cards will be populated here -->
-                        </div>
+                            </div>
 
-                        <!-- Kafka Charts Section -->
                         <div class="kafka-charts-section grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                            <!-- Message Rate Trend Chart -->
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-lg font-semibold">Message Rate Trends</h3>
+                                    <h3 class="text-lg font-semibold text-slate-900">Message Rate Trends</h3>
                                     <div class="flex gap-2">
-                                        <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-primary/20 text-primary dark:bg-primary-dark/20 dark:text-primary-dark" data-chart="trend" data-type="line">Line</button>
-                                        <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark" data-chart="trend" data-type="area">Area</button>
+                                        <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-indigo-100 text-indigo-700 font-medium" data-chart="trend" data-type="line">Line</button>
+                                        <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-chart="trend" data-type="area">Area</button>
                                     </div>
                                 </div>
                                 <div id="kafka-trend-chart" class="h-64"></div>
                             </div>
 
-                            <!-- Topic Comparison Chart -->
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-lg font-semibold">Topic Comparison</h3>
+                                    <h3 class="text-lg font-semibold text-slate-900">Topic Comparison</h3>
                                     <div class="flex gap-2">
-                                        <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-primary/20 text-primary dark:bg-primary-dark/20 dark:text-primary-dark" data-chart="comparison" data-type="bar">Bar</button>
-                                        <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark" data-chart="comparison" data-type="horizontalBar">Horizontal</button>
+                                        <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-indigo-100 text-indigo-700 font-medium" data-chart="comparison" data-type="bar">Bar</button>
+                                        <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-chart="comparison" data-type="horizontalBar">Horizontal</button>
                                     </div>
                                 </div>
                                 <div id="kafka-comparison-chart" class="h-64"></div>
                             </div>
                         </div>
 
-                        <!-- Topic Distribution Chart -->
-                        <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md mb-8">
+                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mb-8">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-semibold">Topic Distribution</h3>
+                                <h3 class="text-lg font-semibold text-slate-900">Topic Distribution</h3>
                                 <div class="flex gap-2">
-                                    <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-primary/20 text-primary dark:bg-primary-dark/20 dark:text-primary-dark" data-chart="distribution" data-type="pie">Pie</button>
-                                    <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark" data-chart="distribution" data-type="doughnut">Doughnut</button>
+                                    <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-indigo-100 text-indigo-700 font-medium" data-chart="distribution" data-type="pie">Pie</button>
+                                    <button class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200" data-chart="distribution" data-type="doughnut">Doughnut</button>
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <div id="kafka-distribution-chart" class="h-64"></div>
                                 <div class="kafka-topics-legend flex flex-col justify-center">
-                                    <!-- Legend will be populated here -->
-                                </div>
+                                    </div>
                             </div>
                         </div>
 
-                        <!-- Kafka Metrics Table -->
-                        <div class="kafka-metrics-table rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md overflow-hidden">
-                            <!-- Kafka metrics table will be populated here -->
-                        </div>
+                        <div class="kafka-metrics-table rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                            </div>
                     </div>
 
 
-                    <!-- Cluster Metrics Tab -->
                     <div id="cluster-tab" class="performance-tab-content hidden">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Total Nodes</p>
-                                        <p class="text-2xl font-bold mt-2" id="cluster-total-nodes">-</p>
+                                        <p class="text-sm font-medium text-slate-500">Total Nodes</p>
+                                        <p class="text-2xl font-bold mt-2 text-slate-900" id="cluster-total-nodes">-</p>
                                     </div>
-                                    <span class="material-symbols-outlined text-primary dark:text-primary-dark text-3xl">computer</span>
+                                    <span class="material-symbols-outlined text-indigo-500 text-3xl">computer</span>
                                 </div>
                             </div>
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Avg CPU Usage</p>
-                                        <p class="text-2xl font-bold mt-2" id="cluster-avg-cpu">-</p>
+                                        <p class="text-sm font-medium text-slate-500">Avg CPU Usage</p>
+                                        <p class="text-2xl font-bold mt-2 text-slate-900" id="cluster-avg-cpu">-</p>
                                     </div>
-                                    <span class="material-symbols-outlined text-success dark:text-success-dark text-3xl">memory</span>
+                                    <span class="material-symbols-outlined text-green-500 text-3xl">memory</span>
                                 </div>
                             </div>
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Total Memory</p>
-                                        <p class="text-2xl font-bold mt-2" id="cluster-total-memory">-</p>
+                                        <p class="text-sm font-medium text-slate-500">Total Memory</p>
+                                        <p class="text-2xl font-bold mt-2 text-slate-900" id="cluster-total-memory">-</p>
                                     </div>
-                                    <span class="material-symbols-outlined text-info dark:text-info-dark text-3xl">storage</span>
+                                    <span class="material-symbols-outlined text-cyan-500 text-3xl">storage</span>
                                 </div>
                             </div>
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Used Memory</p>
-                                        <p class="text-2xl font-bold mt-2" id="cluster-used-memory">-</p>
+                                        <p class="text-sm font-medium text-slate-500">Used Memory</p>
+                                        <p class="text-2xl font-bold mt-2 text-slate-900" id="cluster-used-memory">-</p>
                                     </div>
-                                    <span class="material-symbols-outlined text-warning dark:text-warning-dark text-3xl">analytics</span>
+                                    <span class="material-symbols-outlined text-yellow-500 text-3xl">analytics</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Cluster Node Status Table -->
-                        <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md overflow-hidden">
+                        <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                             <table class="w-full text-left text-sm">
-                                <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
+                                <thead class="bg-slate-50">
                                     <tr>
-                                        <th class="p-4 font-semibold">Node Name</th>
-                                        <th class="p-4 font-semibold">Status</th>
-                                        <th class="p-4 font-semibold">CPU Usage</th>
-                                        <th class="p-4 font-semibold">Memory Usage</th>
-                                        <th class="p-4 font-semibold">Last Update</th>
+                                        <th class="p-4 font-semibold text-slate-600 uppercase text-xs tracking-wider">Node Name</th>
+                                        <th class="p-4 font-semibold text-slate-600 uppercase text-xs tracking-wider">Status</th>
+                                        <th class="p-4 font-semibold text-slate-600 uppercase text-xs tracking-wider">CPU Usage</th>
+                                        <th class="p-4 font-semibold text-slate-600 uppercase text-xs tracking-wider">Memory Usage</th>
+                                        <th class="p-4 font-semibold text-slate-600 uppercase text-xs tracking-wider">Last Update</th>
                                     </tr>
                                 </thead>
-                                <tbody id="cluster-node-status-body" class="divide-y divide-subtle-light dark:divide-subtle-dark">
-                                    <!-- Cluster node data will be populated here -->
-                                </tbody>
+                                <tbody id="cluster-node-status-body" class="divide-y divide-slate-200 text-slate-700">
+                                    </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- System Health Tab -->
                     <div id="system-tab" class="performance-tab-content hidden">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">ClickHouse Status</p>
-                                        <p class="text-lg font-bold mt-2" id="system-clickhouse-status">-</p>
+                                        <p class="text-sm font-medium text-slate-500">ClickHouse Status</p>
+                                        <p class="text-lg font-bold mt-2 text-slate-900" id="system-clickhouse-status">-</p>
                                     </div>
-                                    <span class="material-symbols-outlined text-primary dark:text-primary-dark text-3xl">database</span>
+                                    <span class="material-symbols-outlined text-indigo-500 text-3xl">database</span>
                                 </div>
                             </div>
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Total Pods</p>
-                                        <p class="text-2xl font-bold mt-2" id="system-total-pods">-</p>
+                                        <p class="text-sm font-medium text-slate-500">Total Pods</p>
+                                        <p class="text-2xl font-bold mt-2 text-slate-900" id="system-total-pods">-</p>
                                     </div>
-                                    <span class="material-symbols-outlined text-success dark:text-success-dark text-3xl">apps</span>
+                                    <span class="material-symbols-outlined text-green-500 text-3xl">apps</span>
                                 </div>
                             </div>
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Running Pods</p>
-                                        <p class="text-2xl font-bold mt-2" id="system-running-pods">-</p>
+                                        <p class="text-sm font-medium text-slate-500">Running Pods</p>
+                                        <p class="text-2xl font-bold mt-2 text-slate-900" id="system-running-pods">-</p>
                                     </div>
-                                    <span class="material-symbols-outlined text-info dark:text-info-dark text-3xl">check_circle</span>
+                                    <span class="material-symbols-outlined text-cyan-500 text-3xl">check_circle</span>
                                 </div>
                             </div>
-                            <div class="rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Failed Pods</p>
-                                        <p class="text-2xl font-bold mt-2" id="system-failed-pods">-</p>
+                                        <p class="text-sm font-medium text-slate-500">Failed Pods</p>
+                                        <p class="text-2xl font-bold mt-2 text-slate-900" id="system-failed-pods">-</p>
                                     </div>
-                                    <span class="material-symbols-outlined text-warning dark:text-warning-dark text-3xl">error</span>
+                                    <span class="material-symbols-outlined text-yellow-500 text-3xl">error</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- ClickHouse Connection Details -->
                         <div class="connection-details grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                            <!-- Connection details will be populated here -->
-                        </div>
+                            </div>
 
-                        <!-- Pod Resource Metrics -->
                         <div class="pod-resource-metrics mb-8">
-                            <!-- Pod resource metrics will be populated here -->
-                        </div>
+                            </div>
 
-                        <!-- Pod Status Metrics -->
                         <div class="pod-status-metrics mb-8">
-                            <!-- Pod status metrics will be populated here -->
-                        </div>
+                            </div>
 
-                        <!-- Top Memory Pods -->
                         <div class="top-memory-pods">
-                            <!-- Top memory pods will be populated here -->
-                        </div>
+                            </div>
                     </div>
                 </div>
 
-                <!-- System Health Section -->
                 <div id="system-section" class="hidden space-y-8">
                     <div class="text-center py-20">
-                        <span class="material-symbols-outlined text-6xl text-text-secondary-light dark:text-text-secondary-dark mb-4">health_and_safety</span>
-                        <h3 class="text-xl font-semibold mb-2">System Health</h3>
-                        <p class="text-text-secondary-light dark:text-text-secondary-dark">Comprehensive system health monitoring and diagnostics</p>
+                        <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">health_and_safety</span>
+                        <h3 class="text-xl font-semibold mb-2 text-slate-700">System Health</h3>
+                        <p class="text-slate-500">Comprehensive system health monitoring and diagnostics</p>
                     </div>
                 </div>
 
-                <!-- Log Analysis Section -->
                 <div id="logs-section" class="hidden space-y-8">
                     <div class="text-center py-20">
-                        <span class="material-symbols-outlined text-6xl text-text-secondary-light dark:text-text-secondary-dark mb-4">description</span>
-                        <h3 class="text-xl font-semibold mb-2">Log Analysis</h3>
-                        <p class="text-text-secondary-light dark:text-text-secondary-dark">Advanced log analysis and pattern detection</p>
+                        <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">description</span>
+                        <h3 class="text-xl font-semibold mb-2 text-slate-700">Log Analysis</h3>
+                        <p class="text-slate-500">Advanced log analysis and pattern detection</p>
                     </div>
                 </div>
 
-                <!-- K6 Monitoring Section -->
                 <div id="k6-monitoring-section" class="hidden space-y-8">
-                    <!-- K6 Monitoring Header -->
                     <div class="flex flex-wrap justify-between gap-4 items-center mb-6">
-                        <h1 class="text-4xl font-black leading-tight tracking-[-0.033em]">K6 Load Testing Results</h1>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Last updated: <span id="k6-last-update">Never</span></p>
+                        <h1 class="text-4xl font-black leading-tight tracking-[-0.033em] text-slate-900">K6 Load Testing Results</h1>
+                        <p class="text-sm text-slate-500">Last updated: <span id="k6-last-update">Never</span></p>
                     </div>
 
-                    <!-- K6 Stats Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Total Results</p>
-                            <p class="tracking-light text-3xl font-bold" id="k6-total-results">-</p>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-slate-500">Total Results</p>
+                            <p class="tracking-light text-3xl font-bold text-slate-900" id="k6-total-results">-</p>
                         </div>
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Avg P95 Response Time</p>
-                            <p class="tracking-light text-3xl font-bold" id="k6-avg-p95">-</p>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-slate-500">Avg P95 Response Time</p>
+                            <p class="tracking-light text-3xl font-bold text-slate-900" id="k6-avg-p95">-</p>
                         </div>
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Virtual Users</p>
-                            <p class="tracking-light text-3xl font-bold" id="k6-vus">-</p>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-slate-500">Virtual Users</p>
+                            <p class="tracking-light text-3xl font-bold text-slate-900" id="k6-vus">-</p>
                         </div>
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Dashboard</p>
-                            <p class="tracking-light text-3xl font-bold" id="k6-dashboard">-</p>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-slate-500">Dashboard</p>
+                            <p class="tracking-light text-3xl font-bold text-slate-900" id="k6-dashboard">-</p>
                         </div>
                     </div>
 
-                    <!-- Filters and Controls -->
-                    <div class="flex flex-wrap justify-between gap-4 px-4 py-3 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark mb-6 shadow-sm">
+                    <div class="flex flex-wrap justify-between gap-4 px-4 py-3 bg-white rounded-xl border border-slate-200 mb-6 shadow-sm">
                         <div class="relative flex-1">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                            <input class="w-full h-10 pl-10 pr-4 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary focus:border-primary transition-all" placeholder="Search by panel name..." type="text" id="k6-search"/>
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                            <input class="w-full h-10 pl-10 pr-4 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="Search by panel name..." type="text" id="k6-search"/>
                         </div>
                         <div class="flex items-center gap-4">
-                            <select class="h-10 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary focus:border-primary transition-all" id="k6-time-filter">
+                            <select class="h-10 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" id="k6-time-filter">
                                 <option>All Time Filters</option>
                                 <option>6h</option>
                             </select>
-                            <button class="p-2.5 rounded-lg text-text-light dark:text-text-dark bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" id="k6-refresh-btn">
+                            <button class="p-2.5 rounded-lg text-slate-600 bg-slate-50 border border-slate-300 hover:bg-slate-100 transition-colors" id="k6-refresh-btn">
                                 <span class="material-symbols-outlined animate-spin-slow">refresh</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- K6 Results Table -->
                     <div class="@container">
-                        <div class="overflow-x-auto rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark shadow-sm">
+                        <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
                             <table class="w-full min-w-max text-left">
-                                <thead class="border-b border-border-light dark:border-border-dark">
+                                <thead class="border-b border-slate-200">
                                     <tr>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Timestamp</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Virtual Users</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Time Filter</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Panel Name</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Dashboard</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">P95 Response Time (ms)</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Timestamp</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Virtual Users</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Time Filter</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Panel Name</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Dashboard</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">P95 Response Time (ms)</th>
                                     </tr>
                                 </thead>
-                                <tbody id="k6-results-body">
-                                    <!-- K6 data will be populated here -->
-                                </tbody>
+                                <tbody id="k6-results-body" class="divide-y divide-slate-200 text-slate-700">
+                                    </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- Loading State -->
                     <div id="k6-loading-state" class="text-center py-8">
                         <div class="inline-flex items-center gap-3">
-                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                            <span class="text-text-secondary-light dark:text-text-secondary-dark">Loading K6 results...</span>
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                            <span class="text-slate-500">Loading K6 results...</span>
                         </div>
                     </div>
 
-                    <!-- No Data State -->
                     <div id="k6-no-data-state" class="hidden text-center py-8">
-                        <span class="material-symbols-outlined text-6xl text-text-secondary-light dark:text-text-secondary-dark mb-4">analytics</span>
-                        <h3 class="text-xl font-semibold mb-2">No K6 Results Found</h3>
-                        <p class="text-text-secondary-light dark:text-text-secondary-dark">No load testing results are available for the selected criteria.</p>
+                        <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">analytics</span>
+                        <h3 class="text-xl font-semibold mb-2 text-slate-700">No K6 Results Found</h3>
+                        <p class="text-slate-500">No load testing results are available for the selected criteria.</p>
                     </div>
                 </div>
 
-                <!-- Pod Monitoring Section -->
                 <div id="pod-monitoring-section" class="hidden space-y-8">
-                    <!-- Pod Monitoring Header -->
                     <div class="flex flex-wrap justify-between gap-4 items-center mb-6">
-                        <h1 class="text-4xl font-black leading-tight tracking-[-0.033em]">Pod Monitoring</h1>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Last updated: <span id="pod-last-update">a few seconds ago</span></p>
+                        <h1 class="text-4xl font-black leading-tight tracking-[-0.033em] text-slate-900">Pod Monitoring</h1>
+                        <p class="text-sm text-slate-500">Last updated: <span id="pod-last-update">a few seconds ago</span></p>
                     </div>
 
-                    <!-- Pod Stats Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Total Pods</p>
-                            <p class="tracking-light text-3xl font-bold" id="total-pods">-</p>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-slate-500">Total Pods</p>
+                            <p class="tracking-light text-3xl font-bold text-slate-900" id="total-pods">-</p>
                         </div>
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Running Pods</p>
-                            <p class="tracking-light text-3xl font-bold" id="running-pods">-</p>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-slate-500">Running Pods</p>
+                            <p class="tracking-light text-3xl font-bold text-slate-900" id="running-pods">-</p>
                         </div>
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Avg CPU Usage</p>
-                            <p class="tracking-light text-3xl font-bold" id="avg-cpu-usage">-</p>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-slate-500">Avg CPU Usage</p>
+                            <p class="tracking-light text-3xl font-bold text-slate-900" id="avg-cpu-usage">-</p>
                         </div>
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Avg Memory Usage</p>
-                            <p class="tracking-light text-3xl font-bold" id="avg-memory-usage">-</p>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-slate-500">Avg Memory Usage</p>
+                            <p class="tracking-light text-3xl font-bold text-slate-900" id="avg-memory-usage">-</p>
                         </div>
                     </div>
 
-                    <!-- Filters and Controls -->
-                    <div class="flex flex-wrap justify-between gap-4 px-4 py-3 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark mb-6 shadow-sm">
+                    <div class="flex flex-wrap justify-between gap-4 px-4 py-3 bg-white rounded-xl border border-slate-200 mb-6 shadow-sm">
                         <div class="relative flex-1">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                            <input class="w-full h-10 pl-10 pr-4 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary focus:border-primary transition-all" placeholder="Search by pod name or namespace..." type="text" id="pod-search"/>
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                            <input class="w-full h-10 pl-10 pr-4 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="Search by pod name or namespace..." type="text" id="pod-search"/>
                         </div>
                         <div class="flex items-center gap-4">
-                            <select class="h-10 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary focus:border-primary transition-all" id="namespace-filter">
+                            <select class="h-10 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" id="namespace-filter">
                                 <option>All Namespaces</option>
                                 <option>vsmaps</option>
                                 <option>kube-system</option>
                                 <option>default</option>
                             </select>
-                            <button class="p-2.5 rounded-lg text-text-light dark:text-text-dark bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" id="pod-refresh-btn">
+                            <button class="p-2.5 rounded-lg text-slate-600 bg-slate-50 border border-slate-300 hover:bg-slate-100 transition-colors" id="pod-refresh-btn">
                                 <span class="material-symbols-outlined animate-spin-slow">refresh</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Pod Monitoring Table -->
                     <div class="@container">
-                        <div class="overflow-x-auto rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark shadow-sm">
+                        <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
                             <table class="w-full min-w-max text-left">
-                                <thead class="border-b border-border-light dark:border-border-dark">
+                                <thead class="border-b border-slate-200">
                                     <tr>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Namespace</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Pod Name</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Node</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Status</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Ready</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">CPU Usage</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Memory Usage</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Restarts</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Last Seen</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Namespace</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Pod Name</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Node</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Status</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Ready</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">CPU Usage</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Memory Usage</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Restarts</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Last Seen</th>
                                     </tr>
                                 </thead>
-                                <tbody id="pod-monitoring-body">
-                                    <!-- Pod data will be populated here -->
-                                </tbody>
+                                <tbody id="pod-monitoring-body" class="divide-y divide-slate-200 text-slate-700">
+                                    </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- Pagination -->
                     <div class="flex items-center justify-between mt-6 px-4">
-                        <p class="text-sm text-gray-500 dark:text-gray-400" id="pod-pagination-info">Showing 0 to 0 of 0 results</p>
+                        <p class="text-sm text-slate-500" id="pod-pagination-info">Showing 0 to 0 of 0 results</p>
                         <div class="flex items-center gap-2">
-                <!-- K6 Monitoring Section -->
-                <div id="k6-monitoring-section" class="hidden space-y-8">
-                    <!-- K6 Monitoring Header -->
-                    <div class="flex flex-wrap justify-between gap-4 items-center mb-6">
-                        <h1 class="text-4xl font-black leading-tight tracking-[-0.033em]">K6 Load Testing Results</h1>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Last updated: <span id="k6-last-update">Never</span></p>
-                    </div>
-
-                    <!-- K6 Stats Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Total Results</p>
-                            <p class="tracking-light text-3xl font-bold" id="k6-total-results">-</p>
-                        </div>
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Avg P95 Response Time</p>
-                            <p class="tracking-light text-3xl font-bold" id="k6-avg-p95">-</p>
-                        </div>
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Virtual Users</p>
-                            <p class="tracking-light text-3xl font-bold" id="k6-vus">-</p>
-                        </div>
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Dashboard</p>
-                            <p class="tracking-light text-3xl font-bold" id="k6-dashboard">-</p>
-                        </div>
-                    </div>
-
-                    <!-- Filters and Controls -->
-                    <div class="flex flex-wrap justify-between gap-4 px-4 py-3 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark mb-6 shadow-sm">
-                        <div class="relative flex-1">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                            <input class="w-full h-10 pl-10 pr-4 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary focus:border-primary transition-all" placeholder="Search by panel name..." type="text" id="k6-search"/>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <select class="h-10 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary focus:border-primary transition-all" id="k6-time-filter">
-                                <option>All Time Filters</option>
-    <script src="/static/monitoring-js/k6-metrics.js"></script>
-                                <option>6h</option>
-                            </select>
-                            <button class="p-2.5 rounded-lg text-text-light dark:text-text-dark bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" id="k6-refresh-btn">
-                                <span class="material-symbols-outlined animate-spin-slow">refresh</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- K6 Results Table -->
-                    <div class="@container">
-                        <div class="overflow-x-auto rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark shadow-sm">
-                            <table class="w-full min-w-max text-left">
-                                <thead class="border-b border-border-light dark:border-border-dark">
-                                    <tr>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Timestamp</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Virtual Users</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Time Filter</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Panel Name</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Dashboard</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">P95 Response Time (ms)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="k6-results-body">
-                                    <!-- K6 data will be populated here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Loading State -->
-                    <div id="k6-loading-state" class="text-center py-8">
-                        <div class="inline-flex items-center gap-3">
-                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                            <span class="text-text-secondary-light dark:text-text-secondary-dark">Loading K6 results...</span>
-                        </div>
-                    </div>
-
-                    <!-- No Data State -->
-                    <div id="k6-no-data-state" class="hidden text-center py-8">
-                        <span class="material-symbols-outlined text-6xl text-text-secondary-light dark:text-text-secondary-dark mb-4">analytics</span>
-                        <h3 class="text-xl font-semibold mb-2">No K6 Results Found</h3>
-                        <p class="text-text-secondary-light dark:text-text-secondary-dark">No load testing results are available for the selected criteria.</p>
-                    </div>
-                </div>
-                            <button class="px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled="" id="pod-prev-btn">Previous</button>
-                            <button class="px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" id="pod-next-btn">Next</button>
+                            <button class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled="" id="pod-prev-btn">Previous</button>
+                            <button class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 transition-colors" id="pod-next-btn">Next</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Alerts Section -->
                 <div id="alerts-section" class="hidden space-y-8">
                     <div class="text-center py-20">
-                        <span class="material-symbols-outlined text-6xl text-text-secondary-light dark:text-text-secondary-dark mb-4">notifications</span>
-                        <h3 class="text-xl font-semibold mb-2">Alerts & Notifications</h3>
-                        <p class="text-text-secondary-light dark:text-text-secondary-dark">Alert management and notification configuration</p>
+                        <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">notifications</span>
+                        <h3 class="text-xl font-semibold mb-2 text-slate-700">Alerts & Notifications</h3>
+                        <p class="text-slate-500">Alert management and notification configuration</p>
                     </div>
                 </div>
             </div>
         </main>
-    <!-- Pod Details Modal -->
+    </div>
+    
+    <!-- Pod Details Full Screen Modal -->
     <div id="pod-details-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold">Pod Details</h2>
-                    <button id="close-pod-modal" class="text-gray-500 hover:text-gray-700">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
+        <div class="fixed inset-0 bg-white">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-slate-200">
+                <h2 class="text-2xl font-bold text-slate-900">Pod Details: <span id="modal-pod-name"></span></h2>
+                <button id="close-pod-modal" class="text-slate-500 hover:text-slate-700 transition-colors">
+                    <span class="material-symbols-outlined text-2xl">close</span>
+                </button>
+            </div>
+
+            <!-- Modal Body (Full Screen Content) -->
+            <div class="p-6 h-full overflow-y-auto">
+                <!-- Pod Information Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="material-symbols-outlined text-indigo-600">pod</span>
+                            <h3 class="text-lg font-semibold text-slate-900">Pod Info</h3>
+                        </div>
+                        <div class="space-y-2">
+                            <p class="text-sm text-slate-600"><strong>Name:</strong> <span id="pod-detail-name">-</span></p>
+                            <p class="text-sm text-slate-600"><strong>Namespace:</strong> <span id="pod-detail-namespace">-</span></p>
+                            <p class="text-sm text-slate-600"><strong>Node:</strong> <span id="pod-detail-node">-</span></p>
+                            <p class="text-sm text-slate-600"><strong>Status:</strong> <span id="pod-detail-status">-</span></p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="material-symbols-outlined text-green-600">memory</span>
+                            <h3 class="text-lg font-semibold text-slate-900">Resources</h3>
+                        </div>
+                        <div class="space-y-2">
+                            <p class="text-sm text-slate-600"><strong>CPU Usage:</strong> <span id="pod-detail-cpu">-</span></p>
+                            <p class="text-sm text-slate-600"><strong>Memory Usage:</strong> <span id="pod-detail-memory">-</span></p>
+                            <p class="text-sm text-slate-600"><strong>Restarts:</strong> <span id="pod-detail-restarts">-</span></p>
+                            <p class="text-sm text-slate-600"><strong>Ready:</strong> <span id="pod-detail-ready">-</span></p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="material-symbols-outlined text-cyan-600">schedule</span>
+                            <h3 class="text-lg font-semibold text-slate-900">Timestamps</h3>
+                        </div>
+                        <div class="space-y-2">
+                            <p class="text-sm text-slate-600"><strong>Last Seen:</strong> <span id="pod-detail-last-seen">-</span></p>
+                            <p class="text-sm text-slate-600"><strong>Created:</strong> <span id="pod-detail-created">-</span></p>
+                            <p class="text-sm text-slate-600"><strong>Age:</strong> <span id="pod-detail-age">-</span></p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="material-symbols-outlined text-yellow-600">analytics</span>
+                            <h3 class="text-lg font-semibold text-slate-900">Metrics</h3>
+                        </div>
+                        <div class="space-y-2">
+                            <p class="text-sm text-slate-600"><strong>Containers:</strong> <span id="pod-detail-containers">-</span></p>
+                            <p class="text-sm text-slate-600"><strong>Phase:</strong> <span id="pod-detail-phase">-</span></p>
+                            <p class="text-sm text-slate-600"><strong>QoS Class:</strong> <span id="pod-detail-qos">-</span></p>
+                        </div>
+                    </div>
                 </div>
-                <div id="pod-details-content">
-                    <p class="text-lg"><strong>Pod Name:</strong> <span id="modal-pod-name"></span></p>
+
+                <!-- Detailed Information Tabs -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm">
+                    <div class="border-b border-slate-200">
+                        <nav class="flex">
+                            <button class="pod-detail-tab px-6 py-4 text-sm font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent hover:border-slate-300 transition-colors active" data-tab="containers">
+                                <span class="material-symbols-outlined text-sm mr-2">widgets</span>
+                                Containers
+                            </button>
+                            <button class="pod-detail-tab px-6 py-4 text-sm font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent hover:border-slate-300 transition-colors" data-tab="events">
+                                <span class="material-symbols-outlined text-sm mr-2">event_note</span>
+                                Events
+                            </button>
+                            <button class="pod-detail-tab px-6 py-4 text-sm font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent hover:border-slate-300 transition-colors" data-tab="logs">
+                                <span class="material-symbols-outlined text-sm mr-2">description</span>
+                                Logs
+                            </button>
+                            <button class="pod-detail-tab px-6 py-4 text-sm font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent hover:border-slate-300 transition-colors" data-tab="yaml">
+                                <span class="material-symbols-outlined text-sm mr-2">code</span>
+                                YAML
+                            </button>
+                        </nav>
+                    </div>
+
+                    <div class="p-6">
+                        <div id="containers-tab" class="pod-detail-tab-content">
+                            <h4 class="text-lg font-semibold mb-4 text-slate-900">Container Details</h4>
+                            <div id="pod-containers-content" class="space-y-4">
+                                <!-- Container details will be populated here -->
+                                <div class="text-center py-8 text-slate-500">
+                                    <span class="material-symbols-outlined text-4xl mb-2">widgets</span>
+                                    <p>Loading container information...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="events-tab" class="pod-detail-tab-content hidden">
+                            <h4 class="text-lg font-semibold mb-4 text-slate-900">Pod Events</h4>
+                            <div id="pod-events-content" class="space-y-4">
+                                <!-- Events will be populated here -->
+                                <div class="text-center py-8 text-slate-500">
+                                    <span class="material-symbols-outlined text-4xl mb-2">event_note</span>
+                                    <p>Loading events...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="logs-tab" class="pod-detail-tab-content hidden">
+                            <h4 class="text-lg font-semibold mb-4 text-slate-900">Pod Logs</h4>
+                            <div class="bg-slate-900 rounded-lg p-4">
+                                <pre id="pod-logs-content" class="text-green-400 text-sm font-mono whitespace-pre-wrap">
+                                    <!-- Logs will be populated here -->
+                                    Loading logs...</pre>
+                            </div>
+                        </div>
+
+                        <div id="yaml-tab" class="pod-detail-tab-content hidden">
+                            <h4 class="text-lg font-semibold mb-4 text-slate-900">Pod YAML</h4>
+                            <div class="bg-slate-900 rounded-lg p-4">
+                                <pre id="pod-yaml-content" class="text-yellow-400 text-sm font-mono whitespace-pre-wrap">
+                                    <!-- YAML will be populated here -->
+                                    Loading YAML...</pre>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    </div>
 
-    <!-- Application scripts -->
     <script src="/static/monitoring-js/realtime-updates.js"></script>
     <script src="/static/monitoring-js/cluster-metrics.js"></script>
     <script src="/static/monitoring-js/kafka-metrics.js"></script>
     <script src="/static/monitoring-js/pod_monitoring.js"></script>
     <script src="/static/monitoring-js/system-health.js"></script>
     <script src="/static/monitoring-js/monitoring.js"></script>
+    <script src="/static/monitoring-js/k6-metrics.js"></script>
 </body>
 </html>
