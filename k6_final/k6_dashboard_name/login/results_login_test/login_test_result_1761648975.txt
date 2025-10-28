@@ -1,0 +1,23 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /home/vunet/k6_dashboard_name/login/login.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 50 max VUs, 10m30s max duration (incl. graceful stop):
+              * default: 50 iterations shared among 50 VUs (maxDuration: 10m0s, gracefulStop: 30s)
+
+
+     data_received........: 0 B 0 B/s
+     data_sent............: 0 B 0 B/s
+     iteration_duration...: avg=45.13µs min=5.44µs med=26.46µs max=327.71µs p(90)=98.11µs p(95)=125.35µs
+     iterations...........: 50  21452.009281/s
+
+
+running (00m00.0s), 00/50 VUs, 50 complete and 0 interrupted iterations
+default ✓ [ 100% ] 50 VUs  00m00.0s/10m0s  50/50 shared iters

@@ -1,0 +1,9 @@
+timestamp,test_name,avg_response_time,status_code,success_rate,vus,vus_max,iterations
+2025-10-28 16:19:28,login_test,0,,0.00%,5,5,10
+2025-10-28 16:20:00,login_test,0,,0.00%,5,5,10
+2025-10-28 16:20:08,login_test,0,,0.00%,5,5,10
+2025-10-28 16:20:17,login_test,,,,50,50,10
+2025-10-28 16:25:15,login_test,,,,50,50,10
+2025-10-28 16:25:30,login_test,,,,50,50,10
+2025-10-28 16:26:15,login_test,,,,50,50,50
+2025-10-28 16:36:46,login_test,,,,50,50,50

@@ -4,8 +4,8 @@ import { Trend, Rate, Counter } from 'k6/metrics';
 
 // Dashboard configuration
 const DASHBOARD_CONFIG = {
-  id: 'a7e176b5-a37e-4673-9389-1b0c8da43934',
-  name: 'Self Monitor Server Insights'
+  id: 'b95b768c-bb56-4faf-af9e-2db19d50c149',
+  name: 'Linux Server Insights'
 };
 
 // Time range configuration - can be set via environment variables
@@ -35,7 +35,7 @@ if (!validateTimeRange(TIME_RANGE.from, TIME_RANGE.to)) {
     throw new Error('Invalid time range parameters');
 }
 
-const usersRaw = open('/home/ubuntu/Load-Testing-Tool/k6_final/user_creation_k6/user_cookies.txt').split('\n');
+const usersRaw = open('/home/vunet/Load-Testing-Tool/k6_final/user_creation_k6/user_cookies.txt').split('\n');
 const users = usersRaw.map(line => {
     const [username, password, vunetSession, xVuNetHTTPInfo, grafanaSessionExpiry] = line.split(',');
     return {
@@ -130,7 +130,7 @@ export default function () {
     };
 
     // 1. Get dashboard JSON
-    const dashboardUrl = `https://91.203.133.240/vui/api/dashboards/uid/${DASHBOARD_CONFIG.id}`;
+    const dashboardUrl = `https://qa.vunetsystems.com/vui/api/dashboards/uid/${DASHBOARD_CONFIG.id}`;
     
     const dashboardRes = http.get(dashboardUrl, {
         headers: {
@@ -191,7 +191,7 @@ export default function () {
         }
 
         // Add time range parameters to the URL
-        const panelUrl = `https://91.203.133.240/vui/d/${DASHBOARD_CONFIG.id}/linux-server-insights?orgId=1&viewPanel=${panelId}&from=${encodeURIComponent(TIME_RANGE.from)}&to=${encodeURIComponent(TIME_RANGE.to)}`;
+        const panelUrl = `https://qa.vunetsystems.com/vui/d/${DASHBOARD_CONFIG.id}/linux-server-insights?orgId=1&viewPanel=${panelId}&from=${encodeURIComponent(TIME_RANGE.from)}&to=${encodeURIComponent(TIME_RANGE.to)}`;
         
         const panelRes = http.get(panelUrl, {
             headers: {

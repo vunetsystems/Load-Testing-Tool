@@ -18,7 +18,7 @@ ITERATIONS=$3
 INTERVAL=$4
 
 # ====== CONFIGURATION ======
-SCRIPT_DIR="/home/ubuntu/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard"
+SCRIPT_DIR="/home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard"
 RESULT_DIR="./results_linux_mssql"
 CSV_FILE="${RESULT_DIR}/dashboard_panel_metrics.csv"
 SUMMARY_FILE="${RESULT_DIR}/dashboard_summary.txt"

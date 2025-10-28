@@ -5,8 +5,8 @@ from playwright.sync_api import sync_playwright
 import time
 
 # ===== CONFIGURATION =====
-BASE_URL = "https://91.203.133.240"
-KEYCLOAK_BASE = "https://91.203.133.240"
+BASE_URL = "https://qa.vunetsystems.com"
+KEYCLOAK_BASE = "https://qa.vunetsystems.com"
 REALM = "vunet"
 
 TOKEN_URL = f"{KEYCLOAK_BASE}/realms/{REALM}/protocol/openid-connect/token"

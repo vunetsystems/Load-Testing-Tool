@@ -3,6 +3,7 @@
 // Global managers
 let realtimeManager = null;
 let podMonitoringManager = null;
+let k6MonitoringManager = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize monitoring page
@@ -31,6 +32,11 @@ async function initializeMonitoring() {
     console.log('initializeMonitoring: PodMonitoringManager created, calling initialize...');
     await podMonitoringManager.initialize();
     console.log('initializeMonitoring: PodMonitoringManager initialized');
+
+    // Initialize K6 monitoring manager
+    console.log('initializeMonitoring: Creating K6MonitoringManager...');
+    k6MonitoringManager = new K6MonitoringManager();
+    console.log('initializeMonitoring: K6MonitoringManager created');
 
     // Update last update timestamp
     updateLastUpdateTime();
@@ -86,6 +92,17 @@ function setupSectionNavigation() {
                 }
             }
 
+            // Handle k6 monitoring section
+            if (section === 'k6-monitoring') {
+                if (k6MonitoringManager) {
+                    k6MonitoringManager.refresh();
+                } else {
+                    // Initialize if not already done
+                    k6MonitoringManager = new K6MonitoringManager();
+                    k6MonitoringManager.initialize();
+                }
+            }
+
             // Notify realtime manager of section change
             if (realtimeManager) {
                 realtimeManager.onSectionChange(section);
@@ -118,6 +135,7 @@ function updatePageTitle(sectionName) {
             'overview': 'Monitoring Overview',
             'performance': 'Kafka Metrics',
             'pod-monitoring': 'Pod Monitoring',
+            'k6-monitoring': 'K6 Load Testing Results',
             'system': 'System Health',
             'logs': 'Log Analysis',
             'alerts': 'Alerts & Notifications'
