@@ -1,0 +1,48 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /home/ubuntu/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard/LinuxServerInsights.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 5 max VUs, 10m30s max duration (incl. graceful stop):
+              * default: 5 iterations shared among 5 VUs (maxDuration: 10m0s, gracefulStop: 30s)
+
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 5       107.689989/s
+    checks_succeeded...: 0.00%   0 out of 5
+    checks_failed......: 100.00% 5 out of 5
+
+    ✗ Dashboard is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+
+    CUSTOM
+    dashboard_response_time....: avg=24.04ms min=17.37ms med=22.86ms max=31.1ms  p(90)=29.18ms p(95)=30.14ms
+    dashboard_success_rate.....: 0.00%   0 out of 5
+
+    HTTP
+    http_req_duration..........: avg=24.04ms min=17.37ms med=22.86ms max=31.1ms  p(90)=29.18ms p(95)=30.14ms
+    http_req_duration_custom...: avg=24.04ms min=17.37ms med=22.86ms max=31.1ms  p(90)=29.18ms p(95)=30.14ms
+    http_req_failed............: 100.00% 5 out of 5
+    http_reqs..................: 5       107.689989/s
+
+    EXECUTION
+    iteration_duration.........: avg=39.11ms min=33.5ms  med=37.51ms max=46.12ms p(90)=44.05ms p(95)=45.08ms
+    iterations.................: 5       107.689989/s
+
+    NETWORK
+    data_received..............: 19 kB   409 kB/s
+    data_sent..................: 3.9 kB  83 kB/s
+
+
+
+
+running (00m00.0s), 0/5 VUs, 5 complete and 0 interrupted iterations
+default ✓ [ 100% ] 5 VUs  00m00.0s/10m0s  5/5 shared iters

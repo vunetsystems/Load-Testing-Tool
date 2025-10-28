@@ -4,8 +4,8 @@ import { Trend, Rate, Counter } from 'k6/metrics';
 
 // Dashboard configuration
 const DASHBOARD_CONFIG = {
-  id: 'df8d57d1-37ec-4ecd-8780-81d5116d0185',
-  name: 'Traces Service Catalog'
+  id: 'fa44e3f5-e677-4d1e-837d-16c7d15b59c5',
+  name: 'Payment Journey Observability'
 };
 
 // Time range configuration - can be set via environment variables
@@ -17,7 +17,6 @@ const TIME_RANGE = {
 // Validate time range format
 function validateTimeRange(from, to) {
     try {
-        // Basic validation for Grafana-compatible time strings
         if (typeof from !== 'string' || typeof to !== 'string') {
             throw new Error('Time range must be strings');
         }
@@ -55,7 +54,6 @@ if (users.length === 0) {
 export let options = {
     vus: users.length,
     iterations: users.length,
-   // iterations: 5,
     tags: {
         dashboardName: DASHBOARD_CONFIG.name,
         dashboardId: DASHBOARD_CONFIG.id,
@@ -109,7 +107,8 @@ function getPanelInfo(dashboardJson) {
                 }
                 return {
                     id: panel.id,
-                    title: title || `Panel ${panel.id}`
+                    title: title || `Panel ${panel.id}`,
+                    drilldownUrl: panel.links?.find(link => link.type === 'drilldown')?.url || null
                 };
             });
     } catch (e) {
@@ -118,23 +117,11 @@ function getPanelInfo(dashboardJson) {
     }
 }
 
-export default function () {
-    let user = users[__VU - 1];
-    
-    const baseTags = {
-        dashboardName: DASHBOARD_CONFIG.name,
-        dashboardId: DASHBOARD_CONFIG.id,
-        userId: user.username,
-        timeFrom: TIME_RANGE.from,
-        timeTo: TIME_RANGE.to
-    };
-
-    // 1. Get dashboard JSON
-    const dashboardUrl = `https://164.52.213.158/vui/api/dashboards/uid/${DASHBOARD_CONFIG.id}`;
-    
-    const dashboardRes = http.get(dashboardUrl, {
+function fetchDashboardJson(dashboardId, user) {
+    const dashboardUrl = `https://164.52.213.158/vui/api/dashboards/uid/${dashboardId}`;
+    const res = http.get(dashboardUrl, {
         headers: {
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64)',
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
@@ -142,60 +129,43 @@ export default function () {
             'vunet_session': user.vunetSession,
             'X-VuNet-HTTP-Info': user.xVuNetHTTPInfo,
             'grafana_session_expiry': user.grafanaSessionExpiry.toString()
-        },
-        tags: {
-            ...baseTags,
-            endpoint: 'dashboard',
-            request_type: 'metadata'
         }
     });
-    
-    // Add to custom metrics
-    const dashboardTags = {
-        ...baseTags,
-        endpoint: 'dashboard',
-        status: dashboardRes.status.toString()
-    };
-    
-    dashboardResponseTime.add(dashboardRes.timings.duration, dashboardTags);
-    dashboardSuccessRate.add(dashboardRes.status === 200, dashboardTags);
-    httpReqDuration.add(dashboardRes.timings.duration, dashboardTags);
 
-    if (!check(dashboardRes, {
-        'Dashboard is status 200': (r) => r.status === 200
-    })) {
-        console.error(`Failed to fetch dashboard: ${dashboardRes.status}`);
-        return;
+    if (res.status !== 200) {
+        console.error(`Failed to fetch dashboard ${dashboardId}: ${res.status}`);
+        return null;
     }
 
-    let dashboardJson;
     try {
-        dashboardJson = dashboardRes.json();
+        return res.json();
     } catch (e) {
-        console.error('Failed to parse dashboard JSON:', e);
-        return;
+        console.error(`Failed to parse dashboard JSON for ${dashboardId}:`, e);
+        return null;
     }
+}
 
-    // 2. Extract panel info
+function testDashboard(dashboardId, user, baseTags) {
+    const dashboardJson = fetchDashboardJson(dashboardId, user);
+    if (!dashboardJson) return;
+
     const panelInfo = getPanelInfo(dashboardJson);
     if (panelInfo.length === 0) {
-        console.error('No panels found in dashboard');
+        console.error(`No panels found in dashboard ${dashboardId}`);
         return;
     }
 
-    // 3. Test each panel with time range parameters
-    panelInfo.forEach(({id: panelId, title: panelTitle}) => {
+    panelInfo.forEach(({id: panelId, title: panelTitle, drilldownUrl}) => {
         if (panelId < 1 || panelId > MAX_PANEL_ID) {
             console.error(`Panel ID ${panelId} is out of range (1-${MAX_PANEL_ID})`);
             return;
         }
 
-        // Add time range parameters to the URL
-        const panelUrl = `https://164.52.213.158/vui/d/${DASHBOARD_CONFIG.id}/linux-server-insights?orgId=1&viewPanel=${panelId}&from=${encodeURIComponent(TIME_RANGE.from)}&to=${encodeURIComponent(TIME_RANGE.to)}`;
+        const panelUrl = `https://164.52.213.158/vui/d/${dashboardId}/payment-journey-observability?orgId=1&viewPanel=${panelId}&from=${encodeURIComponent(TIME_RANGE.from)}&to=${encodeURIComponent(TIME_RANGE.to)}`;
         
         const panelRes = http.get(panelUrl, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64)',
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
@@ -220,13 +190,11 @@ export default function () {
             status: panelRes.status.toString()
         };
 
-        // Record metrics
         panelMetrics[panelId].responseTime.add(panelRes.timings.duration, panelTags);
         panelMetrics[panelId].successRate.add(panelRes.status === 200, panelTags);
         panelMetrics[panelId].failureRate.add(panelRes.status !== 200, panelTags);
         httpReqDuration.add(panelRes.timings.duration, panelTags);
-        
-        // User metrics
+
         if (panelRes.status === 200) {
             userSuccessCount.add(1, panelTags);
         } else {
@@ -249,5 +217,34 @@ export default function () {
                 to: TIME_RANGE.to
             }
         }));
+
+        // If the panel has a drilldown URL, test the drilldown dashboard
+        if (drilldownUrl) {
+            const drilldownDashboardIdMatch = drilldownUrl.match(/\/d\/([^\/]+)\//);
+            if (drilldownDashboardIdMatch && drilldownDashboardIdMatch[1]) {
+                const drilldownDashboardId = drilldownDashboardIdMatch[1];
+                const drilldownTags = {
+                    ...baseTags,
+                    dashboardId: drilldownDashboardId,
+                    dashboardName: `Drilldown of ${panelTitle}`
+                };
+                testDashboard(drilldownDashboardId, user, drilldownTags);
+            }
+        }
     });
 }
+
+export default function () {
+    let user = users[__VU - 1];
+    
+    const baseTags = {
+        dashboardName: DASHBOARD_CONFIG.name,
+        dashboardId: DASHBOARD_CONFIG.id,
+        userId: user.username,
+        timeFrom: TIME_RANGE.from,
+        timeTo: TIME_RANGE.to
+    };
+
+    testDashboard(DASHBOARD_CONFIG.id, user, baseTags);
+}
+

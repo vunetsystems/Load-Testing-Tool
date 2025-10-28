@@ -10,20 +10,17 @@ from http.cookiejar import MozillaCookieJar
 requests.packages.urllib3.disable_warnings()
 
 BASE_URL = "https://164.52.213.158"
-#LOGIN_URL = f"{BASE_URL}/vui/login/generic_oauth"
-LOGIN_URL = f"{BASE_URL}/realms/vunet/protocol/openid-connect/auth?client_id=nairobi&code_challenge=o58ieHwj_oqQjmFyi12wqGZ2giRoxJ7no_4jrtY-2Nk&code_challenge_method=S256&redirect_uri=https%3A%2F%2F164.52.213.158%2Fvui%2Flogin%2Fgeneric_oauth&response_type=code&scope=openid+email+offline_access&state=vtSU2OJckth9eIkrZV8Du3OfJeGAWJv6yM87TkMvAmY%3D"
-KEYCLOAK_URL = "https://164.52.214.184/realms/vunet/protocol/openid-connect/token"
-ADMIN_URL = "https://164.52.214.184/admin/realms/vunet/users"
+LOGIN_URL = f"{BASE_URL}/vui/login/generic_oauth"
+KEYCLOAK_URL = "https://164.52.213.158/realms/vunet/protocol/openid-connect/token"
+ADMIN_URL = "  https://164.52.213.158/vui/a/vusmartmaps-app/account_management/users"
 CLIENT_ID = "admin-cli"
 ADMIN_USERNAME = "vunetadmin"
 ADMIN_PASSWORD = "Qwerty@123"
 COMMON_PASSWORD = "Password123!"
 
-# Function to get Keycloak access token
 def get_access_token():
     data = {
-        "client_id": "nairobi",
-        "client_secret": "95z5sjMZLE6qQjRrVrVGtOge3r1k8p4a",
+        "client_id": CLIENT_ID,
         "username": ADMIN_USERNAME,
         "password": ADMIN_PASSWORD,
         "grant_type": "password"
@@ -32,9 +29,7 @@ def get_access_token():
     response = requests.post(KEYCLOAK_URL, data=data, headers=headers, verify=False)
     response.raise_for_status()
     return response.json()['access_token']
-    print(response.json())
 
-# Function to create a new user
 def create_user(access_token, username):
     user_data = {
         "username": username,
@@ -55,11 +50,22 @@ def create_user(access_token, username):
     else:
         print(f"Failed to create user {username}: {response.status_code} - {response.text}")
 
-# Function to generate a random username
+def get_user_id(access_token, username):
+    url = f"{ADMIN_URL}?username={username}"
+    headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
+    response = requests.get(url, headers=headers, verify=False)
+    
+    if response.status_code == 200 and response.json():
+        user_id = response.json()[0]['id']
+        print(f"Retrieved User ID: {user_id} for Username: {username}")
+        return user_id
+    else:
+        print(f"Failed to get user ID for {username}: {response.status_code} - {response.text}")
+        return None
+
 def generate_username(prefix="load_user_"):
     return f"{prefix}{random.randint(1, 10000)}"
 
-# Function to extract cookies
 def extract_cookies(username, password):
     session = requests.Session()
     session.cookies = MozillaCookieJar()
@@ -75,7 +81,6 @@ def extract_cookies(username, password):
     login_page = session.get(f"{BASE_URL}{redirect_url}", verify=False)
     login_html = login_page.text
     
-    
     match = re.search(r'action="([^"]+)"', login_html)
     form_action = match.group(1) if match else None
     
@@ -87,36 +92,54 @@ def extract_cookies(username, password):
     headers = {"User-Agent": "Mozilla/5.0"}
     auth_response = session.post(form_action, data=data, headers=headers, verify=False, allow_redirects=False)
     
-    
-   # final_redirect = auth_response.headers.get("Location")
-   # if not final_redirect:
-   #     print("Failed to get final redirect URL")
-   #     return None
+    final_redirect = auth_response.headers.get("Location")
+    if not final_redirect:
+        print("Failed to get final redirect URL")
+        return None
     
     session.get(LOGIN_URL, verify=False)
     cookies_dict = {cookie.name: cookie.value for cookie in session.cookies}
     return cookies_dict
 
-# Main function to create users and extract cookies
+def add_user_to_group(access_token, user_id, group_name="load_test"):
+    url = f"{BASE_URL}/vui/a/vusmartmaps-app/account_management/users?tabID=userGroups"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+    response = requests.get(url, headers=headers, verify=False)
+    if response.status_code == 200:
+        groups = response.json()
+        group_id = next((group['id'] for group in groups if group['name'] == group_name), None)
+        print(f"Retrieved Group ID: {group_id} for Group Name: {group_name}")
+        
+        if group_id:
+            url = f"{BASE_URL}/admin/realms/vunet/users/{user_id}/groups/{group_id}"
+            response = requests.put(url, headers=headers, verify=False)
+            if response.status_code == 204:
+                print(f"User {user_id} added to group {group_name}.")
+            else:
+                print(f"Error adding user {user_id} to group {group_name}: {response.text}")
+        else:
+            print(f"Group {group_name} not found.")
+    else:
+        print(f"Error fetching groups: {response.status_code} - {response.text}")
+
 def main(num_users):
     access_token = get_access_token()
-    with open("user_cookies.txt", "w") as file:
+    with open("user_cookies.txt", "a") as file:
         for _ in range(num_users):
             username = generate_username()
             create_user(access_token, username)
+            user_id = get_user_id(access_token, username)
+            if user_id:
+                add_user_to_group(access_token, user_id)
             cookies = extract_cookies(username, COMMON_PASSWORD)
-            if not cookies:
-                print(f"Skipping {username}, failed to extract cookies.")
-                continue  # Skip this user and move on
-
-            vunet_session = cookies.get('vunet_session')
-            X_VuNet_HTTP_Info = cookies.get('X-VuNet-HTTP-Info')
-            grafana_session_expiry = cookies.get('grafana_session_expiry')
-
-            if vunet_session and X_VuNet_HTTP_Info and grafana_session_expiry:
-                file.write(f"{username},{COMMON_PASSWORD},{vunet_session},{X_VuNet_HTTP_Info},{grafana_session_expiry}\n")
-            else:
-                print(f"User {username} cookies missing required keys: {cookies}")
+            if cookies:
+                vunet_session = cookies.get('vunet_session', '')
+                X_VuNet_HTTP_Info = cookies.get('X-VuNet-HTTP-Info', '')
+                grafana_session_expiry = cookies.get('grafana_session_expiry', '')
+                file.write(f"{username},{COMMON_PASSWORD},{access_token},{vunet_session},{X_VuNet_HTTP_Info},{grafana_session_expiry}\n")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create users and extract cookies")

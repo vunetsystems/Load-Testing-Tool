@@ -135,77 +135,33 @@ func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// HandleAPIGetPodMetrics handles GET /api/clickhouse/pod-metrics
-func HandleAPIGetPodMetrics(w http.ResponseWriter, r *http.Request) {
-	// Get time range from query parameters
-	startStr := r.URL.Query().Get("start")
-	endStr := r.URL.Query().Get("end")
+// HandleAPIGetPodMonitoring handles GET /api/clickhouse/pod-monitoring
+func HandleAPIGetPodMonitoring(w http.ResponseWriter, r *http.Request) {
+	namespace := r.URL.Query().Get("namespace")
 
-	var timeRange clickhouse.TimeRange
-	if startStr == "" || endStr == "" {
-		// Default to last 5 minutes if no time range provided
-		timeRange.To = time.Now()
-		timeRange.From = timeRange.To.Add(-5 * time.Minute)
+	var podData []clickhouse.PodMonitoringData
+	var err error
+
+	if namespace == "" || namespace == "All Namespaces" {
+		// Fetch from all namespaces when no namespace specified or "All Namespaces" selected
+		podData, err = clickhouse.GetPodMonitoringDataAllNamespaces(r.Context())
 	} else {
-		var err error
-		timeRange.From, err = time.Parse(time.RFC3339, startStr)
-		if err != nil {
-			SendJSONResponse(w, http.StatusBadRequest, APIResponse{
-				Success: false,
-				Message: fmt.Sprintf("Invalid start time format: %v", err),
-			})
-			return
-		}
-		timeRange.To, err = time.Parse(time.RFC3339, endStr)
-		if err != nil {
-			SendJSONResponse(w, http.StatusBadRequest, APIResponse{
-				Success: false,
-				Message: fmt.Sprintf("Invalid end time format: %v", err),
-			})
-			return
-		}
+		// Fetch from specific namespace
+		podData, err = clickhouse.GetPodMonitoringData(r.Context(), namespace)
 	}
 
-	// Get pod resource metrics
-	podResourceMetrics, err := clickhouse.GetPodResourceMetrics(r.Context(), clickhouse.GetMonitoredPods(), timeRange)
 	if err != nil {
-		logger.LogError("System", "ClickHouse", fmt.Sprintf("Failed to get pod resource metrics: %v", err))
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
-			Message: fmt.Sprintf("Failed to get pod resource metrics: %v", err),
-		})
-		return
-	}
-
-	// Get pod status metrics
-	podStatusMetrics, err := clickhouse.GetPodStatusMetrics(r.Context(), clickhouse.GetMonitoredPods(), timeRange)
-	if err != nil {
-		logger.LogError("System", "ClickHouse", fmt.Sprintf("Failed to get pod status metrics: %v", err))
-		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
-			Success: false,
-			Message: fmt.Sprintf("Failed to get pod status metrics: %v", err),
-		})
-		return
-	}
-
-	// Get top pods by memory utilization
-	topPodMemoryMetrics, err := clickhouse.GetTopPodsByMemoryUtilization(r.Context(), clickhouse.GetMonitoredNodes(), timeRange)
-	if err != nil {
-		logger.LogError("System", "ClickHouse", fmt.Sprintf("Failed to get top pod memory metrics: %v", err))
-		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
-			Success: false,
-			Message: fmt.Sprintf("Failed to get top pod memory metrics: %v", err),
+			Message: fmt.Sprintf("Failed to get pod monitoring data: %v", err),
 		})
 		return
 	}
 
 	SendJSONResponse(w, http.StatusOK, APIResponse{
 		Success: true,
-		Message: "Pod metrics retrieved successfully",
-		Data: map[string]interface{}{
-			"podResourceMetrics":  podResourceMetrics,
-			"podStatusMetrics":    podStatusMetrics,
-			"topPodMemoryMetrics": topPodMemoryMetrics,
-		},
+		Message: "Pod monitoring data retrieved successfully",
+		Data:    podData,
 	})
 }
+

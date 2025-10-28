@@ -1078,7 +1078,7 @@ func (osm *O11ySourceManager) sshExec(nodeConfig node_control.NodeConfig, comman
 		"-o", "StrictHostKeyChecking=no",
 		"-o", "UserKnownHostsFile=/dev/null",
 		"-o", "ConnectTimeout=10",
-		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
+		nodeConfig.Host,
 		command,
 	}
 
@@ -1102,7 +1102,7 @@ func (osm *O11ySourceManager) scpCopy(nodeConfig node_control.NodeConfig, localP
 		"-o", "UserKnownHostsFile=/dev/null",
 		"-o", "ConnectTimeout=10",
 		localPath,
-		fmt.Sprintf("%s@%s:%s", nodeConfig.User, nodeConfig.Host, remotePath),
+		fmt.Sprintf("%s:%s", nodeConfig.Host, remotePath),
 	}
 
 	cmd := exec.Command("scp", args...)

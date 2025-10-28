@@ -9,7 +9,7 @@ export let options = {
 };
 
 // Read user details from file
-const usersRaw = open('/home/vunet/k6_final/user_cookies_module.txt').split('\n');
+const usersRaw = open('/home/vunet/user_creation_k6/user_cookies_module.txt').split('\n');
 const users = usersRaw.map(line => {
     const [username, password, accessToken, vunetSession, xVuNetHTTPInfo, grafanaSessionExpiry] = line.split(',');
     return {

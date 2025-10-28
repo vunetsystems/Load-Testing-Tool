@@ -24,7 +24,6 @@ type ClickHouseConfig struct {
 // AppConfig holds the entire application configuration
 type AppConfig struct {
 	ClickHouse     ClickHouseConfig `yaml:"clickhouse"`
-	MonitoredPods  []string         `yaml:"monitored_pods"`
 	MonitoredNodes []string         `yaml:"monitored_nodes"`
 	MonitoringDB   ClickHouseConfig `yaml:"monitoring_db"`
 }
@@ -88,7 +87,6 @@ var clickHouseClient *ClickHouseClient
 var clickHouseConfig ClickHouseConfig
 var monitoringDBClient *ClickHouseClient
 var monitoringDBConfig ClickHouseConfig
-var monitoredPods []string
 var monitoredNodes []string
 
 // LoadConfig loads configuration from YAML file
@@ -106,7 +104,6 @@ func LoadConfig(configPath string) error {
 
 	clickHouseConfig = config.ClickHouse
 	monitoringDBConfig = config.MonitoringDB
-	monitoredPods = config.MonitoredPods
 	monitoredNodes = config.MonitoredNodes
 
 	logger.LogWithNode("System", "ClickHouse", "Configuration loaded successfully", "info")
@@ -163,11 +160,6 @@ func GetClickHouseHealth() (map[string]interface{}, error) {
 		"database":     clickHouseConfig.Database,
 		"last_checked": time.Now(),
 	}, nil
-}
-
-// GetMonitoredPods returns the list of monitored pods
-func GetMonitoredPods() []string {
-	return monitoredPods
 }
 
 // GetMonitoredNodes returns the list of monitored nodes

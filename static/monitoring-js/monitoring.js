@@ -1,7 +1,8 @@
 // Monitoring Dashboard JavaScript
 
-// Global realtime updates manager instance
+// Global managers
 let realtimeManager = null;
+let podMonitoringManager = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize monitoring page
@@ -23,6 +24,13 @@ async function initializeMonitoring() {
     console.log('initializeMonitoring: RealtimeUpdatesManager created, calling initialize...');
     await realtimeManager.initialize();
     console.log('initializeMonitoring: RealtimeUpdatesManager initialized');
+
+    // Initialize pod monitoring manager
+    console.log('initializeMonitoring: Creating PodMonitoringManager...');
+    podMonitoringManager = new PodMonitoringManager();
+    console.log('initializeMonitoring: PodMonitoringManager created, calling initialize...');
+    await podMonitoringManager.initialize();
+    console.log('initializeMonitoring: PodMonitoringManager initialized');
 
     // Update last update timestamp
     updateLastUpdateTime();
@@ -71,6 +79,13 @@ function setupSectionNavigation() {
                 setupPerformanceTabs();
             }
 
+            // Handle pod monitoring section
+            if (section === 'pod-monitoring') {
+                if (podMonitoringManager) {
+                    podMonitoringManager.refresh();
+                }
+            }
+
             // Notify realtime manager of section change
             if (realtimeManager) {
                 realtimeManager.onSectionChange(section);
@@ -102,7 +117,7 @@ function updatePageTitle(sectionName) {
         const titles = {
             'overview': 'Monitoring Overview',
             'performance': 'Kafka Metrics',
-            'pod-metrics': 'Pod Metrics',
+            'pod-monitoring': 'Pod Monitoring',
             'system': 'System Health',
             'logs': 'Log Analysis',
             'alerts': 'Alerts & Notifications'
@@ -161,8 +176,8 @@ async function refreshAllData() {
     if (window.kafkaManager) {
         await window.kafkaManager.refresh();
     }
-    if (window.podMetricsManager) {
-        await window.podMetricsManager.refresh();
+    if (podMonitoringManager) {
+        await podMonitoringManager.refresh();
     }
     if (window.systemHealthManager) {
         await window.systemHealthManager.refresh();

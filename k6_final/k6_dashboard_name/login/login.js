@@ -3,7 +3,7 @@ import { check } from "k6";
 import { Trend, Rate } from "k6/metrics";
 
 // Load all users from a file
-const usersRaw = open("/home/vunet/k6_final/user_creation/user_cookies.txt").split("\n");
+const usersRaw = open("/home/vunet/user_creation_k6/user_cookies.txt").split("\n");
 const users = usersRaw.map((line) => {
   const [username, password] = line.split(",");
   return { username, password };

@@ -22,7 +22,7 @@ func (nm *NodeManager) SSHExecWithOutput(nodeConfig NodeConfig, command string) 
 		"-i", nodeConfig.KeyPath,
 		"-o", SSHOptionStrictHostKeyChecking,
 		"-o", SSHOptionUserKnownHostsFile,
-		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
+		nodeConfig.Host,
 		command,
 	}
 
@@ -123,7 +123,7 @@ func (nm *NodeManager) scpCopyDir(nodeConfig NodeConfig, localDir, remoteDir str
 		"-o", SSHOptionUserKnownHostsFile,
 		"-r",
 		localDir,
-		fmt.Sprintf("%s@%s:%s", nodeConfig.User, nodeConfig.Host, remoteDir),
+		fmt.Sprintf("%s:%s", nodeConfig.Host, remoteDir),
 	}
 
 	cmd := exec.Command("scp", args...)
@@ -139,7 +139,7 @@ func (nm *NodeManager) scpCopyDir(nodeConfig NodeConfig, localDir, remoteDir str
 }
 
 func (nm *NodeManager) scpCopy(nodeConfig NodeConfig, localPath, remotePath string) error {
-	log.Printf("DEBUG: SCP copying %s to %s@%s:%s", localPath, nodeConfig.User, nodeConfig.Host, remotePath)
+	log.Printf("DEBUG: SCP copying %s to %s:%s", localPath, nodeConfig.Host, remotePath)
 
 	args := []string{
 		"-i", nodeConfig.KeyPath,
@@ -159,7 +159,7 @@ func (nm *NodeManager) scpCopy(nodeConfig NodeConfig, localPath, remotePath stri
 		log.Printf("DEBUG: Copying directory with -r flag")
 	}
 
-	args = append(args, localPath, fmt.Sprintf("%s@%s:%s", nodeConfig.User, nodeConfig.Host, remotePath))
+	args = append(args, localPath, fmt.Sprintf("%s:%s", nodeConfig.Host, remotePath))
 
 	log.Printf("DEBUG: Executing SCP command: scp %v", args)
 
@@ -183,7 +183,7 @@ func (nm *NodeManager) sshExec(nodeConfig NodeConfig, command string) error {
 		"-o", "UserKnownHostsFile=/dev/null",
 		"-o", "ConnectTimeout=10",
 		"-o", "LogLevel=ERROR",
-		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
+		nodeConfig.Host,
 		command,
 	}
 

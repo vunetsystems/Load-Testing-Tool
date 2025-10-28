@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os/exec"
 	"strings"
-	"vuDataSim/src/clickhouse"
 	"vuDataSim/src/node_control"
 
 	"github.com/gorilla/mux"
@@ -159,20 +158,20 @@ func HandleUpdateNode(w http.ResponseWriter, r *http.Request, nodeName string) {
 				return
 			}
 		} else {
-			err := NodeManager.DisableNode(nodeName)
+			// Stop node_metrics_api binary before disabling node
+			_, err := BinaryControl.StopMetricsBinary(nodeName, 10)
+			if err != nil {
+				SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+					Success: false,
+					Message: "Failed to stop node_metrics_api before disabling node: " + err.Error(),
+				})
+				return
+			}
+			err = NodeManager.DisableNode(nodeName)
 			if err != nil {
 				SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 					Success: false,
 					Message: err.Error(),
-				})
-				return
-			}
-			// Stop node_metrics_api binary
-			_, err = BinaryControl.StopMetricsBinary(nodeName, 10)
-			if err != nil {
-				SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
-					Success: false,
-					Message: "Node disabled, but failed to stop node_metrics_api: " + err.Error(),
 				})
 				return
 			}
@@ -239,22 +238,22 @@ func HandleAPIClusterSettings(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func HandleAPIGetClusterMetrics(w http.ResponseWriter, r *http.Request) {
-	metrics, err := clickhouse.GetClusterNodeMetrics()
-	if err != nil {
-		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
-			Success: false,
-			Message: fmt.Sprintf("Failed to fetch cluster metrics: %v", err),
-		})
-		return
-	}
+// func HandleAPIGetClusterMetrics(w http.ResponseWriter, r *http.Request) {
+// 	metrics, err := clickhouse.GetClusterNodeMetrics()
+// 	if err != nil {
+// 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+// 			Success: false,
+// 			Message: fmt.Sprintf("Failed to fetch cluster metrics: %v", err),
+// 		})
+// 		return
+// 	}
 
-	SendJSONResponse(w, http.StatusOK, APIResponse{
-		Success: true,
-		Message: "Cluster metrics retrieved successfully",
-		Data:    metrics,
-	})
-}
+// 	SendJSONResponse(w, http.StatusOK, APIResponse{
+// 		Success: true,
+// 		Message: "Cluster metrics retrieved successfully",
+// 		Data:    metrics,
+// 	})
+// }
 
 func HandleAPIDebugMetricsBinary(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
