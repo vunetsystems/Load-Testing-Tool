@@ -1,0 +1,497 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard/multi_dashboard_test.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 5 max VUs, 10m30s max duration (incl. graceful stop):
+              * default: 5 iterations shared among 5 VUs (maxDuration: 10m0s, gracefulStop: 30s)
+
+time="2025-10-29T00:13:01+05:30" level=info msg="Dashboard: MSSQL Overview Dashboard" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="Dashboard is status 200" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="dashboard_success_rate: 0.00%" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="🔹 Found 57 panels for MSSQL Overview Dashboard" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="Dashboard: MSSQL Overview Dashboard" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="Dashboard is status 200" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="dashboard_success_rate: 0.00%" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="🔹 Found 57 panels for MSSQL Overview Dashboard" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="Dashboard: MSSQL Overview Dashboard" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="Dashboard is status 200" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="dashboard_success_rate: 0.00%" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="🔹 Found 57 panels for MSSQL Overview Dashboard" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="Dashboard: MSSQL Overview Dashboard" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="Dashboard is status 200" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="dashboard_success_rate: 0.00%" source=console
+time="2025-10-29T00:13:01+05:30" level=info msg="🔹 Found 57 panels for MSSQL Overview Dashboard" source=console
+time="2025-10-29T00:13:02+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=40 | panel_name=Untitled | panel_status=200 | panel_avg=558.42 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:02+05:30" level=info msg="Dashboard: MSSQL Overview Dashboard" source=console
+time="2025-10-29T00:13:02+05:30" level=info msg="Dashboard is status 200" source=console
+time="2025-10-29T00:13:02+05:30" level=info msg="dashboard_success_rate: 0.00%" source=console
+time="2025-10-29T00:13:02+05:30" level=info msg="🔹 Found 57 panels for MSSQL Overview Dashboard" source=console
+
+running (00m01.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m01.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:13:02+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=40 | panel_name=Untitled | panel_status=200 | panel_avg=919.02 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:02+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=40 | panel_name=Untitled | panel_status=200 | panel_avg=796.88 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:02+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=40 | panel_name=Untitled | panel_status=200 | panel_avg=885.49 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:02+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=62 | panel_name=Summary | panel_status=200 | panel_avg=598.96 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:02+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=40 | panel_name=Untitled | panel_status=200 | panel_avg=817.96 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:02+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=62 | panel_name=Summary | panel_status=200 | panel_avg=400.66 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:02+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=71 | panel_name=Clusters | panel_status=200 | panel_avg=303.95 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=62 | panel_name=Summary | panel_status=200 | panel_avg=563.26 | panel_success_rate=100.00" source=console
+
+running (00m02.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m02.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=62 | panel_name=Summary | panel_status=200 | panel_avg=599.73 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=71 | panel_name=Clusters | panel_status=200 | panel_avg=362.79 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=62 | panel_name=Summary | panel_status=200 | panel_avg=366.68 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=71 | panel_name=Clusters | panel_status=200 | panel_avg=299.76 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=45 | panel_name=Servers | panel_status=200 | panel_avg=205.86 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=45 | panel_name=Servers | panel_status=200 | panel_avg=503.58 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=71 | panel_name=Clusters | panel_status=200 | panel_avg=301.13 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=71 | panel_name=Clusters | panel_status=200 | panel_avg=406.65 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=45 | panel_name=Servers | panel_status=200 | panel_avg=209.38 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=45 | panel_name=Servers | panel_status=200 | panel_avg=104.10 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=47 | panel_name=Databases | panel_status=200 | panel_avg=293.16 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=47 | panel_name=Databases | panel_status=200 | panel_avg=301.38 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=47 | panel_name=Databases | panel_status=200 | panel_avg=197.76 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=45 | panel_name=Servers | panel_status=200 | panel_avg=199.64 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=47 | panel_name=Databases | panel_status=200 | panel_avg=97.04 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=43 | panel_name=Alert Summary | panel_status=200 | panel_avg=197.73 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:03+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=47 | panel_name=Databases | panel_status=200 | panel_avg=293.56 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=43 | panel_name=Alert Summary | panel_status=200 | panel_avg=194.39 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=43 | panel_name=Alert Summary | panel_status=200 | panel_avg=295.04 | panel_success_rate=100.00" source=console
+
+running (00m03.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m03.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=9 | panel_name=Active Alerts | panel_status=200 | panel_avg=200.11 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=9 | panel_name=Active Alerts | panel_status=200 | panel_avg=198.54 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=43 | panel_name=Alert Summary | panel_status=200 | panel_avg=495.24 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=51 | panel_name=Active Sessions | panel_status=200 | panel_avg=299.93 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=43 | panel_name=Alert Summary | panel_status=200 | panel_avg=499.15 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=9 | panel_name=Active Alerts | panel_status=200 | panel_avg=402.52 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=51 | panel_name=Active Sessions | panel_status=200 | panel_avg=207.99 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=9 | panel_name=Active Alerts | panel_status=200 | panel_avg=334.27 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=52 | panel_name=Sleeping Sessions | panel_status=200 | panel_avg=206.30 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=51 | panel_name=Active Sessions | panel_status=200 | panel_avg=205.09 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=9 | panel_name=Active Alerts | panel_status=200 | panel_avg=210.11 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=51 | panel_name=Active Sessions | panel_status=200 | panel_avg=167.03 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=51 | panel_name=Active Sessions | panel_status=200 | panel_avg=186.49 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=60 | panel_name=Blocking Session | panel_status=200 | panel_avg=194.27 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=52 | panel_name=Sleeping Sessions | panel_status=200 | panel_avg=289.39 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:04+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=52 | panel_name=Sleeping Sessions | panel_status=200 | panel_avg=494.09 | panel_success_rate=100.00" source=console
+
+running (00m04.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m04.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=52 | panel_name=Sleeping Sessions | panel_status=200 | panel_avg=396.98 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=60 | panel_name=Blocking Session | panel_status=200 | panel_avg=207.05 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=52 | panel_name=Sleeping Sessions | panel_status=200 | panel_avg=403.83 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=60 | panel_name=Blocking Session | panel_status=200 | panel_avg=302.26 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=49 | panel_name=Buffer Cache Hit % | panel_status=200 | panel_avg=407.06 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=60 | panel_name=Blocking Session | panel_status=200 | panel_avg=106.76 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=49 | panel_name=Buffer Cache Hit % | panel_status=200 | panel_avg=395.07 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=60 | panel_name=Blocking Session | panel_status=200 | panel_avg=400.43 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=49 | panel_name=Buffer Cache Hit % | panel_status=200 | panel_avg=289.27 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=1 | panel_name=Active Transactions | panel_status=200 | panel_avg=102.90 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=49 | panel_name=Buffer Cache Hit % | panel_status=200 | panel_avg=431.72 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=1 | panel_name=Active Transactions | panel_status=200 | panel_avg=494.92 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=1 | panel_name=Active Transactions | panel_status=200 | panel_avg=109.51 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=48 | panel_name=Avg Deadlocks/Sec | panel_status=200 | panel_avg=193.05 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=49 | panel_name=Buffer Cache Hit % | panel_status=200 | panel_avg=303.76 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=1 | panel_name=Active Transactions | panel_status=200 | panel_avg=262.28 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:05+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=48 | panel_name=Avg Deadlocks/Sec | panel_status=200 | panel_avg=199.05 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=1 | panel_name=Active Transactions | panel_status=200 | panel_avg=199.01 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=48 | panel_name=Avg Deadlocks/Sec | panel_status=200 | panel_avg=108.03 | panel_success_rate=100.00" source=console
+
+running (00m05.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m05.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=48 | panel_name=Avg Deadlocks/Sec | panel_status=200 | panel_avg=395.80 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=53 | panel_name=Avg Full Scans/Sec | panel_status=200 | panel_avg=303.15 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=53 | panel_name=Avg Full Scans/Sec | panel_status=200 | panel_avg=294.23 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=53 | panel_name=Avg Full Scans/Sec | panel_status=200 | panel_avg=295.31 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=48 | panel_name=Avg Deadlocks/Sec | panel_status=200 | panel_avg=301.85 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=54 | panel_name=Avg Errors/Sec | panel_status=200 | panel_avg=402.46 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=54 | panel_name=Avg Errors/Sec | panel_status=200 | panel_avg=302.78 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=53 | panel_name=Avg Full Scans/Sec | panel_status=200 | panel_avg=198.18 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=53 | panel_name=Avg Full Scans/Sec | panel_status=200 | panel_avg=497.91 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=54 | panel_name=Avg Errors/Sec | panel_status=200 | panel_avg=299.77 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=81 | panel_name=Database Status | panel_status=200 | panel_avg=102.21 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=54 | panel_name=Avg Errors/Sec | panel_status=200 | panel_avg=205.89 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:06+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=54 | panel_name=Avg Errors/Sec | panel_status=200 | panel_avg=394.54 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=81 | panel_name=Database Status | panel_status=200 | panel_avg=492.02 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=44 | panel_name=Summary of DB Status | panel_status=200 | panel_avg=295.30 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=81 | panel_name=Database Status | panel_status=200 | panel_avg=203.19 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=81 | panel_name=Database Status | panel_status=200 | panel_avg=501.90 | panel_success_rate=100.00" source=console
+
+running (00m06.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m06.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=81 | panel_name=Database Status | panel_status=200 | panel_avg=207.70 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=44 | panel_name=Summary of DB Status | panel_status=200 | panel_avg=192.78 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=80 | panel_name=Impacted Databases | panel_status=200 | panel_avg=197.37 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=44 | panel_name=Summary of DB Status | panel_status=200 | panel_avg=196.97 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=44 | panel_name=Summary of DB Status | panel_status=200 | panel_avg=195.61 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=83 | panel_name=Database Info | panel_status=200 | panel_avg=297.37 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=80 | panel_name=Impacted Databases | panel_status=200 | panel_avg=194.65 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=44 | panel_name=Summary of DB Status | panel_status=200 | panel_avg=503.85 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=80 | panel_name=Impacted Databases | panel_status=200 | panel_avg=304.22 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=80 | panel_name=Impacted Databases | panel_status=200 | panel_avg=396.98 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=85 | panel_name=Time Since Last DB Restart | panel_status=200 | panel_avg=109.47 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=83 | panel_name=Database Info | panel_status=200 | panel_avg=201.31 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=83 | panel_name=Database Info | panel_status=200 | panel_avg=206.75 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=83 | panel_name=Database Info | panel_status=200 | panel_avg=111.52 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=85 | panel_name=Time Since Last DB Restart | panel_status=200 | panel_avg=195.21 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=80 | panel_name=Impacted Databases | panel_status=200 | panel_avg=396.31 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=86 | panel_name=DB Volume Info | panel_status=200 | panel_avg=292.47 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=85 | panel_name=Time Since Last DB Restart | panel_status=200 | panel_avg=189.74 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:07+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=85 | panel_name=Time Since Last DB Restart | panel_status=200 | panel_avg=197.57 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=86 | panel_name=DB Volume Info | panel_status=200 | panel_avg=102.78 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=86 | panel_name=DB Volume Info | panel_status=200 | panel_avg=104.31 | panel_success_rate=100.00" source=console
+
+running (00m07.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m07.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=83 | panel_name=Database Info | panel_status=200 | panel_avg=205.19 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=88 | panel_name=DB Volume Usage % By Server | panel_status=200 | panel_avg=196.99 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=85 | panel_name=Time Since Last DB Restart | panel_status=200 | panel_avg=194.15 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=86 | panel_name=DB Volume Info | panel_status=200 | panel_avg=389.74 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=88 | panel_name=DB Volume Usage % By Server | panel_status=200 | panel_avg=292.87 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=88 | panel_name=DB Volume Usage % By Server | panel_status=200 | panel_avg=400.42 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=86 | panel_name=DB Volume Info | panel_status=200 | panel_avg=110.91 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=88 | panel_name=DB Volume Usage % By Server | panel_status=200 | panel_avg=111.55 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=84 | panel_name=Failover Cluster Info | panel_status=200 | panel_avg=299.44 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=88 | panel_name=DB Volume Usage % By Server | panel_status=200 | panel_avg=190.03 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=84 | panel_name=Failover Cluster Info | panel_status=200 | panel_avg=302.77 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=76 | panel_name=Failover Cluster Node Status | panel_status=200 | panel_avg=113.47 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=84 | panel_name=Failover Cluster Info | panel_status=200 | panel_avg=397.46 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=84 | panel_name=Failover Cluster Info | panel_status=200 | panel_avg=99.73 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=76 | panel_name=Failover Cluster Node Status | panel_status=200 | panel_avg=101.02 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=84 | panel_name=Failover Cluster Info | panel_status=200 | panel_avg=295.81 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=79 | panel_name=Overview on HADR (High Availability Disaster Recovery)  | panel_status=429 | panel_avg=30.07 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=76 | panel_name=Failover Cluster Node Status | panel_status=429 | panel_avg=29.52 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=78 | panel_name=Failover Cluster - Quorum Config | panel_status=429 | panel_avg=5.54 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=79 | panel_name=Overview on HADR (High Availability Disaster Recovery)  | panel_status=429 | panel_avg=4.81 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=77 | panel_name=Availability Group Member Info | panel_status=429 | panel_avg=4.49 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=78 | panel_name=Failover Cluster - Quorum Config | panel_status=429 | panel_avg=5.39 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=74 | panel_name=High Availability Group Status | panel_status=429 | panel_avg=5.12 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=77 | panel_name=Availability Group Member Info | panel_status=429 | panel_avg=3.57 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=73 | panel_name=High Availability Replica Status | panel_status=429 | panel_avg=83.00 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=74 | panel_name=High Availability Group Status | panel_status=429 | panel_avg=82.10 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=76 | panel_name=Failover Cluster Node Status | panel_status=200 | panel_avg=135.77 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=75 | panel_name=HA Database Replica Status | panel_status=429 | panel_avg=5.19 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=79 | panel_name=Overview on HADR (High Availability Disaster Recovery)  | panel_status=429 | panel_avg=4.15 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=82 | panel_name=User Connections | panel_status=429 | panel_avg=3.62 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:08+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=23 | panel_name=User Connections | panel_status=429 | panel_avg=3.47 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=78 | panel_name=Failover Cluster - Quorum Config | panel_status=429 | panel_avg=93.69 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=76 | panel_name=Failover Cluster Node Status | panel_status=200 | panel_avg=235.70 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=79 | panel_name=Overview on HADR (High Availability Disaster Recovery)  | panel_status=200 | panel_avg=324.90 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=70 | panel_name=Max User Connections Trend for Top 5 Servers | panel_status=429 | panel_avg=89.77 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=77 | panel_name=Availability Group Member Info | panel_status=429 | panel_avg=4.65 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=79 | panel_name=Overview on HADR (High Availability Disaster Recovery)  | panel_status=429 | panel_avg=4.91 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=78 | panel_name=Failover Cluster - Quorum Config | panel_status=429 | panel_avg=4.57 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=73 | panel_name=High Availability Replica Status | panel_status=200 | panel_avg=200.61 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=78 | panel_name=Failover Cluster - Quorum Config | panel_status=429 | panel_avg=95.59 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=65 | panel_name=Performance Metrics | panel_status=429 | panel_avg=99.70 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=74 | panel_name=High Availability Group Status | panel_status=429 | panel_avg=99.24 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=75 | panel_name=HA Database Replica Status | panel_status=429 | panel_avg=4.35 | panel_success_rate=0.00" source=console
+
+running (00m08.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m08.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=82 | panel_name=User Connections | panel_status=429 | panel_avg=95.91 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=77 | panel_name=Availability Group Member Info | panel_status=429 | panel_avg=195.13 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=56 | panel_name=MSSQL Performance Metrics | panel_status=429 | panel_avg=100.28 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=73 | panel_name=High Availability Replica Status | panel_status=429 | panel_avg=100.61 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=23 | panel_name=User Connections | panel_status=429 | panel_avg=3.41 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=55 | panel_name=MSSQL Errors/Sec Distribution | panel_status=429 | panel_avg=4.30 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=70 | panel_name=Max User Connections Trend for Top 5 Servers | panel_status=429 | panel_avg=3.18 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=74 | panel_name=High Availability Group Status | panel_status=429 | panel_avg=97.95 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=75 | panel_name=HA Database Replica Status | panel_status=429 | panel_avg=96.26 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=63 | panel_name=Avg Transactions/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=93.90 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=65 | panel_name=Performance Metrics | panel_status=429 | panel_avg=93.38 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=73 | panel_name=High Availability Replica Status | panel_status=429 | panel_avg=4.05 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=82 | panel_name=User Connections | panel_status=429 | panel_avg=5.15 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=56 | panel_name=MSSQL Performance Metrics | panel_status=429 | panel_avg=3.79 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=75 | panel_name=HA Database Replica Status | panel_status=429 | panel_avg=3.90 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=55 | panel_name=MSSQL Errors/Sec Distribution | panel_status=429 | panel_avg=3.99 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=28 | panel_name=Avg Buffer Cache Hit % Trend for Top 5 Databases | panel_status=429 | panel_avg=97.99 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=77 | panel_name=Availability Group Member Info | panel_status=200 | panel_avg=298.82 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=82 | panel_name=User Connections | panel_status=429 | panel_avg=92.80 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=23 | panel_name=User Connections | panel_status=429 | panel_avg=96.39 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=63 | panel_name=Avg Transactions/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=93.02 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=74 | panel_name=High Availability Group Status | panel_status=429 | panel_avg=4.60 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=64 | panel_name=Avg DeadLocks/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=5.73 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=70 | panel_name=Max User Connections Trend for Top 5 Servers | panel_status=429 | panel_avg=4.29 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=23 | panel_name=User Connections | panel_status=429 | panel_avg=6.63 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=28 | panel_name=Avg Buffer Cache Hit % Trend for Top 5 Databases | panel_status=429 | panel_avg=96.86 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=27 | panel_name=Avg Errors/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=96.20 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=73 | panel_name=High Availability Replica Status | panel_status=429 | panel_avg=97.00 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=70 | panel_name=Max User Connections Trend for Top 5 Servers | panel_status=429 | panel_avg=95.33 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=64 | panel_name=Avg DeadLocks/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=5.77 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=59 | panel_name=MSSQL Metrics | panel_status=429 | panel_avg=98.15 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=75 | panel_name=HA Database Replica Status | panel_status=429 | panel_avg=97.80 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=67 | panel_name=Page Metrics | panel_status=429 | panel_avg=98.83 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=27 | panel_name=Avg Errors/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=193.27 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=82 | panel_name=User Connections | panel_status=429 | panel_avg=100.11 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=65 | panel_name=Performance Metrics | panel_status=200 | panel_avg=293.82 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=19 | panel_name=MSSQL Page Metrics | panel_status=429 | panel_avg=4.92 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=65 | panel_name=Performance Metrics | panel_status=429 | panel_avg=201.29 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=59 | panel_name=MSSQL Metrics | panel_status=429 | panel_avg=99.11 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=23 | panel_name=User Connections | panel_status=429 | panel_avg=98.98 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=56 | panel_name=MSSQL Performance Metrics | panel_status=429 | panel_avg=99.24 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=55 | panel_name=MSSQL Errors/Sec Distribution | panel_status=429 | panel_avg=3.71 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=67 | panel_name=Page Metrics | panel_status=429 | panel_avg=5.10 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=56 | panel_name=MSSQL Performance Metrics | panel_status=429 | panel_avg=194.79 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=63 | panel_name=Avg Transactions/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=97.32 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=19 | panel_name=MSSQL Page Metrics | panel_status=429 | panel_avg=98.73 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:09+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=32 | panel_name=Avg Page Lookups/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=198.91 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=70 | panel_name=Max User Connections Trend for Top 5 Servers | panel_status=200 | panel_avg=201.45 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=32 | panel_name=Avg Page Lookups/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=105.13 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=65 | panel_name=Performance Metrics | panel_status=429 | panel_avg=98.35 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=55 | panel_name=MSSQL Errors/Sec Distribution | panel_status=429 | panel_avg=200.78 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=29 | panel_name=Avg Page Reads/Sec for Top 5 Databases | panel_status=429 | panel_avg=93.37 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=56 | panel_name=MSSQL Performance Metrics | panel_status=429 | panel_avg=4.45 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=28 | panel_name=Avg Buffer Cache Hit % Trend for Top 5 Databases | panel_status=429 | panel_avg=204.89 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=55 | panel_name=MSSQL Errors/Sec Distribution | panel_status=429 | panel_avg=4.24 | panel_success_rate=0.00" source=console
+
+running (00m09.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m09.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=66 | panel_name=Avg Page Splits/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=97.40 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=64 | panel_name=Avg DeadLocks/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=93.05 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=63 | panel_name=Avg Transactions/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=100.56 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=63 | panel_name=Avg Transactions/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=92.44 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=27 | panel_name=Avg Errors/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=6.62 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=28 | panel_name=Avg Buffer Cache Hit % Trend for Top 5 Databases | panel_status=429 | panel_avg=96.93 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=28 | panel_name=Avg Buffer Cache Hit % Trend for Top 5 Databases | panel_status=429 | panel_avg=97.91 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=29 | panel_name=Avg Page Reads/Sec for Top 5 Databases | panel_status=200 | panel_avg=396.76 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=68 | panel_name=Memory Info | panel_status=429 | panel_avg=101.26 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=59 | panel_name=MSSQL Metrics | panel_status=429 | panel_avg=97.71 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=66 | panel_name=Avg Page Splits/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=98.80 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=64 | panel_name=Avg DeadLocks/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=100.60 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=64 | panel_name=Avg DeadLocks/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=101.13 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=67 | panel_name=Page Metrics | panel_status=429 | panel_avg=96.41 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=19 | panel_name=MSSQL Page Metrics | panel_status=429 | panel_avg=98.51 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=68 | panel_name=Memory Info | panel_status=429 | panel_avg=99.96 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=27 | panel_name=Avg Errors/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=100.67 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=27 | panel_name=Avg Errors/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=99.99 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=32 | panel_name=Avg Page Lookups/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=99.07 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=58 | panel_name=MSSQL Memory Usage | panel_status=429 | panel_avg=99.25 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=59 | panel_name=MSSQL Metrics | panel_status=429 | panel_avg=98.10 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=58 | panel_name=MSSQL Memory Usage | panel_status=200 | panel_avg=299.66 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=59 | panel_name=MSSQL Metrics | panel_status=429 | panel_avg=100.36 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=67 | panel_name=Page Metrics | panel_status=429 | panel_avg=5.94 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=34 | panel_name=Avg Memory Usage for Top 5 Servers | panel_status=429 | panel_avg=97.91 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=29 | panel_name=Avg Page Reads/Sec for Top 5 Databases | panel_status=429 | panel_avg=101.08 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=67 | panel_name=Page Metrics | panel_status=429 | panel_avg=101.07 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=34 | panel_name=Avg Memory Usage for Top 5 Servers | panel_status=429 | panel_avg=104.32 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=24 | panel_name=Memory Clerk | panel_status=429 | panel_avg=6.50 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=19 | panel_name=MSSQL Page Metrics | panel_status=429 | panel_avg=4.54 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=66 | panel_name=Avg Page Splits/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=98.21 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=24 | panel_name=Memory Clerk | panel_status=429 | panel_avg=97.38 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=32 | panel_name=Avg Page Lookups/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=96.36 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=69 | panel_name=Locks & Waits | panel_status=429 | panel_avg=98.18 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=68 | panel_name=Memory Info | panel_status=429 | panel_avg=6.21 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=69 | panel_name=Locks & Waits | panel_status=429 | panel_avg=5.12 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=21 | panel_name=Locks Overview | panel_status=429 | panel_avg=94.43 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=21 | panel_name=Locks Overview | panel_status=429 | panel_avg=92.58 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=58 | panel_name=MSSQL Memory Usage | panel_status=429 | panel_avg=95.27 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=29 | panel_name=Avg Page Reads/Sec for Top 5 Databases | panel_status=429 | panel_avg=98.07 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=25 | panel_name=Wait Stats | panel_status=429 | panel_avg=5.15 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=19 | panel_name=MSSQL Page Metrics | panel_status=200 | panel_avg=298.96 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=34 | panel_name=Avg Memory Usage for Top 5 Servers | panel_status=429 | panel_avg=5.84 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:10+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=25 | panel_name=Wait Stats | panel_status=429 | panel_avg=10.98 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=42 | panel_name=Avg Lock Waits/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=93.63 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=66 | panel_name=Avg Page Splits/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=99.74 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=32 | panel_name=Avg Page Lookups/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=98.32 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=42 | panel_name=Avg Lock Waits/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=92.91 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=61 | panel_name=Disk Metrics  & Backup Status | panel_status=429 | panel_avg=8.32 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=29 | panel_name=Avg Page Reads/Sec for Top 5 Databases | panel_status=429 | panel_avg=4.82 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=68 | panel_name=Memory Info | panel_status=429 | panel_avg=97.38 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=66 | panel_name=Avg Page Splits/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=94.74 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=58 | panel_name=MSSQL Memory Usage | panel_status=429 | panel_avg=4.79 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=68 | panel_name=Memory Info | panel_status=429 | panel_avg=4.49 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=34 | panel_name=Avg Memory Usage for Top 5 Servers | panel_status=429 | panel_avg=4.64 | panel_success_rate=0.00" source=console
+
+running (00m10.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m10.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=61 | panel_name=Disk Metrics  & Backup Status | panel_status=429 | panel_avg=195.85 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=24 | panel_name=Memory Clerk | panel_status=200 | panel_avg=292.98 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=24 | panel_name=Memory Clerk | panel_status=429 | panel_avg=91.27 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=58 | panel_name=MSSQL Memory Usage | panel_status=429 | panel_avg=93.62 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=20 | panel_name=Log Activity | panel_status=429 | panel_avg=4.44 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=69 | panel_name=Locks & Waits | panel_status=429 | panel_avg=4.43 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=34 | panel_name=Avg Memory Usage for Top 5 Servers | panel_status=429 | panel_avg=4.84 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=20 | panel_name=Log Activity | panel_status=429 | panel_avg=199.48 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=69 | panel_name=Locks & Waits | panel_status=429 | panel_avg=9.31 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=16 | panel_name=Backup Details | panel_status=429 | panel_avg=5.67 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=16 | panel_name=Backup Details | panel_status=429 | panel_avg=4.69 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=21 | panel_name=Locks Overview | panel_status=429 | panel_avg=95.30 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=25 | panel_name=Wait Stats | panel_status=429 | panel_avg=4.75 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=24 | panel_name=Memory Clerk | panel_status=429 | panel_avg=104.62 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=42 | panel_name=Avg Lock Waits/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=5.43 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=61 | panel_name=Disk Metrics  & Backup Status | panel_status=429 | panel_avg=90.04 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=69 | panel_name=Locks & Waits | panel_status=429 | panel_avg=91.89 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=20 | panel_name=Log Activity | panel_status=429 | panel_avg=4.52 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=21 | panel_name=Locks Overview | panel_status=429 | panel_avg=5.55 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=16 | panel_name=Backup Details | panel_status=429 | panel_avg=5.63 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=25 | panel_name=Wait Stats | panel_status=429 | panel_avg=5.70 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=21 | panel_name=Locks Overview | panel_status=200 | panel_avg=208.56 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=42 | panel_name=Avg Lock Waits/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=5.23 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=25 | panel_name=Wait Stats | panel_status=429 | panel_avg=83.09 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=61 | panel_name=Disk Metrics  & Backup Status | panel_status=429 | panel_avg=83.37 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=42 | panel_name=Avg Lock Waits/Sec Trend for Top 5 Databases | panel_status=429 | panel_avg=4.90 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=20 | panel_name=Log Activity | panel_status=429 | panel_avg=3.88 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=16 | panel_name=Backup Details | panel_status=429 | panel_avg=3.76 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=61 | panel_name=Disk Metrics  & Backup Status | panel_status=429 | panel_avg=5.39 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=20 | panel_name=Log Activity | panel_status=429 | panel_avg=4.97 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:11+05:30" level=info msg="PANEL_DATA: dashboard_name=MSSQL Overview Dashboard | panel_id=16 | panel_name=Backup Details | panel_status=429 | panel_avg=5.94 | panel_success_rate=0.00" source=console
+
+running (00m11.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m11.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:13:12+05:30" level=info msg="Dashboard: Linux Server Insights" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="Dashboard is status 200" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="dashboard_success_rate: 0.00%" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="🔹 Found 40 panels for Linux Server Insights" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="Dashboard: Linux Server Insights" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="Dashboard is status 200" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="dashboard_success_rate: 0.00%" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="🔹 Found 40 panels for Linux Server Insights" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=26 | panel_name=Servers | panel_status=429 | panel_avg=4.28 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=47 | panel_name=Servers Restarted in Last 24 Hours | panel_status=429 | panel_avg=4.11 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=42 | panel_name=Alert Summary | panel_status=429 | panel_avg=3.80 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=46 | panel_name=Server Uptime | panel_status=429 | panel_avg=3.88 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=34 | panel_name=Server Memory Utilization | panel_status=429 | panel_avg=4.14 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=33 | panel_name=Active Alerts | panel_status=429 | panel_avg=21.38 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=8 | panel_name=Server CPU Utilization | panel_status=429 | panel_avg=3.53 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=12 | panel_name=P95 CPU Utilization Trend for Top 5 Servers | panel_status=429 | panel_avg=3.15 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=64 | panel_name=P95 IO Wait % CPU Utilization for Top 5 Servers | panel_status=429 | panel_avg=2.98 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=63 | panel_name=P95 Idle CPU Utilization Trend for Top 5 Servers | panel_status=429 | panel_avg=3.63 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=16 | panel_name= Servers Disk Utilization  | panel_status=429 | panel_avg=3.68 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=11 | panel_name=P95 Memory Utilization Trend  for Top 5 Servers | panel_status=429 | panel_avg=3.04 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=26 | panel_name=Servers | panel_status=200 | panel_avg=73.49 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=52 | panel_name=P95 SwapMemory Usage | panel_status=429 | panel_avg=5.21 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=47 | panel_name=Servers Restarted in Last 24 Hours | panel_status=429 | panel_avg=4.02 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=25 | panel_name=P95 Disk Utilization Trend for Top 5 Disks | panel_status=429 | panel_avg=3.58 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=42 | panel_name=Alert Summary | panel_status=429 | panel_avg=4.00 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=56 | panel_name=Untitled | panel_status=429 | panel_avg=3.04 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=46 | panel_name=Server Uptime | panel_status=429 | panel_avg=4.44 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=9 | panel_name=Current CPU Load Average | panel_status=429 | panel_avg=3.11 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=34 | panel_name=Server Memory Utilization | panel_status=429 | panel_avg=3.53 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=13 | panel_name=P95 CPU Load Average Trend for Top 5 Servers | panel_status=429 | panel_avg=64.47 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=33 | panel_name=Active Alerts | panel_status=429 | panel_avg=63.76 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=57 | panel_name=Untitled | panel_status=429 | panel_avg=3.72 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=8 | panel_name=Server CPU Utilization | panel_status=429 | panel_avg=4.43 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=10 | panel_name= Top 5 CPU Consuming Process  | panel_status=429 | panel_avg=3.55 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=12 | panel_name=P95 CPU Utilization Trend for Top 5 Servers | panel_status=429 | panel_avg=3.73 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=14 | panel_name= Top 5 Memory Consuming Process  | panel_status=429 | panel_avg=3.65 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=64 | panel_name=P95 IO Wait % CPU Utilization for Top 5 Servers | panel_status=429 | panel_avg=3.59 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="Dashboard: Linux Server Insights" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="Dashboard is status 429" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="dashboard_success_rate: 0.00%" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="⚠️ No panels found for Linux Server Insights" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=27 | panel_name=Server Process Details | panel_status=429 | panel_avg=89.29 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=58 | panel_name=Untitled | panel_status=429 | panel_avg=6.73 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=15 | panel_name= Servers DiskIO Statistics  | panel_status=429 | panel_avg=5.36 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="Dashboard: Linux Server Insights" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="Dashboard is status 429" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="dashboard_success_rate: 0.00%" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="⚠️ No panels found for Linux Server Insights" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=54 | panel_name=P95 Disk Read/Sec Trends for Top 5 Servers | panel_status=429 | panel_avg=5.02 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=55 | panel_name=P95 Disk Write/Sec Trends for Top 5 Servers | panel_status=429 | panel_avg=6.68 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=24 | panel_name=Total Disk IO Rate (Time) Trend for Top 5 Servers | panel_status=429 | panel_avg=78.30 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="Dashboard: Linux Server Insights" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="Dashboard is status 429" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="dashboard_success_rate: 0.00%" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="⚠️ No panels found for Linux Server Insights" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=59 | panel_name=Untitled | panel_status=429 | panel_avg=4.85 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=18 | panel_name= System Core Usage  | panel_status=429 | panel_avg=5.75 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=63 | panel_name=P95 Idle CPU Utilization Trend for Top 5 Servers | panel_status=200 | panel_avg=231.13 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=16 | panel_name= Servers Disk Utilization  | panel_status=429 | panel_avg=55.10 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=60 | panel_name=Untitled | panel_status=429 | panel_avg=86.77 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=11 | panel_name=P95 Memory Utilization Trend  for Top 5 Servers | panel_status=429 | panel_avg=3.94 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=52 | panel_name=P95 SwapMemory Usage | panel_status=429 | panel_avg=3.29 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=17 | panel_name= Service Summary  | panel_status=429 | panel_avg=7.43 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=25 | panel_name=P95 Disk Utilization Trend for Top 5 Disks | panel_status=429 | panel_avg=3.38 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=61 | panel_name=Untitled | panel_status=429 | panel_avg=4.39 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=19 | panel_name=Server Network Statistics | panel_status=429 | panel_avg=3.38 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=56 | panel_name=Untitled | panel_status=429 | panel_avg=5.41 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=22 | panel_name=P95 Network In Rate trend for Top 5 Servers | panel_status=429 | panel_avg=82.05 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=53 | panel_name=P95 Network Out Rate Trend for Top 5 Servers | panel_status=429 | panel_avg=5.88 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=62 | panel_name=Untitled | panel_status=429 | panel_avg=4.53 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=49 | panel_name=TCP Socket Summary Chart  | panel_status=429 | panel_avg=3.53 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=50 | panel_name=TCP Open Port Count Over Time on Top 5 Servers | panel_status=429 | panel_avg=3.71 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=51 | panel_name=UDP Open Port Count Over Time on Top 5 Servers | panel_status=429 | panel_avg=3.65 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=20 | panel_name=TCP Socket Summary | panel_status=429 | panel_avg=78.05 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:12+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=21 | panel_name=UDP Socket Summary | panel_status=429 | panel_avg=4.59 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=9 | panel_name=Current CPU Load Average | panel_status=200 | panel_avg=281.60 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=13 | panel_name=P95 CPU Load Average Trend for Top 5 Servers | panel_status=429 | panel_avg=4.67 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=57 | panel_name=Untitled | panel_status=429 | panel_avg=96.63 | panel_success_rate=0.00" source=console
+
+running (00m12.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m12.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=10 | panel_name= Top 5 CPU Consuming Process  | panel_status=200 | panel_avg=200.26 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=14 | panel_name= Top 5 Memory Consuming Process  | panel_status=429 | panel_avg=7.81 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=27 | panel_name=Server Process Details | panel_status=429 | panel_avg=6.07 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=58 | panel_name=Untitled | panel_status=200 | panel_avg=204.37 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=15 | panel_name= Servers DiskIO Statistics  | panel_status=429 | panel_avg=5.62 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=54 | panel_name=P95 Disk Read/Sec Trends for Top 5 Servers | panel_status=429 | panel_avg=4.62 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=55 | panel_name=P95 Disk Write/Sec Trends for Top 5 Servers | panel_status=429 | panel_avg=6.14 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=24 | panel_name=Total Disk IO Rate (Time) Trend for Top 5 Servers | panel_status=429 | panel_avg=4.17 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=59 | panel_name=Untitled | panel_status=429 | panel_avg=3.10 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=18 | panel_name= System Core Usage  | panel_status=429 | panel_avg=55.25 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=60 | panel_name=Untitled | panel_status=429 | panel_avg=4.19 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=17 | panel_name= Service Summary  | panel_status=429 | panel_avg=3.55 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=61 | panel_name=Untitled | panel_status=429 | panel_avg=3.35 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=19 | panel_name=Server Network Statistics | panel_status=429 | panel_avg=3.11 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=22 | panel_name=P95 Network In Rate trend for Top 5 Servers | panel_status=429 | panel_avg=3.03 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=53 | panel_name=P95 Network Out Rate Trend for Top 5 Servers | panel_status=429 | panel_avg=4.10 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=62 | panel_name=Untitled | panel_status=429 | panel_avg=3.45 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=49 | panel_name=TCP Socket Summary Chart  | panel_status=429 | panel_avg=3.40 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=50 | panel_name=TCP Open Port Count Over Time on Top 5 Servers | panel_status=429 | panel_avg=3.46 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=51 | panel_name=UDP Open Port Count Over Time on Top 5 Servers | panel_status=200 | panel_avg=183.83 | panel_success_rate=100.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=20 | panel_name=TCP Socket Summary | panel_status=429 | panel_avg=5.36 | panel_success_rate=0.00" source=console
+time="2025-10-29T00:13:13+05:30" level=info msg="PANEL_DATA: dashboard_name=Linux Server Insights | panel_id=21 | panel_name=UDP Socket Summary | panel_status=429 | panel_avg=5.01 | panel_success_rate=0.00" source=console
+
+running (00m13.0s), 1/5 VUs, 4 complete and 0 interrupted iterations
+default   [  80% ] 5 VUs  00m13.0s/10m0s  4/5 shared iters
+
+     █ Dashboard: MSSQL Overview Dashboard
+
+       ✓ Dashboard loaded successfully
+       ✗ Panel loaded
+        ↳  45% — ✓ 129 / ✗ 156
+
+     █ Dashboard: Linux Server Insights
+
+       ✗ Dashboard loaded successfully
+        ↳  40% — ✓ 2 / ✗ 3
+       ✗ Panel loaded
+        ↳  7% — ✓ 6 / ✗ 74
+
+     checks.........................: 37.86% 142 out of 375
+     dashboard_failure_count........: 3      0.219546/s
+     dashboard_response_time........: avg=292.537608 min=6.037023 med=207.323059 max=906.658769 p(90)=566.550352 p(95)=736.604561
+     dashboard_success_count........: 7      0.512274/s
+     data_received..................: 22 MB  1.6 MB/s
+     data_sent......................: 97 kB  7.1 kB/s
+     group_duration.................: avg=5.35s      min=6.53ms   med=5.83s      max=10.35s     p(90)=10.34s     p(95)=10.35s    
+     http_req_blocked...............: avg=106.4µs    min=141ns    med=350ns      max=8.16ms     p(90)=581ns      p(95)=747ns     
+     http_req_connecting............: avg=1.74µs     min=0s       med=0s         max=186.3µs    p(90)=0s         p(95)=0s        
+     http_req_duration..............: avg=142.36ms   min=2.98ms   med=97.7ms     max=919.01ms   p(90)=392.61ms   p(95)=492.63ms  
+       { expected_response:true }...: avg=297.69ms   min=32.95ms  med=292.92ms   max=919.01ms   p(90)=499.02ms   p(95)=563.01ms  
+     http_req_failed................: 62.13% 233 out of 375
+     http_req_receiving.............: avg=5.06ms     min=21.05µs  med=76.08µs    max=90.93ms    p(90)=5.77ms     p(95)=35.24ms   
+     http_req_sending...............: avg=59.36µs    min=17.93µs  med=50.33µs    max=617.15µs   p(90)=80.73µs    p(95)=94.81µs   
+     http_req_tls_handshaking.......: avg=37.66µs    min=0s       med=0s         max=3.23ms     p(90)=0s         p(95)=0s        
+     http_req_waiting...............: avg=137.24ms   min=2.86ms   med=97.24ms    max=891.75ms   p(90)=360.96ms   p(95)=488.28ms  
+     http_reqs......................: 375    27.44324/s
+     iteration_duration.............: avg=12.7s      min=12.33s   med=12.44s     max=13.66s     p(90)=13.29s     p(95)=13.47s    
+     iterations.....................: 5      0.36591/s
+     vus............................: 1      min=1          max=5
+     vus_max........................: 5      min=5          max=5
+
+
+running (00m13.7s), 0/5 VUs, 5 complete and 0 interrupted iterations
+default ✓ [ 100% ] 5 VUs  00m13.7s/10m0s  5/5 shared iters
