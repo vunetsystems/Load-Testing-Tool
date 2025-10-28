@@ -6,7 +6,7 @@ import time
 
 # ===== CONFIGURATION =====
 BASE_URL = "https://91.203.133.240"
-KEYCLOAK_BASE = "https://103.65.21.231"
+KEYCLOAK_BASE = "https://91.203.133.240"
 REALM = "vunet"
 
 TOKEN_URL = f"{KEYCLOAK_BASE}/realms/{REALM}/protocol/openid-connect/token"
