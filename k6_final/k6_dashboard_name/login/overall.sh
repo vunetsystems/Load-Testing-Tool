@@ -17,7 +17,7 @@ ITERATIONS=$2
 INTERVAL=$3  # No longer used, but kept for backward compatibility or optional future use
 
 # ====== CONFIGURATION ======
-SCRIPT_DIR="/home/vunet/k6_final/k6_dashboard_name/login"   # Adjust if your .js is in a different path
+SCRIPT_DIR="/home/vunet/k6_dashboard_name/login"   # Adjust if your .js is in a different path
 RESULT_DIR="./results_login_test"
 CSV_FILE="${RESULT_DIR}/login_metrics.csv"
 SUMMARY_FILE="${RESULT_DIR}/login_summary.txt"

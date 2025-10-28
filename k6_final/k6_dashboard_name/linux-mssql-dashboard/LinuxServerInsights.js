@@ -4,8 +4,8 @@ import { Trend, Rate, Counter } from 'k6/metrics';
 
 // Dashboard configuration
 const DASHBOARD_CONFIG = {
-  id: 'b95b768c-bb56-4faf-af9e-2db19d50c149',
-  name: 'Linux Server Insights'
+  id: 'a7e176b5-a37e-4673-9389-1b0c8da43934',
+  name: 'Self Monitor Server Insights'
 };
 
 // Time range configuration - can be set via environment variables
@@ -35,7 +35,7 @@ if (!validateTimeRange(TIME_RANGE.from, TIME_RANGE.to)) {
     throw new Error('Invalid time range parameters');
 }
 
-const usersRaw = open('/home/vunet/k6_final/user_creation/user_cookies.txt').split('\n');
+const usersRaw = open('/home/ubuntu/Load-Testing-Tool/k6_final/user_creation_k6/user_cookies.txt').split('\n');
 const users = usersRaw.map(line => {
     const [username, password, vunetSession, xVuNetHTTPInfo, grafanaSessionExpiry] = line.split(',');
     return {
@@ -75,7 +75,7 @@ const userSuccessCount = new Counter('user_success_count', true);
 const userFailureCount = new Counter('user_failure_count', true);
 
 // Panel metrics
-const MAX_PANEL_ID = 400;
+const MAX_PANEL_ID = 150;
 const panelMetrics = {};
 
 for (let panelId = 1; panelId <= MAX_PANEL_ID; panelId++) {
@@ -130,7 +130,7 @@ export default function () {
     };
 
     // 1. Get dashboard JSON
-    const dashboardUrl = `https://164.52.213.158/vui/api/dashboards/uid/${DASHBOARD_CONFIG.id}`;
+    const dashboardUrl = `https://91.203.133.240/vui/api/dashboards/uid/${DASHBOARD_CONFIG.id}`;
     
     const dashboardRes = http.get(dashboardUrl, {
         headers: {

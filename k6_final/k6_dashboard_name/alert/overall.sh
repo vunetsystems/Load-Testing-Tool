@@ -17,7 +17,7 @@ ITERATIONS=$2
 INTERVAL=$3
 
 # ====== CONFIGURATION ======
-SCRIPT_DIR="/home/vunet/k6_final/k6_dashboard_name/alert"  # <-- your alert scripts directory
+SCRIPT_DIR="/home/vunet/k6_dashboard_name/alert"  # <-- your alert scripts directory
 RESULT_DIR="./results_alerts"
 CSV_FILE="${RESULT_DIR}/alerts_metrics.csv"
 SUMMARY_FILE="${RESULT_DIR}/alerts_summary.txt"

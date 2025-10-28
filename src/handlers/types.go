@@ -73,7 +73,9 @@ var AppState = &AppStates{
 const (
 	AppVersion = "1.0.0"
 	StaticDir  = "./static"
-	Port       = "164.52.213.158:8086"
+	// Port       = "164.52.213.158:8086"
+	Port       = "0.0.0.0:8086"
+	
 )
 
 var NodeManager = node_control.NewNodeManager()

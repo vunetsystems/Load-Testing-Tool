@@ -283,7 +283,7 @@ func sshExec(nodeConfig node_control.NodeConfig, command string) (string, error)
 		"-o", "UserKnownHostsFile=/dev/null",
 		"-o", "ConnectTimeout=10",
 		"-o", "LogLevel=ERROR", // Reduce SSH warnings
-		fmt.Sprintf("%s@%s", nodeConfig.User, nodeConfig.Host),
+		nodeConfig.Host,
 		command,
 	}
 

@@ -17,7 +17,7 @@ ITERATIONS=$2
 INTERVAL=$3
 
 # ====== CONFIGURATION ======
-SCRIPT_DIR="/home/vunet/k6_final/k6_dashboard_name/reports"  # <-- your report scripts directory
+SCRIPT_DIR="/home/vunet/k6_dashboard_name/reports"  # <-- your report scripts directory
 RESULT_DIR="./results_reports"
 CSV_FILE="${RESULT_DIR}/reports_metrics.csv"
 SUMMARY_FILE="${RESULT_DIR}/reports_summary.txt"

@@ -101,7 +101,7 @@ func main() {
 	api.HandleFunc("/health", handlers.HealthCheck).Methods("GET`")
 	api.HandleFunc("/dashboard", handlers.GetDashboardData).Methods("GET")
 	// Cluster metrics API endpoint
-	api.HandleFunc("/cluster/metrics", handlers.HandleAPIGetClusterMetrics).Methods("GET")
+	// api.HandleFunc("/cluster/metrics", handlers.HandleAPIGetClusterMetrics).Methods("GET")
 	// Metrics with time range endpoint
 	api.HandleFunc("/metrics", handlers.GetMetrics).Methods("GET")
 
@@ -135,10 +135,10 @@ func main() {
 	api.HandleFunc("/clickhouse/metrics", handlers.HandleAPIGetClickHouseMetrics).Methods("GET")
 	api.HandleFunc("/clickhouse/health", handlers.HandleAPIClickHouseHealth).Methods("GET")
 	api.HandleFunc("/clickhouse/kafka-topics", handlers.HandleAPIGetKafkaTopicMetrics).Methods("GET")
-	api.HandleFunc("/clickhouse/pod-metrics", handlers.HandleAPIGetPodMetrics).Methods("GET")
+	api.HandleFunc("/clickhouse/pod-monitoring", handlers.HandleAPIGetPodMonitoring).Methods("GET")
+	// Removed pod-metrics endpoint
 
-	// Kubernetes API endpoints
-	api.HandleFunc("/kubernetes/pods", handlers.HandleAPIGetKubernetesPods).Methods("GET")
+	// Removed Kubernetes API endpoints
 
 	// Kafka and ClickHouse Reset API endpoints
 	api.HandleFunc("/kafka/topics", kafkaHandler.GetTopics).Methods("GET")

@@ -573,7 +573,7 @@ func (bc *BinaryControl) sshExec(node NodeConfig, command string) error {
 		"-o", "UserKnownHostsFile=/dev/null",
 		"-o", "ConnectTimeout=10",
 		"-o", "LogLevel=ERROR",
-		fmt.Sprintf("%s@%s", node.User, node.Host),
+		node.Host,
 		command,
 	}
 	cmd := exec.Command("ssh", args...)
@@ -589,7 +589,7 @@ func (bc *BinaryControl) sshExecWithOutput(node NodeConfig, command string) (str
 		"-o", "UserKnownHostsFile=/dev/null",
 		"-o", "ConnectTimeout=10",
 		"-o", "LogLevel=ERROR",
-		fmt.Sprintf("%s@%s", node.User, node.Host),
+		node.Host,
 		command,
 	}
 	cmd := exec.Command("ssh", args...)

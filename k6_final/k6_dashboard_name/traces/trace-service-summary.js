@@ -35,7 +35,7 @@ if (!validateTimeRange(TIME_RANGE.from, TIME_RANGE.to)) {
     throw new Error('Invalid time range parameters');
 }
 
-const usersRaw = open('/home/vunet/k6_final/user_creation/user_cookies.txt').split('\n');
+const usersRaw = open('/home/vunet/user_creation_k6/user_cookies.txt').split('\n');
 const users = usersRaw.map(line => {
     const [username, password, vunetSession, xVuNetHTTPInfo, grafanaSessionExpiry] = line.split(',');
     return {

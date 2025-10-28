@@ -16,28 +16,28 @@ logging:
   log_max_size: 10485760
 network:
   remote_host: 127.0.0.1
-  remote_user: vunet
+  remote_user: ubuntu
   streamlit_address: 0.0.0.0
   streamlit_port: 8501
  
 paths:
   local_backups_dir: backups
   local_logs_dir: logs
-  remote_binary_dir: /home/vunet/Load-Testing-Tool/bin
-  remote_conf_dir: /home/vunet/Load-Testing-Tool
+  remote_binary_dir: /home/ubuntu/Load-Testing-Tool/bin
+  remote_conf_dir: /home/ubuntu/Load-Testing-Tool
   remote_ssh_key: ~/.ssh/id_rsa
 process:
   default_timeout: 300
   graceful_shutdown_timeout: 10
   remote_timeout: 300
 clickhouse:
-  host: "10.32.3.50"
+  host: "10.32.2.204"
   port: 9000
   database: "vusmart"
   username: "monitoring_read"
   password: "StrongP@assword123"
 monitoring_db:
-  host: "10.32.3.50"
+  host: "10.32.2.204"
   port: 9000
   database: "monitoring"
   username: "monitoring_read"

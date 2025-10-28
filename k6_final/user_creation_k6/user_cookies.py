@@ -5,8 +5,8 @@ from playwright.sync_api import sync_playwright
 import time
 
 # ===== CONFIGURATION =====
-BASE_URL = "https://164.52.213.158"
-KEYCLOAK_BASE = "https://164.52.214.184"
+BASE_URL = "https://91.203.133.240"
+KEYCLOAK_BASE = "https://103.65.21.231"
 REALM = "vunet"
 
 TOKEN_URL = f"{KEYCLOAK_BASE}/realms/{REALM}/protocol/openid-connect/token"
@@ -68,41 +68,23 @@ def generate_username(prefix="load_user_"):
     return f"{prefix}{random.randint(1, 10000)}"
 
 
-def get_user_auth_token(username):
-    """Get user auth token from Keycloak."""
-    data = {
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET,
-        "username": username,
-        "password": COMMON_PASSWORD,
-        "grant_type": "password"
-    }
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    response = requests.post(TOKEN_URL, data=data, headers=headers, verify=False)
-    if response.status_code == 200:
-        token = response.json()["access_token"]
-        print(f"🔐 Auth token retrieved for {username}")
-        return token
-    else:
-        print(f"⚠️ Failed to get auth token for {username}: {response.status_code} - {response.text}")
-        return ""
-
-
 def login_vusmartmaps_get_cookies(username):
     """Use Playwright to login to vuSmartMaps and get cookies."""
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
+        # Ignore invalid SSL certs
         context = browser.new_context(ignore_https_errors=True)
         page = context.new_page()
 
         print(f"🔑 Logging in as {username}...")
         page.goto(f"{BASE_URL}/vui/login", wait_until="networkidle")
 
-        # Fill login form
+        # Fill login form (adjust selectors if needed)
         page.fill("input[name=username]", username)
         page.fill("input[name=password]", COMMON_PASSWORD)
         page.click("button[type=submit]")
 
+        # Wait for dashboard to load
         try:
             page.wait_for_url(f"{BASE_URL}/vui/*", timeout=20000)
         except:
@@ -120,22 +102,18 @@ def login_vusmartmaps_get_cookies(username):
 
 def main(num_users):
     admin_token = get_admin_token()
-    with open("user_cookies_module.txt", "w") as file:
+    with open("user_cookies.txt", "w") as file:
         # Write header
-        file.write("username,password,auth_token,vunet_session,X-VuNet-HTTP-Info,grafana_session_expiry\n")
+        file.write("username,password,vunet_session,X-VuNet-HTTP-Info,grafana_session_expiry\n")
 
         for _ in range(num_users):
             username = generate_username()
             if not create_user(admin_token, username):
                 continue
 
-            # Delay to allow user creation to propagate
+            # Small delay to allow user creation propagation
             time.sleep(2)
 
-            # Get user auth token
-            auth_token = get_user_auth_token(username)
-
-            # Get cookies via Playwright
             cookies = login_vusmartmaps_get_cookies(username)
             if not cookies:
                 print(f"⚠️ Skipping {username}, failed to get cookies.")
@@ -145,15 +123,13 @@ def main(num_users):
             X_VuNet_HTTP_Info = cookies.get("X-VuNet-HTTP-Info", "")
             grafana_session_expiry = cookies.get("grafana_session_expiry", "")
 
-            # Write data
-            file.write(f"{username},{COMMON_PASSWORD},{auth_token},{vunet_session},{X_VuNet_HTTP_Info},{grafana_session_expiry}\n")
-            print(f"✅ Saved cookies & token for {username}")
+            file.write(f"{username},{COMMON_PASSWORD},{vunet_session},{X_VuNet_HTTP_Info},{grafana_session_expiry}\n")
+            print(f"✅ Cookies saved for {username}")
 
 
 # ===== ENTRY POINT =====
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Create users and get vuSmartMaps cookies + auth token")
+    parser = argparse.ArgumentParser(description="Create users and get vuSmartMaps cookies")
     parser.add_argument("num_users", type=int, help="Number of users to create")
     args = parser.parse_args()
     main(args.num_users)
-

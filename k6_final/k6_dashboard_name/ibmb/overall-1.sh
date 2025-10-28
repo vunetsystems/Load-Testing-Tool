@@ -18,8 +18,8 @@ ITERATIONS=$3
 INTERVAL=$4
 
 # ====== CONFIGURATION ======
-SCRIPT_DIR="/home/vunet/k6_dashboard_name/traces"
-RESULT_DIR="./results_traces"
+SCRIPT_DIR="/home/vunet/k6_dashboard_name/ibmb"
+RESULT_DIR="./results_ibmb"
 CSV_FILE="${RESULT_DIR}/dashboard_panel_metrics.csv"
 SUMMARY_FILE="${RESULT_DIR}/dashboard_summary.txt"
 
