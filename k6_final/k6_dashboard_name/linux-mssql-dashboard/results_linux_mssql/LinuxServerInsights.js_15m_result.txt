@@ -1,0 +1,868 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard/LinuxServerInsights.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 5 max VUs, 10m30s max duration (incl. graceful stop):
+              * default: 5 iterations shared among 5 VUs (maxDuration: 10m0s, gracefulStop: 30s)
+
+time="2025-10-29T00:12:42+05:30" level=info msg="Dashboard: Linux Server Insights" source=console
+time="2025-10-29T00:12:42+05:30" level=info msg="Dashboard: Linux Server Insights" source=console
+time="2025-10-29T00:12:42+05:30" level=info msg="Dashboard is status 200" source=console
+time="2025-10-29T00:12:42+05:30" level=info msg="dashboard_success_rate: 100.00%" source=console
+time="2025-10-29T00:12:42+05:30" level=info msg="Dashboard: Linux Server Insights" source=console
+time="2025-10-29T00:12:42+05:30" level=info msg="Dashboard is status 200" source=console
+time="2025-10-29T00:12:42+05:30" level=info msg="dashboard_success_rate: 100.00%" source=console
+time="2025-10-29T00:12:42+05:30" level=info msg="Dashboard is status 200" source=console
+time="2025-10-29T00:12:42+05:30" level=info msg="dashboard_success_rate: 100.00%" source=console
+time="2025-10-29T00:12:42+05:30" level=info msg="Dashboard: Linux Server Insights" source=console
+time="2025-10-29T00:12:42+05:30" level=info msg="Dashboard is status 200" source=console
+time="2025-10-29T00:12:42+05:30" level=info msg="dashboard_success_rate: 100.00%" source=console
+time="2025-10-29T00:12:42+05:30" level=info msg="Dashboard: Linux Server Insights" source=console
+time="2025-10-29T00:12:42+05:30" level=info msg="Dashboard is status 200" source=console
+time="2025-10-29T00:12:42+05:30" level=info msg="dashboard_success_rate: 100.00%" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="🔹 Found 41 panels for Linux Server Insights" source=console
+time="2025-10-29T00:12:43+05:30" level=error msg="Panel ID 1853 is out of range (1-150)" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="🔹 Found 41 panels for Linux Server Insights" source=console
+time="2025-10-29T00:12:43+05:30" level=error msg="Panel ID 1853 is out of range (1-150)" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="🔹 Found 41 panels for Linux Server Insights" source=console
+time="2025-10-29T00:12:43+05:30" level=error msg="Panel ID 1853 is out of range (1-150)" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="🔹 Found 41 panels for Linux Server Insights" source=console
+time="2025-10-29T00:12:43+05:30" level=error msg="Panel ID 1853 is out of range (1-150)" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 26 (Servers) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_26: avg=276.68ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_26: 100.00%" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 26 (Servers) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_26: avg=187.06ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_26: 100.00%" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 26 (Servers) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_26: avg=268.30ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_26: 100.00%" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="🔹 Found 41 panels for Linux Server Insights" source=console
+time="2025-10-29T00:12:43+05:30" level=error msg="Panel ID 1853 is out of range (1-150)" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 47 (Servers Restarted in Last 24 Hours) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_47: avg=101.32ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_47: 100.00%" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 47 (Servers Restarted in Last 24 Hours) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_47: avg=111.56ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_47: 100.00%" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 26 (Servers) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_26: avg=385.31ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_26: 100.00%" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 26 (Servers) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_26: avg=292.74ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_26: 100.00%" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 42 (Alert Summary) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_42: avg=294.49ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_42: 100.00%" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 47 (Servers Restarted in Last 24 Hours) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_47: avg=400.46ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_47: 100.00%" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 42 (Alert Summary) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_42: avg=385.98ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_42: 100.00%" source=console
+
+running (00m01.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m01.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 42 (Alert Summary) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_42: avg=193.01ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_42: 100.00%" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 47 (Servers Restarted in Last 24 Hours) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_47: avg=302.54ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_47: 100.00%" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 46 (Server Uptime) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_46: avg=204.99ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_46: 100.00%" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 46 (Server Uptime) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_46: avg=203.67ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_46: 100.00%" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="Panel 47 (Servers Restarted in Last 24 Hours) is status 200" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_response_time_47: avg=396.00ms" source=console
+time="2025-10-29T00:12:43+05:30" level=info msg="panel_success_rate_47: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 46 (Server Uptime) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_46: avg=200.13ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_46: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 42 (Alert Summary) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_42: avg=203.07ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_42: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 34 (Server Memory Utilization) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_34: avg=288.60ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_34: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 34 (Server Memory Utilization) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_34: avg=297.27ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_34: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 42 (Alert Summary) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_42: avg=302.08ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_42: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 34 (Server Memory Utilization) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_34: avg=233.98ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_34: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 46 (Server Uptime) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_46: avg=225.88ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_46: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 33 (Active Alerts) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_33: avg=104.55ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_33: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 46 (Server Uptime) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_46: avg=103.12ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_46: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 33 (Active Alerts) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_33: avg=302.04ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_33: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 34 (Server Memory Utilization) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_34: avg=169.31ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_34: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 33 (Active Alerts) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_33: avg=171.74ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_33: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 8 (Server CPU Utilization) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_8: avg=110.13ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_8: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 33 (Active Alerts) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_33: avg=227.76ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_33: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 34 (Server Memory Utilization) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_34: avg=391.23ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_34: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 8 (Server CPU Utilization) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_8: avg=400.13ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_8: 100.00%" source=console
+
+running (00m02.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m02.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 12 (P95 CPU Utilization Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_12: avg=288.94ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_12: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 8 (Server CPU Utilization) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_8: avg=393.70ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_8: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 8 (Server CPU Utilization) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_8: avg=266.59ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_8: 100.00%" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="Panel 33 (Active Alerts) is status 200" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_response_time_33: avg=203.96ms" source=console
+time="2025-10-29T00:12:44+05:30" level=info msg="panel_success_rate_33: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 12 (P95 CPU Utilization Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_12: avg=206.70ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_12: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 12 (P95 CPU Utilization Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_12: avg=205.68ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_12: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 64 (P95 IO Wait % CPU Utilization for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_64: avg=206.90ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_64: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 64 (P95 IO Wait % CPU Utilization for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_64: avg=98.37ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_64: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 64 (P95 IO Wait % CPU Utilization for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_64: avg=287.66ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_64: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 12 (P95 CPU Utilization Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_12: avg=299.50ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_12: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 8 (Server CPU Utilization) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_8: avg=300.59ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_8: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 63 (P95 Idle CPU Utilization Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_63: avg=289.68ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_63: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 63 (P95 Idle CPU Utilization Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_63: avg=199.60ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_63: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 63 (P95 Idle CPU Utilization Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_63: avg=298.97ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_63: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 16 ( Servers Disk Utilization ) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_16: avg=235.63ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_16: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 16 ( Servers Disk Utilization ) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_16: avg=197.22ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_16: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 64 (P95 IO Wait % CPU Utilization for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_64: avg=433.30ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_64: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 16 ( Servers Disk Utilization ) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_16: avg=230.23ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_16: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 12 (P95 CPU Utilization Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_12: avg=494.07ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_12: 100.00%" source=console
+
+running (00m03.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m03.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 11 (P95 Memory Utilization Trend  for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_11: avg=171.02ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_11: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 11 (P95 Memory Utilization Trend  for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_11: avg=278.51ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_11: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 11 (P95 Memory Utilization Trend  for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_11: avg=298.66ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_11: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 64 (P95 IO Wait % CPU Utilization for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_64: avg=200.18ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_64: 100.00%" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="Panel 63 (P95 Idle CPU Utilization Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_response_time_63: avg=266.36ms" source=console
+time="2025-10-29T00:12:45+05:30" level=info msg="panel_success_rate_63: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 52 (P95 SwapMemory Usage) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_52: avg=193.39ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_52: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 52 (P95 SwapMemory Usage) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_52: avg=293.29ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_52: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 16 ( Servers Disk Utilization ) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_16: avg=201.43ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_16: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 52 (P95 SwapMemory Usage) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_52: avg=207.70ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_52: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 25 (P95 Disk Utilization Trend for Top 5 Disks) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_25: avg=196.53ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_25: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 63 (P95 Idle CPU Utilization Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_63: avg=395.57ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_63: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 56 (Panel 56) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 11 (P95 Memory Utilization Trend  for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_11: avg=295.81ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_11: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_56: avg=195.32ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_56: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 25 (P95 Disk Utilization Trend for Top 5 Disks) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_25: avg=300.67ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_25: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 25 (P95 Disk Utilization Trend for Top 5 Disks) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_25: avg=395.49ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_25: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 16 ( Servers Disk Utilization ) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_16: avg=311.13ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_16: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 56 (Panel 56) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_56: avg=296.72ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_56: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 9 (Current CPU Load Average) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_9: avg=301.06ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_9: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 56 (Panel 56) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_56: avg=206.30ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_56: 100.00%" source=console
+
+running (00m04.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m04.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 11 (P95 Memory Utilization Trend  for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="Panel 9 (Current CPU Load Average) is status 200" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_9: avg=98.47ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_9: 100.00%" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_response_time_11: avg=196.94ms" source=console
+time="2025-10-29T00:12:46+05:30" level=info msg="panel_success_rate_11: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 13 (P95 CPU Load Average Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_13: avg=299.12ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_13: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 13 (P95 CPU Load Average Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_13: avg=194.91ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_13: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 9 (Current CPU Load Average) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_9: avg=303.58ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_9: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 52 (P95 SwapMemory Usage) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_52: avg=606.42ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_52: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 13 (P95 CPU Load Average Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_13: avg=96.17ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_13: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 52 (P95 SwapMemory Usage) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_52: avg=389.83ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_52: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 57 (Panel 57) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_57: avg=198.04ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_57: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 25 (P95 Disk Utilization Trend for Top 5 Disks) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_25: avg=291.29ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_25: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 57 (Panel 57) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_57: avg=395.11ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_57: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 57 (Panel 57) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_57: avg=399.76ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_57: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 56 (Panel 56) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_56: avg=203.55ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_56: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 25 (P95 Disk Utilization Trend for Top 5 Disks) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_25: avg=312.09ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_25: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 10 ( Top 5 CPU Consuming Process ) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_10: avg=309.58ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_10: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 10 ( Top 5 CPU Consuming Process ) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_10: avg=97.59ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_10: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 10 ( Top 5 CPU Consuming Process ) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_10: avg=205.41ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_10: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 56 (Panel 56) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_56: avg=94.54ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_56: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 14 ( Top 5 Memory Consuming Process ) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_14: avg=193.19ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_14: 100.00%" source=console
+
+running (00m05.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m05.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 9 (Current CPU Load Average) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_9: avg=296.18ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_9: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 14 ( Top 5 Memory Consuming Process ) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_14: avg=200.58ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_14: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 14 ( Top 5 Memory Consuming Process ) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_14: avg=205.22ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_14: 100.00%" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="Panel 9 (Current CPU Load Average) is status 200" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_response_time_9: avg=299.25ms" source=console
+time="2025-10-29T00:12:47+05:30" level=info msg="panel_success_rate_9: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 13 (P95 CPU Load Average Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_13: avg=199.90ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_13: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 27 (Server Process Details) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_27: avg=301.28ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_27: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 58 (Panel 58) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_58: avg=196.49ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_58: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 57 (Panel 57) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_57: avg=205.25ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_57: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 27 (Server Process Details) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_27: avg=402.33ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_27: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 27 (Server Process Details) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_27: avg=495.36ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_27: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 13 (P95 CPU Load Average Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_13: avg=399.65ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_13: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 15 ( Servers DiskIO Statistics ) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_15: avg=199.88ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_15: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 57 (Panel 57) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_57: avg=193.49ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_57: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 58 (Panel 58) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_58: avg=299.84ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_58: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 10 ( Top 5 CPU Consuming Process ) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_10: avg=495.92ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_10: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 54 (P95 Disk Read/Sec Trends for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_54: avg=297.71ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_54: 100.00%" source=console
+
+running (00m06.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m06.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 58 (Panel 58) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_58: avg=589.52ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_58: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 15 ( Servers DiskIO Statistics ) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_15: avg=198.77ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_15: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 10 ( Top 5 CPU Consuming Process ) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_10: avg=304.98ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_10: 100.00%" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="Panel 14 ( Top 5 Memory Consuming Process ) is status 200" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_response_time_14: avg=200.74ms" source=console
+time="2025-10-29T00:12:48+05:30" level=info msg="panel_success_rate_14: 100.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 14 ( Top 5 Memory Consuming Process ) is status 200" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_14: avg=202.57ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_14: 100.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 15 ( Servers DiskIO Statistics ) is status 200" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_15: avg=301.04ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_15: 100.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 55 (P95 Disk Write/Sec Trends for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_55: avg=398.13ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_55: 100.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 27 (Server Process Details) is status 200" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_27: avg=199.12ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_27: 100.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 54 (P95 Disk Read/Sec Trends for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_54: avg=308.13ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_54: 100.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 27 (Server Process Details) is status 200" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_27: avg=101.63ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_27: 100.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 58 (Panel 58) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_58: avg=5.75ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_58: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 58 (Panel 58) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_58: avg=13.96ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_58: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 55 (P95 Disk Write/Sec Trends for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_55: avg=10.62ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_55: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 24 (Total Disk IO Rate (Time) Trend for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_24: avg=16.10ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_24: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 15 ( Servers DiskIO Statistics ) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_15: avg=20.04ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_15: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 15 ( Servers DiskIO Statistics ) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_15: avg=20.20ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_15: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 54 (P95 Disk Read/Sec Trends for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_54: avg=4.91ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_54: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 59 (Panel 59) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_59: avg=7.87ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_59: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 54 (P95 Disk Read/Sec Trends for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_54: avg=6.85ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_54: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 55 (P95 Disk Write/Sec Trends for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_55: avg=7.42ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_55: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 18 ( System Core Usage ) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_18: avg=7.79ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_18: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 55 (P95 Disk Write/Sec Trends for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_55: avg=7.75ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_55: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 60 (Panel 60) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_60: avg=5.15ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_60: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 24 (Total Disk IO Rate (Time) Trend for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_24: avg=8.35ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_24: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 24 (Total Disk IO Rate (Time) Trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_24: avg=134.43ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_24: 100.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 24 (Total Disk IO Rate (Time) Trend for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_24: avg=83.79ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_24: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 59 (Panel 59) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_59: avg=81.55ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_59: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 59 (Panel 59) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_59: avg=3.92ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_59: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 18 ( System Core Usage ) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_18: avg=3.48ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_18: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 18 ( System Core Usage ) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_18: avg=3.35ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_18: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 60 (Panel 60) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_60: avg=4.03ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_60: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 60 (Panel 60) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_60: avg=3.58ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_60: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 17 ( Service Summary ) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_17: avg=4.25ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_17: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 17 ( Service Summary ) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_17: avg=4.71ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_17: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 61 (Panel 61) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_61: avg=80.57ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_61: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 54 (P95 Disk Read/Sec Trends for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_54: avg=235.56ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_54: 100.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 59 (Panel 59) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_59: avg=100.87ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_59: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 61 (Panel 61) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_61: avg=84.64ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_61: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 18 ( System Core Usage ) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_18: avg=3.46ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_18: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 55 (P95 Disk Write/Sec Trends for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_55: avg=6.36ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_55: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 19 (Server Network Statistics) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_19: avg=5.70ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_19: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 19 (Server Network Statistics) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_19: avg=10.12ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_19: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 60 (Panel 60) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_60: avg=92.92ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_60: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 24 (Total Disk IO Rate (Time) Trend for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_24: avg=92.80ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_24: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 17 ( Service Summary ) is status 200" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_17: avg=280.43ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_17: 100.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 22 (P95 Network In Rate trend for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_22: avg=93.77ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_22: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 22 (P95 Network In Rate trend for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_22: avg=95.49ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_22: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 17 ( Service Summary ) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_17: avg=6.64ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_17: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 59 (Panel 59) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_59: avg=98.68ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_59: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 61 (Panel 61) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 53 (P95 Network Out Rate Trend for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_61: avg=96.54ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_53: avg=95.25ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_61: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_53: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 53 (P95 Network Out Rate Trend for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_53: avg=96.46ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_53: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 18 ( System Core Usage ) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_18: avg=5.65ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_18: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 62 (Panel 62) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_62: avg=7.07ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_62: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 62 (Panel 62) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_62: avg=97.74ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_62: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 49 (TCP Socket Summary Chart ) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_49: avg=97.02ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_49: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 61 (Panel 61) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_61: avg=198.31ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_61: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 49 (TCP Socket Summary Chart ) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_49: avg=6.54ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_49: 0.00%" source=console
+
+running (00m07.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m07.0s/10m0s  0/5 shared iters
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 19 (Server Network Statistics) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_19: avg=199.76ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_19: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 60 (Panel 60) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_60: avg=196.54ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_60: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 19 (Server Network Statistics) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_19: avg=97.46ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_19: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 50 (TCP Open Port Count Over Time on Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_50: avg=101.41ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_50: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 17 ( Service Summary ) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_17: avg=99.22ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_17: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 22 (P95 Network In Rate trend for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_22: avg=101.75ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_22: 0.00%" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="Panel 50 (TCP Open Port Count Over Time on Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_response_time_50: avg=195.42ms" source=console
+time="2025-10-29T00:12:49+05:30" level=info msg="panel_success_rate_50: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 51 (UDP Open Port Count Over Time on Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_51: avg=193.01ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_51: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 53 (P95 Network Out Rate Trend for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_53: avg=98.99ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_53: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 61 (Panel 61) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_61: avg=100.25ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_61: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 51 (UDP Open Port Count Over Time on Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_51: avg=194.87ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_51: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 22 (P95 Network In Rate trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_22: avg=297.83ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_22: 100.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 20 (TCP Socket Summary) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_20: avg=201.02ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_20: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 62 (Panel 62) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_62: avg=296.98ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_62: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 20 (TCP Socket Summary) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_20: avg=299.87ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_20: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 19 (Server Network Statistics) is status 200" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_19: avg=396.93ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_19: 100.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 49 (TCP Socket Summary Chart ) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_49: avg=101.54ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_49: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 53 (P95 Network Out Rate Trend for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_53: avg=300.32ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_53: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 21 (UDP Socket Summary) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_21: avg=203.12ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_21: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 21 (UDP Socket Summary) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_21: avg=100.28ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_21: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 50 (TCP Open Port Count Over Time on Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_50: avg=101.12ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_50: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 62 (Panel 62) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_62: avg=101.60ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_62: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 51 (UDP Open Port Count Over Time on Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_51: avg=3.62ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_51: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 49 (TCP Socket Summary Chart ) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_49: avg=96.97ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_49: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 20 (TCP Socket Summary) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_20: avg=95.73ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_20: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 50 (TCP Open Port Count Over Time on Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_50: avg=4.64ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_50: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 21 (UDP Socket Summary) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_21: avg=4.88ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_21: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 51 (UDP Open Port Count Over Time on Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_51: avg=5.95ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_51: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 20 (TCP Socket Summary) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_20: avg=5.24ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_20: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 21 (UDP Socket Summary) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_21: avg=4.84ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_21: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 22 (P95 Network In Rate trend for Top 5 Servers) is status 200" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_22: avg=224.42ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_22: 100.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 53 (P95 Network Out Rate Trend for Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_53: avg=3.97ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_53: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 62 (Panel 62) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_62: avg=4.07ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_62: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 49 (TCP Socket Summary Chart ) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_49: avg=67.31ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_49: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 50 (TCP Open Port Count Over Time on Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_50: avg=4.12ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_50: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 51 (UDP Open Port Count Over Time on Top 5 Servers) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_51: avg=3.76ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_51: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 20 (TCP Socket Summary) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_20: avg=3.52ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_20: 0.00%" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="Panel 21 (UDP Socket Summary) is status 429" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_response_time_21: avg=3.49ms" source=console
+time="2025-10-29T00:12:50+05:30" level=info msg="panel_success_rate_21: 0.00%" source=console
+
+     ✓ Dashboard is status 200
+     ✓ Panel 26 (Servers) is status 200
+     ✓ Panel 47 (Servers Restarted in Last 24 Hours) is status 200
+     ✓ Panel 42 (Alert Summary) is status 200
+     ✓ Panel 46 (Server Uptime) is status 200
+     ✓ Panel 34 (Server Memory Utilization) is status 200
+     ✓ Panel 33 (Active Alerts) is status 200
+     ✓ Panel 8 (Server CPU Utilization) is status 200
+     ✓ Panel 12 (P95 CPU Utilization Trend for Top 5 Servers) is status 200
+     ✓ Panel 64 (P95 IO Wait % CPU Utilization for Top 5 Servers) is status 200
+     ✓ Panel 63 (P95 Idle CPU Utilization Trend for Top 5 Servers) is status 200
+     ✓ Panel 16 ( Servers Disk Utilization ) is status 200
+     ✓ Panel 11 (P95 Memory Utilization Trend  for Top 5 Servers) is status 200
+     ✓ Panel 52 (P95 SwapMemory Usage) is status 200
+     ✓ Panel 25 (P95 Disk Utilization Trend for Top 5 Disks) is status 200
+     ✓ Panel 56 (Panel 56) is status 200
+     ✓ Panel 9 (Current CPU Load Average) is status 200
+     ✓ Panel 13 (P95 CPU Load Average Trend for Top 5 Servers) is status 200
+     ✓ Panel 57 (Panel 57) is status 200
+     ✓ Panel 10 ( Top 5 CPU Consuming Process ) is status 200
+     ✓ Panel 14 ( Top 5 Memory Consuming Process ) is status 200
+     ✓ Panel 27 (Server Process Details) is status 200
+     ✗ Panel 58 (Panel 58) is status 200
+      ↳  60% — ✓ 3 / ✗ 2
+     ✗ Panel 15 ( Servers DiskIO Statistics ) is status 200
+      ↳  60% — ✓ 3 / ✗ 2
+     ✗ Panel 54 (P95 Disk Read/Sec Trends for Top 5 Servers) is status 200
+      ↳  60% — ✓ 3 / ✗ 2
+     ✗ Panel 55 (P95 Disk Write/Sec Trends for Top 5 Servers) is status 200
+      ↳  20% — ✓ 1 / ✗ 4
+     ✗ Panel 24 (Total Disk IO Rate (Time) Trend for Top 5 Servers) is status 200
+      ↳  20% — ✓ 1 / ✗ 4
+     ✗ Panel 59 (Panel 59) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 18 ( System Core Usage ) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 60 (Panel 60) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 17 ( Service Summary ) is status 200
+      ↳  20% — ✓ 1 / ✗ 4
+     ✗ Panel 61 (Panel 61) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 19 (Server Network Statistics) is status 200
+      ↳  20% — ✓ 1 / ✗ 4
+     ✗ Panel 22 (P95 Network In Rate trend for Top 5 Servers) is status 200
+      ↳  40% — ✓ 2 / ✗ 3
+     ✗ Panel 53 (P95 Network Out Rate Trend for Top 5 Servers) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 62 (Panel 62) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 49 (TCP Socket Summary Chart ) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 50 (TCP Open Port Count Over Time on Top 5 Servers) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 51 (UDP Open Port Count Over Time on Top 5 Servers) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 20 (TCP Socket Summary) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 21 (UDP Socket Summary) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+
+     checks.........................: 60.97%  125 out of 205
+     dashboard_response_time........: avg=300.92ms min=182.19ms med=275.6ms  max=472.91ms p(90)=434.3ms  p(95)=453.6ms 
+     dashboard_success_rate.........: 100.00% 5 out of 5
+     data_received..................: 19 MB   2.4 MB/s
+     data_sent......................: 70 kB   8.8 kB/s
+     http_req_blocked...............: avg=248.88µs min=250ns    med=400ns    max=10.83ms  p(90)=766ns    p(95)=902ns   
+     http_req_connecting............: avg=21.98µs  min=0s       med=0s       max=1.04ms   p(90)=0s       p(95)=0s      
+     http_req_duration..............: avg=188.95ms min=3.35ms   med=198.31ms max=606.41ms p(90)=388.29ms p(95)=399.73ms
+       { expected_response:true }...: avg=266.64ms min=94.53ms  med=268.3ms  max=606.41ms p(90)=397.64ms p(95)=427.1ms 
+     http_req_duration_custom.......: avg=188.95ms min=3.35ms   med=198.31ms max=606.41ms p(90)=388.29ms p(95)=399.73ms
+     http_req_failed................: 39.02%  80 out of 205
+     http_req_receiving.............: avg=5.63ms   min=19.66µs  med=3.37ms   max=126.44ms p(90)=6.15ms   p(95)=27.94ms 
+     http_req_sending...............: avg=62.95µs  min=32.07µs  med=58.39µs  max=196.83µs p(90)=84.01µs  p(95)=104.69µs
+     http_req_tls_handshaking.......: avg=56.96µs  min=0s       med=0s       max=2.64ms   p(90)=0s       p(95)=0s      
+     http_req_waiting...............: avg=183.25ms min=3.25ms   med=193.85ms max=597.4ms  p(90)=381.76ms p(95)=395.86ms
+     http_reqs......................: 205     25.862879/s
+     iteration_duration.............: avg=7.77s    min=7.61s    med=7.81s    max=7.92s    p(90)=7.88s    p(95)=7.9s    
+     iterations.....................: 5       0.630802/s
+     panel_failure_rate_10..........: 0.00%   0 out of 5
+     panel_failure_rate_11..........: 0.00%   0 out of 5
+     panel_failure_rate_12..........: 0.00%   0 out of 5
+     panel_failure_rate_13..........: 0.00%   0 out of 5
+     panel_failure_rate_14..........: 0.00%   0 out of 5
+     panel_failure_rate_15..........: 40.00%  2 out of 5
+     panel_failure_rate_16..........: 0.00%   0 out of 5
+     panel_failure_rate_17..........: 80.00%  4 out of 5
+     panel_failure_rate_18..........: 100.00% 5 out of 5
+     panel_failure_rate_19..........: 80.00%  4 out of 5
+     panel_failure_rate_20..........: 100.00% 5 out of 5
+     panel_failure_rate_21..........: 100.00% 5 out of 5
+     panel_failure_rate_22..........: 60.00%  3 out of 5
+     panel_failure_rate_24..........: 80.00%  4 out of 5
+     panel_failure_rate_25..........: 0.00%   0 out of 5
+     panel_failure_rate_26..........: 0.00%   0 out of 5
+     panel_failure_rate_27..........: 0.00%   0 out of 5
+     panel_failure_rate_33..........: 0.00%   0 out of 5
+     panel_failure_rate_34..........: 0.00%   0 out of 5
+     panel_failure_rate_42..........: 0.00%   0 out of 5
+     panel_failure_rate_46..........: 0.00%   0 out of 5
+     panel_failure_rate_47..........: 0.00%   0 out of 5
+     panel_failure_rate_49..........: 100.00% 5 out of 5
+     panel_failure_rate_50..........: 100.00% 5 out of 5
+     panel_failure_rate_51..........: 100.00% 5 out of 5
+     panel_failure_rate_52..........: 0.00%   0 out of 5
+     panel_failure_rate_53..........: 100.00% 5 out of 5
+     panel_failure_rate_54..........: 40.00%  2 out of 5
+     panel_failure_rate_55..........: 80.00%  4 out of 5
+     panel_failure_rate_56..........: 0.00%   0 out of 5
+     panel_failure_rate_57..........: 0.00%   0 out of 5
+     panel_failure_rate_58..........: 40.00%  2 out of 5
+     panel_failure_rate_59..........: 100.00% 5 out of 5
+     panel_failure_rate_60..........: 100.00% 5 out of 5
+     panel_failure_rate_61..........: 100.00% 5 out of 5
+     panel_failure_rate_62..........: 100.00% 5 out of 5
+     panel_failure_rate_63..........: 0.00%   0 out of 5
+     panel_failure_rate_64..........: 0.00%   0 out of 5
+     panel_failure_rate_8...........: 0.00%   0 out of 5
+     panel_failure_rate_9...........: 0.00%   0 out of 5
+     panel_response_time_10.........: avg=282.69ms min=97.59ms  med=304.98ms max=495.92ms p(90)=421.38ms p(95)=458.65ms
+     panel_response_time_11.........: avg=248.19ms min=171.02ms med=278.51ms max=298.65ms p(90)=297.52ms p(95)=298.08ms
+     panel_response_time_12.........: avg=298.97ms min=205.68ms med=288.94ms max=494.07ms p(90)=416.24ms p(95)=455.15ms
+     panel_response_time_13.........: avg=237.95ms min=96.17ms  med=199.9ms  max=399.65ms p(90)=359.43ms p(95)=379.54ms
+     panel_response_time_14.........: avg=200.45ms min=193.18ms med=200.74ms max=205.22ms p(90)=204.16ms p(95)=204.69ms
+     panel_response_time_15.........: avg=147.98ms min=20.04ms  med=198.76ms max=301.04ms p(90)=260.57ms p(95)=280.81ms
+     panel_response_time_16.........: avg=235.12ms min=197.22ms med=230.22ms max=311.13ms p(90)=280.93ms p(95)=296.03ms
+     panel_response_time_17.........: avg=79.04ms  min=4.25ms   med=6.63ms   max=280.42ms p(90)=207.94ms p(95)=244.18ms
+     panel_response_time_18.........: avg=4.74ms   min=3.35ms   med=3.47ms   max=7.79ms   p(90)=6.93ms   p(95)=7.36ms  
+     panel_response_time_19.........: avg=141.99ms min=5.69ms   med=97.46ms  max=396.92ms p(90)=318.06ms p(95)=357.49ms
+     panel_response_time_20.........: avg=121.07ms min=3.52ms   med=95.72ms  max=299.86ms p(90)=260.32ms p(95)=280.09ms
+     panel_response_time_21.........: avg=63.32ms  min=3.48ms   med=4.87ms   max=203.12ms p(90)=161.98ms p(95)=182.55ms
+     panel_response_time_22.........: avg=162.65ms min=93.76ms  med=101.74ms max=297.83ms p(90)=268.46ms p(95)=283.14ms
+     panel_response_time_24.........: avg=67.09ms  min=8.34ms   med=83.78ms  max=134.42ms p(90)=117.77ms p(95)=126.1ms 
+     panel_response_time_25.........: avg=299.21ms min=196.53ms med=300.67ms max=395.49ms p(90)=362.13ms p(95)=378.81ms
+     panel_response_time_26.........: avg=282.01ms min=187.06ms med=276.68ms max=385.3ms  p(90)=348.27ms p(95)=366.79ms
+     panel_response_time_27.........: avg=299.94ms min=101.63ms med=301.28ms max=495.36ms p(90)=458.14ms p(95)=476.75ms
+     panel_response_time_33.........: avg=202.01ms min=104.55ms med=203.96ms max=302.04ms p(90)=272.32ms p(95)=287.18ms
+     panel_response_time_34.........: avg=276.07ms min=169.3ms  med=288.6ms  max=391.22ms p(90)=353.64ms p(95)=372.43ms
+     panel_response_time_42.........: avg=275.72ms min=193.01ms med=294.49ms max=385.97ms p(90)=352.41ms p(95)=369.19ms
+     panel_response_time_46.........: avg=187.55ms min=103.12ms med=203.67ms max=225.87ms p(90)=217.52ms p(95)=221.7ms 
+     panel_response_time_47.........: avg=262.37ms min=101.31ms med=302.53ms max=400.46ms p(90)=398.67ms p(95)=399.56ms
+     panel_response_time_49.........: avg=73.87ms  min=6.53ms   med=96.97ms  max=101.53ms p(90)=99.73ms  p(95)=100.63ms
+     panel_response_time_50.........: avg=81.34ms  min=4.12ms   med=101.11ms max=195.42ms p(90)=157.81ms p(95)=176.61ms
+     panel_response_time_51.........: avg=80.24ms  min=3.62ms   med=5.95ms   max=194.87ms p(90)=194.12ms p(95)=194.5ms 
+     panel_response_time_52.........: avg=338.12ms min=193.38ms med=293.29ms max=606.41ms p(90)=519.78ms p(95)=563.1ms 
+     panel_response_time_53.........: avg=118.99ms min=3.96ms   med=96.45ms  max=300.32ms p(90)=219.79ms p(95)=260.05ms
+     panel_response_time_54.........: avg=170.63ms min=4.91ms   med=235.55ms max=308.12ms p(90)=303.95ms p(95)=306.04ms
+     panel_response_time_55.........: avg=86.05ms  min=6.35ms   med=7.75ms   max=398.12ms p(90)=243.12ms p(95)=320.62ms
+     panel_response_time_56.........: avg=199.28ms min=94.53ms  med=203.55ms max=296.71ms p(90)=260.54ms p(95)=278.63ms
+     panel_response_time_57.........: avg=278.32ms min=193.49ms med=205.25ms max=399.75ms p(90)=397.89ms p(95)=398.82ms
+     panel_response_time_58.........: avg=221.11ms min=5.74ms   med=196.48ms max=589.52ms p(90)=473.64ms p(95)=531.58ms
+     panel_response_time_59.........: avg=58.57ms  min=3.91ms   med=81.55ms  max=100.87ms p(90)=99.99ms  p(95)=100.43ms
+     panel_response_time_60.........: avg=60.44ms  min=3.58ms   med=5.15ms   max=196.54ms p(90)=155.09ms p(95)=175.81ms
+     panel_response_time_61.........: avg=112.06ms min=80.56ms  med=96.53ms  max=198.31ms p(90)=159.08ms p(95)=178.69ms
+     panel_response_time_62.........: avg=101.49ms min=4.07ms   med=97.74ms  max=296.97ms p(90)=218.82ms p(95)=257.9ms 
+     panel_response_time_63.........: avg=290.03ms min=199.59ms med=289.67ms max=395.57ms p(90)=356.93ms p(95)=376.25ms
+     panel_response_time_64.........: avg=245.28ms min=98.36ms  med=206.89ms max=433.3ms  p(90)=375.04ms p(95)=404.17ms
+     panel_response_time_8..........: avg=294.22ms min=110.13ms med=300.59ms max=400.12ms p(90)=397.55ms p(95)=398.84ms
+     panel_response_time_9..........: avg=259.7ms  min=98.46ms  med=299.25ms max=303.57ms p(90)=302.57ms p(95)=303.07ms
+     panel_success_rate_10..........: 100.00% 5 out of 5
+     panel_success_rate_11..........: 100.00% 5 out of 5
+     panel_success_rate_12..........: 100.00% 5 out of 5
+     panel_success_rate_13..........: 100.00% 5 out of 5
+     panel_success_rate_14..........: 100.00% 5 out of 5
+     panel_success_rate_15..........: 60.00%  3 out of 5
+     panel_success_rate_16..........: 100.00% 5 out of 5
+     panel_success_rate_17..........: 20.00%  1 out of 5
+     panel_success_rate_18..........: 0.00%   0 out of 5
+     panel_success_rate_19..........: 20.00%  1 out of 5
+     panel_success_rate_20..........: 0.00%   0 out of 5
+     panel_success_rate_21..........: 0.00%   0 out of 5
+     panel_success_rate_22..........: 40.00%  2 out of 5
+     panel_success_rate_24..........: 20.00%  1 out of 5
+     panel_success_rate_25..........: 100.00% 5 out of 5
+     panel_success_rate_26..........: 100.00% 5 out of 5
+     panel_success_rate_27..........: 100.00% 5 out of 5
+     panel_success_rate_33..........: 100.00% 5 out of 5
+     panel_success_rate_34..........: 100.00% 5 out of 5
+     panel_success_rate_42..........: 100.00% 5 out of 5
+     panel_success_rate_46..........: 100.00% 5 out of 5
+     panel_success_rate_47..........: 100.00% 5 out of 5
+     panel_success_rate_49..........: 0.00%   0 out of 5
+     panel_success_rate_50..........: 0.00%   0 out of 5
+     panel_success_rate_51..........: 0.00%   0 out of 5
+     panel_success_rate_52..........: 100.00% 5 out of 5
+     panel_success_rate_53..........: 0.00%   0 out of 5
+     panel_success_rate_54..........: 60.00%  3 out of 5
+     panel_success_rate_55..........: 20.00%  1 out of 5
+     panel_success_rate_56..........: 100.00% 5 out of 5
+     panel_success_rate_57..........: 100.00% 5 out of 5
+     panel_success_rate_58..........: 60.00%  3 out of 5
+     panel_success_rate_59..........: 0.00%   0 out of 5
+     panel_success_rate_60..........: 0.00%   0 out of 5
+     panel_success_rate_61..........: 0.00%   0 out of 5
+     panel_success_rate_62..........: 0.00%   0 out of 5
+     panel_success_rate_63..........: 100.00% 5 out of 5
+     panel_success_rate_64..........: 100.00% 5 out of 5
+     panel_success_rate_8...........: 100.00% 5 out of 5
+     panel_success_rate_9...........: 100.00% 5 out of 5
+     user_failure_count.............: 80ms    10.09ms/s
+     user_success_count.............: 120ms   15.13ms/s
+     vus............................: 5       min=5          max=5
+     vus_max........................: 5       min=5          max=5
+
+
+running (00m07.9s), 0/5 VUs, 5 complete and 0 interrupted iterations
+default ✓ [ 100% ] 5 VUs  00m07.9s/10m0s  5/5 shared iters

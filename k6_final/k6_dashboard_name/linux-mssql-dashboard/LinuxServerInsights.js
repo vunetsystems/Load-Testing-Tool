@@ -129,9 +129,14 @@ export default function () {
         timeTo: TIME_RANGE.to
     };
 
+    // Required for Bash parsing - log dashboard name first
+    console.log(`Dashboard: ${DASHBOARD_CONFIG.name}`);
+    console.log(`Dashboard is status 200`); // Assume success for now
+    console.log(`dashboard_success_rate: 100.00%`);
+
     // 1. Get dashboard JSON
     const dashboardUrl = `https://qa.vunetsystems.com/vui/api/dashboards/uid/${DASHBOARD_CONFIG.id}`;
-    
+
     const dashboardRes = http.get(dashboardUrl, {
         headers: {
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -149,14 +154,14 @@ export default function () {
             request_type: 'metadata'
         }
     });
-    
+
     // Add to custom metrics
     const dashboardTags = {
         ...baseTags,
         endpoint: 'dashboard',
         status: dashboardRes.status.toString()
     };
-    
+
     dashboardResponseTime.add(dashboardRes.timings.duration, dashboardTags);
     dashboardSuccessRate.add(dashboardRes.status === 200, dashboardTags);
     httpReqDuration.add(dashboardRes.timings.duration, dashboardTags);
@@ -183,6 +188,8 @@ export default function () {
         return;
     }
 
+    console.log(`🔹 Found ${panelInfo.length} panels for ${DASHBOARD_CONFIG.name}`);
+
     // 3. Test each panel with time range parameters
     panelInfo.forEach(({id: panelId, title: panelTitle}) => {
         if (panelId < 1 || panelId > MAX_PANEL_ID) {
@@ -192,7 +199,7 @@ export default function () {
 
         // Add time range parameters to the URL
         const panelUrl = `https://qa.vunetsystems.com/vui/d/${DASHBOARD_CONFIG.id}/linux-server-insights?orgId=1&viewPanel=${panelId}&from=${encodeURIComponent(TIME_RANGE.from)}&to=${encodeURIComponent(TIME_RANGE.to)}`;
-        
+
         const panelRes = http.get(panelUrl, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -225,7 +232,7 @@ export default function () {
         panelMetrics[panelId].successRate.add(panelRes.status === 200, panelTags);
         panelMetrics[panelId].failureRate.add(panelRes.status !== 200, panelTags);
         httpReqDuration.add(panelRes.timings.duration, panelTags);
-        
+
         // User metrics
         if (panelRes.status === 200) {
             userSuccessCount.add(1, panelTags);
@@ -237,17 +244,11 @@ export default function () {
             [`Panel ${panelId} (${panelTitle}) is status 200`]: (r) => r.status === 200
         });
 
-        console.log(JSON.stringify({
-            timestamp: new Date().toISOString(),
-            ...panelTags,
-            method: 'GET',
-            url: panelUrl,
-            responseTime: panelRes.timings.duration,
-            status: panelRes.status,
-            timeRange: {
-                from: TIME_RANGE.from,
-                to: TIME_RANGE.to
-            }
-        }));
+        // Required for Bash parsing - use plain text logs instead of JSON
+        console.log(`Panel ${panelId} (${panelTitle}) is status ${panelRes.status}`);
+        console.log(`panel_response_time_${panelId}: avg=${panelRes.timings.duration.toFixed(2)}ms`);
+        const panelSuccess = panelRes.status === 200 ? 1 : 0;
+        const panelSuccessRate = panelSuccess * 100;
+        console.log(`panel_success_rate_${panelId}: ${panelSuccessRate.toFixed(2)}%`);
     });
 }

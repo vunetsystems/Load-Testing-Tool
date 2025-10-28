@@ -1,41 +1,366 @@
 timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,iterations
-2025-10-28 16:09:28,LinuxServerInsights,204.67,10," Top 5 CPU Consuming Process ",200,100.00%,200,100.00,199.88,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,11,"P95 Memory Utilization Trend  for Top 5 Servers",200,100.00%,200,100.00,259.35,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,12,"P95 CPU Utilization Trend for Top 5 Servers",200,100.00%,200,100.00,271.75,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,13,"P95 CPU Load Average Trend for Top 5 Servers",200,100.00%,200,100.00,260.74,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,14," Top 5 Memory Consuming Process ",200,100.00%,200,100.00,280.8,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,15," Servers DiskIO Statistics ",200,100.00%,200,80.00,228.49,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,16," Servers Disk Utilization ",200,100.00%,200,100.00,181.98,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,17," Service Summary ",200,100.00%,200,20.00,119.96,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,18," System Core Usage ",200,100.00%,200,0.00,58.42,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,19,"Server Network Statistics",200,100.00%,200,0.00,42.61,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,20,"TCP Socket Summary",200,100.00%,200,0.00,61.7,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,21,"UDP Socket Summary",200,100.00%,200,0.00,41.09,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,22,"P95 Network In Rate trend for Top 5 Servers",200,100.00%,200,0.00,100.21,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,24,,200,100.00%,,0.00,10.63,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,25,"P95 Disk Utilization Trend for Top 5 Disks",200,100.00%,200,100.00,287.49,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,26,"Servers",200,100.00%,200,100.00,302.18,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,27,"Server Process Details",200,100.00%,200,100.00,257.63,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,33,"Active Alerts",200,100.00%,200,100.00,308.33,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,34,"Server Memory Utilization",200,100.00%,200,100.00,236.55,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,42,"Alert Summary",200,100.00%,200,100.00,268.96,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,46,"Server Uptime",200,100.00%,200,100.00,287.98,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,47,"Servers Restarted in Last 24 Hours",200,100.00%,200,100.00,278.75,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,49,"TCP Socket Summary Chart ",200,100.00%,200,0.00,79.47,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,50,"TCP Open Port Count Over Time on Top 5 Servers",200,100.00%,200,40.00,158.67,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,51,"UDP Open Port Count Over Time on Top 5 Servers",200,100.00%,200,20.00,131.35,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,52,"P95 SwapMemory Usage",200,100.00%,200,100.00,295.22,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,53,"P95 Network Out Rate Trend for Top 5 Servers",200,100.00%,200,0.00,111.28,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,54,"P95 Disk Read/Sec Trends for Top 5 Servers",200,100.00%,200,0.00,5.33,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,55,"P95 Disk Write/Sec Trends for Top 5 Servers",200,100.00%,200,0.00,21.79,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,56,"Panel 56",200,100.00%,200,100.00,235,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,57,"Panel 57",200,100.00%,200,100.00,236.62,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,58,"Panel 58",200,100.00%,200,100.00,300.13,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,59,"Panel 59",200,100.00%,200,0.00,39.19,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,60,"Panel 60",200,100.00%,200,0.00,79.83,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,61,"Panel 61",200,100.00%,200,20.00,119.65,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,62,"Panel 62",200,100.00%,200,20.00,102.83,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,63,"P95 Idle CPU Utilization Trend for Top 5 Servers",200,100.00%,200,100.00,256.28,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,64,"P95 IO Wait % CPU Utilization for Top 5 Servers",200,100.00%,200,100.00,192.62,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,8,"Server CPU Utilization",200,100.00%,200,100.00,295.93,6h,5,5,5
-2025-10-28 16:09:28,LinuxServerInsights,204.67,9,"Current CPU Load Average",200,100.00%,200,100.00,239.25,6h,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,40 ,"Untitled",,,200 ,100.00" source=console,558.42 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,40 ,"Untitled",,,200 ,100.00" source=console,919.02 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,40 ,"Untitled",,,200 ,100.00" source=console,796.88 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,40 ,"Untitled",,,200 ,100.00" source=console,885.49 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,62 ,"Summary",,,200 ,100.00" source=console,598.96 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,40 ,"Untitled",,,200 ,100.00" source=console,817.96 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,62 ,"Summary",,,200 ,100.00" source=console,400.66 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,71 ,"Clusters",,,200 ,100.00" source=console,303.95 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,62 ,"Summary",,,200 ,100.00" source=console,563.26 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,62 ,"Summary",,,200 ,100.00" source=console,599.73 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,71 ,"Clusters",,,200 ,100.00" source=console,362.79 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,62 ,"Summary",,,200 ,100.00" source=console,366.68 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,71 ,"Clusters",,,200 ,100.00" source=console,299.76 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,45 ,"Servers",,,200 ,100.00" source=console,205.86 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,45 ,"Servers",,,200 ,100.00" source=console,503.58 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,71 ,"Clusters",,,200 ,100.00" source=console,301.13 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,71 ,"Clusters",,,200 ,100.00" source=console,406.65 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,45 ,"Servers",,,200 ,100.00" source=console,209.38 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,45 ,"Servers",,,200 ,100.00" source=console,104.10 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,47 ,"Databases",,,200 ,100.00" source=console,293.16 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,47 ,"Databases",,,200 ,100.00" source=console,301.38 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,47 ,"Databases",,,200 ,100.00" source=console,197.76 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,45 ,"Servers",,,200 ,100.00" source=console,199.64 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,47 ,"Databases",,,200 ,100.00" source=console,97.04 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,43 ,"Alert Summary",,,200 ,100.00" source=console,197.73 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,47 ,"Databases",,,200 ,100.00" source=console,293.56 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,43 ,"Alert Summary",,,200 ,100.00" source=console,194.39 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,43 ,"Alert Summary",,,200 ,100.00" source=console,295.04 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,9 ,"Active Alerts",,,200 ,100.00" source=console,200.11 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,9 ,"Active Alerts",,,200 ,100.00" source=console,198.54 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,43 ,"Alert Summary",,,200 ,100.00" source=console,495.24 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,51 ,"Active Sessions",,,200 ,100.00" source=console,299.93 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,43 ,"Alert Summary",,,200 ,100.00" source=console,499.15 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,9 ,"Active Alerts",,,200 ,100.00" source=console,402.52 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,51 ,"Active Sessions",,,200 ,100.00" source=console,207.99 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,9 ,"Active Alerts",,,200 ,100.00" source=console,334.27 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,52 ,"Sleeping Sessions",,,200 ,100.00" source=console,206.30 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,51 ,"Active Sessions",,,200 ,100.00" source=console,205.09 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,9 ,"Active Alerts",,,200 ,100.00" source=console,210.11 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,51 ,"Active Sessions",,,200 ,100.00" source=console,167.03 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,51 ,"Active Sessions",,,200 ,100.00" source=console,186.49 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,60 ,"Blocking Session",,,200 ,100.00" source=console,194.27 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,52 ,"Sleeping Sessions",,,200 ,100.00" source=console,289.39 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,52 ,"Sleeping Sessions",,,200 ,100.00" source=console,494.09 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,52 ,"Sleeping Sessions",,,200 ,100.00" source=console,396.98 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,60 ,"Blocking Session",,,200 ,100.00" source=console,207.05 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,52 ,"Sleeping Sessions",,,200 ,100.00" source=console,403.83 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,60 ,"Blocking Session",,,200 ,100.00" source=console,302.26 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,49 ,"Buffer Cache Hit %",,,200 ,100.00" source=console,407.06 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,60 ,"Blocking Session",,,200 ,100.00" source=console,106.76 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,49 ,"Buffer Cache Hit %",,,200 ,100.00" source=console,395.07 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,60 ,"Blocking Session",,,200 ,100.00" source=console,400.43 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,49 ,"Buffer Cache Hit %",,,200 ,100.00" source=console,289.27 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,1 ,"Active Transactions",,,200 ,100.00" source=console,102.90 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,49 ,"Buffer Cache Hit %",,,200 ,100.00" source=console,431.72 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,1 ,"Active Transactions",,,200 ,100.00" source=console,494.92 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,1 ,"Active Transactions",,,200 ,100.00" source=console,109.51 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,48 ,"Avg Deadlocks/Sec",,,200 ,100.00" source=console,193.05 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,49 ,"Buffer Cache Hit %",,,200 ,100.00" source=console,303.76 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,1 ,"Active Transactions",,,200 ,100.00" source=console,262.28 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,48 ,"Avg Deadlocks/Sec",,,200 ,100.00" source=console,199.05 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,1 ,"Active Transactions",,,200 ,100.00" source=console,199.01 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,48 ,"Avg Deadlocks/Sec",,,200 ,100.00" source=console,108.03 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,48 ,"Avg Deadlocks/Sec",,,200 ,100.00" source=console,395.80 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,53 ,"Avg Full Scans/Sec",,,200 ,100.00" source=console,303.15 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,53 ,"Avg Full Scans/Sec",,,200 ,100.00" source=console,294.23 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,53 ,"Avg Full Scans/Sec",,,200 ,100.00" source=console,295.31 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,48 ,"Avg Deadlocks/Sec",,,200 ,100.00" source=console,301.85 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,54 ,"Avg Errors/Sec",,,200 ,100.00" source=console,402.46 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,54 ,"Avg Errors/Sec",,,200 ,100.00" source=console,302.78 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,53 ,"Avg Full Scans/Sec",,,200 ,100.00" source=console,198.18 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,53 ,"Avg Full Scans/Sec",,,200 ,100.00" source=console,497.91 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,54 ,"Avg Errors/Sec",,,200 ,100.00" source=console,299.77 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,81 ,"Database Status",,,200 ,100.00" source=console,102.21 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,54 ,"Avg Errors/Sec",,,200 ,100.00" source=console,205.89 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,54 ,"Avg Errors/Sec",,,200 ,100.00" source=console,394.54 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,81 ,"Database Status",,,200 ,100.00" source=console,492.02 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,44 ,"Summary of DB Status",,,200 ,100.00" source=console,295.30 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,81 ,"Database Status",,,200 ,100.00" source=console,203.19 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,81 ,"Database Status",,,200 ,100.00" source=console,501.90 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,81 ,"Database Status",,,200 ,100.00" source=console,207.70 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,44 ,"Summary of DB Status",,,200 ,100.00" source=console,192.78 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,80 ,"Impacted Databases",,,200 ,100.00" source=console,197.37 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,44 ,"Summary of DB Status",,,200 ,100.00" source=console,196.97 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,44 ,"Summary of DB Status",,,200 ,100.00" source=console,195.61 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,83 ,"Database Info",,,200 ,100.00" source=console,297.37 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,80 ,"Impacted Databases",,,200 ,100.00" source=console,194.65 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,44 ,"Summary of DB Status",,,200 ,100.00" source=console,503.85 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,80 ,"Impacted Databases",,,200 ,100.00" source=console,304.22 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,80 ,"Impacted Databases",,,200 ,100.00" source=console,396.98 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,85 ,"Time Since Last DB Restart",,,200 ,100.00" source=console,109.47 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,83 ,"Database Info",,,200 ,100.00" source=console,201.31 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,83 ,"Database Info",,,200 ,100.00" source=console,206.75 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,83 ,"Database Info",,,200 ,100.00" source=console,111.52 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,85 ,"Time Since Last DB Restart",,,200 ,100.00" source=console,195.21 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,80 ,"Impacted Databases",,,200 ,100.00" source=console,396.31 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,86 ,"DB Volume Info",,,200 ,100.00" source=console,292.47 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,85 ,"Time Since Last DB Restart",,,200 ,100.00" source=console,189.74 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,85 ,"Time Since Last DB Restart",,,200 ,100.00" source=console,197.57 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,86 ,"DB Volume Info",,,200 ,100.00" source=console,102.78 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,86 ,"DB Volume Info",,,200 ,100.00" source=console,104.31 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,83 ,"Database Info",,,200 ,100.00" source=console,205.19 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,88 ,"DB Volume Usage % By Server",,,200 ,100.00" source=console,196.99 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,85 ,"Time Since Last DB Restart",,,200 ,100.00" source=console,194.15 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,86 ,"DB Volume Info",,,200 ,100.00" source=console,389.74 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,88 ,"DB Volume Usage % By Server",,,200 ,100.00" source=console,292.87 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,88 ,"DB Volume Usage % By Server",,,200 ,100.00" source=console,400.42 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,86 ,"DB Volume Info",,,200 ,100.00" source=console,110.91 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,88 ,"DB Volume Usage % By Server",,,200 ,100.00" source=console,111.55 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,84 ,"Failover Cluster Info",,,200 ,100.00" source=console,299.44 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,88 ,"DB Volume Usage % By Server",,,200 ,100.00" source=console,190.03 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,84 ,"Failover Cluster Info",,,200 ,100.00" source=console,302.77 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,76 ,"Failover Cluster Node Status",,,200 ,100.00" source=console,113.47 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,84 ,"Failover Cluster Info",,,200 ,100.00" source=console,397.46 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,84 ,"Failover Cluster Info",,,200 ,100.00" source=console,99.73 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,76 ,"Failover Cluster Node Status",,,200 ,100.00" source=console,101.02 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,84 ,"Failover Cluster Info",,,200 ,100.00" source=console,295.81 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,79 ,"Overview on HADR (High Availability Disaster Recovery)",,,429 ,0.00" source=console,30.07 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,76 ,"Failover Cluster Node Status",,,429 ,0.00" source=console,29.52 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,78 ,"Failover Cluster - Quorum Config",,,429 ,0.00" source=console,5.54 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,79 ,"Overview on HADR (High Availability Disaster Recovery)",,,429 ,0.00" source=console,4.81 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,77 ,"Availability Group Member Info",,,429 ,0.00" source=console,4.49 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,78 ,"Failover Cluster - Quorum Config",,,429 ,0.00" source=console,5.39 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,74 ,"High Availability Group Status",,,429 ,0.00" source=console,5.12 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,77 ,"Availability Group Member Info",,,429 ,0.00" source=console,3.57 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,73 ,"High Availability Replica Status",,,429 ,0.00" source=console,83.00 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,74 ,"High Availability Group Status",,,429 ,0.00" source=console,82.10 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,76 ,"Failover Cluster Node Status",,,200 ,100.00" source=console,135.77 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,75 ,"HA Database Replica Status",,,429 ,0.00" source=console,5.19 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,79 ,"Overview on HADR (High Availability Disaster Recovery)",,,429 ,0.00" source=console,4.15 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,82 ,"User Connections",,,429 ,0.00" source=console,3.62 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,23 ,"User Connections",,,429 ,0.00" source=console,3.47 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,78 ,"Failover Cluster - Quorum Config",,,429 ,0.00" source=console,93.69 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,76 ,"Failover Cluster Node Status",,,200 ,100.00" source=console,235.70 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,79 ,"Overview on HADR (High Availability Disaster Recovery)",,,200 ,100.00" source=console,324.90 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,70 ,"Max User Connections Trend for Top 5 Servers",,,429 ,0.00" source=console,89.77 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,77 ,"Availability Group Member Info",,,429 ,0.00" source=console,4.65 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,79 ,"Overview on HADR (High Availability Disaster Recovery)",,,429 ,0.00" source=console,4.91 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,78 ,"Failover Cluster - Quorum Config",,,429 ,0.00" source=console,4.57 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,73 ,"High Availability Replica Status",,,200 ,100.00" source=console,200.61 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,78 ,"Failover Cluster - Quorum Config",,,429 ,0.00" source=console,95.59 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,65 ,"Performance Metrics",,,429 ,0.00" source=console,99.70 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,74 ,"High Availability Group Status",,,429 ,0.00" source=console,99.24 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,75 ,"HA Database Replica Status",,,429 ,0.00" source=console,4.35 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,82 ,"User Connections",,,429 ,0.00" source=console,95.91 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,77 ,"Availability Group Member Info",,,429 ,0.00" source=console,195.13 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,56 ,"MSSQL Performance Metrics",,,429 ,0.00" source=console,100.28 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,73 ,"High Availability Replica Status",,,429 ,0.00" source=console,100.61 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,23 ,"User Connections",,,429 ,0.00" source=console,3.41 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,55 ,"MSSQL Errors/Sec Distribution",,,429 ,0.00" source=console,4.30 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,70 ,"Max User Connections Trend for Top 5 Servers",,,429 ,0.00" source=console,3.18 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,74 ,"High Availability Group Status",,,429 ,0.00" source=console,97.95 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,75 ,"HA Database Replica Status",,,429 ,0.00" source=console,96.26 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,63 ,"Avg Transactions/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,93.90 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,65 ,"Performance Metrics",,,429 ,0.00" source=console,93.38 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,73 ,"High Availability Replica Status",,,429 ,0.00" source=console,4.05 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,82 ,"User Connections",,,429 ,0.00" source=console,5.15 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,56 ,"MSSQL Performance Metrics",,,429 ,0.00" source=console,3.79 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,75 ,"HA Database Replica Status",,,429 ,0.00" source=console,3.90 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,55 ,"MSSQL Errors/Sec Distribution",,,429 ,0.00" source=console,3.99 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,28 ,"Avg Buffer Cache Hit % Trend for Top 5 Databases",,,429 ,0.00" source=console,97.99 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,77 ,"Availability Group Member Info",,,200 ,100.00" source=console,298.82 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,82 ,"User Connections",,,429 ,0.00" source=console,92.80 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,23 ,"User Connections",,,429 ,0.00" source=console,96.39 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,63 ,"Avg Transactions/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,93.02 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,74 ,"High Availability Group Status",,,429 ,0.00" source=console,4.60 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,64 ,"Avg DeadLocks/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,5.73 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,70 ,"Max User Connections Trend for Top 5 Servers",,,429 ,0.00" source=console,4.29 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,23 ,"User Connections",,,429 ,0.00" source=console,6.63 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,28 ,"Avg Buffer Cache Hit % Trend for Top 5 Databases",,,429 ,0.00" source=console,96.86 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,27 ,"Avg Errors/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,96.20 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,73 ,"High Availability Replica Status",,,429 ,0.00" source=console,97.00 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,70 ,"Max User Connections Trend for Top 5 Servers",,,429 ,0.00" source=console,95.33 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,64 ,"Avg DeadLocks/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,5.77 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,59 ,"MSSQL Metrics",,,429 ,0.00" source=console,98.15 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,75 ,"HA Database Replica Status",,,429 ,0.00" source=console,97.80 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,67 ,"Page Metrics",,,429 ,0.00" source=console,98.83 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,27 ,"Avg Errors/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,193.27 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,82 ,"User Connections",,,429 ,0.00" source=console,100.11 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,65 ,"Performance Metrics",,,200 ,100.00" source=console,293.82 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,19 ,"MSSQL Page Metrics",,,429 ,0.00" source=console,4.92 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,65 ,"Performance Metrics",,,429 ,0.00" source=console,201.29 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,59 ,"MSSQL Metrics",,,429 ,0.00" source=console,99.11 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,23 ,"User Connections",,,429 ,0.00" source=console,98.98 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,56 ,"MSSQL Performance Metrics",,,429 ,0.00" source=console,99.24 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,55 ,"MSSQL Errors/Sec Distribution",,,429 ,0.00" source=console,3.71 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,67 ,"Page Metrics",,,429 ,0.00" source=console,5.10 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,56 ,"MSSQL Performance Metrics",,,429 ,0.00" source=console,194.79 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,63 ,"Avg Transactions/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,97.32 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,19 ,"MSSQL Page Metrics",,,429 ,0.00" source=console,98.73 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,32 ,"Avg Page Lookups/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,198.91 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,70 ,"Max User Connections Trend for Top 5 Servers",,,200 ,100.00" source=console,201.45 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,32 ,"Avg Page Lookups/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,105.13 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,65 ,"Performance Metrics",,,429 ,0.00" source=console,98.35 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,55 ,"MSSQL Errors/Sec Distribution",,,429 ,0.00" source=console,200.78 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,29 ,"Avg Page Reads/Sec for Top 5 Databases",,,429 ,0.00" source=console,93.37 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,56 ,"MSSQL Performance Metrics",,,429 ,0.00" source=console,4.45 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,28 ,"Avg Buffer Cache Hit % Trend for Top 5 Databases",,,429 ,0.00" source=console,204.89 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,55 ,"MSSQL Errors/Sec Distribution",,,429 ,0.00" source=console,4.24 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,66 ,"Avg Page Splits/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,97.40 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,64 ,"Avg DeadLocks/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,93.05 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,63 ,"Avg Transactions/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,100.56 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,63 ,"Avg Transactions/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,92.44 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,27 ,"Avg Errors/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,6.62 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,28 ,"Avg Buffer Cache Hit % Trend for Top 5 Databases",,,429 ,0.00" source=console,96.93 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,28 ,"Avg Buffer Cache Hit % Trend for Top 5 Databases",,,429 ,0.00" source=console,97.91 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,29 ,"Avg Page Reads/Sec for Top 5 Databases",,,200 ,100.00" source=console,396.76 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,68 ,"Memory Info",,,429 ,0.00" source=console,101.26 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,59 ,"MSSQL Metrics",,,429 ,0.00" source=console,97.71 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,66 ,"Avg Page Splits/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,98.80 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,64 ,"Avg DeadLocks/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,100.60 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,64 ,"Avg DeadLocks/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,101.13 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,67 ,"Page Metrics",,,429 ,0.00" source=console,96.41 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,19 ,"MSSQL Page Metrics",,,429 ,0.00" source=console,98.51 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,68 ,"Memory Info",,,429 ,0.00" source=console,99.96 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,27 ,"Avg Errors/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,100.67 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,27 ,"Avg Errors/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,99.99 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,32 ,"Avg Page Lookups/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,99.07 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,58 ,"MSSQL Memory Usage",,,429 ,0.00" source=console,99.25 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,59 ,"MSSQL Metrics",,,429 ,0.00" source=console,98.10 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,58 ,"MSSQL Memory Usage",,,200 ,100.00" source=console,299.66 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,59 ,"MSSQL Metrics",,,429 ,0.00" source=console,100.36 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,67 ,"Page Metrics",,,429 ,0.00" source=console,5.94 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,34 ,"Avg Memory Usage for Top 5 Servers",,,429 ,0.00" source=console,97.91 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,29 ,"Avg Page Reads/Sec for Top 5 Databases",,,429 ,0.00" source=console,101.08 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,67 ,"Page Metrics",,,429 ,0.00" source=console,101.07 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,34 ,"Avg Memory Usage for Top 5 Servers",,,429 ,0.00" source=console,104.32 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,24 ,"Memory Clerk",,,429 ,0.00" source=console,6.50 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,19 ,"MSSQL Page Metrics",,,429 ,0.00" source=console,4.54 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,66 ,"Avg Page Splits/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,98.21 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,24 ,"Memory Clerk",,,429 ,0.00" source=console,97.38 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,32 ,"Avg Page Lookups/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,96.36 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,69 ,"Locks & Waits",,,429 ,0.00" source=console,98.18 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,68 ,"Memory Info",,,429 ,0.00" source=console,6.21 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,69 ,"Locks & Waits",,,429 ,0.00" source=console,5.12 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,21 ,"Locks Overview",,,429 ,0.00" source=console,94.43 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,21 ,"Locks Overview",,,429 ,0.00" source=console,92.58 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,58 ,"MSSQL Memory Usage",,,429 ,0.00" source=console,95.27 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,29 ,"Avg Page Reads/Sec for Top 5 Databases",,,429 ,0.00" source=console,98.07 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,25 ,"Wait Stats",,,429 ,0.00" source=console,5.15 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,19 ,"MSSQL Page Metrics",,,200 ,100.00" source=console,298.96 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,34 ,"Avg Memory Usage for Top 5 Servers",,,429 ,0.00" source=console,5.84 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,25 ,"Wait Stats",,,429 ,0.00" source=console,10.98 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,42 ,"Avg Lock Waits/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,93.63 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,66 ,"Avg Page Splits/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,99.74 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,32 ,"Avg Page Lookups/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,98.32 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,42 ,"Avg Lock Waits/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,92.91 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,61 ,"Disk Metrics  & Backup Status",,,429 ,0.00" source=console,8.32 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,29 ,"Avg Page Reads/Sec for Top 5 Databases",,,429 ,0.00" source=console,4.82 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,68 ,"Memory Info",,,429 ,0.00" source=console,97.38 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,66 ,"Avg Page Splits/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,94.74 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,58 ,"MSSQL Memory Usage",,,429 ,0.00" source=console,4.79 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,68 ,"Memory Info",,,429 ,0.00" source=console,4.49 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,34 ,"Avg Memory Usage for Top 5 Servers",,,429 ,0.00" source=console,4.64 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,61 ,"Disk Metrics  & Backup Status",,,429 ,0.00" source=console,195.85 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,24 ,"Memory Clerk",,,200 ,100.00" source=console,292.98 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,24 ,"Memory Clerk",,,429 ,0.00" source=console,91.27 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,58 ,"MSSQL Memory Usage",,,429 ,0.00" source=console,93.62 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,20 ,"Log Activity",,,429 ,0.00" source=console,4.44 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,69 ,"Locks & Waits",,,429 ,0.00" source=console,4.43 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,34 ,"Avg Memory Usage for Top 5 Servers",,,429 ,0.00" source=console,4.84 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,20 ,"Log Activity",,,429 ,0.00" source=console,199.48 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,69 ,"Locks & Waits",,,429 ,0.00" source=console,9.31 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,16 ,"Backup Details",,,429 ,0.00" source=console,5.67 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,16 ,"Backup Details",,,429 ,0.00" source=console,4.69 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,21 ,"Locks Overview",,,429 ,0.00" source=console,95.30 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,25 ,"Wait Stats",,,429 ,0.00" source=console,4.75 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,24 ,"Memory Clerk",,,429 ,0.00" source=console,104.62 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,42 ,"Avg Lock Waits/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,5.43 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,61 ,"Disk Metrics  & Backup Status",,,429 ,0.00" source=console,90.04 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,69 ,"Locks & Waits",,,429 ,0.00" source=console,91.89 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,20 ,"Log Activity",,,429 ,0.00" source=console,4.52 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,21 ,"Locks Overview",,,429 ,0.00" source=console,5.55 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,16 ,"Backup Details",,,429 ,0.00" source=console,5.63 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,25 ,"Wait Stats",,,429 ,0.00" source=console,5.70 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,21 ,"Locks Overview",,,200 ,100.00" source=console,208.56 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,42 ,"Avg Lock Waits/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,5.23 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,25 ,"Wait Stats",,,429 ,0.00" source=console,83.09 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,61 ,"Disk Metrics  & Backup Status",,,429 ,0.00" source=console,83.37 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,42 ,"Avg Lock Waits/Sec Trend for Top 5 Databases",,,429 ,0.00" source=console,4.90 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,20 ,"Log Activity",,,429 ,0.00" source=console,3.88 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,16 ,"Backup Details",,,429 ,0.00" source=console,3.76 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,61 ,"Disk Metrics  & Backup Status",,,429 ,0.00" source=console,5.39 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,20 ,"Log Activity",,,429 ,0.00" source=console,4.97 ,15m,5,5,5
+2025-10-29 00:13:01,"MSSQL Overview Dashboard",,16 ,"Backup Details",,,429 ,0.00" source=console,5.94 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,26 ,"Servers",,,429 ,0.00" source=console,4.28 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,47 ,"Servers Restarted in Last 24 Hours",,,429 ,0.00" source=console,4.11 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,42 ,"Alert Summary",,,429 ,0.00" source=console,3.80 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,46 ,"Server Uptime",,,429 ,0.00" source=console,3.88 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,34 ,"Server Memory Utilization",,,429 ,0.00" source=console,4.14 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,33 ,"Active Alerts",,,429 ,0.00" source=console,21.38 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,8 ,"Server CPU Utilization",,,429 ,0.00" source=console,3.53 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,12 ,"P95 CPU Utilization Trend for Top 5 Servers",,,429 ,0.00" source=console,3.15 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,64 ,"P95 IO Wait % CPU Utilization for Top 5 Servers",,,429 ,0.00" source=console,2.98 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,63 ,"P95 Idle CPU Utilization Trend for Top 5 Servers",,,429 ,0.00" source=console,3.63 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,16 ,"Servers Disk Utilization",,,429 ,0.00" source=console,3.68 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,11 ,"P95 Memory Utilization Trend  for Top 5 Servers",,,429 ,0.00" source=console,3.04 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,26 ,"Servers",,,200 ,100.00" source=console,73.49 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,52 ,"P95 SwapMemory Usage",,,429 ,0.00" source=console,5.21 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,47 ,"Servers Restarted in Last 24 Hours",,,429 ,0.00" source=console,4.02 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,25 ,"P95 Disk Utilization Trend for Top 5 Disks",,,429 ,0.00" source=console,3.58 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,42 ,"Alert Summary",,,429 ,0.00" source=console,4.00 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,56 ,"Untitled",,,429 ,0.00" source=console,3.04 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,46 ,"Server Uptime",,,429 ,0.00" source=console,4.44 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,9 ,"Current CPU Load Average",,,429 ,0.00" source=console,3.11 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,34 ,"Server Memory Utilization",,,429 ,0.00" source=console,3.53 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,13 ,"P95 CPU Load Average Trend for Top 5 Servers",,,429 ,0.00" source=console,64.47 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,33 ,"Active Alerts",,,429 ,0.00" source=console,63.76 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,57 ,"Untitled",,,429 ,0.00" source=console,3.72 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,8 ,"Server CPU Utilization",,,429 ,0.00" source=console,4.43 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,10 ,"Top 5 CPU Consuming Process",,,429 ,0.00" source=console,3.55 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,12 ,"P95 CPU Utilization Trend for Top 5 Servers",,,429 ,0.00" source=console,3.73 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,14 ,"Top 5 Memory Consuming Process",,,429 ,0.00" source=console,3.65 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,64 ,"P95 IO Wait % CPU Utilization for Top 5 Servers",,,429 ,0.00" source=console,3.59 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,27 ,"Server Process Details",,,429 ,0.00" source=console,89.29 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,58 ,"Untitled",,,429 ,0.00" source=console,6.73 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,15 ,"Servers DiskIO Statistics",,,429 ,0.00" source=console,5.36 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,54 ,"P95 Disk Read/Sec Trends for Top 5 Servers",,,429 ,0.00" source=console,5.02 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,55 ,"P95 Disk Write/Sec Trends for Top 5 Servers",,,429 ,0.00" source=console,6.68 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,24 ,"Total Disk IO Rate (Time) Trend for Top 5 Servers",,,429 ,0.00" source=console,78.30 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,59 ,"Untitled",,,429 ,0.00" source=console,4.85 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,18 ,"System Core Usage",,,429 ,0.00" source=console,5.75 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,63 ,"P95 Idle CPU Utilization Trend for Top 5 Servers",,,200 ,100.00" source=console,231.13 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,16 ,"Servers Disk Utilization",,,429 ,0.00" source=console,55.10 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,60 ,"Untitled",,,429 ,0.00" source=console,86.77 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,11 ,"P95 Memory Utilization Trend  for Top 5 Servers",,,429 ,0.00" source=console,3.94 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,52 ,"P95 SwapMemory Usage",,,429 ,0.00" source=console,3.29 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,17 ,"Service Summary",,,429 ,0.00" source=console,7.43 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,25 ,"P95 Disk Utilization Trend for Top 5 Disks",,,429 ,0.00" source=console,3.38 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,61 ,"Untitled",,,429 ,0.00" source=console,4.39 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,19 ,"Server Network Statistics",,,429 ,0.00" source=console,3.38 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,56 ,"Untitled",,,429 ,0.00" source=console,5.41 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,22 ,"P95 Network In Rate trend for Top 5 Servers",,,429 ,0.00" source=console,82.05 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,53 ,"P95 Network Out Rate Trend for Top 5 Servers",,,429 ,0.00" source=console,5.88 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,62 ,"Untitled",,,429 ,0.00" source=console,4.53 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,49 ,"TCP Socket Summary Chart",,,429 ,0.00" source=console,3.53 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,50 ,"TCP Open Port Count Over Time on Top 5 Servers",,,429 ,0.00" source=console,3.71 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,51 ,"UDP Open Port Count Over Time on Top 5 Servers",,,429 ,0.00" source=console,3.65 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,20 ,"TCP Socket Summary",,,429 ,0.00" source=console,78.05 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,21 ,"UDP Socket Summary",,,429 ,0.00" source=console,4.59 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,9 ,"Current CPU Load Average",,,200 ,100.00" source=console,281.60 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,13 ,"P95 CPU Load Average Trend for Top 5 Servers",,,429 ,0.00" source=console,4.67 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,57 ,"Untitled",,,429 ,0.00" source=console,96.63 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,10 ,"Top 5 CPU Consuming Process",,,200 ,100.00" source=console,200.26 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,14 ,"Top 5 Memory Consuming Process",,,429 ,0.00" source=console,7.81 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,27 ,"Server Process Details",,,429 ,0.00" source=console,6.07 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,58 ,"Untitled",,,200 ,100.00" source=console,204.37 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,15 ,"Servers DiskIO Statistics",,,429 ,0.00" source=console,5.62 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,54 ,"P95 Disk Read/Sec Trends for Top 5 Servers",,,429 ,0.00" source=console,4.62 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,55 ,"P95 Disk Write/Sec Trends for Top 5 Servers",,,429 ,0.00" source=console,6.14 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,24 ,"Total Disk IO Rate (Time) Trend for Top 5 Servers",,,429 ,0.00" source=console,4.17 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,59 ,"Untitled",,,429 ,0.00" source=console,3.10 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,18 ,"System Core Usage",,,429 ,0.00" source=console,55.25 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,60 ,"Untitled",,,429 ,0.00" source=console,4.19 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,17 ,"Service Summary",,,429 ,0.00" source=console,3.55 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,61 ,"Untitled",,,429 ,0.00" source=console,3.35 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,19 ,"Server Network Statistics",,,429 ,0.00" source=console,3.11 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,22 ,"P95 Network In Rate trend for Top 5 Servers",,,429 ,0.00" source=console,3.03 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,53 ,"P95 Network Out Rate Trend for Top 5 Servers",,,429 ,0.00" source=console,4.10 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,62 ,"Untitled",,,429 ,0.00" source=console,3.45 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,49 ,"TCP Socket Summary Chart",,,429 ,0.00" source=console,3.40 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,50 ,"TCP Open Port Count Over Time on Top 5 Servers",,,429 ,0.00" source=console,3.46 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,51 ,"UDP Open Port Count Over Time on Top 5 Servers",,,200 ,100.00" source=console,183.83 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,20 ,"TCP Socket Summary",,,429 ,0.00" source=console,5.36 ,15m,5,5,5
+2025-10-29 00:13:01,"Linux Server Insights",,21 ,"UDP Socket Summary",,,429 ,0.00" source=console,5.01 ,15m,5,5,5

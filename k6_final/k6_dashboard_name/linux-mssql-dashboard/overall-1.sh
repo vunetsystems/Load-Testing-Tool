@@ -1,23 +1,25 @@
 #!/bin/bash
 
-# Usage hint
+# ===============================
+# Usage and Arguments
+# ===============================
 usage() {
   echo "Usage: $0 [time-range (e.g. 15m)] [vus] [iterations] [interval-in-seconds]"
   exit 1
 }
 
-# Check input args
 if [ $# -ne 4 ]; then
   usage
 fi
 
-# ====== USER INPUTS ======
 TIME_RANGE=$1
 VUS=$2
 ITERATIONS=$3
 INTERVAL=$4
 
-# ====== CONFIGURATION ======
+# ===============================
+# Configuration
+# ===============================
 SCRIPT_DIR="/home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard"
 RESULT_DIR="./results_linux_mssql"
 CSV_FILE="${RESULT_DIR}/dashboard_panel_metrics.csv"
@@ -25,109 +27,115 @@ SUMMARY_FILE="${RESULT_DIR}/dashboard_summary.txt"
 
 mkdir -p "$RESULT_DIR"
 
-# Initialize output files
+# Initialize files
 echo "timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,iterations" > "$CSV_FILE"
 echo -e "DASHBOARD PERFORMANCE SUMMARY\n" > "$SUMMARY_FILE"
 
-# Process each dashboard
+# ===============================
+# Iterate over dashboard test scripts
+# ===============================
 for DASHBOARD_SCRIPT in "$SCRIPT_DIR"/*.js; do
-  DASHBOARD_NAME=$(basename "$DASHBOARD_SCRIPT" .js | cut -d'_' -f1)
   TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
-  
-  echo -e "\n🔹 Processing Dashboard: $DASHBOARD_NAME"
-  echo "   Script: $(basename $DASHBOARD_SCRIPT)"
+  DASHBOARD_FILE=$(basename "$DASHBOARD_SCRIPT")
+  echo -e "\n🔹 Running script: $DASHBOARD_FILE"
   echo "   Time range: now-${TIME_RANGE} → now"
   echo "   VUs: $VUS | Iterations: $ITERATIONS"
 
-  OUTPUT_FILE="${RESULT_DIR}/${DASHBOARD_NAME}_${TIME_RANGE}_result.txt"
+  OUTPUT_FILE="${RESULT_DIR}/${DASHBOARD_FILE}_${TIME_RANGE}_result.txt"
 
-  # Run k6 test
+  # ===============================
+  # Run the k6 test
+  # ===============================
   K6_INSECURE_SKIP_TLS_VERIFY=true k6 run \
     -e TIME_FROM="now-${TIME_RANGE}" \
     -e TIME_TO="now" \
     --vus "$VUS" \
     --iterations "$ITERATIONS" \
-    "$DASHBOARD_SCRIPT" | tee "$OUTPUT_FILE"
+    "$DASHBOARD_SCRIPT" 2>&1 | tee "$OUTPUT_FILE"
 
-  # Extract dashboard metrics
-  # Extract dashboard metrics
-  DASHBOARD_AVG=$(grep "dashboard_response_time" "$OUTPUT_FILE" | grep -oP 'avg=\K[0-9.]+')
-  DASHBOARD_STATUS=$(grep -Po 'Dashboard is status \K[0-9]+' "$OUTPUT_FILE" | head -n 1)
-  DASHBOARD_SUCCESS_RATE=$(grep -Po 'dashboard_success_rate.*?: \K[0-9.]+%' "$OUTPUT_FILE" | head -n 1)
+  # ===============================
+  # Parse k6 output
+  # ===============================
+  echo -e "\n📊 Parsing results from: $OUTPUT_FILE"
 
+  # We must use associative arrays (maps) to handle interleaved output
+  declare -A dashboard_statuses
+  declare -A dashboard_success_rates
+  declare -A found_dashboards
 
-  echo -e "\n📊 Dashboard Average Response Time: ${DASHBOARD_AVG}ms" | tee -a "$SUMMARY_FILE"
+  # --- FIRST PASS: Get Dashboard-level metrics ---
+  # This pass reads the file and maps dashboard names to their status/success rate
+  current_dashboard_name=""
+  while IFS= read -r line; do
+    if [[ "$line" =~ Dashboard:[[:space:]](.+)source=console ]]; then
+      current_dashboard_name=$(echo "${BASH_REMATCH[1]}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      
+      # Log to summary file only once
+      if [[ -z "${found_dashboards[$current_dashboard_name]}" ]]; then
+        echo -e "\n🔹 Found Dashboard: $current_dashboard_name" | tee -a "$SUMMARY_FILE"
+        found_dashboards["$current_dashboard_name"]=1
+      fi
 
-
-  # Extract panel details
-  declare -A PANEL_NAME_MAP
-  declare -A PANEL_STATUS_MAP
-
-  while IFS= read -r line; do 
-    # Adjusted regex to match "Panel ID (Panel Name) is status <status>"
-    if [[ "$line" =~ Panel[[:space:]]([0-9]+)[[:space:]]*\(([^\)]+)\)[[:space:]]is[[:space:]]status[[:space:]]([0-9]+) ]]; then
-        panel_id="${BASH_REMATCH[1]}"
-        panel_name="${BASH_REMATCH[2]}"
-        panel_status="${BASH_REMATCH[3]}"
-        PANEL_NAME_MAP["$panel_id"]="$panel_name"
-        PANEL_STATUS_MAP["$panel_id"]="$panel_status"
+    elif [[ "$line" =~ Dashboard[[:space:]]is[[:space:]]status[[:space:]]([0-9]+) ]]; then
+      if [[ -n "$current_dashboard_name" ]]; then
+        dashboard_statuses["$current_dashboard_name"]="${BASH_REMATCH[1]}"
+      fi
+    elif [[ "$line" =~ dashboard_success_rate:[[:space:]]([0-9.]+)% ]]; then
+      if [[ -n "$current_dashboard_name" ]]; then
+        dashboard_success_rates["$current_dashboard_name"]="${BASH_REMATCH[1]}"
+        current_dashboard_name="" # Reset after success rate
+      fi
     fi
   done < "$OUTPUT_FILE"
 
-  # Process panel metrics
-  echo -e "\n📋 Panel Response Times:" | tee -a "$SUMMARY_FILE"
-  declare -A PANEL_DATA
-  while IFS= read -r metric; do
-    if [[ "$metric" =~ panel_response_time_([0-9]+).*avg=([0-9.]+)ms ]]; then
-      panel_id="${BASH_REMATCH[1]}"
-      PANEL_DATA["${panel_id}_response"]="${BASH_REMATCH[2]}"
-    elif [[ "$metric" =~ panel_success_rate_([0-9]+).*:\ ([0-9.]+)% ]]; then
-      panel_id="${BASH_REMATCH[1]}"
-      PANEL_DATA["${panel_id}_success"]="${BASH_REMATCH[2]}"
-      success_count=$(echo "$metric" | grep -oP '([0-9]+) out of ([0-9]+)' | cut -d' ' -f1)
-      total_count=$(echo "$metric" | grep -oP '([0-9]+) out of ([0-9]+)' | cut -d' ' -f3)
-      failure_count=$((total_count - success_count))
-      PANEL_DATA["${panel_id}_success_count"]="$success_count"
-      PANEL_DATA["${panel_id}_failure_count"]="$failure_count"
-    fi
-  done < <(grep -E "panel_response_time_[0-9]+|panel_success_rate_[0-9]+" "$OUTPUT_FILE")
 
-  # Write to CSV and display
-  for panel_id in $(echo "${!PANEL_DATA[@]}" | tr ' ' '\n' | cut -d'_' -f1 | sort -u); do
-    panel_name="${PANEL_NAME_MAP[$panel_id]}"
-    panel_status="${PANEL_STATUS_MAP[$panel_id]}"
-    response_time="${PANEL_DATA[${panel_id}_response]}"
-    success_rate="${PANEL_DATA[${panel_id}_success]}"
-    success_count="${PANEL_DATA[${panel_id}_success_count]:-0}"
-    failure_count="${PANEL_DATA[${panel_id}_failure_count]:-0}"
+  # --- SECOND PASS: Parse Panel data and write CSV ---
+  # This pass reads the file again, finds our new atomic PANEL_DATA lines,
+  # and combines them with the dashboard metrics we found in pass 1.
+  while IFS= read -r line; do
     
-    if [[ -n "$response_time" && -n "$success_rate" ]]; then
-      # Clean and escape panel name for CSV
-      panel_name_clean=$(echo "$panel_name" | sed 's/"/""/g')
+    # Match our new, robust, single-line format
+    if [[ "$line" =~ PANEL_DATA:[[:space:]]dashboard_name=([^|]+)[[:space:]]*\|[[:space:]]*panel_id=([^|]+)[[:space:]]*\|[[:space:]]*panel_name=([^|]+)[[:space:]]*\|[[:space:]]*panel_status=([^|]+)[[:space:]]*\|[[:space:]]*panel_avg=([^|]+)[[:space:]]*\|[[:space:]]*panel_success_rate=([^|]+) ]]; then
       
-      # Write to CSV (with all required fields)
-      echo "$TIMESTAMP,$DASHBOARD_NAME,$DASHBOARD_AVG,$panel_id,\"$panel_name_clean\",$DASHBOARD_STATUS,$DASHBOARD_SUCCESS_RATE,$panel_status,$success_rate,$response_time,$TIME_RANGE,$VUS,$VUS,$ITERATIONS" >> "$CSV_FILE"
-      
-      # Display in summary
-      printf "  - Panel %-3s %-40s: %6.2fms (Success: %5.1f%%, %d✓ %d✗)\n" \
-        "$panel_id" "$panel_name" "$response_time" "$success_rate" "$success_count" "$failure_count" | tee -a "$SUMMARY_FILE"
-    fi
-  done
+      db_name=$(echo "${BASH_REMATCH[1]}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      panel_id="${BASH_REMATCH[2]}"
+      panel_name=$(echo "${BASH_REMATCH[3]}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      panel_status="${BASH_REMATCH[4]}"
+      panel_avg="${BASH_REMATCH[5]}"
+      panel_success_rate="${BASH_REMATCH[6]}"
 
-  echo "✅ Completed Dashboard: $DASHBOARD_NAME"
+      # Look up the dashboard metrics we stored in pass 1
+      db_status=${dashboard_statuses["$db_name"]}
+      db_success_rate=${dashboard_success_rates["$db_name"]}
+
+      # Write to CSV
+      panel_name_clean=$(echo "$panel_name" | sed 's/"/""/g')
+      echo "$TIMESTAMP,\"$db_name\",${dashboard_avg:-},$panel_id,\"$panel_name_clean\",${db_status:-},${db_success_rate:-},${panel_status:-},${panel_success_rate:-},${panel_avg:-},$TIME_RANGE,$VUS,$VUS,$ITERATIONS" >> "$CSV_FILE"
+      
+      # Write to Summary
+      printf "  - Panel %-3s %-40s: %6.2fms (Success: %5.1f%%)\n" "$panel_id" "$panel_name" "$panel_avg" "$panel_success_rate" >> "$SUMMARY_FILE"
+    
+    fi
+  done < "$OUTPUT_FILE"
+
+  echo "✅ Completed processing for: $DASHBOARD_FILE"
   echo "⏳ Waiting $INTERVAL seconds before next test..."
   sleep "$INTERVAL"
 done
 
-# Final CSV cleanup to ensure proper formatting
-sed -i 's/""""/""/g' "$CSV_FILE"  # Fix double-escaped quotes
-sed -i 's/,"",/,,/g' "$CSV_FILE"   # Remove empty quoted fields
+# ===============================
+# Final Cleanup
+# ===============================
+sed -i 's/""""/""/g' "$CSV_FILE"
+sed -i 's/,"",/,,/g' "$CSV_FILE"
 
 echo -e "\n📂 Results saved to:"
 echo "  - Detailed CSV: $CSV_FILE"
 echo "  - Summary: $SUMMARY_FILE"
 
-# Insert the final CSV into ClickHouse
+# ===============================
+# ClickHouse Insert
+# ===============================
 echo -e "\n🚀 Inserting data into ClickHouse..."
 
 sed 's/\([0-9]\+\.[0-9]\+\)%/\1/g' "$CSV_FILE" | \
@@ -136,4 +144,3 @@ clickhouse-client -d vusmart --user vusmartmanager --password 'Vunet#1234' \
 -q "INSERT INTO monitoring.k6_results FORMAT CSVWithNames"
 
 echo "✅ Data inserted into ClickHouse table: monitoring.k6_results"
-

@@ -1,13 +1,16 @@
 import requests
 import random
 import argparse
-from playwright.sync_api import sync_playwright
 import time
+import urllib3
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from playwright.sync_api import sync_playwright
 
 # ===== CONFIGURATION =====
 BASE_URL = "https://qa.vunetsystems.com"
 KEYCLOAK_BASE = "https://qa.vunetsystems.com"
 REALM = "vunet"
+
 
 TOKEN_URL = f"{KEYCLOAK_BASE}/realms/{REALM}/protocol/openid-connect/token"
 ADMIN_URL = f"{KEYCLOAK_BASE}/admin/realms/{REALM}/users"
