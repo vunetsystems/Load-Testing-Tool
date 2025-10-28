@@ -3,7 +3,7 @@ import { check } from "k6";
 import { Trend, Rate } from "k6/metrics";
 
 // Load all users from a file
-const usersRaw = open("/home/vunet/user_creation_k6/user_cookies.txt").split("\n");
+const usersRaw = open("/home/vunet/Load-Testing-Tool/k6_final/user_creation_k6/user_cookies.txt").split("\n");
 const users = usersRaw.map((line) => {
   const [username, password] = line.split(",");
   return { username, password };
@@ -29,7 +29,7 @@ export let options = {
 };
 
 // Base URL and login endpoint
-const BASE_URL = "https://164.52.214.184";
+const BASE_URL = "https://qa.vunetsystems.com";
 const LOGIN_ENDPOINT = `${BASE_URL}/vui/a/vusmartmaps-app?redirect=dashboard&lte=now&gte=now-15m`;
 
 // Metrics

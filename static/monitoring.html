@@ -102,6 +102,10 @@
                             <span class="material-symbols-outlined text-sm mr-2">description</span>
                             Log Analysis
                         </button>
+                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-subtle-light dark:border-subtle-dark text-text-secondary-light dark:text-text-secondary-dark font-medium transition-colors hover:bg-subtle-light dark:hover:bg-subtle-dark" data-section="k6-monitoring">
+                            <span class="material-symbols-outlined text-sm mr-2">speed</span>
+                            K6 Monitoring
+                        </button>
                         <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-subtle-light dark:border-subtle-dark text-text-secondary-light dark:text-text-secondary-dark font-medium transition-colors hover:bg-subtle-light dark:hover:bg-subtle-dark" data-section="alerts">
                             <span class="material-symbols-outlined text-sm mr-2">notifications</span>
                             Alerts & Notifications
@@ -574,6 +578,88 @@
                     </div>
                 </div>
 
+                <!-- K6 Monitoring Section -->
+                <div id="k6-monitoring-section" class="hidden space-y-8">
+                    <!-- K6 Monitoring Header -->
+                    <div class="flex flex-wrap justify-between gap-4 items-center mb-6">
+                        <h1 class="text-4xl font-black leading-tight tracking-[-0.033em]">K6 Load Testing Results</h1>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Last updated: <span id="k6-last-update">Never</span></p>
+                    </div>
+
+                    <!-- K6 Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Total Results</p>
+                            <p class="tracking-light text-3xl font-bold" id="k6-total-results">-</p>
+                        </div>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Avg P95 Response Time</p>
+                            <p class="tracking-light text-3xl font-bold" id="k6-avg-p95">-</p>
+                        </div>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Virtual Users</p>
+                            <p class="tracking-light text-3xl font-bold" id="k6-vus">-</p>
+                        </div>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Dashboard</p>
+                            <p class="tracking-light text-3xl font-bold" id="k6-dashboard">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Filters and Controls -->
+                    <div class="flex flex-wrap justify-between gap-4 px-4 py-3 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark mb-6 shadow-sm">
+                        <div class="relative flex-1">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                            <input class="w-full h-10 pl-10 pr-4 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary focus:border-primary transition-all" placeholder="Search by panel name..." type="text" id="k6-search"/>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <select class="h-10 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary focus:border-primary transition-all" id="k6-time-filter">
+                                <option>All Time Filters</option>
+                                <option>6h</option>
+                            </select>
+                            <button class="p-2.5 rounded-lg text-text-light dark:text-text-dark bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" id="k6-refresh-btn">
+                                <span class="material-symbols-outlined animate-spin-slow">refresh</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- K6 Results Table -->
+                    <div class="@container">
+                        <div class="overflow-x-auto rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark shadow-sm">
+                            <table class="w-full min-w-max text-left">
+                                <thead class="border-b border-border-light dark:border-border-dark">
+                                    <tr>
+                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Timestamp</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Virtual Users</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Time Filter</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Panel Name</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Dashboard</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">P95 Response Time (ms)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="k6-results-body">
+                                    <!-- K6 data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="k6-loading-state" class="text-center py-8">
+                        <div class="inline-flex items-center gap-3">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                            <span class="text-text-secondary-light dark:text-text-secondary-dark">Loading K6 results...</span>
+                        </div>
+                    </div>
+
+                    <!-- No Data State -->
+                    <div id="k6-no-data-state" class="hidden text-center py-8">
+                        <span class="material-symbols-outlined text-6xl text-text-secondary-light dark:text-text-secondary-dark mb-4">analytics</span>
+                        <h3 class="text-xl font-semibold mb-2">No K6 Results Found</h3>
+                        <p class="text-text-secondary-light dark:text-text-secondary-dark">No load testing results are available for the selected criteria.</p>
+                    </div>
+                </div>
+
                 <!-- Pod Monitoring Section -->
                 <div id="pod-monitoring-section" class="hidden space-y-8">
                     <!-- Pod Monitoring Header -->
@@ -649,6 +735,88 @@
                     <div class="flex items-center justify-between mt-6 px-4">
                         <p class="text-sm text-gray-500 dark:text-gray-400" id="pod-pagination-info">Showing 0 to 0 of 0 results</p>
                         <div class="flex items-center gap-2">
+                <!-- K6 Monitoring Section -->
+                <div id="k6-monitoring-section" class="hidden space-y-8">
+                    <!-- K6 Monitoring Header -->
+                    <div class="flex flex-wrap justify-between gap-4 items-center mb-6">
+                        <h1 class="text-4xl font-black leading-tight tracking-[-0.033em]">K6 Load Testing Results</h1>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Last updated: <span id="k6-last-update">Never</span></p>
+                    </div>
+
+                    <!-- K6 Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Total Results</p>
+                            <p class="tracking-light text-3xl font-bold" id="k6-total-results">-</p>
+                        </div>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Avg P95 Response Time</p>
+                            <p class="tracking-light text-3xl font-bold" id="k6-avg-p95">-</p>
+                        </div>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Virtual Users</p>
+                            <p class="tracking-light text-3xl font-bold" id="k6-vus">-</p>
+                        </div>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-gray-600 dark:text-gray-300">Dashboard</p>
+                            <p class="tracking-light text-3xl font-bold" id="k6-dashboard">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Filters and Controls -->
+                    <div class="flex flex-wrap justify-between gap-4 px-4 py-3 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark mb-6 shadow-sm">
+                        <div class="relative flex-1">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                            <input class="w-full h-10 pl-10 pr-4 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary focus:border-primary transition-all" placeholder="Search by panel name..." type="text" id="k6-search"/>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <select class="h-10 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary focus:border-primary transition-all" id="k6-time-filter">
+                                <option>All Time Filters</option>
+    <script src="/static/monitoring-js/k6-metrics.js"></script>
+                                <option>6h</option>
+                            </select>
+                            <button class="p-2.5 rounded-lg text-text-light dark:text-text-dark bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" id="k6-refresh-btn">
+                                <span class="material-symbols-outlined animate-spin-slow">refresh</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- K6 Results Table -->
+                    <div class="@container">
+                        <div class="overflow-x-auto rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark shadow-sm">
+                            <table class="w-full min-w-max text-left">
+                                <thead class="border-b border-border-light dark:border-border-dark">
+                                    <tr>
+                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Timestamp</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Virtual Users</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Time Filter</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Panel Name</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">Dashboard</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">P95 Response Time (ms)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="k6-results-body">
+                                    <!-- K6 data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="k6-loading-state" class="text-center py-8">
+                        <div class="inline-flex items-center gap-3">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                            <span class="text-text-secondary-light dark:text-text-secondary-dark">Loading K6 results...</span>
+                        </div>
+                    </div>
+
+                    <!-- No Data State -->
+                    <div id="k6-no-data-state" class="hidden text-center py-8">
+                        <span class="material-symbols-outlined text-6xl text-text-secondary-light dark:text-text-secondary-dark mb-4">analytics</span>
+                        <h3 class="text-xl font-semibold mb-2">No K6 Results Found</h3>
+                        <p class="text-text-secondary-light dark:text-text-secondary-dark">No load testing results are available for the selected criteria.</p>
+                    </div>
+                </div>
                             <button class="px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled="" id="pod-prev-btn">Previous</button>
                             <button class="px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" id="pod-next-btn">Next</button>
                         </div>

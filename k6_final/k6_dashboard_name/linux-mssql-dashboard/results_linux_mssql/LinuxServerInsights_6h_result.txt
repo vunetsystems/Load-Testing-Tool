@@ -1,0 +1,242 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard/LinuxServerInsights.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 5 max VUs, 10m30s max duration (incl. graceful stop):
+              * default: 5 iterations shared among 5 VUs (maxDuration: 10m0s, gracefulStop: 30s)
+
+
+running (00m01.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m01.0s/10m0s  0/5 shared iters
+
+running (00m02.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m02.0s/10m0s  0/5 shared iters
+
+running (00m03.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m03.0s/10m0s  0/5 shared iters
+
+running (00m04.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m04.0s/10m0s  0/5 shared iters
+
+running (00m05.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m05.0s/10m0s  0/5 shared iters
+
+running (00m06.0s), 5/5 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 5 VUs  00m06.0s/10m0s  0/5 shared iters
+
+running (00m07.0s), 4/5 VUs, 1 complete and 0 interrupted iterations
+default   [  20% ] 5 VUs  00m07.0s/10m0s  1/5 shared iters
+
+     ✓ Dashboard is status 200
+     ✓ Panel 26 (Servers) is status 200
+     ✓ Panel 47 (Servers Restarted in Last 24 Hours) is status 200
+     ✓ Panel 42 (Alert Summary) is status 200
+     ✓ Panel 46 (Server Uptime) is status 200
+     ✓ Panel 34 (Server Memory Utilization) is status 200
+     ✓ Panel 33 (Active Alerts) is status 200
+     ✓ Panel 8 (Server CPU Utilization) is status 200
+     ✓ Panel 12 (P95 CPU Utilization Trend for Top 5 Servers) is status 200
+     ✓ Panel 64 (P95 IO Wait % CPU Utilization for Top 5 Servers) is status 200
+     ✓ Panel 63 (P95 Idle CPU Utilization Trend for Top 5 Servers) is status 200
+     ✓ Panel 16 ( Servers Disk Utilization ) is status 200
+     ✓ Panel 11 (P95 Memory Utilization Trend  for Top 5 Servers) is status 200
+     ✓ Panel 52 (P95 SwapMemory Usage) is status 200
+     ✓ Panel 25 (P95 Disk Utilization Trend for Top 5 Disks) is status 200
+     ✓ Panel 56 (Panel 56) is status 200
+     ✓ Panel 9 (Current CPU Load Average) is status 200
+     ✓ Panel 13 (P95 CPU Load Average Trend for Top 5 Servers) is status 200
+     ✓ Panel 57 (Panel 57) is status 200
+     ✓ Panel 10 ( Top 5 CPU Consuming Process ) is status 200
+     ✓ Panel 14 ( Top 5 Memory Consuming Process ) is status 200
+     ✓ Panel 27 (Server Process Details) is status 200
+     ✓ Panel 58 (Panel 58) is status 200
+     ✗ Panel 15 ( Servers DiskIO Statistics ) is status 200
+      ↳  80% — ✓ 4 / ✗ 1
+     ✗ Panel 54 (P95 Disk Read/Sec Trends for Top 5 Servers) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 55 (P95 Disk Write/Sec Trends for Top 5 Servers) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 24 (Total Disk IO Rate (Time) Trend for Top 5 Servers) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 59 (Panel 59) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 18 ( System Core Usage ) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 60 (Panel 60) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 17 ( Service Summary ) is status 200
+      ↳  20% — ✓ 1 / ✗ 4
+     ✗ Panel 61 (Panel 61) is status 200
+      ↳  20% — ✓ 1 / ✗ 4
+     ✗ Panel 19 (Server Network Statistics) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 22 (P95 Network In Rate trend for Top 5 Servers) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 53 (P95 Network Out Rate Trend for Top 5 Servers) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 62 (Panel 62) is status 200
+      ↳  20% — ✓ 1 / ✗ 4
+     ✗ Panel 49 (TCP Socket Summary Chart ) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 50 (TCP Open Port Count Over Time on Top 5 Servers) is status 200
+      ↳  40% — ✓ 2 / ✗ 3
+     ✗ Panel 51 (UDP Open Port Count Over Time on Top 5 Servers) is status 200
+      ↳  20% — ✓ 1 / ✗ 4
+     ✗ Panel 20 (TCP Socket Summary) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+     ✗ Panel 21 (UDP Socket Summary) is status 200
+      ↳  0% — ✓ 0 / ✗ 5
+
+     checks.........................: 60.97%  125 out of 205
+     dashboard_response_time........: avg=204.67ms min=118.05ms med=214.93ms max=316.31ms p(90)=291.51ms p(95)=303.91ms
+     dashboard_success_rate.........: 100.00% 5 out of 5
+     data_received..................: 19 MB   2.4 MB/s
+     data_sent......................: 67 kB   8.5 kB/s
+     http_req_blocked...............: avg=156.1µs  min=260ns    med=410ns    max=7.1ms    p(90)=717ns    p(95)=883ns   
+     http_req_connecting............: avg=3.45µs   min=0s       med=0s       max=240.72µs p(90)=0s       p(95)=0s      
+     http_req_duration..............: avg=181.72ms min=3.69ms   med=195.19ms max=497.92ms p(90)=391.46ms p(95)=398.58ms
+       { expected_response:true }...: avg=259.79ms min=97.21ms  med=254.32ms max=497.92ms p(90)=398.35ms p(95)=401.61ms
+     http_req_duration_custom.......: avg=181.72ms min=3.69ms   med=195.19ms max=497.92ms p(90)=391.46ms p(95)=398.58ms
+     http_req_failed................: 39.02%  80 out of 205
+     http_req_receiving.............: avg=4.74ms   min=23.65µs  med=3.41ms   max=45.37ms  p(90)=6.87ms   p(95)=30.4ms  
+     http_req_sending...............: avg=64.24µs  min=32.19µs  med=56.15µs  max=607.05µs p(90)=82.42µs  p(95)=103.58µs
+     http_req_tls_handshaking.......: avg=55.67µs  min=0s       med=0s       max=2.98ms   p(90)=0s       p(95)=0s      
+     http_req_waiting...............: avg=176.92ms min=3.56ms   med=190.52ms max=493ms    p(90)=387.18ms p(95)=394.39ms
+     http_reqs......................: 205     26.139197/s
+     iteration_duration.............: avg=7.47s    min=6.95s    med=7.46s    max=7.84s    p(90)=7.76s    p(95)=7.8s    
+     iterations.....................: 5       0.637541/s
+     panel_failure_rate_10..........: 0.00%   0 out of 5
+     panel_failure_rate_11..........: 0.00%   0 out of 5
+     panel_failure_rate_12..........: 0.00%   0 out of 5
+     panel_failure_rate_13..........: 0.00%   0 out of 5
+     panel_failure_rate_14..........: 0.00%   0 out of 5
+     panel_failure_rate_15..........: 20.00%  1 out of 5
+     panel_failure_rate_16..........: 0.00%   0 out of 5
+     panel_failure_rate_17..........: 80.00%  4 out of 5
+     panel_failure_rate_18..........: 100.00% 5 out of 5
+     panel_failure_rate_19..........: 100.00% 5 out of 5
+     panel_failure_rate_20..........: 100.00% 5 out of 5
+     panel_failure_rate_21..........: 100.00% 5 out of 5
+     panel_failure_rate_22..........: 100.00% 5 out of 5
+     panel_failure_rate_24..........: 100.00% 5 out of 5
+     panel_failure_rate_25..........: 0.00%   0 out of 5
+     panel_failure_rate_26..........: 0.00%   0 out of 5
+     panel_failure_rate_27..........: 0.00%   0 out of 5
+     panel_failure_rate_33..........: 0.00%   0 out of 5
+     panel_failure_rate_34..........: 0.00%   0 out of 5
+     panel_failure_rate_42..........: 0.00%   0 out of 5
+     panel_failure_rate_46..........: 0.00%   0 out of 5
+     panel_failure_rate_47..........: 0.00%   0 out of 5
+     panel_failure_rate_49..........: 100.00% 5 out of 5
+     panel_failure_rate_50..........: 60.00%  3 out of 5
+     panel_failure_rate_51..........: 80.00%  4 out of 5
+     panel_failure_rate_52..........: 0.00%   0 out of 5
+     panel_failure_rate_53..........: 100.00% 5 out of 5
+     panel_failure_rate_54..........: 100.00% 5 out of 5
+     panel_failure_rate_55..........: 100.00% 5 out of 5
+     panel_failure_rate_56..........: 0.00%   0 out of 5
+     panel_failure_rate_57..........: 0.00%   0 out of 5
+     panel_failure_rate_58..........: 0.00%   0 out of 5
+     panel_failure_rate_59..........: 100.00% 5 out of 5
+     panel_failure_rate_60..........: 100.00% 5 out of 5
+     panel_failure_rate_61..........: 80.00%  4 out of 5
+     panel_failure_rate_62..........: 80.00%  4 out of 5
+     panel_failure_rate_63..........: 0.00%   0 out of 5
+     panel_failure_rate_64..........: 0.00%   0 out of 5
+     panel_failure_rate_8...........: 0.00%   0 out of 5
+     panel_failure_rate_9...........: 0.00%   0 out of 5
+     panel_response_time_10.........: avg=199.88ms min=97.21ms  med=102.72ms max=402.39ms p(90)=360.01ms p(95)=381.2ms 
+     panel_response_time_11.........: avg=259.35ms min=105.53ms med=202.62ms max=494.89ms p(90)=416.14ms p(95)=455.52ms
+     panel_response_time_12.........: avg=271.75ms min=203.67ms med=245.1ms  max=398.39ms p(90)=359.04ms p(95)=378.71ms
+     panel_response_time_13.........: avg=260.74ms min=105.91ms med=202.51ms max=497.92ms p(90)=454.3ms  p(95)=476.11ms
+     panel_response_time_14.........: avg=280.8ms  min=198.55ms med=209.3ms  max=399.79ms p(90)=398.42ms p(95)=399.11ms
+     panel_response_time_15.........: avg=228.49ms min=4.18ms   med=235.89ms max=398.52ms p(90)=357.33ms p(95)=377.92ms
+     panel_response_time_16.........: avg=181.98ms min=100.42ms med=197.09ms max=304.04ms p(90)=263.57ms p(95)=283.8ms 
+     panel_response_time_17.........: avg=119.96ms min=4.42ms   med=99ms     max=298.14ms p(90)=255.62ms p(95)=276.88ms
+     panel_response_time_18.........: avg=58.42ms  min=4.06ms   med=92.39ms  max=96.47ms  p(90)=95.38ms  p(95)=95.92ms 
+     panel_response_time_19.........: avg=42.61ms  min=3.96ms   med=5.21ms   max=100.33ms p(90)=99.92ms  p(95)=100.13ms
+     panel_response_time_20.........: avg=61.7ms   min=4.08ms   med=98.15ms  max=101.59ms p(90)=100.58ms p(95)=101.08ms
+     panel_response_time_21.........: avg=41.09ms  min=5.24ms   med=5.9ms    max=99.57ms  p(90)=95.42ms  p(95)=97.49ms 
+     panel_response_time_22.........: avg=100.21ms min=3.69ms   med=99.6ms   max=199.21ms p(90)=159.42ms p(95)=179.32ms
+     panel_response_time_24.........: avg=10.63ms  min=4.11ms   med=5.11ms   max=33.39ms  p(90)=22.33ms  p(95)=27.86ms 
+     panel_response_time_25.........: avg=287.49ms min=198.09ms med=298.92ms max=398.29ms p(90)=376.5ms  p(95)=387.39ms
+     panel_response_time_26.........: avg=302.18ms min=189.46ms med=290.42ms max=448.11ms p(90)=387.22ms p(95)=417.66ms
+     panel_response_time_27.........: avg=257.63ms min=103.35ms med=288.93ms max=397.62ms p(90)=357.92ms p(95)=377.77ms
+     panel_response_time_33.........: avg=308.33ms min=189.36ms med=300.25ms max=494.3ms  p(90)=439.17ms p(95)=466.74ms
+     panel_response_time_34.........: avg=236.55ms min=146.31ms med=212.97ms max=319.48ms p(90)=315.2ms  p(95)=317.34ms
+     panel_response_time_42.........: avg=268.96ms min=192.33ms med=244.01ms max=395.87ms p(90)=360.05ms p(95)=377.96ms
+     panel_response_time_46.........: avg=287.98ms min=200.04ms med=294.9ms  max=393.19ms p(90)=355.21ms p(95)=374.2ms 
+     panel_response_time_47.........: avg=278.75ms min=189.62ms med=208.57ms max=401.67ms p(90)=401.55ms p(95)=401.61ms
+     panel_response_time_49.........: avg=79.47ms  min=5.65ms   med=96.45ms  max=100.73ms p(90)=100.45ms p(95)=100.59ms
+     panel_response_time_50.........: avg=158.67ms min=8.24ms   med=99.56ms  max=295.26ms p(90)=294.85ms p(95)=295.05ms
+     panel_response_time_51.........: avg=131.35ms min=6.84ms   med=97.72ms  max=256.98ms p(90)=233.35ms p(95)=245.17ms
+     panel_response_time_52.........: avg=295.22ms min=288.89ms med=295.31ms max=303.19ms p(90)=300.54ms p(95)=301.86ms
+     panel_response_time_53.........: avg=111.28ms min=62.13ms  med=97.48ms  max=200.74ms p(90)=160.04ms p(95)=180.39ms
+     panel_response_time_54.........: avg=5.33ms   min=4.11ms   med=4.62ms   max=8.24ms   p(90)=7.12ms   p(95)=7.68ms  
+     panel_response_time_55.........: avg=21.79ms  min=5.55ms   med=26.88ms  max=35.32ms  p(90)=34.57ms  p(95)=34.95ms 
+     panel_response_time_56.........: avg=235ms    min=165.66ms med=204.1ms  max=404.59ms p(90)=324.73ms p(95)=364.66ms
+     panel_response_time_57.........: avg=236.62ms min=191.63ms med=205.36ms max=298.65ms p(90)=292.95ms p(95)=295.8ms 
+     panel_response_time_58.........: avg=300.13ms min=202.99ms med=298.44ms max=399.4ms  p(90)=397.63ms p(95)=398.52ms
+     panel_response_time_59.........: avg=39.19ms  min=4.07ms   med=5.21ms   max=91.24ms  p(90)=91.2ms   p(95)=91.22ms 
+     panel_response_time_60.........: avg=79.83ms  min=3.82ms   med=93.24ms  max=199.55ms p(90)=158.19ms p(95)=178.87ms
+     panel_response_time_61.........: avg=119.65ms min=4.04ms   med=98.67ms  max=299.13ms p(90)=219.05ms p(95)=259.09ms
+     panel_response_time_62.........: avg=102.83ms min=5.61ms   med=99.11ms  max=202.29ms p(90)=201.87ms p(95)=202.08ms
+     panel_response_time_63.........: avg=256.28ms min=108.03ms med=291.52ms max=394.28ms p(90)=355.3ms  p(95)=374.79ms
+     panel_response_time_64.........: avg=192.62ms min=106.62ms med=196.89ms max=267.32ms p(90)=240.23ms p(95)=253.78ms
+     panel_response_time_8..........: avg=295.93ms min=188.12ms med=302.11ms max=398.59ms p(90)=397.93ms p(95)=398.26ms
+     panel_response_time_9..........: avg=239.25ms min=109.33ms med=291.26ms max=301.29ms p(90)=300.75ms p(95)=301.02ms
+     panel_success_rate_10..........: 100.00% 5 out of 5
+     panel_success_rate_11..........: 100.00% 5 out of 5
+     panel_success_rate_12..........: 100.00% 5 out of 5
+     panel_success_rate_13..........: 100.00% 5 out of 5
+     panel_success_rate_14..........: 100.00% 5 out of 5
+     panel_success_rate_15..........: 80.00%  4 out of 5
+     panel_success_rate_16..........: 100.00% 5 out of 5
+     panel_success_rate_17..........: 20.00%  1 out of 5
+     panel_success_rate_18..........: 0.00%   0 out of 5
+     panel_success_rate_19..........: 0.00%   0 out of 5
+     panel_success_rate_20..........: 0.00%   0 out of 5
+     panel_success_rate_21..........: 0.00%   0 out of 5
+     panel_success_rate_22..........: 0.00%   0 out of 5
+     panel_success_rate_24..........: 0.00%   0 out of 5
+     panel_success_rate_25..........: 100.00% 5 out of 5
+     panel_success_rate_26..........: 100.00% 5 out of 5
+     panel_success_rate_27..........: 100.00% 5 out of 5
+     panel_success_rate_33..........: 100.00% 5 out of 5
+     panel_success_rate_34..........: 100.00% 5 out of 5
+     panel_success_rate_42..........: 100.00% 5 out of 5
+     panel_success_rate_46..........: 100.00% 5 out of 5
+     panel_success_rate_47..........: 100.00% 5 out of 5
+     panel_success_rate_49..........: 0.00%   0 out of 5
+     panel_success_rate_50..........: 40.00%  2 out of 5
+     panel_success_rate_51..........: 20.00%  1 out of 5
+     panel_success_rate_52..........: 100.00% 5 out of 5
+     panel_success_rate_53..........: 0.00%   0 out of 5
+     panel_success_rate_54..........: 0.00%   0 out of 5
+     panel_success_rate_55..........: 0.00%   0 out of 5
+     panel_success_rate_56..........: 100.00% 5 out of 5
+     panel_success_rate_57..........: 100.00% 5 out of 5
+     panel_success_rate_58..........: 100.00% 5 out of 5
+     panel_success_rate_59..........: 0.00%   0 out of 5
+     panel_success_rate_60..........: 0.00%   0 out of 5
+     panel_success_rate_61..........: 20.00%  1 out of 5
+     panel_success_rate_62..........: 20.00%  1 out of 5
+     panel_success_rate_63..........: 100.00% 5 out of 5
+     panel_success_rate_64..........: 100.00% 5 out of 5
+     panel_success_rate_8...........: 100.00% 5 out of 5
+     panel_success_rate_9...........: 100.00% 5 out of 5
+     user_failure_count.............: 80ms    10.2ms/s
+     user_success_count.............: 120ms   15.3ms/s
+     vus............................: 4       min=4          max=5
+     vus_max........................: 5       min=5          max=5
+
+
+running (00m07.8s), 0/5 VUs, 5 complete and 0 interrupted iterations
+default ✓ [ 100% ] 5 VUs  00m07.8s/10m0s  5/5 shared iters
