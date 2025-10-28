@@ -3543,3 +3543,80 @@
 {"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-28T09:46:23Z","message":"Fetched 155 pods for namespace vsmaps"}
 {"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-28T09:46:39Z","message":"Fetched 307 pods from all namespaces"}
 {"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-28T09:46:53Z","message":"Fetched 155 pods for namespace vsmaps"}
+{"level":"info","version":"1.0.0","time":"2025-10-29T00:15:21+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-29T00:15:21+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:15:21+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:15:21+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-29T00:15:21+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:15:21+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-29T00:15:21+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-29T00:15:21+05:30","message":"Monitoring DB client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-29T00:15:21+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-29T00:15:21+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"216.48.189.75:8086","time":"2025-10-29T00:15:21+05:30","message":"Server starting"}
+{"level":"info","url":"http://216.48.189.75:8086","time":"2025-10-29T00:15:21+05:30","message":"Open in browser"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:15:36+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:15:38+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:15:45+05:30","message":"Fetched 0 k6 results"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:16:02+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:16:06+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:16:22+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:16:37+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","version":"1.0.0","time":"2025-10-29T00:25:27+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-29T00:25:27+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:25:27+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:25:27+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-29T00:25:27+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:25:27+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-29T00:25:27+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-29T00:25:27+05:30","message":"Monitoring DB client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-29T00:25:27+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-29T00:25:27+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"216.48.189.75:8086","time":"2025-10-29T00:25:27+05:30","message":"Server starting"}
+{"level":"info","url":"http://216.48.189.75:8086","time":"2025-10-29T00:25:27+05:30","message":"Open in browser"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:25:31+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:25:37+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:25:47+05:30","message":"Fetched 0 k6 results"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:25:59+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:26:02+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:26:16+05:30","message":"Fetched 127 pods from all namespaces"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:26:19+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:26:31+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:27:02+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:27:32+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:27:42+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:27:48+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:27:52+05:30","message":"Fetched 0 k6 results"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:28:13+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:28:44+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:29:14+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:29:31+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:29:37+05:30","message":"Fetched 0 k6 results"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:29:44+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:29:54+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:30:10+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:30:19+05:30","message":"Fetched 0 k6 results"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:30:21+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:30:24+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:30:54+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:31:25+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:31:56+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:32:26+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:32:57+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:33:26+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:33:57+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:34:27+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:34:58+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:35:28+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:35:34+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:35:57+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:35:59+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:36:28+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:36:58+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:37:28+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:37:58+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:38:30+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:39:00+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:39:30+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:40:01+05:30","message":"Fetched 71 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-29T00:40:32+05:30","message":"Fetched 71 pods for namespace vsmaps"}

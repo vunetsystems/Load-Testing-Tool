@@ -64,6 +64,11 @@ class PodMonitoringManager {
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
                 modal.classList.add('hidden');
+                // Show sidebar and main content again
+                const sidebar = document.querySelector('aside');
+                const main = document.querySelector('main');
+                if (sidebar) sidebar.classList.remove('hidden');
+                if (main) main.classList.remove('hidden');
             });
         }
 
@@ -71,6 +76,11 @@ class PodMonitoringManager {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.classList.add('hidden');
+                    // Show sidebar and main content again
+                    const sidebar = document.querySelector('aside');
+                    const main = document.querySelector('main');
+                    if (sidebar) sidebar.classList.remove('hidden');
+                    if (main) main.classList.remove('hidden');
                 }
             });
         }
@@ -320,7 +330,7 @@ class PodMonitoringManager {
         await this.fetchPodMonitoringData();
     }
 
-    // Show pod details modal
+    // Show pod details modal (full screen)
     showPodDetailsModal(podName) {
         const modal = document.getElementById('pod-details-modal');
         const podNameElement = document.getElementById('modal-pod-name');
@@ -328,7 +338,86 @@ class PodMonitoringManager {
         if (modal && podNameElement) {
             podNameElement.textContent = podName;
             modal.classList.remove('hidden');
+
+            // Hide sidebar and main content for full-screen effect
+            const sidebar = document.querySelector('aside');
+            const main = document.querySelector('main');
+            if (sidebar) sidebar.classList.add('hidden');
+            if (main) main.classList.add('hidden');
+
+            // Populate pod details
+            this.populatePodDetails(podName);
         }
+    }
+
+    // Populate pod details in the full-screen modal
+    populatePodDetails(podName) {
+        const pod = this.podData.find(p => p.pod_name === podName);
+        if (!pod) return;
+
+        // Update basic info
+        this.updateElement('pod-detail-name', pod.pod_name || 'Unknown');
+        this.updateElement('pod-detail-namespace', pod.namespace || 'Unknown');
+        this.updateElement('pod-detail-node', pod.node_name || 'Unknown');
+        this.updateElement('pod-detail-status', pod.status || 'Unknown');
+        this.updateElement('pod-detail-cpu', pod.cpu_usage != null ? `${pod.cpu_usage.toFixed(1)}%` : 'N/A');
+        this.updateElement('pod-detail-memory', pod.memory_usage != null ? `${pod.memory_usage.toFixed(1)}%` : 'N/A');
+        this.updateElement('pod-detail-restarts', pod.restarts != null ? pod.restarts : '0');
+        this.updateElement('pod-detail-ready', pod.ready || 'N/A');
+
+        // Update timestamps
+        const lastSeen = pod.last_seen ? new Date(pod.last_seen) : new Date();
+        this.updateElement('pod-detail-last-seen', this.getTimeAgo(lastSeen));
+        this.updateElement('pod-detail-created', 'N/A'); // Would need additional API data
+        this.updateElement('pod-detail-age', 'N/A'); // Would need additional API data
+
+        // Update additional metrics
+        this.updateElement('pod-detail-containers', 'N/A'); // Would need additional API data
+        this.updateElement('pod-detail-phase', pod.status || 'Unknown');
+        this.updateElement('pod-detail-qos', 'N/A'); // Would need additional API data
+
+        // Initialize tabs
+        this.initializePodDetailTabs();
+    }
+
+    // Update element text content
+    updateElement(id, text) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = text;
+        }
+    }
+
+    // Initialize pod detail tabs
+    initializePodDetailTabs() {
+        const tabButtons = document.querySelectorAll('.pod-detail-tab');
+        const tabContents = document.querySelectorAll('.pod-detail-tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all tabs
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.classList.remove('border-indigo-600', 'text-indigo-600');
+                    btn.classList.add('text-slate-600', 'border-transparent');
+                });
+
+                // Hide all tab contents
+                tabContents.forEach(content => content.classList.add('hidden'));
+
+                // Activate clicked tab
+                button.classList.add('active');
+                button.classList.remove('text-slate-600', 'border-transparent');
+                button.classList.add('text-indigo-600', 'border-indigo-600');
+
+                // Show corresponding content
+                const tabId = button.dataset.tab + '-tab';
+                const content = document.getElementById(tabId);
+                if (content) {
+                    content.classList.remove('hidden');
+                }
+            });
+        });
     }
 
     // Get current data
