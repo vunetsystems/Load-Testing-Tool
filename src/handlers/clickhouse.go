@@ -164,6 +164,40 @@ func HandleAPIGetPodMonitoring(w http.ResponseWriter, r *http.Request) {
 		Data:    podData,
 	})
 }
+// HandleAPIGetK6MaxVus handles GET /api/clickhouse/k6-max-vus
+func HandleAPIGetK6MaxVus(w http.ResponseWriter, r *http.Request) {
+	maxVusResult, err := clickhouse.GetK6MaxVus(r.Context())
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to get k6 max vus: %v", err),
+		})
+		return
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "K6 max vus retrieved successfully",
+		Data:    maxVusResult,
+	})
+}
+// HandleAPIGetK6LoginResults handles GET /api/clickhouse/k6-login-results
+func HandleAPIGetK6LoginResults(w http.ResponseWriter, r *http.Request) {
+	k6LoginResults, err := clickhouse.GetK6LoginResults(r.Context())
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to get k6 login results: %v", err),
+		})
+		return
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "K6 login results retrieved successfully",
+		Data:    k6LoginResults,
+	})
+}
 // HandleAPIGetK6DashboardResults handles GET /api/clickhouse/k6-dashboard-results
 func HandleAPIGetK6DashboardResults(w http.ResponseWriter, r *http.Request) {
 	k6DashboardResults, err := clickhouse.GetK6DashboardResults(r.Context())

@@ -5,6 +5,7 @@ class K6MonitoringManager {
         this.k6Data = [];
         this.filteredData = [];
         this.k6DashboardData = [];
+        this.k6LoginData = [];
         this.lastUpdate = null;
         this.isUpdating = false;
         this.currentSearch = '';
@@ -19,6 +20,7 @@ class K6MonitoringManager {
         this.attachEventListeners();
         await this.fetchK6Data();
         await this.fetchK6DashboardData();
+        await this.fetchK6LoginData();
     }
 
     // Attach event listeners
@@ -416,10 +418,115 @@ class K6MonitoringManager {
         }
     }
 
+    // Fetch K6 login data from API
+    async fetchK6LoginData() {
+        if (this.isUpdating) return;
+
+        this.isUpdating = true;
+        try {
+            this.showLoginLoading();
+
+            const response = await fetch('/api/clickhouse/k6-login-results');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.success && result.data) {
+                this.k6LoginData = result.data;
+                console.log('K6 login data updated:', this.k6LoginData);
+                this.renderLoginTable();
+                this.hideLoginLoading();
+            } else {
+                console.error('Failed to fetch K6 login data:', result.message);
+                this.showLoginNoData();
+            }
+        } catch (error) {
+            console.error('Error fetching K6 login data:', error);
+            this.showLoginNoData();
+        } finally {
+            this.isUpdating = false;
+        }
+    }
+
+    // Render the login data table
+    renderLoginTable() {
+        const tbody = document.getElementById('k6-login-results-body');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+
+        if (!this.k6LoginData.length) {
+            const emptyRow = document.createElement('tr');
+            emptyRow.innerHTML = `
+                <td colspan="4" class="px-4 py-8 text-center text-text-secondary-light dark:text-text-secondary-dark">
+                    No login test results available
+                </td>
+            `;
+            tbody.appendChild(emptyRow);
+            return;
+        }
+
+        this.k6LoginData.forEach(item => {
+            const row = document.createElement('tr');
+            row.className = 'border-b border-border-light dark:border-border-dark hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50';
+
+            // Format timestamp
+            const timestamp = this.formatTimestamp(item.timestamp);
+
+            // Get response time class
+            const responseTimeClass = this.getResponseTimeClass(item.p95_response_time);
+
+            row.innerHTML = `
+                <td class="px-4 py-3 text-sm">${timestamp}</td>
+                <td class="px-4 py-3 text-sm font-medium">${item.no_of_users}</td>
+                <td class="px-4 py-3 text-sm">${item.test_name}</td>
+                <td class="px-4 py-3 text-sm">
+                    <span class="font-medium ${responseTimeClass}">
+                        ${item.p95_response_time.toFixed(2)}ms
+                    </span>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+        });
+    }
+
+    // Show login loading state
+    showLoginLoading() {
+        const loadingState = document.getElementById('k6-login-loading-state');
+        const noDataState = document.getElementById('k6-login-no-data-state');
+
+        if (loadingState) {
+            loadingState.classList.remove('hidden');
+        }
+        if (noDataState) {
+            noDataState.classList.add('hidden');
+        }
+    }
+
+    // Hide login loading state
+    hideLoginLoading() {
+        const loadingState = document.getElementById('k6-login-loading-state');
+        if (loadingState) {
+            loadingState.classList.add('hidden');
+        }
+    }
+
+    // Show login no data state
+    showLoginNoData() {
+        this.hideLoginLoading();
+        const noDataState = document.getElementById('k6-login-no-data-state');
+        if (noDataState) {
+            noDataState.classList.remove('hidden');
+        }
+    }
+
     // Manual refresh
     async refresh() {
         await this.fetchK6Data();
         await this.fetchK6DashboardData();
+        await this.fetchK6LoginData();
     }
 
     // Get current data

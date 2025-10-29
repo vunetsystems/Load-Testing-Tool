@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"vuDataSim/src/kafka_ch_reset"
 	"vuDataSim/src/logger"
@@ -70,31 +72,52 @@ func (kh *KafkaHandler) RecreateTopics(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info().Msg("Starting Kafka topic recreation for enabled o11y sources from conf.yml")
 
-	result, err := kh.kafkaManager.RecreateTopicsForO11ySources()
-	if err != nil {
+	// Add timeout context to prevent hanging
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second) // 5 minute timeout
+	defer cancel()
+
+	// Create a channel to receive the result
+	resultChan := make(chan map[string]interface{}, 1)
+	errChan := make(chan error, 1)
+
+	go func() {
+		result, err := kh.kafkaManager.RecreateTopicsForO11ySources()
+		if err != nil {
+			errChan <- err
+			return
+		}
+		resultChan <- result
+	}()
+
+	select {
+	case result := <-resultChan:
+		success := result["success"].(bool)
+		if success {
+			logger.Info().Msg("Successfully completed Kafka topic recreation for enabled o11y sources")
+			sendJSONResponse(w, http.StatusOK, APIResponse{
+				Success: true,
+				Message: "Topics recreated successfully for enabled o11y sources",
+				Data:    result,
+			})
+		} else {
+			logger.Warn().Msg("Kafka topic recreation for enabled o11y sources completed with errors")
+			sendJSONResponse(w, http.StatusPartialContent, APIResponse{
+				Success: false,
+				Message: "Topic recreation for enabled o11y sources completed with some errors",
+				Data:    result,
+			})
+		}
+	case err := <-errChan:
 		logger.Error().Err(err).Msg("Failed to recreate Kafka topics for enabled o11y sources")
 		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Failed to recreate topics for enabled o11y sources: %v", err),
-			Data:    result,
 		})
-		return
-	}
-
-	success := result["success"].(bool)
-	if success {
-		logger.Info().Msg("Successfully completed Kafka topic recreation for enabled o11y sources")
-		sendJSONResponse(w, http.StatusOK, APIResponse{
-			Success: true,
-			Message: "Topics recreated successfully for enabled o11y sources",
-			Data:    result,
-		})
-	} else {
-		logger.Warn().Msg("Kafka topic recreation for enabled o11y sources completed with errors")
-		sendJSONResponse(w, http.StatusPartialContent, APIResponse{
+	case <-ctx.Done():
+		logger.Error().Msg("Kafka topic recreation timed out")
+		sendJSONResponse(w, http.StatusGatewayTimeout, APIResponse{
 			Success: false,
-			Message: "Topic recreation for enabled o11y sources completed with some errors",
-			Data:    result,
+			Message: "Topic recreation operation timed out after 5 minutes",
 		})
 	}
 }

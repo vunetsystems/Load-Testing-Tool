@@ -117,6 +117,8 @@ func main() {
 	api.HandleFunc("/binary/status/{node}", handlers.HandleAPIGetBinaryStatus).Methods("GET")
 	api.HandleFunc("/binary/start/{node}", handlers.HandleAPIStartBinary).Methods("POST")
 	api.HandleFunc("/binary/stop/{node}", handlers.HandleAPIStopBinary).Methods("POST")
+	api.HandleFunc("/binary/start-all", handlers.HandleAPIStartAllBinaries).Methods("POST")
+	api.HandleFunc("/binary/stop-all", handlers.HandleAPIStopAllBinaries).Methods("POST")
 
 	// O11y Source Manager API endpoints
 	api.HandleFunc("/o11y/sources", handlers.HandleAPIGetO11ySources).Methods("GET")
@@ -133,6 +135,8 @@ func main() {
 	api.HandleFunc("/ssh/status", handlers.HandleAPIGetSSHStatus).Methods("GET")
 	// ClickHouse metrics API endpoints
 	api.HandleFunc("/clickhouse/metrics", handlers.HandleAPIGetClickHouseMetrics).Methods("GET")
+	api.HandleFunc("/clickhouse/k6-max-vus", handlers.HandleAPIGetK6MaxVus).Methods("GET")
+	api.HandleFunc("/clickhouse/k6-login-results", handlers.HandleAPIGetK6LoginResults).Methods("GET")
 	api.HandleFunc("/clickhouse/health", handlers.HandleAPIClickHouseHealth).Methods("GET")
 	api.HandleFunc("/clickhouse/kafka-topics", handlers.HandleAPIGetKafkaTopicMetrics).Methods("GET")
 	api.HandleFunc("/clickhouse/k6-dashboard-results", handlers.HandleAPIGetK6DashboardResults).Methods("GET")
