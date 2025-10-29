@@ -6,18 +6,24 @@ class K6MonitoringManager {
         this.filteredData = [];
         this.k6DashboardData = [];
         this.k6LoginData = [];
+        this.k6MaxVus = null;
         this.lastUpdate = null;
         this.isUpdating = false;
         this.currentSearch = '';
         this.currentDashboardFilter = 'all';
         this.currentPage = 1;
         this.itemsPerPage = 10;
+        this.dashboardCurrentPage = 1;
+        this.dashboardItemsPerPage = 5;
+        this.loginCurrentPage = 1;
+        this.loginItemsPerPage = 5;
     }
 
     // Initialize K6 monitoring
     async initialize() {
         console.log('Initializing K6 monitoring...');
         this.attachEventListeners();
+        await this.fetchK6MaxVus();
         await this.fetchK6Data();
         await this.fetchK6DashboardData();
         await this.fetchK6LoginData();
@@ -75,6 +81,32 @@ class K6MonitoringManager {
                 }
             });
         }
+
+        // Dashboard pagination buttons
+        const dashboardNextBtn = document.getElementById('k6-dashboard-next-btn');
+
+        if (dashboardNextBtn) {
+            dashboardNextBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(this.k6DashboardData.length / this.dashboardItemsPerPage);
+                if (this.dashboardCurrentPage < totalPages) {
+                    this.dashboardCurrentPage++;
+                    this.renderDashboardTable();
+                }
+            });
+        }
+
+        // Login pagination buttons
+        const loginNextBtn = document.getElementById('k6-login-next-btn');
+
+        if (loginNextBtn) {
+            loginNextBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(this.k6LoginData.length / this.loginItemsPerPage);
+                if (this.loginCurrentPage < totalPages) {
+                    this.loginCurrentPage++;
+                    this.renderLoginTable();
+                }
+            });
+        }
     }
 
     // Fetch K6 data from API
@@ -126,6 +158,28 @@ class K6MonitoringManager {
         }
     }
 
+    // Fetch K6 max vus from API
+    async fetchK6MaxVus() {
+        try {
+            const response = await fetch('/api/clickhouse/k6-max-vus');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.success && result.data) {
+                this.k6MaxVus = result.data.max_vus;
+                console.log('K6 max vus updated:', this.k6MaxVus);
+            } else {
+                console.error('Failed to fetch K6 max vus:', result.message);
+                this.k6MaxVus = null;
+            }
+        } catch (error) {
+            console.error('Error fetching K6 max vus:', error);
+            this.k6MaxVus = null;
+        }
+    }
+
     // Process data for stats
     processData() {
         if (!this.k6Data.length) return;
@@ -133,13 +187,12 @@ class K6MonitoringManager {
         // Calculate stats
         const totalResults = this.k6Data.length;
         const avgP95 = this.k6Data.reduce((sum, item) => sum + item.p95_response_time, 0) / totalResults;
-        const uniqueVUs = [...new Set(this.k6Data.map(item => item.no_of_users))];
         const uniqueDashboards = [...new Set(this.k6Data.map(item => item.dashboard_name))];
 
         // Update stats display
         this.updateCardValue('k6-total-results', totalResults.toLocaleString());
         this.updateCardValue('k6-avg-p95', `${avgP95.toFixed(2)}ms`);
-        this.updateCardValue('k6-vus', uniqueVUs.length > 1 ? `${uniqueVUs.join(', ')}` : uniqueVUs[0] || 'N/A');
+        this.updateCardValue('k6-vus', this.k6MaxVus ? this.k6MaxVus.toString() : 'N/A');
         this.updateCardValue('k6-dashboard', uniqueDashboards[0] || 'N/A');
     }
 
@@ -359,10 +412,16 @@ class K6MonitoringManager {
                 </td>
             `;
             tbody.appendChild(emptyRow);
+            this.updateDashboardPaginationControls();
             return;
         }
 
-        this.k6DashboardData.forEach(item => {
+        // Calculate pagination
+        const startIndex = (this.dashboardCurrentPage - 1) * this.dashboardItemsPerPage;
+        const endIndex = Math.min(startIndex + this.dashboardItemsPerPage, this.k6DashboardData.length);
+        const currentPageData = this.k6DashboardData.slice(startIndex, endIndex);
+
+        currentPageData.forEach(item => {
             const row = document.createElement('tr');
             row.className = 'border-b border-border-light dark:border-border-dark hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50';
 
@@ -386,6 +445,8 @@ class K6MonitoringManager {
 
             tbody.appendChild(row);
         });
+
+        this.updateDashboardPaginationControls();
     }
 
     // Show dashboard loading state
@@ -415,6 +476,58 @@ class K6MonitoringManager {
         const noDataState = document.getElementById('k6-dashboard-no-data-state');
         if (noDataState) {
             noDataState.classList.remove('hidden');
+        }
+    }
+
+    // Update dashboard pagination controls
+    updateDashboardPaginationControls() {
+        const nextBtn = document.getElementById('k6-dashboard-next-btn');
+        const paginationInfo = document.getElementById('k6-dashboard-pagination-info');
+        const totalItems = this.k6DashboardData.length;
+        const totalPages = Math.ceil(totalItems / this.dashboardItemsPerPage);
+        const startItem = (this.dashboardCurrentPage - 1) * this.dashboardItemsPerPage + 1;
+        const endItem = Math.min(this.dashboardCurrentPage * this.dashboardItemsPerPage, totalItems);
+
+        // Update pagination info
+        if (paginationInfo) {
+            if (totalItems === 0) {
+                paginationInfo.textContent = 'Showing 0 to 0 of 0 results';
+            } else {
+                paginationInfo.textContent = `Showing ${startItem} to ${endItem} of ${totalItems} results`;
+            }
+        }
+
+        // Update button states
+        if (nextBtn) {
+            nextBtn.disabled = this.dashboardCurrentPage >= totalPages;
+            nextBtn.classList.toggle('opacity-50', this.dashboardCurrentPage >= totalPages);
+            nextBtn.classList.toggle('cursor-not-allowed', this.dashboardCurrentPage >= totalPages);
+        }
+    }
+
+    // Update login pagination controls
+    updateLoginPaginationControls() {
+        const nextBtn = document.getElementById('k6-login-next-btn');
+        const paginationInfo = document.getElementById('k6-login-pagination-info');
+        const totalItems = this.k6LoginData.length;
+        const totalPages = Math.ceil(totalItems / this.loginItemsPerPage);
+        const startItem = (this.loginCurrentPage - 1) * this.loginItemsPerPage + 1;
+        const endItem = Math.min(this.loginCurrentPage * this.loginItemsPerPage, totalItems);
+
+        // Update pagination info
+        if (paginationInfo) {
+            if (totalItems === 0) {
+                paginationInfo.textContent = 'Showing 0 to 0 of 0 results';
+            } else {
+                paginationInfo.textContent = `Showing ${startItem} to ${endItem} of ${totalItems} results`;
+            }
+        }
+
+        // Update button states
+        if (nextBtn) {
+            nextBtn.disabled = this.loginCurrentPage >= totalPages;
+            nextBtn.classList.toggle('opacity-50', this.loginCurrentPage >= totalPages);
+            nextBtn.classList.toggle('cursor-not-allowed', this.loginCurrentPage >= totalPages);
         }
     }
 
@@ -464,10 +577,16 @@ class K6MonitoringManager {
                 </td>
             `;
             tbody.appendChild(emptyRow);
+            this.updateLoginPaginationControls();
             return;
         }
 
-        this.k6LoginData.forEach(item => {
+        // Calculate pagination
+        const startIndex = (this.loginCurrentPage - 1) * this.loginItemsPerPage;
+        const endIndex = Math.min(startIndex + this.loginItemsPerPage, this.k6LoginData.length);
+        const currentPageData = this.k6LoginData.slice(startIndex, endIndex);
+
+        currentPageData.forEach(item => {
             const row = document.createElement('tr');
             row.className = 'border-b border-border-light dark:border-border-dark hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50';
 
@@ -490,6 +609,8 @@ class K6MonitoringManager {
 
             tbody.appendChild(row);
         });
+
+        this.updateLoginPaginationControls();
     }
 
     // Show login loading state
@@ -524,6 +645,12 @@ class K6MonitoringManager {
 
     // Manual refresh
     async refresh() {
+        // Reset pagination to first page
+        this.currentPage = 1;
+        this.dashboardCurrentPage = 1;
+        this.loginCurrentPage = 1;
+
+        await this.fetchK6MaxVus();
         await this.fetchK6Data();
         await this.fetchK6DashboardData();
         await this.fetchK6LoginData();

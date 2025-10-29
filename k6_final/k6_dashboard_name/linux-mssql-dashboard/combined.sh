@@ -62,7 +62,7 @@ K6_INSECURE_SKIP_TLS_VERIFY=true k6 run \
 echo -e "\n📊 Parsing login results..."
 TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
 
-# Example parser for LOGIN metrics
+# Parse login metrics
 grep "✅ Login successful" "$LOGIN_OUTPUT" | while IFS= read -r line; do
   if [[ "$line" =~ ✅[[:space:]]Login[[:space:]]successful[[:space:]]\|[[:space:]]User:[[:space:]]([^|]+)[[:space:]]\|[[:space:]]Response[[:space:]]Time:[[:space:]]([^|]+)[[:space:]]ms ]]; then
     USERNAME="${BASH_REMATCH[1]}"
@@ -106,60 +106,42 @@ K6_INSECURE_SKIP_TLS_VERIFY=true k6 run \
   "$BASE_DIR/multi_dashboard_test.js" 2>&1 | tee "$DASHBOARD_OUTPUT"
 
 # ======================================
-# Parse Dashboard results
+# Parse Dashboard & Panel results
 # ======================================
 echo -e "\n📊 Parsing dashboard results from: $DASHBOARD_OUTPUT"
 
-declare -A dashboard_statuses
-declare -A dashboard_success_rates
-declare -A found_dashboards
-current_dashboard_name=""
+TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
 
-while IFS= read -r line; do
-  if [[ "$line" =~ Dashboard:[[:space:]](.+)source=console ]]; then
-    current_dashboard_name=$(echo "${BASH_REMATCH[1]}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-    if [[ -z "${found_dashboards[$current_dashboard_name]}" ]]; then
-      echo -e "\n🔹 Found Dashboard: $current_dashboard_name" | tee -a "$SUMMARY_FILE"
-      found_dashboards["$current_dashboard_name"]=1
-    fi
-  elif [[ "$line" =~ Dashboard[[:space:]]is[[:space:]]status[[:space:]]([0-9]+) ]]; then
-    dashboard_statuses["$current_dashboard_name"]="${BASH_REMATCH[1]}"
-  elif [[ "$line" =~ dashboard_success_rate:[[:space:]]([0-9.]+)% ]]; then
-    dashboard_success_rates["$current_dashboard_name"]="${BASH_REMATCH[1]}"
-    current_dashboard_name=""
-  fi
-done < "$DASHBOARD_OUTPUT"
+# DASHBOARD_DATA lines
+grep 'DASHBOARD_DATA:' "$DASHBOARD_OUTPUT" | while IFS= read -r line; do
+  dashboard_name=$(echo "$line" | sed -E 's/.*name=([^|]+).*/\1/' | xargs)
+  status=$(echo "$line" | sed -E 's/.*status=([0-9]+).*/\1/')
+  response_time=$(echo "$line" | sed -E 's/.*response_time=([0-9.]+)ms.*/\1/')
+  
+  echo "📊 Dashboard=$dashboard_name | Status=$status | Time=${response_time}ms"
+  
+  # Append to CSV
+  echo "$TIMESTAMP,$dashboard_name,$response_time,,,'$status',100,,,$response_time,$TIME_RANGE,$VUS,$VUS,$ITERATIONS" >> "$DASHBOARD_CSV"
+  echo "🔹 Dashboard: $dashboard_name — ${response_time}ms (status=$status)" >> "$SUMMARY_FILE"
+done
 
-while IFS= read -r line; do
-  if [[ "$line" =~ PANEL_DATA:[[:space:]]dashboard_name=([^|]+)[[:space:]]*\|[[:space:]]*panel_id=([^|]+)[[:space:]]*\|[[:space:]]*panel_name=([^|]+)[[:space:]]*\|[[:space:]]*panel_status=([^|]+)[[:space:]]*\|[[:space:]]*panel_avg=([^|]+)[[:space:]]*\|[[:space:]]*panel_success_rate=([^|]+) ]]; then
-    echo "DEBUG: Matched line: $line" >&2
-    db_name=$(echo "${BASH_REMATCH[1]}" | xargs)
-    panel_id="${BASH_REMATCH[2]}"
-    panel_name=$(echo "${BASH_REMATCH[3]}" | xargs)
-    panel_status="${BASH_REMATCH[4]}"
-    panel_avg="${BASH_REMATCH[5]}"
-    panel_success_rate="${BASH_REMATCH[6]}"
+# PANEL_DATA lines
+grep '\[PANEL_DATA\]' "$DASHBOARD_OUTPUT" | while IFS= read -r line; do
+  dashboard_name=$(echo "$line" | sed -E 's/.*dashboard=([^|]+).*/\1/' | xargs)
+  panel_id=$(echo "$line" | sed -E 's/.*panel_id=([0-9]+).*/\1/')
+  panel_name=$(echo "$line" | sed -E 's/.*panel_name=([^|]+).*/\1/' | xargs)
+  status=$(echo "$line" | sed -E 's/.*status=([0-9]+).*/\1/')
+  response_time=$(echo "$line" | sed -E 's/.*response_time=([0-9.]+)ms.*/\1/')
+  
+  echo "🧩 Panel=$panel_name | Dashboard=$dashboard_name | Time=${response_time}ms"
+  
+  # Append to CSV
+  printf "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" \
+    "$TIMESTAMP" "$dashboard_name" "$response_time" "$panel_id" "$panel_name" \
+    "$status" "100" "$status" "100" "$response_time" "$TIME_RANGE" "$VUS" "$VUS" "$ITERATIONS" >> "$DASHBOARD_CSV"
 
-    # Clean the captured values
-    panel_avg=$(echo "$panel_avg" | sed 's/[[:space:]]*$//; s/ source=console.*//')
-    panel_success_rate=$(echo "$panel_success_rate" | sed 's/[[:space:]]*$//; s/ source=console.*//')
-
-    db_status=${dashboard_statuses["$db_name"]}
-    db_success_rate=${dashboard_success_rates["$db_name"]}
-    clean_db_name=$(echo "$db_name" | sed 's/"//g' | sed 's/,/ /g')
-    clean_panel_name=$(echo "$panel_name" | sed 's/"//g' | sed 's/,/ /g')
-    clean_dashboard_avg=$(echo "${dashboard_avg:-0}" | sed 's/[^0-9.\-]//g')
-    clean_panel_avg=$(echo "${panel_avg:-0}" | sed 's/[^0-9.\-]//g')
-    clean_panel_success_rate=$(echo "${panel_success_rate:-0}" | sed 's/[^0-9.\-]//g')
-    clean_db_success_rate=$(echo "${db_success_rate:-0}" | sed 's/[^0-9.\-]//g')
-
-    printf "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" \
-      "$TIMESTAMP" "$clean_db_name" "$clean_dashboard_avg" "$panel_id" "$clean_panel_name" \
-      "${db_status:-0}" "$clean_db_success_rate" "$panel_status" "$clean_panel_success_rate" \
-      "$clean_panel_avg" "$TIME_RANGE" "$VUS" "$VUS" "$ITERATIONS" >> "$DASHBOARD_CSV"
-    printf "  - Panel %-3s %-40s: %6.2fms (Success: %5.1f%%)\n" "$panel_id" "$panel_name" "$clean_panel_avg" "$clean_panel_success_rate" >> "$SUMMARY_FILE"
-  fi
-done < "$DASHBOARD_OUTPUT"
+  printf "  - Panel %-3s %-40s: %6.2fms (status: %s)\n" "$panel_id" "$panel_name" "$response_time" "$status" >> "$SUMMARY_FILE"
+done
 
 echo "✅ Completed Dashboard Test."
 echo "📂 CSV Output: $DASHBOARD_CSV"

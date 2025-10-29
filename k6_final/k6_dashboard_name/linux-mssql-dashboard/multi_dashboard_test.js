@@ -149,6 +149,11 @@ export default function () {
 
   // Iterate through dashboards
   for (const d of config.dashboards) {
+if (String(d.enabled).toLowerCase() !== 'true') {
+  console.log(`🚫 Skipping disabled dashboard: ${d.name}`);
+  continue;
+}
+
     const dashboardUrl = `${baseDashboardAPI}${d.id}`;
 
     group(`Dashboard: ${d.name}`, function () {

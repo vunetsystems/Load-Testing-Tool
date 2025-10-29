@@ -33,8 +33,7 @@ func GetK6Results(ctx context.Context, dashboard string) ([]K6Result, error) {
 	   quantile(0.9)(panel_avg_response_time) AS "P95 Response time"
 FROM monitoring.k6_results
 WHERE timestamp >= now() - INTERVAL 6 HOUR
-	 AND vus IN (5)
-	 AND time_range IN ('15m')
+AND time_range IN ('15m')
 	`
 
 	// Add dashboard filter if specified

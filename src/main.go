@@ -148,13 +148,11 @@ func main() {
 
 	// Kafka and ClickHouse Reset API endpoints
 	api.HandleFunc("/kafka/topics", kafkaHandler.GetTopics).Methods("GET")
-	api.HandleFunc("/kafka/recreate", kafkaHandler.RecreateTopicsForO11ySources).Methods("POST")
 	api.HandleFunc("/kafka/status", kafkaHandler.GetTopicStatus).Methods("GET")
 	api.HandleFunc("/kafka/describe/{topic}", kafkaHandler.DescribeTopic).Methods("GET")
 	api.HandleFunc("/kafka/delete/{topic}", kafkaHandler.DeleteTopic).Methods("DELETE")
 	api.HandleFunc("/kafka/create", kafkaHandler.CreateTopic).Methods("POST")
-	api.HandleFunc("/clickhouse/truncate", kafkaHandler.TruncateClickHouseTables).Methods("POST")
-	api.HandleFunc("/clickhouse/tables", kafkaHandler.GetClickHouseTableNames).Methods("GET")
+	api.HandleFunc("/kafka/recreate-enabled", kafkaHandler.RecreateEnabledTopics).Methods("POST")
 
 	// K6 Load Testing API endpoints
 	api.HandleFunc("/k6/config", handlers.HandleAPIGetK6Config).Methods("GET")
@@ -202,9 +200,9 @@ func main() {
 	srv := &http.Server{
 		Addr:         handlers.Port,
 		Handler:      router,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
+		ReadTimeout:  60 * time.Second,
+		WriteTimeout: 120 * time.Second,
+		IdleTimeout:  300 * time.Second,
 	}
 
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {

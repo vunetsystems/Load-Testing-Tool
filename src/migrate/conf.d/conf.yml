@@ -2,7 +2,7 @@ data_generation_time:
   type: real-time
 include_module_dirs:
   Apache:
-    enabled: true
+    enabled: false
   Azure_Firewall:
     enabled: false
   Azure_Redis_Cache:
@@ -10,9 +10,9 @@ include_module_dirs:
   LinuxMonitor:
     enabled: false
   MongoDB:
-    enabled: true
-  Mssql:
     enabled: false
+  Mssql:
+    enabled: true
 logging:
   console: false
   directory: /home/vunet/vuDataSim/vuDataSim/logs/

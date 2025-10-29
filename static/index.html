@@ -231,10 +231,6 @@
                      <span>Add All Cluster Nodes</span>
                  </button>
             <div class="mt-auto space-y-3">
-                <button id="kafka-clickhouse-clean-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-warning/50 dark:border-warning-dark/50 py-3 text-warning dark:text-warning-dark font-semibold transition-colors hover:bg-warning/10 dark:hover:bg-warning-dark/10">
-                    <span class="material-symbols-outlined">cleaning_services</span>
-                    <span>Clean Kafka & ClickHouse</span>
-                </button>
                 <button id="binary-control-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-success/50 dark:border-success-dark/50 py-3 text-success dark:text-success-dark font-semibold transition-colors hover:bg-success/10 dark:hover:bg-success-dark/10">
                     <span class="material-symbols-outlined">play_arrow</span>
                     <span>Binary Control</span>
@@ -287,41 +283,48 @@
                             <p class="text-text-secondary-light dark:text-text-secondary-dark text-xs font-normal leading-normal" id="sync-status-text">No sync in progress</p>
                         </div>
                         <!-- Timeline / Stepper -->
-                        <div class="grid grid-cols-[auto_1fr] gap-x-4">
-                            <!-- Step 1: Pending -->
-                            <div class="flex flex-col items-center">
-                                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500" id="step1-container">
-                                    <span class="material-symbols-outlined text-xl" id="step1-icon">schedule</span>
+                        <div class="flex items-start justify-between relative">
+                            <div class="flex-1 text-center">
+                                <div class="relative mb-2">
+                                    <div class="relative w-10 h-10 mx-auto flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500" id="step1-container">
+                                        <span class="material-symbols-outlined text-xl" id="step1-icon">schedule</span>
+                                    </div>
+                                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                                        <div class="h-0.5 w-full bg-gray-300 dark:bg-gray-600 translate-x-full"></div>
+                                    </div>
                                 </div>
-                                <div class="w-0.5 grow bg-gray-300 dark:bg-gray-600"></div>
-                            </div>
-                            <div class="pb-8">
-                                <div class="p-4 rounded-lg bg-subtle-light/50 dark:bg-subtle-dark/50 border border-subtle-light dark:border-subtle-dark hover:shadow-md transition-shadow" id="step1-box">
+                                <div class="mt-4 p-4 rounded-lg bg-subtle-light/50 dark:bg-subtle-dark/50 border border-subtle-light dark:border-subtle-dark hover:shadow-md transition-shadow" id="step1-box">
                                     <p class="text-text-secondary-light dark:text-text-secondary-dark text-base font-semibold leading-normal" id="step1-title">EPS Split</p>
                                     <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal" id="step1-text">Pending</p>
                                 </div>
                             </div>
-                            <!-- Step 2: Pending -->
-                            <div class="flex flex-col items-center">
-                                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark" id="step2-container">
-                                    <span class="material-symbols-outlined text-xl" id="step2-icon">schedule</span>
+                            <div class="flex-1 text-center px-2">
+                                <div class="relative mb-2">
+                                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                                        <div class="h-0.5 w-full bg-gray-300 dark:bg-gray-600"></div>
+                                    </div>
+                                    <div class="relative w-10 h-10 mx-auto flex items-center justify-center rounded-full bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark" id="step2-container">
+                                        <span class="material-symbols-outlined text-xl" id="step2-icon">schedule</span>
+                                    </div>
+                                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                                        <div class="h-0.5 w-full bg-gray-300 dark:bg-gray-600 translate-x-full"></div>
+                                    </div>
                                 </div>
-                                <div class="w-0.5 grow bg-subtle-light dark:bg-subtle-dark"></div>
-                            </div>
-                            <div class="pb-8">
-                                <div class="p-4 rounded-lg bg-subtle-light/50 dark:bg-subtle-dark/50 border border-subtle-light dark:border-subtle-dark hover:shadow-md transition-shadow" id="step2-box">
+                                <div class="mt-4 p-4 rounded-lg bg-subtle-light/50 dark:bg-subtle-dark/50 border border-subtle-light dark:border-subtle-dark hover:shadow-md transition-shadow" id="step2-box">
                                     <p class="text-text-secondary-light dark:text-text-secondary-dark text-base font-semibold leading-normal" id="step2-title">EPS Distribute</p>
                                     <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal" id="step2-text">Pending</p>
                                 </div>
                             </div>
-                            <!-- Step 3: Pending -->
-                            <div class="flex flex-col items-center">
-                                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark" id="step3-container">
-                                    <span class="material-symbols-outlined text-xl" id="step3-icon">schedule</span>
+                            <div class="flex-1 text-center">
+                                <div class="relative mb-2">
+                                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                                        <div class="h-0.5 w-1/2 bg-gray-300 dark:bg-gray-600"></div>
+                                    </div>
+                                    <div class="relative w-10 h-10 mx-auto flex items-center justify-center rounded-full bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark" id="step3-container">
+                                        <span class="material-symbols-outlined text-xl" id="step3-icon">schedule</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div>
-                                <div class="p-4 rounded-lg bg-subtle-light/50 dark:bg-subtle-dark/50 border border-subtle-light dark:border-subtle-dark hover:shadow-md transition-shadow" id="step3-box">
+                                <div class="mt-4 p-4 rounded-lg bg-subtle-light/50 dark:bg-subtle-dark/50 border border-subtle-light dark:border-subtle-dark hover:shadow-md transition-shadow" id="step3-box">
                                     <p class="text-text-secondary-light dark:text-text-secondary-dark text-base font-semibold leading-normal" id="step3-title">Conf.d Distribute</p>
                                     <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal" id="step3-text">Pending</p>
                                 </div>

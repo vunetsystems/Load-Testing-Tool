@@ -32,7 +32,6 @@ func GetK6DashboardResults(ctx context.Context) ([]K6DashboardResult, error) {
 		FROM monitoring.k6_results
 		WHERE
 		    timestamp >= (now() - INTERVAL 1 HOUR) - INTERVAL 5 HOUR - INTERVAL 30 MINUTE
-		    AND vus IN (5)
 		    AND time_range IN ('15m')
 		GROUP BY
 		    timestamp, vus, time_range, dashboard_name

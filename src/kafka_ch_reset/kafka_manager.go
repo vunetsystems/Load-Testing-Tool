@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 	"vuDataSim/src/logger"
 	"gopkg.in/yaml.v3"
@@ -115,8 +114,11 @@ func (km *KafkaManager) GetAllTopics() []TopicConfig {
 
 // DescribeTopic describes a single topic and returns its metadata
 func (km *KafkaManager) DescribeTopic(topicName string) (*TopicMetadata, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	describeCmd := fmt.Sprintf("kafka-topics --bootstrap-server localhost:9092 --describe --topic %s", topicName)
-	cmd := exec.Command("kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", describeCmd)
+	cmd := exec.CommandContext(ctx, "kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", describeCmd)
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -135,8 +137,11 @@ func (km *KafkaManager) DescribeTopic(topicName string) (*TopicMetadata, error) 
 
 // DeleteTopic deletes a single topic
 func (km *KafkaManager) DeleteTopic(topicName string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	deleteCmd := fmt.Sprintf("kafka-topics --bootstrap-server localhost:9092 --delete --topic %s", topicName)
-	cmd := exec.Command("kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", deleteCmd)
+	cmd := exec.CommandContext(ctx, "kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", deleteCmd)
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -151,10 +156,13 @@ func (km *KafkaManager) DeleteTopic(topicName string) error {
 
 // CreateTopic creates a single topic with specified metadata
 func (km *KafkaManager) CreateTopic(topicName string, partitionCount, replicationFactor int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	createCmd := fmt.Sprintf("kafka-topics --bootstrap-server localhost:9092 --create --topic %s --partitions %d --replication-factor %d",
 		topicName, partitionCount, replicationFactor)
 
-	cmd := exec.Command("kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", createCmd)
+	cmd := exec.CommandContext(ctx, "kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", createCmd)
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -186,219 +194,6 @@ func (km *KafkaManager) LoadO11yConfig(confPath string) (*O11ySourceConfig, erro
 }
 
 
-// RecreateTopicsForO11ySources recreates topics for enabled o11y sources from conf.yml using parallel processing
-func (km *KafkaManager) RecreateTopicsForO11ySources() (map[string]interface{}, error) {
-	result := map[string]interface{}{
-		"success": true,
-		"results": make(map[string]string),
-		"errors":  make([]string, 0),
-		"processed_sources": make([]string, 0),
-	}
-
-	// Use a mutex to protect shared result map
-	var resultMu sync.Mutex
-
-	// Step 1: Load o11y configuration from conf.yml
-	confPath := "src/migrate/conf.d/conf.yml"
-	o11yConfig, err := km.LoadO11yConfig(confPath)
-	if err != nil {
-		resultMu.Lock()
-		result["success"] = false
-		result["errors"] = append(result["errors"].([]string), fmt.Sprintf("Failed to load o11y config: %v", err))
-		resultMu.Unlock()
-		return result, err
-	}
-
-	// Step 2: Find enabled o11y sources
-	enabledSources := make([]string, 0)
-	for sourceName, sourceConfig := range o11yConfig.IncludeModuleDirs {
-		if sourceConfig.Enabled {
-			enabledSources = append(enabledSources, sourceName)
-			logger.Info().Str("source", sourceName).Msg("Found enabled o11y source")
-		}
-	}
-
-	if len(enabledSources) == 0 {
-		resultMu.Lock()
-		result["success"] = false
-		result["errors"] = append(result["errors"].([]string), "No enabled o11y sources found in conf.yml")
-		resultMu.Unlock()
-		return result, fmt.Errorf("no enabled o11y sources found")
-	}
-
-	resultMu.Lock()
-	result["processed_sources"] = enabledSources
-	resultMu.Unlock()
-
-	// Step 3: Collect all topics that need to be recreated
-	var allTopics []string
-	sourceMap := make(map[string]*TopicConfig)
-
-	for _, sourceName := range enabledSources {
-		translatedName := km.translateSourceName(sourceName)
-		logger.Info().Str("source", sourceName).Str("translated", translatedName).Msg("Processing enabled source")
-
-		// Find the topic configuration for this source
-		var sourceTopicConfig *TopicConfig
-		for _, topicConfig := range km.topics {
-			if topicConfig.Name == translatedName {
-				sourceTopicConfig = &topicConfig
-				break
-			}
-		}
-
-		if sourceTopicConfig == nil {
-			errMsg := fmt.Sprintf("No topic configuration found for source: %s (translated: %s)", sourceName, translatedName)
-			resultMu.Lock()
-			result["success"] = false
-			result["errors"] = append(result["errors"].([]string), errMsg)
-			resultMu.Unlock()
-			logger.Error().Str("source", sourceName).Str("translated", translatedName).Msg("No topic configuration found")
-			continue
-		}
-
-		sourceMap[sourceName] = sourceTopicConfig
-
-		// Collect all input and output topics
-		for _, inputTopic := range sourceTopicConfig.InputTopic {
-			allTopics = append(allTopics, inputTopic.Name)
-		}
-		for _, outputTopic := range sourceTopicConfig.OutputTopic {
-			allTopics = append(allTopics, outputTopic.Name)
-		}
-	}
-
-	// Step 4: Describe all topics in parallel first
-	metadataMap := make(map[string]*TopicMetadata)
-	var metadataMu sync.Mutex
-	var describeError error
-	var wg sync.WaitGroup
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	for _, topicName := range allTopics {
-		wg.Add(1)
-		go func(topic string) {
-			defer wg.Done()
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				metadata, err := km.DescribeTopic(topic)
-				if err != nil {
-					metadataMu.Lock()
-					if describeError == nil { // Only set error once
-						describeError = err
-					}
-					metadataMu.Unlock()
-					resultMu.Lock()
-					result["success"] = false
-					errorMsg := fmt.Sprintf("Describe operation failed for topic %s: %v", topic, err)
-					result["errors"] = append(result["errors"].([]string), errorMsg)
-					resultMu.Unlock()
-					cancel() // Cancel all other goroutines
-					return
-				}
-				metadataMu.Lock()
-				metadataMap[topic] = metadata
-				metadataMu.Unlock()
-			}
-		}(topicName)
-	}
-
-	wg.Wait()
-
-	if describeError != nil {
-		logger.Error().Err(describeError).Msg("Stopping topic recreation due to describe error")
-		return result, describeError
-	}
-
-	logger.Info().Int("total_topics", len(allTopics)).Msg("All topics described successfully")
-
-	// Step 5: Delete all topics in parallel
-	for _, topicName := range allTopics {
-		wg.Add(1)
-		go func(topic string) {
-			defer wg.Done()
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				err := km.DeleteTopic(topic)
-				if err != nil {
-					resultMu.Lock()
-					result["success"] = false
-					errorMsg := fmt.Sprintf("Delete operation failed for topic %s: %v", topic, err)
-					result["errors"] = append(result["errors"].([]string), errorMsg)
-					resultMu.Unlock()
-					cancel() // Cancel all other goroutines
-				}
-			}
-		}(topicName)
-	}
-
-	wg.Wait()
-
-	resultMu.Lock()
-	success := result["success"].(bool)
-	resultMu.Unlock()
-
-	if !success {
-		logger.Error().Msg("Stopping topic recreation due to delete errors")
-		return result, fmt.Errorf("delete errors occurred")
-	}
-
-	logger.Info().Int("total_topics", len(allTopics)).Msg("All topics deleted successfully")
-
-	// Add wait delay between delete and create operations
-	logger.Info().Msg("Waiting 5 seconds before creating topics...")
-	time.Sleep(5 * time.Second)
-
-	// Step 6: Create all topics in parallel
-	for _, topicName := range allTopics {
-		wg.Add(1)
-		go func(topic string) {
-			defer wg.Done()
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				metadataMu.Lock()
-				metadata := metadataMap[topic]
-				metadataMu.Unlock()
-				err := km.CreateTopic(topic, metadata.PartitionCount, metadata.ReplicationFactor)
-				if err != nil {
-					resultMu.Lock()
-					result["success"] = false
-					errorMsg := fmt.Sprintf("Create operation failed for topic %s: %v", topic, err)
-					result["errors"] = append(result["errors"].([]string), errorMsg)
-					resultMu.Unlock()
-					cancel() // Cancel all other goroutines
-				} else {
-					resultMu.Lock()
-					result["results"].(map[string]string)[topic] = "recreated"
-					resultMu.Unlock()
-				}
-			}
-		}(topicName)
-	}
-
-	wg.Wait()
-
-	resultMu.Lock()
-	finalSuccess := result["success"].(bool)
-	resultMu.Unlock()
-
-	if !finalSuccess {
-		logger.Error().Msg("Stopping topic recreation due to create errors")
-		return result, fmt.Errorf("create errors occurred")
-	}
-
-	logger.Info().Int("total_topics", len(allTopics)).Msg("Completed parallel topic recreation")
-
-	return result, nil
-}
 
 // parseTopicDescription parses the output of kafka-topics --describe command
 func (km *KafkaManager) parseTopicDescription(output string) (*TopicMetadata, error) {
@@ -446,143 +241,7 @@ func (km *KafkaManager) parseTopicDescription(output string) (*TopicMetadata, er
 	return metadata, nil
 }
 
-// GetTableNamesForO11ySources returns table names for enabled o11y sources from conf.yml
-func (km *KafkaManager) GetTableNamesForO11ySources() (map[string]interface{}, error) {
-	result := map[string]interface{}{
-		"success": true,
-		"results": make(map[string][]string),
-		"errors":  make([]string, 0),
-		"processed_sources": make([]string, 0),
-	}
 
-	// Step 1: Load o11y configuration from conf.yml
-	confPath := "src/migrate/conf.d/conf.yml"
-	o11yConfig, err := km.LoadO11yConfig(confPath)
-	if err != nil {
-		result["success"] = false
-		result["errors"] = append(result["errors"].([]string), fmt.Sprintf("Failed to load o11y config: %v", err))
-		return result, err
-	}
-
-	// Step 2: Find enabled o11y sources
-	enabledSources := make([]string, 0)
-	for sourceName, sourceConfig := range o11yConfig.IncludeModuleDirs {
-		if sourceConfig.Enabled {
-			enabledSources = append(enabledSources, sourceName)
-			logger.Info().Str("source", sourceName).Msg("Found enabled o11y source")
-		}
-	}
-
-	if len(enabledSources) == 0 {
-		result["success"] = false
-		result["errors"] = append(result["errors"].([]string), "No enabled o11y sources found in conf.yml")
-		return result, fmt.Errorf("no enabled o11y sources found")
-	}
-
-	result["processed_sources"] = enabledSources
-
-	// Step 3: Collect all table names for enabled sources
-	var allTables []string
-	sourceTableMap := make(map[string][]string)
-
-	for _, sourceName := range enabledSources {
-		translatedName := km.translateSourceName(sourceName)
-		logger.Info().Str("source", sourceName).Str("translated", translatedName).Msg("Processing enabled source for table names")
-
-		// Find the topic configuration for this source
-		var sourceTopicConfig *TopicConfig
-		for _, topicConfig := range km.topics {
-			if topicConfig.Name == translatedName {
-				sourceTopicConfig = &topicConfig
-				break
-			}
-		}
-
-		if sourceTopicConfig == nil {
-			errMsg := fmt.Sprintf("No topic configuration found for source: %s (translated: %s)", sourceName, translatedName)
-			result["success"] = false
-			result["errors"] = append(result["errors"].([]string), errMsg)
-			logger.Error().Str("source", sourceName).Str("translated", translatedName).Msg("No topic configuration found")
-			continue
-		}
-
-		// Collect all ClickHouse tables for this source
-		sourceTables := sourceTopicConfig.ClickhouseTables
-		sourceTableMap[sourceName] = sourceTables
-		allTables = append(allTables, sourceTables...)
-
-		logger.Info().Str("source", sourceName).Int("table_count", len(sourceTables)).Msg("Found ClickHouse tables")
-	}
-
-	result["results"] = sourceTableMap
-	result["all_tables"] = allTables
-	result["total_tables"] = len(allTables)
-
-	logger.Info().Int("total_sources", len(enabledSources)).Int("total_tables", len(allTables)).Msg("Completed table name collection for enabled o11y sources")
-
-	return result, nil
-}
-
-// TruncateClickHouseTablesForO11ySources truncates ClickHouse tables for enabled o11y sources
-func (km *KafkaManager) TruncateClickHouseTablesForO11ySources() (map[string]interface{}, error) {
-	result := map[string]interface{}{
-		"success": true,
-		"results": make(map[string]string),
-		"errors":  make([]string, 0),
-		"processed_sources": make([]string, 0),
-		"truncated_tables": make([]string, 0),
-	}
-
-	// Step 1: Get table names for enabled o11y sources
-	tableResult, err := km.GetTableNamesForO11ySources()
-	if err != nil {
-		result["success"] = false
-		result["errors"] = append(result["errors"].([]string), fmt.Sprintf("Failed to get table names: %v", err))
-		return result, err
-	}
-
-	// Check if table collection was successful
-	if !tableResult["success"].(bool) {
-		result["success"] = false
-		result["errors"] = tableResult["errors"].([]string)
-		return result, fmt.Errorf("failed to collect table names")
-	}
-
-	sourceTableMap := tableResult["results"].(map[string][]string)
-	processedSources := tableResult["processed_sources"].([]string)
-	result["processed_sources"] = processedSources
-
-	// Step 2: Truncate each table
-	for sourceName, tables := range sourceTableMap {
-		for _, tableName := range tables {
-			logger.Info().Str("source", sourceName).Str("table", tableName).Msg("Truncating ClickHouse table")
-
-			// Execute truncate command
-			truncateCmd := fmt.Sprintf("clickhouse-client --query \"TRUNCATE TABLE vusmart.%s ON CLUSTER vusmart\"", tableName)
-			cmd := exec.Command("kubectl", "exec", "chi-clickhouse-vusmart-0-0-0", "-n", "vsmaps", "--", "bash", "-c", truncateCmd)
-
-			output, err := cmd.Output()
-			if err != nil {
-				errMsg := fmt.Sprintf("Failed to truncate table %s: %v (output: %s)", tableName, err, string(output))
-				result["success"] = false
-				result["errors"] = append(result["errors"].([]string), errMsg)
-				result["results"].(map[string]string)[tableName] = fmt.Sprintf("failed: %v", err)
-				logger.Error().Err(err).Str("table", tableName).Msg("Failed to truncate table")
-			} else {
-				result["results"].(map[string]string)[tableName] = "truncated"
-				result["truncated_tables"] = append(result["truncated_tables"].([]string), tableName)
-				logger.Info().Str("table", tableName).Msg("Table truncated successfully")
-			}
-		}
-	}
-
-	totalTruncated := len(result["truncated_tables"].([]string))
-	totalErrors := len(result["errors"].([]string))
-
-	logger.Info().Int("truncated", totalTruncated).Int("errors", totalErrors).Msg("Completed ClickHouse table truncation")
-
-	return result, nil
-}
 
 // GetTopicStatus returns the status of all topics
 func (km *KafkaManager) GetTopicStatus() (map[string]interface{}, error) {
@@ -619,8 +278,11 @@ func (km *KafkaManager) GetTopicStatus() (map[string]interface{}, error) {
 
 // getSingleTopicStatus checks if a single topic exists and its status
 func (km *KafkaManager) getSingleTopicStatus(topicName string) string {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	describeCmd := fmt.Sprintf("kafka-topics --bootstrap-server localhost:9092 --describe --topic %s", topicName)
-	cmd := exec.Command("kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", describeCmd)
+	cmd := exec.CommandContext(ctx, "kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", describeCmd)
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -632,4 +294,183 @@ func (km *KafkaManager) getSingleTopicStatus(topicName string) string {
 	}
 
 	return "unknown"
+}
+
+// DescribeTopicsBulk describes multiple topics in a single kubectl exec call
+func (km *KafkaManager) DescribeTopicsBulk(topics []string) (map[string]*TopicMetadata, error) {
+	if len(topics) == 0 {
+		return make(map[string]*TopicMetadata), nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Build a single command that describes all topics
+	topicList := strings.Join(topics, ",")
+	describeCmd := fmt.Sprintf("for topic in %s; do echo '===TOPIC_START==='; kafka-topics --bootstrap-server localhost:9092 --describe --topic $topic; echo '===TOPIC_END==='; done", topicList)
+
+	cmd := exec.CommandContext(ctx, "kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", describeCmd)
+
+	output, err := cmd.Output()
+	if err != nil {
+		logger.Error().Err(err).Str("topics", topicList).Msg("Failed to execute bulk describe command")
+		return nil, fmt.Errorf("failed to describe topics: %v", err)
+	}
+
+	// Parse the output to extract metadata for each topic
+	return km.parseBulkTopicDescription(string(output), topics)
+}
+
+// DeleteTopicsBulk deletes multiple topics in a single kubectl exec call
+func (km *KafkaManager) DeleteTopicsBulk(topics []string) error {
+	if len(topics) == 0 {
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Build a single command that deletes all topics
+	topicList := strings.Join(topics, ",")
+	deleteCmd := fmt.Sprintf("for topic in %s; do kafka-topics --bootstrap-server localhost:9092 --delete --topic $topic; done", topicList)
+
+	cmd := exec.CommandContext(ctx, "kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", deleteCmd)
+
+	output, err := cmd.Output()
+	if err != nil {
+		logger.Warn().Err(err).Str("topics", topicList).Str("output", string(output)).Msg("Bulk delete command had some failures")
+		// Don't return error for delete failures as topics might not exist
+	}
+
+	logger.Info().Int("topics", len(topics)).Msg("Bulk delete command executed")
+	return nil
+}
+
+// CreateTopicsBulk creates multiple topics in a single kubectl exec call
+func (km *KafkaManager) CreateTopicsBulk(topicMetadatas map[string]*TopicMetadata) error {
+	if len(topicMetadatas) == 0 {
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Build a single command that creates all topics
+	var createCommands []string
+	for topicName, meta := range topicMetadatas {
+		createCmd := fmt.Sprintf("kafka-topics --bootstrap-server localhost:9092 --create --topic %s --partitions %d --replication-factor %d",
+			topicName, meta.PartitionCount, meta.ReplicationFactor)
+		createCommands = append(createCommands, createCmd)
+	}
+
+	fullCmd := strings.Join(createCommands, " && ")
+	cmd := exec.CommandContext(ctx, "kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", fullCmd)
+
+	output, err := cmd.Output()
+	if err != nil {
+		logger.Error().Err(err).Str("output", string(output)).Msg("Failed to execute bulk create command")
+		return fmt.Errorf("failed to create topics: %v", err)
+	}
+
+	logger.Info().Int("topics", len(topicMetadatas)).Msg("Bulk create command executed successfully")
+	return nil
+}
+
+// parseBulkTopicDescription parses the output of bulk describe command
+func (km *KafkaManager) parseBulkTopicDescription(output string, expectedTopics []string) (map[string]*TopicMetadata, error) {
+	topicMetadatas := make(map[string]*TopicMetadata)
+
+	// Split output by topic separators
+	sections := strings.Split(output, "===TOPIC_START===")
+	for _, section := range sections[1:] { // Skip first empty section
+		endIndex := strings.Index(section, "===TOPIC_END===")
+		if endIndex == -1 {
+			continue
+		}
+		topicOutput := section[:endIndex]
+
+		// Parse individual topic description
+		meta, err := km.parseTopicDescription(topicOutput)
+		if err != nil {
+			logger.Warn().Err(err).Str("output", topicOutput).Msg("Failed to parse topic description in bulk output")
+			continue
+		}
+
+		if meta.TopicName != "" {
+			topicMetadatas[meta.TopicName] = meta
+		}
+	}
+
+	// Check if we got metadata for all expected topics
+	for _, topic := range expectedTopics {
+		if _, exists := topicMetadatas[topic]; !exists {
+			return nil, fmt.Errorf("failed to get metadata for topic %s", topic)
+		}
+	}
+
+	return topicMetadatas, nil
+}
+
+// RecreateTopicsForEnabledSources recreates topics for all enabled o11y sources from conf.yml
+func (km *KafkaManager) RecreateTopicsForEnabledSources(confPath string) error {
+	// Load o11y config
+	o11yConfig, err := km.LoadO11yConfig(confPath)
+	if err != nil {
+		return fmt.Errorf("failed to load o11y config: %v", err)
+	}
+
+	// Get enabled sources
+	var enabledSources []string
+	for source, config := range o11yConfig.IncludeModuleDirs {
+		if config.Enabled {
+			enabledSources = append(enabledSources, source)
+		}
+	}
+
+	if len(enabledSources) == 0 {
+		return fmt.Errorf("no enabled o11y sources found")
+	}
+
+	// Collect all topics for enabled sources
+	var allTopics []string
+	sourceTopics := make(map[string][]string)
+	for _, source := range enabledSources {
+		translatedName := km.translateSourceName(source)
+		for _, topicGroup := range km.topics {
+			if topicGroup.Name == translatedName {
+				for _, inputTopic := range topicGroup.InputTopic {
+					allTopics = append(allTopics, inputTopic.Name)
+					sourceTopics[source] = append(sourceTopics[source], inputTopic.Name)
+				}
+				for _, outputTopic := range topicGroup.OutputTopic {
+					allTopics = append(allTopics, outputTopic.Name)
+					sourceTopics[source] = append(sourceTopics[source], outputTopic.Name)
+				}
+				break
+			}
+		}
+	}
+
+	if len(allTopics) == 0 {
+		return fmt.Errorf("no topics found for enabled sources")
+	}
+
+	// Describe all topics in bulk
+	topicMetadatas, err := km.DescribeTopicsBulk(allTopics)
+	if err != nil {
+		return fmt.Errorf("failed to describe topics: %v", err)
+	}
+
+	// Delete all topics in bulk
+	if err := km.DeleteTopicsBulk(allTopics); err != nil {
+		return fmt.Errorf("failed to delete topics: %v", err)
+	}
+
+	// Create all topics in bulk
+	if err := km.CreateTopicsBulk(topicMetadatas); err != nil {
+		return fmt.Errorf("failed to create topics: %v", err)
+	}
+
+	logger.Info().Int("sources", len(enabledSources)).Int("topics", len(allTopics)).Msg("Successfully recreated topics for enabled o11y sources")
+	return nil
 }
