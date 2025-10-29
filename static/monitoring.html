@@ -515,9 +515,10 @@
                             <input class="w-full h-10 pl-10 pr-4 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="Search by panel name..." type="text" id="k6-search"/>
                         </div>
                         <div class="flex items-center gap-4">
-                            <select class="h-10 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" id="k6-time-filter">
-                                <option>All Time Filters</option>
-                                <option>6h</option>
+                            <select class="h-10 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" id="k6-dashboard-filter">
+                                <option value="all">All Dashboards</option>
+                                <option value="Linux Server Insights">Linux Server Insights</option>
+                                <option value="MSSQL Overview Dashboard">MSSQL Overview Dashboard</option>
                             </select>
                             <button class="p-2.5 rounded-lg text-slate-600 bg-slate-50 border border-slate-300 hover:bg-slate-100 transition-colors" id="k6-refresh-btn">
                                 <span class="material-symbols-outlined animate-spin-slow">refresh</span>

@@ -18,26 +18,38 @@ type K6Result struct {
 }
 
 // GetK6Results fetches k6 results based on the specified query
-func GetK6Results(ctx context.Context) ([]K6Result, error) {
+func GetK6Results(ctx context.Context, dashboard string) ([]K6Result, error) {
 	if monitoringDBClient == nil {
 		return nil, fmt.Errorf("Monitoring ClickHouse client not initialized")
 	}
 
 	query := `
 		SELECT
-		  timestamp AS "Timestamp",
-		  vus AS "No of Users",
-		  time_range AS "Time Filter",
-		  panel_name AS "Panel Name",
-		  dashboard_name AS "Dashboard Name",
-		  quantile(0.9)(panel_avg_response_time) AS "P95 Response time"
-		FROM monitoring.k6_results
-		WHERE timestamp >= now() - INTERVAL 1 HOUR
-		  AND vus IN (5)
-		  AND time_range IN ('6h')
-		  AND dashboard_name IN ('LinuxServerInsights')
-		GROUP BY timestamp, vus, time_range, panel_name, dashboard_name
-		ORDER BY timestamp;
+	   timestamp AS "Timestamp",
+	   vus AS "No of Users",
+	   time_range AS "Time Filter",
+	   panel_name AS "Panel Name",
+	   dashboard_name AS "Dashboard Name",
+	   quantile(0.9)(panel_avg_response_time) AS "P95 Response time"
+FROM monitoring.k6_results
+WHERE timestamp >= now() - INTERVAL 6 HOUR
+	 AND vus IN (5)
+	 AND time_range IN ('15m')
+	`
+
+	// Add dashboard filter if specified
+	if dashboard != "" && dashboard != "all" {
+		query += fmt.Sprintf(" AND dashboard_name IN ('%s')", dashboard)
+	}
+
+	query += `
+GROUP BY
+	   timestamp,
+	   vus,
+	   time_range,
+	   panel_name,
+	   dashboard_name
+ORDER BY timestamp ASC;
 	`
 
 	rows, err := monitoringDBClient.Client.Query(ctx, query)

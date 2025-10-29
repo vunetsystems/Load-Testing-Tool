@@ -166,7 +166,9 @@ func HandleAPIGetPodMonitoring(w http.ResponseWriter, r *http.Request) {
 }
 // HandleAPIGetK6Results handles GET /api/clickhouse/k6-results
 func HandleAPIGetK6Results(w http.ResponseWriter, r *http.Request) {
-	k6Results, err := clickhouse.GetK6Results(r.Context())
+	dashboard := r.URL.Query().Get("dashboard")
+
+	k6Results, err := clickhouse.GetK6Results(r.Context(), dashboard)
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
