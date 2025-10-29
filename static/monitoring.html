@@ -492,98 +492,7 @@
                     </div>
                 </div>
 
-                <div id="system-section" class="hidden space-y-8">
-                    <div class="text-center py-20">
-                        <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">health_and_safety</span>
-                        <h3 class="text-xl font-semibold mb-2 text-slate-700">System Health</h3>
-                        <p class="text-slate-500">Comprehensive system health monitoring and diagnostics</p>
-                    </div>
-                </div>
-
-                <div id="logs-section" class="hidden space-y-8">
-                    <div class="text-center py-20">
-                        <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">description</span>
-                        <h3 class="text-xl font-semibold mb-2 text-slate-700">Log Analysis</h3>
-                        <p class="text-slate-500">Advanced log analysis and pattern detection</p>
-                    </div>
-                </div>
-
-                <div id="k6-monitoring-section" class="hidden space-y-8">
-                    <div class="flex flex-wrap justify-between gap-4 items-center mb-6">
-                        <h1 class="text-4xl font-black leading-tight tracking-[-0.033em] text-slate-900">K6 Load Testing Results</h1>
-                        <p class="text-sm text-slate-500">Last updated: <span id="k6-last-update">Never</span></p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-slate-500">Total Results</p>
-                            <p class="tracking-light text-3xl font-bold text-slate-900" id="k6-total-results">-</p>
-                        </div>
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-slate-500">Avg P95 Response Time</p>
-                            <p class="tracking-light text-3xl font-bold text-slate-900" id="k6-avg-p95">-</p>
-                        </div>
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-slate-500">Virtual Users</p>
-                            <p class="tracking-light text-3xl font-bold text-slate-900" id="k6-vus">-</p>
-                        </div>
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-base font-medium text-slate-500">Dashboard</p>
-                            <p class="tracking-light text-3xl font-bold text-slate-900" id="k6-dashboard">-</p>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-wrap justify-between gap-4 px-4 py-3 bg-white rounded-xl border border-slate-200 mb-6 shadow-sm">
-                        <div class="relative flex-1">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                            <input class="w-full h-10 pl-10 pr-4 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="Search by panel name..." type="text" id="k6-search"/>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <select class="h-10 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" id="k6-dashboard-filter">
-                                <option value="all">All Dashboards</option>
-                                <option value="Linux Server Insights">Linux Server Insights</option>
-                                <option value="MSSQL Overview Dashboard">MSSQL Overview Dashboard</option>
-                            </select>
-                            <button class="p-2.5 rounded-lg text-slate-600 bg-slate-50 border border-slate-300 hover:bg-slate-100 transition-colors" id="k6-refresh-btn">
-                                <span class="material-symbols-outlined animate-spin-slow">refresh</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="@container">
-                        <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-                            <table class="w-full min-w-max text-left">
-                                <thead class="border-b border-slate-200">
-                                    <tr>
-                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Timestamp</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Virtual Users</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Time Filter</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Panel Name</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Dashboard</th>
-                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">P95 Response Time (ms)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="k6-results-body" class="divide-y divide-slate-200 text-slate-700">
-                                    </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div id="k6-loading-state" class="text-center py-8">
-                        <div class="inline-flex items-center gap-3">
-                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
-                            <span class="text-slate-500">Loading K6 results...</span>
-                        </div>
-                    </div>
-
-                    <div id="k6-no-data-state" class="hidden text-center py-8">
-                        <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">analytics</span>
-                        <h3 class="text-xl font-semibold mb-2 text-slate-700">No K6 Results Found</h3>
-                        <p class="text-slate-500">No load testing results are available for the selected criteria.</p>
-                    </div>
-                </div>
-
-                <div id="pod-monitoring-section" class="hidden space-y-8">
+                 <div id="pod-monitoring-section" class="hidden space-y-8">
                     <div class="flex flex-wrap justify-between gap-4 items-center mb-6">
                         <h1 class="text-4xl font-black leading-tight tracking-[-0.033em] text-slate-900">Pod Monitoring</h1>
                         <p class="text-sm text-slate-500">Last updated: <span id="pod-last-update">a few seconds ago</span></p>
@@ -657,6 +566,22 @@
                     </div>
                 </div>
 
+                <div id="system-section" class="hidden space-y-8">
+                    <div class="text-center py-20">
+                        <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">health_and_safety</span>
+                        <h3 class="text-xl font-semibold mb-2 text-slate-700">System Health</h3>
+                        <p class="text-slate-500">Comprehensive system health monitoring and diagnostics</p>
+                    </div>
+                </div>
+
+                <div id="logs-section" class="hidden space-y-8">
+                    <div class="text-center py-20">
+                        <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">description</span>
+                        <h3 class="text-xl font-semibold mb-2 text-slate-700">Log Analysis</h3>
+                        <p class="text-slate-500">Advanced log analysis and pattern detection</p>
+                    </div>
+                </div>
+
                 <div id="alerts-section" class="hidden space-y-8">
                     <div class="text-center py-20">
                         <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">notifications</span>
@@ -664,6 +589,138 @@
                         <p class="text-slate-500">Alert management and notification configuration</p>
                     </div>
                 </div>
+
+                <div id="k6-monitoring-section" class="hidden space-y-8">
+                    <div class="flex flex-wrap justify-between gap-4 items-center mb-6">
+                        <h1 class="text-4xl font-black leading-tight tracking-[-0.033em] text-slate-900">K6 Load Testing Results</h1>
+                        <p class="text-sm text-slate-500">Last updated: <span id="k6-last-update">Never</span></p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-slate-500">Total Results</p>
+                            <p class="tracking-light text-3xl font-bold text-slate-900" id="k6-total-results">-</p>
+                        </div>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-slate-500">Avg P95 Response Time</p>
+                            <p class="tracking-light text-3xl font-bold text-slate-900" id="k6-avg-p95">-</p>
+                        </div>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-slate-500">Virtual Users</p>
+                            <p class="tracking-light text-3xl font-bold text-slate-900" id="k6-vus">-</p>
+                        </div>
+                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                            <p class="text-base font-medium text-slate-500">Dashboard</p>
+                            <p class="tracking-light text-3xl font-bold text-slate-900" id="k6-dashboard">-</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap justify-between gap-4 px-4 py-3 bg-white rounded-xl border border-slate-200 mb-6 shadow-sm">
+                        <div class="relative flex-1">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                            <input class="w-full h-10 pl-10 pr-4 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="Search by panel name..." type="text" id="k6-search"/>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <select class="h-10 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" id="k6-dashboard-filter">
+                                <option value="all">All Dashboards</option>
+                                <option value="Linux Server Insights">Linux Server Insights</option>
+                                <option value="MSSQL Overview Dashboard">MSSQL Overview Dashboard</option>
+                            </select>
+                            <button class="p-2.5 rounded-lg text-slate-600 bg-slate-50 border border-slate-300 hover:bg-slate-100 transition-colors" id="k6-refresh-btn">
+                                <span class="material-symbols-outlined animate-spin-slow">refresh</span>
+                            </button>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-4 text-slate-900">Panel-Level Performance</h3>
+                    <div class="@container">
+                        <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+                            <table class="w-full min-w-max text-left">
+                                <thead class="border-b border-slate-200">
+                                    <tr>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Timestamp</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Virtual Users</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Time Filter</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Panel Name</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Dashboard</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">P95 Response Time (ms)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="k6-results-body" class="divide-y divide-slate-200 text-slate-700">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="k6-loading-state" class="text-center py-8">
+                        <div class="inline-flex items-center gap-3">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                            <span class="text-slate-500">Loading K6 results...</span>
+                        </div>
+                    </div>
+
+                    <div id="k6-no-data-state" class="hidden text-center py-8">
+                        <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">analytics</span>
+                        <h3 class="text-xl font-semibold mb-2 text-slate-700">No K6 Results Found</h3>
+                        <p class="text-slate-500">No load testing results are available for the selected criteria.</p>
+                    </div>
+
+                    <!-- Pagination Controls for Panel Table -->
+                    <div class="flex items-center justify-between mt-6 px-4">
+                        <p class="text-sm text-slate-500" id="k6-pagination-info">Showing 0 to 0 of 0 results</p>
+                        <div class="flex items-center gap-2">
+                            <button class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled="" id="k6-prev-btn">Previous</button>
+                            <button class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 transition-colors" id="k6-next-btn">Next</button>
+                        </div>
+                    </div>
+
+                    <!-- K6 Dashboard Results Table -->
+                    <div class="mt-8">
+                        <h3 class="text-lg font-semibold mb-4 text-slate-900">Dashboard-Level Performance</h3>
+                        <div class="@container">
+                            <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+                                <table class="w-full min-w-max text-left">
+                                    <thead class="border-b border-slate-200">
+                                        <tr>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Timestamp</th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Virtual Users</th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Time Filter</th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">Dashboard Name</th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">P95 Response Time (ms)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="k6-dashboard-results-body" class="divide-y divide-slate-200 text-slate-700">
+                                        <!-- Dashboard results will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="k6-dashboard-loading-state" class="text-center py-8">
+                            <div class="inline-flex items-center gap-3">
+                                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                                <span class="text-slate-500">Loading dashboard results...</span>
+                            </div>
+                        </div>
+
+                        <div id="k6-dashboard-no-data-state" class="hidden text-center py-8">
+                            <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">analytics</span>
+                            <h3 class="text-xl font-semibold mb-2 text-slate-700">No Dashboard Results Found</h3>
+                            <p class="text-slate-500">No dashboard-level results are available.</p>
+                        </div>
+                    </div>
+                </div>
+                    
+            
+            </div>
+                    </div>
+
+                    <!-- K6 Dashboard Results Table -->
+                    
+                </div>
+
+               
+
+                
             </div>
         </main>
     </div>

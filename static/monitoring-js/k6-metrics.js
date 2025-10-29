@@ -4,10 +4,13 @@ class K6MonitoringManager {
     constructor() {
         this.k6Data = [];
         this.filteredData = [];
+        this.k6DashboardData = [];
         this.lastUpdate = null;
         this.isUpdating = false;
         this.currentSearch = '';
         this.currentDashboardFilter = 'all';
+        this.currentPage = 1;
+        this.itemsPerPage = 10;
     }
 
     // Initialize K6 monitoring
@@ -15,6 +18,7 @@ class K6MonitoringManager {
         console.log('Initializing K6 monitoring...');
         this.attachEventListeners();
         await this.fetchK6Data();
+        await this.fetchK6DashboardData();
     }
 
     // Attach event listeners
@@ -24,6 +28,7 @@ class K6MonitoringManager {
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
                 this.currentSearch = e.target.value.toLowerCase();
+                console.log('Search input changed:', this.currentSearch);
                 this.filterAndDisplayData();
             });
         }
@@ -33,7 +38,8 @@ class K6MonitoringManager {
         if (dashboardFilter) {
             dashboardFilter.addEventListener('change', (e) => {
                 this.currentDashboardFilter = e.target.value;
-                this.fetchK6Data(); // Refetch data when dashboard changes
+                console.log('Dashboard filter changed:', this.currentDashboardFilter);
+                this.filterAndDisplayData(); // Apply filter locally without refetching
             });
         }
 
@@ -42,6 +48,29 @@ class K6MonitoringManager {
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => {
                 this.refresh();
+            });
+        }
+
+        // Pagination buttons
+        const prevBtn = document.getElementById('k6-prev-btn');
+        const nextBtn = document.getElementById('k6-next-btn');
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (this.currentPage > 1) {
+                    this.currentPage--;
+                    this.displayCurrentPage();
+                }
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(this.filteredData.length / this.itemsPerPage);
+                if (this.currentPage < totalPages) {
+                    this.currentPage++;
+                    this.displayCurrentPage();
+                }
             });
         }
     }
@@ -68,7 +97,9 @@ class K6MonitoringManager {
             if (result.success && result.data) {
                 this.k6Data = result.data;
                 this.lastUpdate = new Date();
-                console.log('K6 monitoring data updated:', this.k6Data);
+                console.log('K6 monitoring data updated:', this.k6Data.length, 'items');
+                console.log('Dashboard filter:', this.currentDashboardFilter);
+                console.log('API URL:', url);
                 this.updateLastUpdateTime();
                 this.processData();
                 this.filterAndDisplayData();
@@ -115,16 +146,25 @@ class K6MonitoringManager {
         // Apply filters
         this.filteredData = this.k6Data.filter(item => {
             const matchesSearch = !this.currentSearch ||
-                item.panel_name.toLowerCase().includes(this.currentSearch) ||
-                item.dashboard_name.toLowerCase().includes(this.currentSearch);
+                (item.panel_name && item.panel_name.toLowerCase().includes(this.currentSearch)) ||
+                (item.dashboard_name && item.dashboard_name.toLowerCase().includes(this.currentSearch));
 
-            return matchesSearch;
+            const matchesDashboard = this.currentDashboardFilter === 'all' ||
+                this.currentDashboardFilter === '' ||
+                (item.dashboard_name && item.dashboard_name === this.currentDashboardFilter);
+
+            return matchesSearch && matchesDashboard;
         });
 
-        this.renderTable();
+        // Reset to first page when filtering
+        this.currentPage = 1;
+        this.displayCurrentPage();
+        console.log('Filtered data:', this.filteredData.length, 'items from', this.k6Data.length, 'total');
+        console.log('Current search:', this.currentSearch);
+        console.log('Current dashboard filter:', this.currentDashboardFilter);
     }
 
-    // Render the data table
+    // Render the data table (shows current page only)
     renderTable() {
         const tbody = document.getElementById('k6-results-body');
         if (!tbody) return;
@@ -139,10 +179,16 @@ class K6MonitoringManager {
                 </td>
             `;
             tbody.appendChild(emptyRow);
+            this.updatePaginationControls();
             return;
         }
 
-        this.filteredData.forEach(item => {
+        // Calculate pagination
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = Math.min(startIndex + this.itemsPerPage, this.filteredData.length);
+        const currentPageData = this.filteredData.slice(startIndex, endIndex);
+
+        currentPageData.forEach(item => {
             const row = document.createElement('tr');
             row.className = 'border-b border-border-light dark:border-border-dark hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50';
 
@@ -167,6 +213,47 @@ class K6MonitoringManager {
 
             tbody.appendChild(row);
         });
+
+        this.updatePaginationControls();
+    }
+
+    // Display current page data
+    displayCurrentPage() {
+        this.renderTable();
+    }
+
+    // Update pagination controls
+    updatePaginationControls() {
+        const prevBtn = document.getElementById('k6-prev-btn');
+        const nextBtn = document.getElementById('k6-next-btn');
+        const paginationInfo = document.getElementById('k6-pagination-info');
+
+        const totalItems = this.filteredData.length;
+        const totalPages = Math.ceil(totalItems / this.itemsPerPage);
+        const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
+        const endItem = Math.min(this.currentPage * this.itemsPerPage, totalItems);
+
+        // Update pagination info
+        if (paginationInfo) {
+            if (totalItems === 0) {
+                paginationInfo.textContent = 'Showing 0 to 0 of 0 results';
+            } else {
+                paginationInfo.textContent = `Showing ${startItem} to ${endItem} of ${totalItems} results`;
+            }
+        }
+
+        // Update button states
+        if (prevBtn) {
+            prevBtn.disabled = this.currentPage <= 1;
+            prevBtn.classList.toggle('opacity-50', this.currentPage <= 1);
+            prevBtn.classList.toggle('cursor-not-allowed', this.currentPage <= 1);
+        }
+
+        if (nextBtn) {
+            nextBtn.disabled = this.currentPage >= totalPages;
+            nextBtn.classList.toggle('opacity-50', this.currentPage >= totalPages);
+            nextBtn.classList.toggle('cursor-not-allowed', this.currentPage >= totalPages);
+        }
     }
 
     // Format timestamp for display
@@ -224,9 +311,115 @@ class K6MonitoringManager {
         }
     }
 
+    // Fetch K6 dashboard data from API
+    async fetchK6DashboardData() {
+        if (this.isUpdating) return;
+
+        this.isUpdating = true;
+        try {
+            this.showDashboardLoading();
+
+            const response = await fetch('/api/clickhouse/k6-dashboard-results');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.success && result.data) {
+                this.k6DashboardData = result.data;
+                console.log('K6 dashboard data updated:', this.k6DashboardData);
+                this.renderDashboardTable();
+                this.hideDashboardLoading();
+            } else {
+                console.error('Failed to fetch K6 dashboard data:', result.message);
+                this.showDashboardNoData();
+            }
+        } catch (error) {
+            console.error('Error fetching K6 dashboard data:', error);
+            this.showDashboardNoData();
+        } finally {
+            this.isUpdating = false;
+        }
+    }
+
+    // Render the dashboard data table
+    renderDashboardTable() {
+        const tbody = document.getElementById('k6-dashboard-results-body');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+
+        if (!this.k6DashboardData.length) {
+            const emptyRow = document.createElement('tr');
+            emptyRow.innerHTML = `
+                <td colspan="5" class="px-4 py-8 text-center text-text-secondary-light dark:text-text-secondary-dark">
+                    No dashboard results available
+                </td>
+            `;
+            tbody.appendChild(emptyRow);
+            return;
+        }
+
+        this.k6DashboardData.forEach(item => {
+            const row = document.createElement('tr');
+            row.className = 'border-b border-border-light dark:border-border-dark hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50';
+
+            // Format timestamp
+            const timestamp = this.formatTimestamp(item.timestamp);
+
+            // Get response time class
+            const responseTimeClass = this.getResponseTimeClass(item.p95_response_time);
+
+            row.innerHTML = `
+                <td class="px-4 py-3 text-sm">${timestamp}</td>
+                <td class="px-4 py-3 text-sm font-medium">${item.no_of_users}</td>
+                <td class="px-4 py-3 text-sm">${item.time_filter}</td>
+                <td class="px-4 py-3 text-sm">${item.dashboard_name}</td>
+                <td class="px-4 py-3 text-sm">
+                    <span class="font-medium ${responseTimeClass}">
+                        ${item.p95_response_time.toFixed(2)}ms
+                    </span>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+        });
+    }
+
+    // Show dashboard loading state
+    showDashboardLoading() {
+        const loadingState = document.getElementById('k6-dashboard-loading-state');
+        const noDataState = document.getElementById('k6-dashboard-no-data-state');
+
+        if (loadingState) {
+            loadingState.classList.remove('hidden');
+        }
+        if (noDataState) {
+            noDataState.classList.add('hidden');
+        }
+    }
+
+    // Hide dashboard loading state
+    hideDashboardLoading() {
+        const loadingState = document.getElementById('k6-dashboard-loading-state');
+        if (loadingState) {
+            loadingState.classList.add('hidden');
+        }
+    }
+
+    // Show dashboard no data state
+    showDashboardNoData() {
+        this.hideDashboardLoading();
+        const noDataState = document.getElementById('k6-dashboard-no-data-state');
+        if (noDataState) {
+            noDataState.classList.remove('hidden');
+        }
+    }
+
     // Manual refresh
     async refresh() {
         await this.fetchK6Data();
+        await this.fetchK6DashboardData();
     }
 
     // Get current data

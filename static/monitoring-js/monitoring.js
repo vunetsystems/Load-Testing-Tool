@@ -36,7 +36,9 @@ async function initializeMonitoring() {
     // Initialize K6 monitoring manager
     console.log('initializeMonitoring: Creating K6MonitoringManager...');
     k6MonitoringManager = new K6MonitoringManager();
-    console.log('initializeMonitoring: K6MonitoringManager created');
+    console.log('initializeMonitoring: K6MonitoringManager created, calling initialize...');
+    await k6MonitoringManager.initialize();
+    console.log('initializeMonitoring: K6MonitoringManager initialized');
 
     // Update last update timestamp
     updateLastUpdateTime();
