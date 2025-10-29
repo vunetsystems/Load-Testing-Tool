@@ -101,8 +101,9 @@ for DASHBOARD_SCRIPT in "$SCRIPT_DIR"/*.js; do
       panel_id="${BASH_REMATCH[2]}"
       panel_name=$(echo "${BASH_REMATCH[3]}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
       panel_status="${BASH_REMATCH[4]}"
-      panel_avg="${BASH_REMATCH[5]}"
-      panel_success_rate="${BASH_REMATCH[6]}"
+panel_avg=$(echo "$panel_avg" | sed 's/[[:space:]]*$//; s/ source=console.*//')
+panel_success_rate=$(echo "$panel_success_rate" | sed 's/[[:space:]]*$//; s/ source=console.*//')
+
 
       # Look up the dashboard metrics we stored in pass 1
       db_status=${dashboard_statuses["$db_name"]}

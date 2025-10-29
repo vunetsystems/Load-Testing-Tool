@@ -7,7 +7,7 @@ class K6MonitoringManager {
         this.lastUpdate = null;
         this.isUpdating = false;
         this.currentSearch = '';
-        this.currentTimeFilter = 'All Time Filters';
+        this.currentDashboardFilter = 'all';
     }
 
     // Initialize K6 monitoring
@@ -28,12 +28,12 @@ class K6MonitoringManager {
             });
         }
 
-        // Time filter
-        const timeFilter = document.getElementById('k6-time-filter');
-        if (timeFilter) {
-            timeFilter.addEventListener('change', (e) => {
-                this.currentTimeFilter = e.target.value;
-                this.filterAndDisplayData();
+        // Dashboard filter
+        const dashboardFilter = document.getElementById('k6-dashboard-filter');
+        if (dashboardFilter) {
+            dashboardFilter.addEventListener('change', (e) => {
+                this.currentDashboardFilter = e.target.value;
+                this.fetchK6Data(); // Refetch data when dashboard changes
             });
         }
 
@@ -54,7 +54,12 @@ class K6MonitoringManager {
         try {
             this.showLoading();
 
-            const response = await fetch('/api/clickhouse/k6-results');
+            const params = new URLSearchParams();
+            if (this.currentDashboardFilter && this.currentDashboardFilter !== 'all') {
+                params.append('dashboard', this.currentDashboardFilter);
+            }
+            const url = `/api/clickhouse/k6-results${params.toString() ? '?' + params.toString() : ''}`;
+            const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -113,10 +118,7 @@ class K6MonitoringManager {
                 item.panel_name.toLowerCase().includes(this.currentSearch) ||
                 item.dashboard_name.toLowerCase().includes(this.currentSearch);
 
-            const matchesTimeFilter = this.currentTimeFilter === 'All Time Filters' ||
-                item.time_filter === this.currentTimeFilter;
-
-            return matchesSearch && matchesTimeFilter;
+            return matchesSearch;
         });
 
         this.renderTable();
