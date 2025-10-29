@@ -10,6 +10,10 @@ const dashboardResponseTime = new Trend('dashboard_response_time');
 const dashboardSuccessCount = new Counter('dashboard_success_count');
 const dashboardFailureCount = new Counter('dashboard_failure_count');
 
+const panelResponseTime = new Trend('panel_response_time');
+const panelSuccessCount = new Counter('panel_success_count');
+const panelFailureCount = new Counter('panel_failure_count');
+
 // ================================
 // Config Paths
 // ================================
@@ -78,27 +82,21 @@ const config = new SharedArray('k6_config', () => {
 })[0];
 
 const usersRaw = open(COOKIE_PATH, 'utf-8').split('\n');
-const users = usersRaw.map(line => {
+const users = usersRaw
+  .map(line => {
     const [username, password, vunetSession, xVuNetHTTPInfo, grafanaSessionExpiry] = line.split(',');
     return {
-        username,
-        password,
-        vunetSession,
-        xVuNetHTTPInfo,
-        grafanaSessionExpiry: parseInt(grafanaSessionExpiry, 10)
+      username,
+      password,
+      vunetSession,
+      xVuNetHTTPInfo,
+      grafanaSessionExpiry: parseInt(grafanaSessionExpiry, 10),
     };
-}).filter(user => user.vunetSession && user.xVuNetHTTPInfo && user.grafanaSessionExpiry);
+  })
+  .filter(user => user.vunetSession && user.xVuNetHTTPInfo && user.grafanaSessionExpiry);
 
 const TIME_FROM = __ENV.TIME_FROM || 'now-15m';
 const TIME_TO = __ENV.TIME_TO || 'now';
-
-// ================================
-// Dashboard Mapping
-// ================================
-const dashboardMap = {};
-config.dashboards.forEach((d, idx) => {
-  dashboardMap[`dashboard_${d.slug}`] = idx;
-});
 
 // ================================
 // Dynamic Options
@@ -110,8 +108,8 @@ export const options = {
 // ================================
 // Helper Functions
 // ================================
-function fetchJSON(url, params, headers, cookies) {
-  const res = http.get(url, { params, headers, cookies });
+function fetchJSON(url, params, headers) {
+  const res = http.get(url, { params, headers });
   let json = {};
   try {
     json = res.json();
@@ -149,36 +147,24 @@ export default function () {
   const baseDashboardAPI = config.base_urls.dashboard_api;
   const basePanelURL = config.base_urls.panel;
 
-  // Iterate through all dashboards in the config
+  // Iterate through dashboards
   for (const d of config.dashboards) {
     const dashboardUrl = `${baseDashboardAPI}${d.id}`;
 
     group(`Dashboard: ${d.name}`, function () {
+      const startTime = Date.now();
       const { res, json } = fetchJSON(dashboardUrl, {}, headers);
-      const status = res.status;
+      const endTime = Date.now();
 
-      const ok = check(res, {
-        'Dashboard loaded successfully': (r) => r.status === 200,
-      });
+      const responseTime = res.timings?.duration || (endTime - startTime);
+      dashboardResponseTime.add(responseTime, { dashboard: d.name });
 
-      // Record metrics
-      dashboardResponseTime.add(res.timings.duration, { dashboard: d.name });
+      const ok = check(res, { 'Dashboard loaded successfully': (r) => r.status === 200 });
+      if (ok) dashboardSuccessCount.add(1);
+      else dashboardFailureCount.add(1);
 
-      // Required for Bash parsing - log dashboard name first
-      console.log(`Dashboard: ${d.name}`);
-      console.log(`Dashboard is status ${status}`);
+      console.log(`DASHBOARD_DATA: name=${d.name} | status=${res.status} | response_time=${responseTime.toFixed(2)}ms`);
 
-      if (ok) {
-        dashboardSuccessCount.add(1);
-      } else {
-        dashboardFailureCount.add(1);
-      }
-
-      const dashboardSuccessRate =
-        (dashboardSuccessCount.value / (dashboardSuccessCount.value + dashboardFailureCount.value)) * 100 || 0;
-      console.log(`dashboard_success_rate: ${dashboardSuccessRate.toFixed(2)}%`);
-
-      // Panels
       if (!json?.dashboard?.panels) {
         console.log(`⚠️ No panels found for ${d.name}`);
         return;
@@ -189,26 +175,26 @@ export default function () {
 
       for (const p of panels) {
         const panelUrl = `${basePanelURL}${d.id}/${d.slug}?orgId=1&from=${TIME_FROM}&to=${TIME_TO}&panelId=${p.id}`;
-        const res = http.get(panelUrl, headers);
-        const panelStatus = res.status;
 
-        check(res, {
-          'Panel loaded': (r) => r.status === 200,
-        });
+        const panelStart = Date.now();
+        const res = http.get(panelUrl, { headers });
+        const panelEnd = Date.now();
 
-       // --- ADD THESE LINES ---
-        const panelResp = res.timings.duration.toFixed(2);
-        const panelSuccess = panelStatus === 200 ? 1 : 0;
-        const panelSuccessRate = (panelSuccess * 100).toFixed(2);
-        
-        // Sanitize panel title to remove any pipe characters
-        const panelTitle = p.title.replace(/\|/g, '-'); 
+        const responseTime = res.timings?.duration || (panelEnd - panelStart);
+        panelResponseTime.add(responseTime, { dashboard: d.name, panel: p.title });
 
-        // Log everything on one, atomic line
-        console.log(`PANEL_DATA: dashboard_name=${d.name} | panel_id=${p.id} | panel_name=${panelTitle} | panel_status=${panelStatus} | panel_avg=${panelResp} | panel_success_rate=${panelSuccessRate}`);
+        const success = res.status === 200;
+        if (success) panelSuccessCount.add(1);
+        else panelFailureCount.add(1);
+
+        const safeTitle = (p.title || 'Untitled').replace(/\|/g, '-');
+
+        console.log(
+          `[PANEL_DATA] dashboard=${d.name} | panel_id=${p.id} | panel_name=${safeTitle} | status=${res.status} | response_time=${responseTime.toFixed(2)}ms`
+        );
       }
     });
 
-    sleep(1); // Sleep between dashboards
+    sleep(1);
   }
 }

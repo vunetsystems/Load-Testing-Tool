@@ -135,6 +135,15 @@ class VuDataSimManager {
             binarySshOutput: document.getElementById('binary-ssh-output'),
             binaryAllStatusBody: document.getElementById('binary-all-status-body'),
 
+            // Bulk operation elements
+            startAllBinariesBtn: document.getElementById('start-all-binaries-btn'),
+            stopAllBinariesBtn: document.getElementById('stop-all-binaries-btn'),
+            refreshAllStatusBtn: document.getElementById('refresh-all-status-btn'),
+            bulkOperationLogs: document.getElementById('bulk-operation-logs'),
+            bulkLogsOutput: document.getElementById('bulk-logs-output'),
+            bulkOperationStatus: document.getElementById('bulk-operation-status'),
+            bulkOperationProgress: document.getElementById('bulk-operation-progress'),
+
             // Dashboard elements
             nodeStatusIndicatorsContainer: document.getElementById('node-status-indicators'),
 
@@ -288,6 +297,11 @@ class VuDataSimManager {
         this.elements.startBinaryBtn?.addEventListener('click', () => this.binaryControl.startBinary());
         this.elements.stopBinaryBtn?.addEventListener('click', () => this.binaryControl.stopBinary());
         this.elements.binaryNodeSelect?.addEventListener('change', () => this.binaryControl.onBinaryNodeSelectChange());
+
+        // Bulk binary control action listeners
+        this.elements.startAllBinariesBtn?.addEventListener('click', () => this.startAllBinaries());
+        this.elements.stopAllBinariesBtn?.addEventListener('click', () => this.stopAllBinaries());
+        this.elements.refreshAllStatusBtn?.addEventListener('click', () => this.refreshAllBinaryStatus());
 
         // Add get binary output button listener
         const getOutputBtn = document.getElementById('get-binary-output-btn');
@@ -657,6 +671,170 @@ class VuDataSimManager {
             button.innerHTML = '<span class="material-symbols-outlined">play_arrow</span><span>Start K6 Test</span>';
             button.disabled = false;
         }
+    }
+
+    async startAllBinaries() {
+        try {
+            // Disable the button and show loading state
+            const button = this.elements.startAllBinariesBtn;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Starting All...</span>';
+            button.disabled = true;
+
+            // Show bulk operation logs
+            this.showBulkOperationLogs();
+
+            console.log('Starting all binaries on enabled nodes...');
+
+            // Call the API to start all binaries
+            const response = await this.callAPI('/api/binary/start-all', 'POST');
+
+            if (!response.success) {
+                throw new Error(response.message || 'Failed to start all binaries');
+            }
+
+            console.log('Bulk start operation completed:', response);
+
+            // Update logs and progress
+            this.updateBulkOperationLogs(response.data);
+
+            // Show success notification
+            this.showNotification(response.message, response.data.failed > 0 ? 'warning' : 'success');
+
+            // Refresh all status after operation
+            setTimeout(() => this.refreshAllBinaryStatus(), 2000);
+
+        } catch (error) {
+            console.error('Error starting all binaries:', error);
+            this.showNotification(`Failed to start all binaries: ${error.message}`, 'error');
+
+        } finally {
+            // Re-enable the button and restore original text
+            const button = this.elements.startAllBinariesBtn;
+            button.innerHTML = '<span class="material-symbols-outlined">play_arrow</span><span>Start All Binaries</span>';
+            button.disabled = false;
+        }
+    }
+
+    async stopAllBinaries() {
+        try {
+            // Disable the button and show loading state
+            const button = this.elements.stopAllBinariesBtn;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Stopping All...</span>';
+            button.disabled = true;
+
+            // Show bulk operation logs
+            this.showBulkOperationLogs();
+
+            console.log('Stopping all binaries on enabled nodes...');
+
+            // Call the API to stop all binaries
+            const response = await this.callAPI('/api/binary/stop-all', 'POST');
+
+            if (!response.success) {
+                throw new Error(response.message || 'Failed to stop all binaries');
+            }
+
+            console.log('Bulk stop operation completed:', response);
+
+            // Update logs and progress
+            this.updateBulkOperationLogs(response.data);
+
+            // Show success notification
+            this.showNotification(response.message, response.data.failed > 0 ? 'warning' : 'success');
+
+            // Refresh all status after operation
+            setTimeout(() => this.refreshAllBinaryStatus(), 2000);
+
+        } catch (error) {
+            console.error('Error stopping all binaries:', error);
+            this.showNotification(`Failed to stop all binaries: ${error.message}`, 'error');
+
+        } finally {
+            // Re-enable the button and restore original text
+            const button = this.elements.stopAllBinariesBtn;
+            button.innerHTML = '<span class="material-symbols-outlined">stop</span><span>Stop All Binaries</span>';
+            button.disabled = false;
+        }
+    }
+
+    async refreshAllBinaryStatus() {
+        try {
+            console.log('Refreshing all binary statuses...');
+
+            // Call the API to get all binary statuses
+            const response = await this.callAPI('/api/binary/status', 'GET');
+
+            if (!response.success) {
+                throw new Error(response.message || 'Failed to refresh binary statuses');
+            }
+
+            console.log('Binary statuses refreshed:', response.data);
+
+            // Update the binary control modal table
+            this.binaryControl.updateAllStatusTable(response.data);
+
+            // Show success notification
+            this.showNotification(`Refreshed status for ${response.data.length} nodes`, 'success');
+
+        } catch (error) {
+            console.error('Error refreshing binary statuses:', error);
+            this.showNotification(`Failed to refresh binary statuses: ${error.message}`, 'error');
+        }
+    }
+
+    showBulkOperationLogs() {
+        if (this.elements.bulkOperationLogs) {
+            this.elements.bulkOperationLogs.classList.remove('hidden');
+            if (this.elements.bulkLogsOutput) {
+                this.elements.bulkLogsOutput.innerHTML = '<div class="text-text-secondary-light dark:text-text-secondary-dark">Operation starting...</div>';
+            }
+            if (this.elements.bulkOperationStatus) {
+                this.elements.bulkOperationStatus.textContent = 'Operation in progress...';
+            }
+            if (this.elements.bulkOperationProgress) {
+                this.elements.bulkOperationProgress.textContent = '0/0 completed';
+            }
+        }
+    }
+
+    updateBulkOperationLogs(data) {
+        if (!data || !this.elements.bulkLogsOutput) return;
+
+        const logsContainer = this.elements.bulkLogsOutput;
+        logsContainer.innerHTML = '';
+
+        // Display logs
+        if (data.logs && data.logs.length > 0) {
+            data.logs.forEach(log => {
+                const logElement = document.createElement('div');
+                logElement.className = 'text-xs mb-1';
+
+                // Color code based on log content
+                if (log.includes('SUCCESS:')) {
+                    logElement.className += ' text-success';
+                } else if (log.includes('FAILED:')) {
+                    logElement.className += ' text-danger';
+                } else {
+                    logElement.className += ' text-text-secondary-light dark:text-text-secondary-dark';
+                }
+
+                logElement.textContent = log;
+                logsContainer.appendChild(logElement);
+            });
+        }
+
+        // Update status and progress
+        if (this.elements.bulkOperationStatus) {
+            this.elements.bulkOperationStatus.textContent = `Operation completed: ${data.successful}/${data.totalNodes} successful`;
+        }
+        if (this.elements.bulkOperationProgress) {
+            this.elements.bulkOperationProgress.textContent = `${data.successful}/${data.totalNodes} completed`;
+        }
+
+        // Auto-scroll to bottom
+        logsContainer.scrollTop = logsContainer.scrollHeight;
     }
 }
 

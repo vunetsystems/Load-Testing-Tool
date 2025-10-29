@@ -100,6 +100,60 @@ func HandleAPIStartBinary(w http.ResponseWriter, r *http.Request) {
 	SendJSONResponse(w, statusCode, apiResponse)
 }
 
+// HandleAPIStartAllBinaries handles POST /api/binary/start-all
+func HandleAPIStartAllBinaries(w http.ResponseWriter, r *http.Request) {
+	// Parse timeout from query parameters (default: 30 seconds)
+	timeout := 30
+	if timeoutStr := r.URL.Query().Get("timeout"); timeoutStr != "" {
+		if parsed, err := strconv.Atoi(timeoutStr); err == nil && parsed > 0 {
+			timeout = parsed
+		}
+	}
+
+	response, err := BinaryControl.StartAllBinaries(timeout)
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to start all binaries: %v", err),
+		})
+		return
+	}
+
+	apiResponse := APIResponse{
+		Success: response.Success,
+		Message: response.Message,
+		Data:    response.Data,
+	}
+	SendJSONResponse(w, http.StatusOK, apiResponse)
+}
+
+// HandleAPIStopAllBinaries handles POST /api/binary/stop-all
+func HandleAPIStopAllBinaries(w http.ResponseWriter, r *http.Request) {
+	// Parse timeout from query parameters (default: 30 seconds)
+	timeout := 30
+	if timeoutStr := r.URL.Query().Get("timeout"); timeoutStr != "" {
+		if parsed, err := strconv.Atoi(timeoutStr); err == nil && parsed > 0 {
+			timeout = parsed
+		}
+	}
+
+	response, err := BinaryControl.StopAllBinaries(timeout)
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to stop all binaries: %v", err),
+		})
+		return
+	}
+
+	apiResponse := APIResponse{
+		Success: response.Success,
+		Message: response.Message,
+		Data:    response.Data,
+	}
+	SendJSONResponse(w, http.StatusOK, apiResponse)
+}
+
 // handleAPIStopBinary handles POST /api/binary/stop/{node}
 func HandleAPIStopBinary(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

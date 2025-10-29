@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 	"vuDataSim/src/logger"
 	"gopkg.in/yaml.v3"
 )
@@ -83,21 +84,23 @@ type SourcesConfig struct {
 
 // LoadConfig loads the topic configuration from YAML file
 func (km *KafkaManager) LoadConfig() error {
-	fmt.Printf("Loading config from: %s\n", km.configPath)
+	logger.Info().Str("path", km.configPath).Msg("Loading topic configuration")
 	data, err := exec.Command("cat", km.configPath).Output()
 	if err != nil {
+		logger.Error().Err(err).Str("path", km.configPath).Msg("Failed to read config file")
 		return fmt.Errorf("failed to read config file: %v", err)
 	}
 
 	var config SourcesConfig
 	err = yaml.Unmarshal(data, &config)
 	if err != nil {
+		logger.Error().Err(err).Str("path", km.configPath).Str("data", string(data)).Msg("Failed to parse YAML config")
 		return fmt.Errorf("failed to parse YAML config: %v", err)
 	}
 
-	fmt.Printf("Loaded %d topic configurations\n", len(config.Sources))
+	logger.Info().Int("sources", len(config.Sources)).Msg("Successfully loaded topic configurations")
 	for i, source := range config.Sources {
-		fmt.Printf("Source %d: %s\n", i, source.Name)
+		logger.Debug().Int("index", i).Str("source", source.Name).Msg("Loaded source configuration")
 	}
 
 	km.topics = config.Sources
@@ -117,11 +120,13 @@ func (km *KafkaManager) DescribeTopic(topicName string) (*TopicMetadata, error) 
 
 	output, err := cmd.Output()
 	if err != nil {
+		logger.Error().Err(err).Str("topic", topicName).Msg("Failed to execute describe command")
 		return nil, fmt.Errorf("failed to describe topic %s: %v", topicName, err)
 	}
 
 	metadata, err := km.parseTopicDescription(string(output))
 	if err != nil {
+		logger.Error().Err(err).Str("topic", topicName).Str("output", string(output)).Msg("Failed to parse topic description")
 		return nil, fmt.Errorf("failed to parse topic description for %s: %v", topicName, err)
 	}
 
@@ -133,12 +138,14 @@ func (km *KafkaManager) DeleteTopic(topicName string) error {
 	deleteCmd := fmt.Sprintf("kafka-topics --bootstrap-server localhost:9092 --delete --topic %s", topicName)
 	cmd := exec.Command("kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", deleteCmd)
 
-	_, err := cmd.Output()
+	output, err := cmd.Output()
 	if err != nil {
+		logger.Warn().Err(err).Str("topic", topicName).Str("output", string(output)).Msg("Delete command failed (might be expected if topic doesn't exist)")
 		// Note: Delete might fail if topic doesn't exist, which is okay for some use cases
 		return fmt.Errorf("failed to delete topic %s: %v", topicName, err)
 	}
 
+	logger.Info().Str("topic", topicName).Msg("Topic delete command executed successfully")
 	return nil
 }
 
@@ -149,11 +156,13 @@ func (km *KafkaManager) CreateTopic(topicName string, partitionCount, replicatio
 
 	cmd := exec.Command("kubectl", "exec", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "--", "bash", "-c", createCmd)
 
-	_, err := cmd.Output()
+	output, err := cmd.Output()
 	if err != nil {
+		logger.Error().Err(err).Str("topic", topicName).Int("partitions", partitionCount).Int("replicationFactor", replicationFactor).Str("output", string(output)).Msg("Failed to create topic")
 		return fmt.Errorf("failed to create topic %s: %v", topicName, err)
 	}
 
+	logger.Info().Str("topic", topicName).Int("partitions", partitionCount).Int("replicationFactor", replicationFactor).Msg("Topic created successfully")
 	return nil
 }
 
@@ -161,15 +170,18 @@ func (km *KafkaManager) CreateTopic(topicName string, partitionCount, replicatio
 func (km *KafkaManager) LoadO11yConfig(confPath string) (*O11ySourceConfig, error) {
 	data, err := exec.Command("cat", confPath).Output()
 	if err != nil {
+		logger.Error().Err(err).Str("path", confPath).Msg("Failed to read o11y config file")
 		return nil, fmt.Errorf("failed to read o11y config file: %v", err)
 	}
 
 	var config O11ySourceConfig
 	err = yaml.Unmarshal(data, &config)
 	if err != nil {
+		logger.Error().Err(err).Str("path", confPath).Str("data", string(data)).Msg("Failed to parse YAML o11y config")
 		return nil, fmt.Errorf("failed to parse YAML o11y config: %v", err)
 	}
 
+	logger.Info().Str("path", confPath).Msg("Successfully loaded o11y config")
 	return &config, nil
 }
 
@@ -183,12 +195,17 @@ func (km *KafkaManager) RecreateTopicsForO11ySources() (map[string]interface{}, 
 		"processed_sources": make([]string, 0),
 	}
 
+	// Use a mutex to protect shared result map
+	var resultMu sync.Mutex
+
 	// Step 1: Load o11y configuration from conf.yml
 	confPath := "src/migrate/conf.d/conf.yml"
 	o11yConfig, err := km.LoadO11yConfig(confPath)
 	if err != nil {
+		resultMu.Lock()
 		result["success"] = false
 		result["errors"] = append(result["errors"].([]string), fmt.Sprintf("Failed to load o11y config: %v", err))
+		resultMu.Unlock()
 		return result, err
 	}
 
@@ -202,12 +219,16 @@ func (km *KafkaManager) RecreateTopicsForO11ySources() (map[string]interface{}, 
 	}
 
 	if len(enabledSources) == 0 {
+		resultMu.Lock()
 		result["success"] = false
 		result["errors"] = append(result["errors"].([]string), "No enabled o11y sources found in conf.yml")
+		resultMu.Unlock()
 		return result, fmt.Errorf("no enabled o11y sources found")
 	}
 
+	resultMu.Lock()
 	result["processed_sources"] = enabledSources
+	resultMu.Unlock()
 
 	// Step 3: Collect all topics that need to be recreated
 	var allTopics []string
@@ -228,8 +249,10 @@ func (km *KafkaManager) RecreateTopicsForO11ySources() (map[string]interface{}, 
 
 		if sourceTopicConfig == nil {
 			errMsg := fmt.Sprintf("No topic configuration found for source: %s (translated: %s)", sourceName, translatedName)
+			resultMu.Lock()
 			result["success"] = false
 			result["errors"] = append(result["errors"].([]string), errMsg)
+			resultMu.Unlock()
 			logger.Error().Str("source", sourceName).Str("translated", translatedName).Msg("No topic configuration found")
 			continue
 		}
@@ -247,7 +270,7 @@ func (km *KafkaManager) RecreateTopicsForO11ySources() (map[string]interface{}, 
 
 	// Step 4: Describe all topics in parallel first
 	metadataMap := make(map[string]*TopicMetadata)
-	var mu sync.Mutex
+	var metadataMu sync.Mutex
 	var describeError error
 	var wg sync.WaitGroup
 
@@ -258,18 +281,29 @@ func (km *KafkaManager) RecreateTopicsForO11ySources() (map[string]interface{}, 
 		wg.Add(1)
 		go func(topic string) {
 			defer wg.Done()
-			metadata, err := km.DescribeTopic(topic)
-			mu.Lock()
-			defer mu.Unlock()
-			if err != nil {
-				describeError = err
-				result["success"] = false
-				errorMsg := fmt.Sprintf("Topic %s does not exist: %v", topic, err)
-				result["errors"] = append(result["errors"].([]string), errorMsg)
-				cancel() // Cancel all other goroutines
+			select {
+			case <-ctx.Done():
 				return
+			default:
+				metadata, err := km.DescribeTopic(topic)
+				if err != nil {
+					metadataMu.Lock()
+					if describeError == nil { // Only set error once
+						describeError = err
+					}
+					metadataMu.Unlock()
+					resultMu.Lock()
+					result["success"] = false
+					errorMsg := fmt.Sprintf("Describe operation failed for topic %s: %v", topic, err)
+					result["errors"] = append(result["errors"].([]string), errorMsg)
+					resultMu.Unlock()
+					cancel() // Cancel all other goroutines
+					return
+				}
+				metadataMu.Lock()
+				metadataMap[topic] = metadata
+				metadataMu.Unlock()
 			}
-			metadataMap[topic] = metadata
 		}(topicName)
 	}
 
@@ -292,26 +326,34 @@ func (km *KafkaManager) RecreateTopicsForO11ySources() (map[string]interface{}, 
 				return
 			default:
 				err := km.DeleteTopic(topic)
-				mu.Lock()
 				if err != nil {
+					resultMu.Lock()
 					result["success"] = false
-					errorMsg := fmt.Sprintf("Failed to delete topic %s: %v", topic, err)
+					errorMsg := fmt.Sprintf("Delete operation failed for topic %s: %v", topic, err)
 					result["errors"] = append(result["errors"].([]string), errorMsg)
+					resultMu.Unlock()
 					cancel() // Cancel all other goroutines
 				}
-				mu.Unlock()
 			}
 		}(topicName)
 	}
 
 	wg.Wait()
 
-	if !result["success"].(bool) {
+	resultMu.Lock()
+	success := result["success"].(bool)
+	resultMu.Unlock()
+
+	if !success {
 		logger.Error().Msg("Stopping topic recreation due to delete errors")
 		return result, fmt.Errorf("delete errors occurred")
 	}
 
 	logger.Info().Int("total_topics", len(allTopics)).Msg("All topics deleted successfully")
+
+	// Add wait delay between delete and create operations
+	logger.Info().Msg("Waiting 5 seconds before creating topics...")
+	time.Sleep(5 * time.Second)
 
 	// Step 6: Create all topics in parallel
 	for _, topicName := range allTopics {
@@ -322,25 +364,33 @@ func (km *KafkaManager) RecreateTopicsForO11ySources() (map[string]interface{}, 
 			case <-ctx.Done():
 				return
 			default:
+				metadataMu.Lock()
 				metadata := metadataMap[topic]
+				metadataMu.Unlock()
 				err := km.CreateTopic(topic, metadata.PartitionCount, metadata.ReplicationFactor)
-				mu.Lock()
 				if err != nil {
+					resultMu.Lock()
 					result["success"] = false
-					errorMsg := fmt.Sprintf("Failed to create topic %s: %v", topic, err)
+					errorMsg := fmt.Sprintf("Create operation failed for topic %s: %v", topic, err)
 					result["errors"] = append(result["errors"].([]string), errorMsg)
+					resultMu.Unlock()
 					cancel() // Cancel all other goroutines
 				} else {
+					resultMu.Lock()
 					result["results"].(map[string]string)[topic] = "recreated"
+					resultMu.Unlock()
 				}
-				mu.Unlock()
 			}
 		}(topicName)
 	}
 
 	wg.Wait()
 
-	if !result["success"].(bool) {
+	resultMu.Lock()
+	finalSuccess := result["success"].(bool)
+	resultMu.Unlock()
+
+	if !finalSuccess {
 		logger.Error().Msg("Stopping topic recreation due to create errors")
 		return result, fmt.Errorf("create errors occurred")
 	}
