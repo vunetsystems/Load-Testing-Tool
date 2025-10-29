@@ -48,6 +48,12 @@ class VuDataSimManager {
         console.log('- o11ySourcesList:', document.getElementById('o11y-sources-list'));
 
         this.elements = {
+            // K6 Load Testing elements
+            k6TimeRange: document.getElementById('k6-time-range'),
+            k6Vus: document.getElementById('k6-vus'),
+            k6Iterations: document.getElementById('k6-iterations'),
+            k6Interval: document.getElementById('k6-interval'),
+            startK6TestBtn: document.getElementById('start-k6-test-btn'),
             logNodeFilter: document.getElementById('log-node'),
             logModuleFilter: document.getElementById('log-module'),
             logsContainer: document.getElementById('logs-container'),
@@ -287,6 +293,11 @@ class VuDataSimManager {
         const getOutputBtn = document.getElementById('get-binary-output-btn');
         if (getOutputBtn) {
             getOutputBtn.addEventListener('click', () => this.binaryControl.getBinaryOutput());
+        }
+
+        // K6 Load Testing event listeners
+        if (this.elements.startK6TestBtn) {
+            this.elements.startK6TestBtn.addEventListener('click', () => this.startK6Test());
         }
 
         // Close modal on Escape key
@@ -581,6 +592,69 @@ class VuDataSimManager {
             // Re-enable the button and restore original text
             const button = this.elements.addAllClusterNodesBtn;
             button.innerHTML = '<span class="material-symbols-outlined">add_circle</span><span>Add All Cluster Nodes</span>';
+            button.disabled = false;
+        }
+    }
+
+    async startK6Test() {
+        try {
+            // Get values from input fields
+            const timeRange = this.elements.k6TimeRange?.value?.trim() || '15m';
+            const vus = parseInt(this.elements.k6Vus?.value) || 10;
+            const iterations = parseInt(this.elements.k6Iterations?.value) || 5;
+            const interval = parseInt(this.elements.k6Interval?.value) || 5;
+
+            // Validate inputs
+            if (!timeRange) {
+                this.showNotification('Time range is required', 'error');
+                return;
+            }
+            if (vus < 1 || vus > 1000) {
+                this.showNotification('Virtual users must be between 1 and 1000', 'error');
+                return;
+            }
+            if (iterations < 1 || iterations > 1000) {
+                this.showNotification('Iterations must be between 1 and 1000', 'error');
+                return;
+            }
+            if (interval < 1 || interval > 300) {
+                this.showNotification('Interval must be between 1 and 300 seconds', 'error');
+                return;
+            }
+
+            // Disable the button and show loading state
+            const button = this.elements.startK6TestBtn;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Starting...</span>';
+            button.disabled = true;
+
+            console.log('Starting K6 test with parameters:', { timeRange, vus, iterations, interval });
+
+            // Call the API to start K6 test
+            const response = await this.callAPI('/api/k6/run-combined', 'POST', {
+                timeRange,
+                vus,
+                iterations,
+                interval
+            });
+
+            if (!response.success) {
+                throw new Error(response.message || 'Failed to start K6 test');
+            }
+
+            console.log('K6 test started successfully:', response);
+
+            // Show success notification
+            this.showNotification('K6 test started successfully! Check logs for progress.', 'success');
+
+        } catch (error) {
+            console.error('Error starting K6 test:', error);
+            this.showNotification(`Failed to start K6 test: ${error.message}`, 'error');
+
+        } finally {
+            // Re-enable the button and restore original text
+            const button = this.elements.startK6TestBtn;
+            button.innerHTML = '<span class="material-symbols-outlined">play_arrow</span><span>Start K6 Test</span>';
             button.disabled = false;
         }
     }
