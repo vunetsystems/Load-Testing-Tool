@@ -430,6 +430,118 @@ func (h *K6Handler) ResetK6Config(w http.ResponseWriter, r *http.Request) {
 	logger.LogWithNode("System", "k6", "K6 configuration reset to defaults", "info")
 }
 
+// RunCombinedScript handles POST /api/k6/run-combined
+func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+
+	if h.status.IsRunning {
+		SendJSONResponse(w, http.StatusConflict, APIResponse{
+			Success: false,
+			Message: "K6 test is already running",
+		})
+		return
+	}
+
+	// Parse request body for parameters
+	var params struct {
+		TimeRange  string `json:"timeRange"`
+		VUs        int    `json:"vus"`
+		Iterations int    `json:"iterations"`
+		Interval   int    `json:"interval"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+		SendJSONResponse(w, http.StatusBadRequest, APIResponse{
+			Success: false,
+			Message: "Invalid JSON payload",
+		})
+		return
+	}
+
+	// Validate parameters
+	if params.TimeRange == "" {
+		params.TimeRange = "15m"
+	}
+	if params.VUs <= 0 {
+		params.VUs = 10
+	}
+	if params.Iterations <= 0 {
+		params.Iterations = 5
+	}
+	if params.Interval <= 0 {
+		params.Interval = 5
+	}
+
+	// Start execution in background
+	go h.executeCombinedScript(params.TimeRange, params.VUs, params.Iterations, params.Interval)
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "K6 combined script started successfully",
+		Data: map[string]interface{}{
+			"timeRange":  params.TimeRange,
+			"vus":        params.VUs,
+			"iterations": params.Iterations,
+			"interval":   params.Interval,
+		},
+	})
+
+	logger.LogWithNode("System", "k6", fmt.Sprintf("K6 combined script started: timeRange=%s, vus=%d, iterations=%d, interval=%d",
+		params.TimeRange, params.VUs, params.Iterations, params.Interval), "info")
+}
+
+// executeCombinedScript executes the combined.sh script with given parameters
+func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, interval int) {
+	h.mutex.Lock()
+	h.status.IsRunning = true
+	h.status.StartTime = time.Now()
+	h.status.CurrentScript = "combined.sh"
+	h.status.LastError = ""
+	h.cmd = nil
+	h.mutex.Unlock()
+
+	// Broadcast initial status
+	go AppState.BroadcastUpdate()
+
+	defer func() {
+		h.mutex.Lock()
+		h.status.IsRunning = false
+		h.status.CurrentScript = ""
+		h.mutex.Unlock()
+
+		// Broadcast final status
+		go AppState.BroadcastUpdate()
+	}()
+
+	logger.Info().Str("module", "k6").Msg("Starting combined.sh script execution")
+
+	// Execute the script
+	cmd := exec.Command("./combined.sh", timeRange, fmt.Sprintf("%d", vus), fmt.Sprintf("%d", iterations), fmt.Sprintf("%d", interval))
+	cmd.Dir = "k6_final/k6_dashboard_name/linux-mssql-dashboard" // Working directory
+
+	// Set up process for potential cancellation
+	h.mutex.Lock()
+	h.cmd = cmd
+	h.mutex.Unlock()
+
+	output, err := cmd.CombinedOutput()
+
+	h.mutex.Lock()
+	if err != nil {
+		h.status.LastError = err.Error()
+		logger.Error().Err(err).Str("module", "k6").Msg("Combined script execution failed")
+	} else {
+		logger.Info().Str("module", "k6").Msg("Combined script execution completed successfully")
+	}
+
+	// Log output for debugging
+	if len(output) > 0 {
+		logger.Info().Str("module", "k6").Str("output", string(output)).Msg("Combined script output")
+	}
+	h.mutex.Unlock()
+}
+
 // GetK6Logs handles GET /api/k6/logs
 func (h *K6Handler) GetK6Logs(w http.ResponseWriter, r *http.Request) {
 	// For now, return a simple message since we don't have persistent log storage
@@ -474,4 +586,8 @@ func HandleAPIResetK6Config(w http.ResponseWriter, r *http.Request) {
 
 func HandleAPIGetK6Logs(w http.ResponseWriter, r *http.Request) {
 	K6Manager.GetK6Logs(w, r)
+}
+
+func HandleAPIRunCombinedScript(w http.ResponseWriter, r *http.Request) {
+	K6Manager.RunCombinedScript(w, r)
 }

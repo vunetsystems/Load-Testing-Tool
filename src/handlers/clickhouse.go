@@ -164,6 +164,23 @@ func HandleAPIGetPodMonitoring(w http.ResponseWriter, r *http.Request) {
 		Data:    podData,
 	})
 }
+// HandleAPIGetK6DashboardResults handles GET /api/clickhouse/k6-dashboard-results
+func HandleAPIGetK6DashboardResults(w http.ResponseWriter, r *http.Request) {
+	k6DashboardResults, err := clickhouse.GetK6DashboardResults(r.Context())
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to get k6 dashboard results: %v", err),
+		})
+		return
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "K6 dashboard results retrieved successfully",
+		Data:    k6DashboardResults,
+	})
+}
 // HandleAPIGetK6Results handles GET /api/clickhouse/k6-results
 func HandleAPIGetK6Results(w http.ResponseWriter, r *http.Request) {
 	dashboard := r.URL.Query().Get("dashboard")

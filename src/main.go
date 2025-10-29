@@ -135,6 +135,7 @@ func main() {
 	api.HandleFunc("/clickhouse/metrics", handlers.HandleAPIGetClickHouseMetrics).Methods("GET")
 	api.HandleFunc("/clickhouse/health", handlers.HandleAPIClickHouseHealth).Methods("GET")
 	api.HandleFunc("/clickhouse/kafka-topics", handlers.HandleAPIGetKafkaTopicMetrics).Methods("GET")
+	api.HandleFunc("/clickhouse/k6-dashboard-results", handlers.HandleAPIGetK6DashboardResults).Methods("GET")
 	api.HandleFunc("/clickhouse/k6-results", handlers.HandleAPIGetK6Results).Methods("GET")
 	api.HandleFunc("/clickhouse/pod-monitoring", handlers.HandleAPIGetPodMonitoring).Methods("GET")
 	// Removed pod-metrics endpoint
@@ -159,6 +160,7 @@ func main() {
 	api.HandleFunc("/k6/start", handlers.HandleAPIStartK6Test).Methods("POST")
 	api.HandleFunc("/k6/stop", handlers.HandleAPIStopK6Test).Methods("POST")
 	api.HandleFunc("/k6/logs", handlers.HandleAPIGetK6Logs).Methods("GET")
+	api.HandleFunc("/k6/run-combined", handlers.HandleAPIRunCombinedScript).Methods("POST")
 
 	// Proxy endpoint for node metrics API
 	api.HandleFunc("/proxy/metrics/{name}", handlers.HandleProxyMetrics).Methods("GET")
