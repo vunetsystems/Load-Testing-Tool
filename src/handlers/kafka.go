@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"path/filepath"
-	"time"
 
 	"vuDataSim/src/kafka_ch_reset"
 	"vuDataSim/src/logger"
@@ -60,67 +58,6 @@ func (kh *KafkaHandler) GetTopics(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// RecreateTopics handles POST /api/kafka/recreate - recreates topics for enabled o11y sources
-func (kh *KafkaHandler) RecreateTopics(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		sendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
-			Success: false,
-			Message: "Method not allowed. Use POST.",
-		})
-		return
-	}
-
-	logger.Info().Msg("Starting Kafka topic recreation for enabled o11y sources from conf.yml")
-
-	// Add timeout context to prevent hanging
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second) // 5 minute timeout
-	defer cancel()
-
-	// Create a channel to receive the result
-	resultChan := make(chan map[string]interface{}, 1)
-	errChan := make(chan error, 1)
-
-	go func() {
-		result, err := kh.kafkaManager.RecreateTopicsForO11ySources()
-		if err != nil {
-			errChan <- err
-			return
-		}
-		resultChan <- result
-	}()
-
-	select {
-	case result := <-resultChan:
-		success := result["success"].(bool)
-		if success {
-			logger.Info().Msg("Successfully completed Kafka topic recreation for enabled o11y sources")
-			sendJSONResponse(w, http.StatusOK, APIResponse{
-				Success: true,
-				Message: "Topics recreated successfully for enabled o11y sources",
-				Data:    result,
-			})
-		} else {
-			logger.Warn().Msg("Kafka topic recreation for enabled o11y sources completed with errors")
-			sendJSONResponse(w, http.StatusPartialContent, APIResponse{
-				Success: false,
-				Message: "Topic recreation for enabled o11y sources completed with some errors",
-				Data:    result,
-			})
-		}
-	case err := <-errChan:
-		logger.Error().Err(err).Msg("Failed to recreate Kafka topics for enabled o11y sources")
-		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
-			Success: false,
-			Message: fmt.Sprintf("Failed to recreate topics for enabled o11y sources: %v", err),
-		})
-	case <-ctx.Done():
-		logger.Error().Msg("Kafka topic recreation timed out")
-		sendJSONResponse(w, http.StatusGatewayTimeout, APIResponse{
-			Success: false,
-			Message: "Topic recreation operation timed out after 5 minutes",
-		})
-	}
-}
 
 // GetTopicStatus handles GET /api/kafka/status - returns status of all topics
 func (kh *KafkaHandler) GetTopicStatus(w http.ResponseWriter, r *http.Request) {
@@ -294,8 +231,11 @@ func (kh *KafkaHandler) CreateTopic(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// RecreateTopicsForO11ySources handles POST /api/kafka/recreate/o11y - recreates topics for enabled o11y sources from conf.yml
-func (kh *KafkaHandler) RecreateTopicsForO11ySources(w http.ResponseWriter, r *http.Request) {
+
+
+
+// RecreateEnabledTopics handles POST /api/kafka/recreate-enabled - recreates topics for enabled o11y sources
+func (kh *KafkaHandler) RecreateEnabledTopics(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		sendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
 			Success: false,
@@ -304,113 +244,20 @@ func (kh *KafkaHandler) RecreateTopicsForO11ySources(w http.ResponseWriter, r *h
 		return
 	}
 
-	logger.Info().Msg("Starting Kafka topic recreation for enabled o11y sources from conf.yml")
-
-	result, err := kh.kafkaManager.RecreateTopicsForO11ySources()
+	confPath := "src/migrate/conf.d/conf.yml"
+	err := kh.kafkaManager.RecreateTopicsForEnabledSources(confPath)
 	if err != nil {
-		logger.Error().Err(err).Msg("Failed to recreate Kafka topics for enabled o11y sources")
+		logger.Error().Err(err).Msg("Failed to recreate topics for enabled sources")
 		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
-			Message: fmt.Sprintf("Failed to recreate topics for enabled o11y sources: %v", err),
-			Data:    result,
-		})
-		return
-	}
-
-	success := result["success"].(bool)
-	if success {
-		logger.Info().Msg("Successfully completed Kafka topic recreation for enabled o11y sources")
-		sendJSONResponse(w, http.StatusOK, APIResponse{
-			Success: true,
-			Message: "Topics recreated successfully for enabled o11y sources",
-			Data:    result,
-		})
-	} else {
-		logger.Warn().Msg("Kafka topic recreation for enabled o11y sources completed with errors")
-		sendJSONResponse(w, http.StatusPartialContent, APIResponse{
-			Success: false,
-			Message: "Topic recreation for enabled o11y sources completed with some errors",
-			Data:    result,
-		})
-	}
-}
-
-// TruncateClickHouseTables handles POST /api/clickhouse/truncate - truncates ClickHouse tables for enabled o11y sources
-func (kh *KafkaHandler) TruncateClickHouseTables(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		sendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
-			Success: false,
-			Message: "Method not allowed. Use POST.",
-		})
-		return
-	}
-
-	logger.Info().Msg("Starting ClickHouse table truncation for enabled o11y sources")
-
-	result, err := kh.kafkaManager.TruncateClickHouseTablesForO11ySources()
-	if err != nil {
-		logger.Error().Err(err).Msg("Failed to truncate ClickHouse tables for enabled o11y sources")
-		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
-			Success: false,
-			Message: fmt.Sprintf("Failed to truncate ClickHouse tables: %v", err),
-			Data:    result,
-		})
-		return
-	}
-
-	success := result["success"].(bool)
-	truncatedTables := result["truncated_tables"].([]string)
-	totalTruncated := len(truncatedTables)
-	totalErrors := len(result["errors"].([]string))
-
-	if success && totalErrors == 0 {
-		logger.Info().Int("truncated", totalTruncated).Msg("Successfully completed ClickHouse table truncation")
-		sendJSONResponse(w, http.StatusOK, APIResponse{
-			Success: true,
-			Message: fmt.Sprintf("Successfully truncated %d ClickHouse tables for enabled o11y sources", totalTruncated),
-			Data:    result,
-		})
-	} else if totalTruncated > 0 {
-		logger.Warn().Int("truncated", totalTruncated).Int("errors", totalErrors).Msg("ClickHouse table truncation completed with some errors")
-		sendJSONResponse(w, http.StatusPartialContent, APIResponse{
-			Success: true,
-			Message: fmt.Sprintf("Truncated %d ClickHouse tables with %d errors", totalTruncated, totalErrors),
-			Data:    result,
-		})
-	} else {
-		logger.Error().Int("errors", totalErrors).Msg("Failed to truncate any ClickHouse tables")
-		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
-			Success: false,
-			Message: fmt.Sprintf("Failed to truncate ClickHouse tables: %d errors occurred", totalErrors),
-			Data:    result,
-		})
-	}
-}
-
-// GetClickHouseTableNames handles GET /api/clickhouse/tables - returns table names for enabled o11y sources
-func (kh *KafkaHandler) GetClickHouseTableNames(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		sendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
-			Success: false,
-			Message: "Method not allowed",
-		})
-		return
-	}
-
-	tableResult, err := kh.kafkaManager.GetTableNamesForO11ySources()
-	if err != nil {
-		logger.Error().Err(err).Msg("Failed to get ClickHouse table names for enabled o11y sources")
-		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
-			Success: false,
-			Message: fmt.Sprintf("Failed to get ClickHouse table names: %v", err),
+			Message: fmt.Sprintf("Failed to recreate topics: %v", err),
 		})
 		return
 	}
 
 	sendJSONResponse(w, http.StatusOK, APIResponse{
 		Success: true,
-		Message: "ClickHouse table names retrieved successfully for enabled o11y sources",
-		Data:    tableResult,
+		Message: "Topics recreated successfully for all enabled o11y sources",
 	})
 }
 

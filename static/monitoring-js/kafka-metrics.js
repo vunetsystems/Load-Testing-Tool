@@ -102,7 +102,7 @@ class KafkaMetricsManager {
 
         this.isUpdating = true;
         try {
-            const response = await fetch('http://164.52.213.158:8086/api/clickhouse/kafka-topics');
+            const response = await fetch('http://216.48.189.75:8086/api/clickhouse/kafka-topics');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }

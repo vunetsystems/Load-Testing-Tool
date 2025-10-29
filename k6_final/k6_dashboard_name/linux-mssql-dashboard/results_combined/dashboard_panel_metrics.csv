@@ -1,0 +1,581 @@
+timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,iterations
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.86,,,'200',100,,,198.86,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,294.29,,,'200',100,,,294.29,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,388.84,,,'200',100,,,388.84,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,486.54,,,'200',100,,,486.54,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,604.68,,,'200',100,,,604.68,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,604.49,,,'200',100,,,604.49,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,729.91,,,'200',100,,,729.91,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,1035.25,,,'200',100,,,1035.25,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,1131.88,,,'200',100,,,1131.88,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,1233.03,,,'200',100,,,1233.03,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,281.19,40,Untitled,200,100,200,100,281.19,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,287.09,40,Untitled,200,100,200,100,287.09,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,582.77,40,Untitled,200,100,200,100,582.77,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,287.29,40,Untitled,200,100,200,100,287.29,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,629.78,40,Untitled,200,100,200,100,629.78,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,741.33,62,Summary,200,100,200,100,741.33,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,593.17,62,Summary,200,100,200,100,593.17,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,773.34,40,Untitled,200,100,200,100,773.34,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,552.59,62,Summary,200,100,200,100,552.59,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,255.76,71,Clusters,200,100,200,100,255.76,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,738.62,40,Untitled,200,100,200,100,738.62,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,643.02,40,Untitled,200,100,200,100,643.02,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,645.30,40,Untitled,200,100,200,100,645.30,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,596.70,71,Clusters,200,100,200,100,596.70,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,693.42,62,Summary,200,100,200,100,693.42,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,1054.69,62,Summary,200,100,200,100,1054.69,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,1301.64,62,Summary,200,100,200,100,1301.64,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,1569.35,40,Untitled,200,100,200,100,1569.35,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,541.93,62,Summary,200,100,200,100,541.93,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,744.34,45,Servers,200,100,200,100,744.34,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,597.72,62,Summary,200,100,200,100,597.72,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,495.53,62,Summary,200,100,200,100,495.53,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,804.17,71,Clusters,200,100,200,100,804.17,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.32,45,Servers,429,100,429,100,3.32,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,6.99,71,Clusters,429,100,429,100,6.99,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,38.89,47,Databases,429,100,429,100,38.89,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,38.88,45,Servers,429,100,429,100,38.88,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.46,43,Alert Summary,429,100,429,100,3.46,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.36,9,Active Alerts,429,100,429,100,3.36,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,6.59,47,Databases,429,100,429,100,6.59,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,4.28,51,Active Sessions,429,100,429,100,4.28,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.12,43,Alert Summary,429,100,429,100,3.12,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,86.82,9,Active Alerts,429,100,429,100,86.82,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,89.28,52,Sleeping Sessions,429,100,429,100,89.28,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.94,51,Active Sessions,429,100,429,100,3.94,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,4.42,60,Blocking Session,429,100,429,100,4.42,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.36,49,Buffer Cache Hit %,429,100,429,100,3.36,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,4.67,1,Active Transactions,429,100,429,100,4.67,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.11,48,Avg Deadlocks/Sec,429,100,429,100,3.11,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,2.97,53,Avg Full Scans/Sec,429,100,429,100,2.97,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.14,54,Avg Errors/Sec,429,100,429,100,3.14,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.21,81,Database Status,429,100,429,100,3.21,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,72.11,44,Summary of DB Status,429,100,429,100,72.11,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,5.35,80,Impacted Databases,429,100,429,100,5.35,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,4.33,83,Database Info,429,100,429,100,4.33,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.55,85,Time Since Last DB Restart,429,100,429,100,3.55,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.23,86,DB Volume Info,429,100,429,100,3.23,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.52,88,DB Volume Usage % By Server,429,100,429,100,3.52,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.47,84,Failover Cluster Info,429,100,429,100,3.47,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.27,76,Failover Cluster Node Status,429,100,429,100,3.27,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.79,79,Overview on HADR (High Availability Disaster Recovery),429,100,429,100,3.79,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.89,78,Failover Cluster - Quorum Config,429,100,429,100,3.89,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.44,77,Availability Group Member Info,429,100,429,100,3.44,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.30,74,High Availability Group Status,429,100,429,100,3.30,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,400.53,71,Clusters,200,100,200,100,400.53,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,645.61,71,Clusters,200,100,200,100,645.61,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,56.32,73,High Availability Replica Status,429,100,429,100,56.32,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,5.90,45,Servers,429,100,429,100,5.90,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,644.05,62,Summary,200,100,200,100,644.05,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,499.61,47,Databases,200,100,200,100,499.61,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.40,45,Servers,429,100,429,100,101.40,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.19,75,HA Database Replica Status,429,100,429,100,101.19,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,96.05,47,Databases,429,100,429,100,96.05,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,4.66,47,Databases,429,100,429,100,4.66,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,845.04,71,Clusters,200,100,200,100,845.04,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,93.68,43,Alert Summary,429,100,429,100,93.68,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.05,43,Alert Summary,429,100,429,100,101.05,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.31,71,Clusters,429,100,429,100,101.31,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.00,82,User Connections,429,100,429,100,99.00,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,3.49,45,Servers,429,100,429,100,3.49,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.82,43,Alert Summary,429,100,429,100,100.82,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,96.52,45,Servers,429,100,429,100,96.52,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,945.21,71,Clusters,200,100,200,100,945.21,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,1144.10,45,Servers,200,100,200,100,1144.10,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,594.11,52,Sleeping Sessions,200,100,200,100,594.11,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,195.95,9,Active Alerts,429,100,429,100,195.95,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,746.12,71,Clusters,200,100,200,100,746.12,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.81,9,Active Alerts,429,100,429,100,199.81,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,297.25,9,Active Alerts,429,100,429,100,297.25,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.52,47,Databases,429,100,429,100,199.52,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.56,47,Databases,429,100,429,100,102.56,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,394.53,47,Databases,429,100,429,100,394.53,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.12,45,Servers,429,100,429,100,199.12,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,298.15,45,Servers,429,100,429,100,298.15,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,104.23,51,Active Sessions,429,100,429,100,104.23,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,202.15,51,Active Sessions,429,100,429,100,202.15,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,495.84,23,User Connections,429,100,429,100,495.84,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,299.30,60,Blocking Session,429,100,429,100,299.30,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.61,43,Alert Summary,429,100,429,100,200.61,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.47,43,Alert Summary,429,100,429,100,201.47,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,301.27,51,Active Sessions,429,100,429,100,301.27,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.33,47,Databases,429,100,429,100,197.33,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.32,43,Alert Summary,429,100,429,100,200.32,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.40,52,Sleeping Sessions,429,100,429,100,197.40,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.62,47,Databases,429,100,429,100,200.62,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.75,49,Buffer Cache Hit %,429,100,429,100,200.75,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,203.07,70,Max User Connections Trend for Top 5 Servers,429,100,429,100,203.07,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.53,9,Active Alerts,429,100,429,100,200.53,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,297.44,52,Sleeping Sessions,429,100,429,100,297.44,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,299.01,9,Active Alerts,429,100,429,100,299.01,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.90,1,Active Transactions,429,100,429,100,102.90,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,399.75,52,Sleeping Sessions,429,100,429,100,399.75,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,300.27,43,Alert Summary,429,100,429,100,300.27,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,400.44,9,Active Alerts,429,100,429,100,400.44,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,300.07,60,Blocking Session,429,100,429,100,300.07,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.97,65,Performance Metrics,429,100,429,100,198.97,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,196.34,60,Blocking Session,429,100,429,100,196.34,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.05,51,Active Sessions,429,100,429,100,200.05,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.08,48,Avg Deadlocks/Sec,429,100,429,100,198.08,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,398.73,43,Alert Summary,429,100,429,100,398.73,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.26,51,Active Sessions,429,100,429,100,198.26,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,202.67,49,Buffer Cache Hit %,429,100,429,100,202.67,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.91,49,Buffer Cache Hit %,429,100,429,100,198.91,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,398.04,60,Blocking Session,429,100,429,100,398.04,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,299.53,56,MSSQL Performance Metrics,429,100,429,100,299.53,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,301.99,9,Active Alerts,429,100,429,100,301.99,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,399.77,51,Active Sessions,429,100,429,100,399.77,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,299.14,53,Avg Full Scans/Sec,429,100,429,100,299.14,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.17,49,Buffer Cache Hit %,429,100,429,100,101.17,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,203.85,52,Sleeping Sessions,429,100,429,100,203.85,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,302.98,52,Sleeping Sessions,429,100,429,100,302.98,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,295.02,1,Active Transactions,429,100,429,100,295.02,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,196.81,52,Sleeping Sessions,429,100,429,100,196.81,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.51,55,MSSQL Errors/Sec Distribution,429,100,429,100,200.51,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,401.00,9,Active Alerts,429,100,429,100,401.00,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.06,51,Active Sessions,429,100,429,100,201.06,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.33,60,Blocking Session,429,100,429,100,101.33,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.87,1,Active Transactions,429,100,429,100,197.87,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,299.87,1,Active Transactions,429,100,429,100,299.87,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,194.05,49,Buffer Cache Hit %,429,100,429,100,194.05,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,298.25,54,Avg Errors/Sec,429,100,429,100,298.25,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.32,51,Active Sessions,200,100,200,100,197.32,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.33,48,Avg Deadlocks/Sec,429,100,429,100,200.33,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.04,63,Avg Transactions/Sec Trend for Top 5 Databases,429,100,429,100,201.04,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,204.40,60,Blocking Session,429,100,429,100,204.40,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,296.06,52,Sleeping Sessions,429,100,429,100,296.06,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.33,48,Avg Deadlocks/Sec,429,100,429,100,200.33,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,396.71,60,Blocking Session,429,100,429,100,396.71,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.71,1,Active Transactions,429,100,429,100,102.71,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,203.80,48,Avg Deadlocks/Sec,429,100,429,100,203.80,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,104.48,52,Sleeping Sessions,429,100,429,100,104.48,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,98.39,53,Avg Full Scans/Sec,429,100,429,100,98.39,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,195.18,28,Avg Buffer Cache Hit % Trend for Top 5 Databases,429,100,429,100,195.18,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.62,49,Buffer Cache Hit %,429,100,429,100,99.62,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.07,49,Buffer Cache Hit %,429,100,429,100,198.07,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.90,53,Avg Full Scans/Sec,429,100,429,100,201.90,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.55,48,Avg Deadlocks/Sec,429,100,429,100,101.55,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.18,60,Blocking Session,200,100,200,100,199.18,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.36,64,Avg DeadLocks/Sec Trend for Top 5 Databases,429,100,429,100,100.36,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.03,1,Active Transactions,429,100,429,100,100.03,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,302.97,81,Database Status,429,100,429,100,302.97,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.19,53,Avg Full Scans/Sec,429,100,429,100,199.19,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.41,53,Avg Full Scans/Sec,429,100,429,100,99.41,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,4.79,27,Avg Errors/Sec Trend for Top 5 Databases,429,100,429,100,4.79,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,98.58,48,Avg Deadlocks/Sec,429,100,429,100,98.58,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.60,49,Buffer Cache Hit %,429,100,429,100,101.60,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.00,54,Avg Errors/Sec,429,100,429,100,99.00,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,298.39,60,Blocking Session,429,100,429,100,298.39,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,205.76,54,Avg Errors/Sec,429,100,429,100,205.76,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,203.29,1,Active Transactions,429,100,429,100,203.29,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,295.89,54,Avg Errors/Sec,429,100,429,100,295.89,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,194.56,59,MSSQL Metrics,429,100,429,100,194.56,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,196.39,54,Avg Errors/Sec,429,100,429,100,196.39,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.05,44,Summary of DB Status,429,100,429,100,197.05,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.80,49,Buffer Cache Hit %,429,100,429,100,100.80,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.58,81,Database Status,429,100,429,100,101.58,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.45,53,Avg Full Scans/Sec,200,100,200,100,201.45,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,103.57,81,Database Status,429,100,429,100,103.57,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.89,80,Impacted Databases,429,100,429,100,102.89,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,202.02,1,Active Transactions,429,100,429,100,202.02,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.50,81,Database Status,429,100,429,100,199.50,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,195.08,1,Active Transactions,429,100,429,100,195.08,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,295.30,48,Avg Deadlocks/Sec,429,100,429,100,295.30,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,98.02,44,Summary of DB Status,429,100,429,100,98.02,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,203.17,81,Database Status,429,100,429,100,203.17,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,196.17,44,Summary of DB Status,429,100,429,100,196.17,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,295.79,44,Summary of DB Status,429,100,429,100,295.79,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.49,83,Database Info,429,100,429,100,198.49,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,399.42,67,Page Metrics,429,100,429,100,399.42,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,196.92,85,Time Since Last DB Restart,429,100,429,100,196.92,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,298.49,53,Avg Full Scans/Sec,429,100,429,100,298.49,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,202.12,80,Impacted Databases,429,100,429,100,202.12,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,299.31,44,Summary of DB Status,429,100,429,100,299.31,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,202.76,80,Impacted Databases,429,100,429,100,202.76,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,498.50,54,Avg Errors/Sec,429,100,429,100,498.50,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,497.48,48,Avg Deadlocks/Sec,429,100,429,100,497.48,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,499.70,48,Avg Deadlocks/Sec,429,100,429,100,499.70,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,300.52,19,MSSQL Page Metrics,429,100,429,100,300.52,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.12,83,Database Info,429,100,429,100,199.12,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.42,54,Avg Errors/Sec,200,100,200,100,200.42,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,498.62,80,Impacted Databases,429,100,429,100,498.62,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.92,83,Database Info,429,100,429,100,200.92,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.97,53,Avg Full Scans/Sec,429,100,429,100,199.97,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.21,81,Database Status,429,100,429,100,200.21,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.85,53,Avg Full Scans/Sec,429,100,429,100,199.85,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,402.61,86,DB Volume Info,429,100,429,100,402.61,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.34,83,Database Info,429,100,429,100,200.34,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,202.11,81,Database Status,429,100,429,100,202.11,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,297.86,85,Time Since Last DB Restart,429,100,429,100,297.86,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,499.62,80,Impacted Databases,429,100,429,100,499.62,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,297.49,44,Summary of DB Status,429,100,429,100,297.49,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.48,88,DB Volume Usage % By Server,429,100,429,100,199.48,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.62,54,Avg Errors/Sec,429,100,429,100,201.62,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,401.77,32,Avg Page Lookups/Sec Trend for Top 5 Databases,429,100,429,100,401.77,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,301.23,54,Avg Errors/Sec,429,100,429,100,301.23,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,400.58,85,Time Since Last DB Restart,429,100,429,100,400.58,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,203.46,85,Time Since Last DB Restart,429,100,429,100,203.46,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.86,86,DB Volume Info,429,100,429,100,199.86,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,297.87,44,Summary of DB Status,429,100,429,100,297.87,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.56,83,Database Info,429,100,429,100,201.56,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.60,29,Avg Page Reads/Sec for Top 5 Databases,429,100,429,100,102.60,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,6.88,88,DB Volume Usage % By Server,429,100,429,100,6.88,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.48,84,Failover Cluster Info,429,100,429,100,197.48,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.03,80,Impacted Databases,429,100,429,100,200.03,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.92,80,Impacted Databases,429,100,429,100,100.92,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,97.44,84,Failover Cluster Info,429,100,429,100,97.44,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.96,81,Database Status,429,100,429,100,201.96,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.54,85,Time Since Last DB Restart,429,100,429,100,101.54,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,6.36,76,Failover Cluster Node Status,429,100,429,100,6.36,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,294.95,86,DB Volume Info,429,100,429,100,294.95,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.24,83,Database Info,429,100,429,100,101.24,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,295.60,86,DB Volume Info,429,100,429,100,295.60,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,98.73,83,Database Info,429,100,429,100,98.73,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,96.80,79,Overview on HADR (High Availability Disaster Recovery),429,100,429,100,96.80,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.81,76,Failover Cluster Node Status,429,100,429,100,99.81,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.52,44,Summary of DB Status,429,100,429,100,100.52,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,304.13,81,Database Status,429,100,429,100,304.13,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,97.93,79,Overview on HADR (High Availability Disaster Recovery),429,100,429,100,97.93,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,97.01,80,Impacted Databases,429,100,429,100,97.01,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.69,85,Time Since Last DB Restart,429,100,429,100,101.69,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.70,86,DB Volume Info,429,100,429,100,198.70,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,196.51,78,Failover Cluster - Quorum Config,429,100,429,100,196.51,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.29,88,DB Volume Usage % By Server,429,100,429,100,199.29,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.73,85,Time Since Last DB Restart,429,100,429,100,199.73,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,202.64,88,DB Volume Usage % By Server,429,100,429,100,202.64,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,403.14,66,Avg Page Splits/Sec Trend for Top 5 Databases,429,100,429,100,403.14,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,107.26,78,Failover Cluster - Quorum Config,429,100,429,100,107.26,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.94,77,Availability Group Member Info,429,100,429,100,99.94,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,298.21,44,Summary of DB Status,429,100,429,100,298.21,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.74,84,Failover Cluster Info,429,100,429,100,101.74,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,104.42,86,DB Volume Info,429,100,429,100,104.42,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,203.45,86,DB Volume Info,429,100,429,100,203.45,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,294.74,88,DB Volume Usage % By Server,429,100,429,100,294.74,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.67,84,Failover Cluster Info,429,100,429,100,199.67,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,190.72,77,Availability Group Member Info,429,100,429,100,190.72,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,298.45,83,Database Info,429,100,429,100,298.45,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.98,74,High Availability Group Status,429,100,429,100,101.98,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.76,80,Impacted Databases,429,100,429,100,99.76,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,98.94,74,High Availability Group Status,429,100,429,100,98.94,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,292.79,68,Memory Info,429,100,429,100,292.79,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.36,84,Failover Cluster Info,429,100,429,100,101.36,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.95,85,Time Since Last DB Restart,429,100,429,100,99.95,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.64,76,Failover Cluster Node Status,429,100,429,100,100.64,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,194.56,88,DB Volume Usage % By Server,200,100,200,100,194.56,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.60,73,High Availability Replica Status,429,100,429,100,101.60,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,293.78,83,Database Info,429,100,429,100,293.78,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,393.50,76,Failover Cluster Node Status,429,100,429,100,393.50,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,196.81,75,HA Database Replica Status,429,100,429,100,196.81,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.73,73,High Availability Replica Status,429,100,429,100,200.73,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.07,84,Failover Cluster Info,429,100,429,100,200.07,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,396.42,88,DB Volume Usage % By Server,429,100,429,100,396.42,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,296.98,86,DB Volume Info,429,100,429,100,296.98,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,299.04,58,MSSQL Memory Usage,429,100,429,100,299.04,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,300.22,79,Overview on HADR (High Availability Disaster Recovery),429,100,429,100,300.22,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.47,79,Overview on HADR (High Availability Disaster Recovery),429,100,429,100,201.47,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,297.03,84,Failover Cluster Info,429,100,429,100,297.03,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,300.02,82,User Connections,429,100,429,100,300.02,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,301.64,75,HA Database Replica Status,429,100,429,100,301.64,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,300.08,88,DB Volume Usage % By Server,429,100,429,100,300.08,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,400.10,85,Time Since Last DB Restart,200,100,200,100,400.10,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,298.24,78,Failover Cluster - Quorum Config,429,100,429,100,298.24,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,698.05,76,Failover Cluster Node Status,429,100,429,100,698.05,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,399.17,34,Avg Memory Usage for Top 5 Servers,200,100,200,100,399.17,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.88,76,Failover Cluster Node Status,429,100,429,100,200.88,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,501.60,76,Failover Cluster Node Status,429,100,429,100,501.60,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,104.70,86,DB Volume Info,429,100,429,100,104.70,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.09,79,Overview on HADR (High Availability Disaster Recovery),429,100,429,100,100.09,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,298.01,82,User Connections,429,100,429,100,298.01,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,202.01,84,Failover Cluster Info,429,100,429,100,202.01,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,499.85,78,Failover Cluster - Quorum Config,429,100,429,100,499.85,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,300.84,23,User Connections,429,100,429,100,300.84,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.22,79,Overview on HADR (High Availability Disaster Recovery),429,100,429,100,200.22,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.55,78,Failover Cluster - Quorum Config,429,100,429,100,197.55,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,299.25,24,Memory Clerk,200,100,200,100,299.25,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.76,70,Max User Connections Trend for Top 5 Servers,429,100,429,100,198.76,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,298.08,88,DB Volume Usage % By Server,429,100,429,100,298.08,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,297.09,77,Availability Group Member Info,429,100,429,100,297.09,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,400.11,77,Availability Group Member Info,429,100,429,100,400.11,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,396.89,79,Overview on HADR (High Availability Disaster Recovery),429,100,429,100,396.89,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.27,78,Failover Cluster - Quorum Config,429,100,429,100,200.27,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,300.38,23,User Connections,429,100,429,100,300.38,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,301.48,76,Failover Cluster Node Status,429,100,429,100,301.48,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.25,74,High Availability Group Status,429,100,429,100,99.25,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.74,69,Locks & Waits,429,100,429,100,199.74,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.13,70,Max User Connections Trend for Top 5 Servers,429,100,429,100,99.13,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,104.31,74,High Availability Group Status,429,100,429,100,104.31,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,205.42,77,Availability Group Member Info,200,100,200,100,205.42,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.33,77,Availability Group Member Info,429,100,429,100,198.33,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,298.11,65,Performance Metrics,429,100,429,100,298.11,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.24,79,Overview on HADR (High Availability Disaster Recovery),429,100,429,100,197.24,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.87,78,Failover Cluster - Quorum Config,429,100,429,100,200.87,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.48,73,High Availability Replica Status,429,100,429,100,102.48,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.36,65,Performance Metrics,429,100,429,100,198.36,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,397.20,84,Failover Cluster Info,429,100,429,100,397.20,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.43,21,Locks Overview,429,100,429,100,200.43,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.06,78,Failover Cluster - Quorum Config,429,100,429,100,100.06,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.63,73,High Availability Replica Status,429,100,429,100,199.63,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.18,56,MSSQL Performance Metrics,200,100,200,100,200.18,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.38,74,High Availability Group Status,429,100,429,100,200.38,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.64,77,Availability Group Member Info,429,100,429,100,198.64,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.40,25,Wait Stats,429,100,429,100,102.40,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,103.14,76,Failover Cluster Node Status,429,100,429,100,103.14,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.60,75,HA Database Replica Status,429,100,429,100,99.60,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.63,77,Availability Group Member Info,429,100,429,100,198.63,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,297.60,75,HA Database Replica Status,429,100,429,100,297.60,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,395.18,74,High Availability Group Status,429,100,429,100,395.18,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,203.16,56,MSSQL Performance Metrics,429,100,429,100,203.16,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,103.51,73,High Availability Replica Status,429,100,429,100,103.51,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,6.18,74,High Availability Group Status,429,100,429,100,6.18,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.20,79,Overview on HADR (High Availability Disaster Recovery),429,100,429,100,197.20,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.31,74,High Availability Group Status,429,100,429,100,200.31,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,98.79,55,MSSQL Errors/Sec Distribution,429,100,429,100,98.79,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,103.16,82,User Connections,429,100,429,100,103.16,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,103.86,73,High Availability Replica Status,429,100,429,100,103.86,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.99,73,High Availability Replica Status,429,100,429,100,99.99,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,205.62,82,User Connections,429,100,429,100,205.62,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,296.91,42,Avg Lock Waits/Sec Trend for Top 5 Databases,429,100,429,100,296.91,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,196.42,75,HA Database Replica Status,429,100,429,100,196.42,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,301.08,55,MSSQL Errors/Sec Distribution,200,100,200,100,301.08,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.04,23,User Connections,429,100,429,100,101.04,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,104.82,73,High Availability Replica Status,429,100,429,100,104.82,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,192.74,75,HA Database Replica Status,429,100,429,100,192.74,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.54,63,Avg Transactions/Sec Trend for Top 5 Databases,429,100,429,100,198.54,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,96.24,70,Max User Connections Trend for Top 5 Servers,429,100,429,100,96.24,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.92,61,Disk Metrics & Backup Status,429,100,429,100,101.92,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.01,75,HA Database Replica Status,429,100,429,100,199.01,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,204.61,78,Failover Cluster - Quorum Config,429,100,429,100,204.61,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.99,82,User Connections,429,100,429,100,99.99,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,98.98,28,Avg Buffer Cache Hit % Trend for Top 5 Databases,429,100,429,100,98.98,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.03,63,Avg Transactions/Sec Trend for Top 5 Databases,429,100,429,100,198.03,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.87,82,User Connections,429,100,429,100,199.87,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,194.96,75,HA Database Replica Status,429,100,429,100,194.96,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,294.47,23,User Connections,429,100,429,100,294.47,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.58,23,User Connections,429,100,429,100,101.58,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.77,82,User Connections,429,100,429,100,100.77,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,105.00,23,User Connections,429,100,429,100,105.00,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,295.33,77,Availability Group Member Info,429,100,429,100,295.33,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.50,28,Avg Buffer Cache Hit % Trend for Top 5 Databases,429,100,429,100,201.50,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,397.65,65,Performance Metrics,429,100,429,100,397.65,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,395.50,82,User Connections,200,100,200,100,395.50,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,300.59,64,Avg DeadLocks/Sec Trend for Top 5 Databases,429,100,429,100,300.59,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.36,23,User Connections,429,100,429,100,198.36,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.03,70,Max User Connections Trend for Top 5 Servers,429,100,429,100,200.03,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,297.07,70,Max User Connections Trend for Top 5 Servers,429,100,429,100,297.07,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,407.70,20,Log Activity,429,100,429,100,407.70,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.27,64,Avg DeadLocks/Sec Trend for Top 5 Databases,429,100,429,100,198.27,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.46,23,User Connections,429,100,429,100,101.46,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.67,70,Max User Connections Trend for Top 5 Servers,429,100,429,100,197.67,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,299.62,74,High Availability Group Status,429,100,429,100,299.62,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.01,27,Avg Errors/Sec Trend for Top 5 Databases,429,100,429,100,200.01,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.93,70,Max User Connections Trend for Top 5 Servers,429,100,429,100,102.93,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,494.21,70,Max User Connections Trend for Top 5 Servers,200,100,200,100,494.21,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.44,65,Performance Metrics,429,100,429,100,102.44,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,303.72,56,MSSQL Performance Metrics,429,100,429,100,303.72,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.03,73,High Availability Replica Status,429,100,429,100,201.03,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,301.36,27,Avg Errors/Sec Trend for Top 5 Databases,429,100,429,100,301.36,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,400.56,65,Performance Metrics,429,100,429,100,400.56,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,202.32,59,MSSQL Metrics,200,100,200,100,202.32,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,294.54,65,Performance Metrics,429,100,429,100,294.54,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,488.91,16,Backup Details,429,100,429,100,488.91,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,202.48,65,Performance Metrics,429,100,429,100,202.48,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.22,75,HA Database Replica Status,429,100,429,100,102.22,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,98.99,82,User Connections,429,100,429,100,98.99,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,605.82,65,Performance Metrics,429,100,429,100,605.82,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,205.35,67,Page Metrics,429,100,429,100,205.35,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,297.02,56,MSSQL Performance Metrics,429,100,429,100,297.02,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.50,56,MSSQL Performance Metrics,200,100,200,100,201.50,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,398.73,55,MSSQL Errors/Sec Distribution,429,100,429,100,398.73,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,401.22,56,MSSQL Performance Metrics,429,100,429,100,401.22,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,300.62,59,MSSQL Metrics,429,100,429,100,300.62,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.27,56,MSSQL Performance Metrics,429,100,429,100,201.27,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,191.66,56,MSSQL Performance Metrics,429,100,429,100,191.66,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,97.99,63,Avg Transactions/Sec Trend for Top 5 Databases,429,100,429,100,97.99,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,97.42,67,Page Metrics,429,100,429,100,97.42,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.68,23,User Connections,429,100,429,100,198.68,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,105.88,55,MSSQL Errors/Sec Distribution,429,100,429,100,105.88,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.65,55,MSSQL Errors/Sec Distribution,429,100,429,100,102.65,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.42,55,MSSQL Errors/Sec Distribution,429,100,429,100,101.42,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.73,55,MSSQL Errors/Sec Distribution,429,100,429,100,100.73,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.77,19,MSSQL Page Metrics,429,100,429,100,101.77,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,98.68,63,Avg Transactions/Sec Trend for Top 5 Databases,429,100,429,100,98.68,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,104.76,28,Avg Buffer Cache Hit % Trend for Top 5 Databases,429,100,429,100,104.76,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,104.52,63,Avg Transactions/Sec Trend for Top 5 Databases,429,100,429,100,104.52,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.77,70,Max User Connections Trend for Top 5 Servers,200,100,200,100,197.77,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,194.45,63,Avg Transactions/Sec Trend for Top 5 Databases,429,100,429,100,194.45,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,301.76,55,MSSQL Errors/Sec Distribution,429,100,429,100,301.76,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,394.05,19,MSSQL Page Metrics,429,100,429,100,394.05,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,188.67,28,Avg Buffer Cache Hit % Trend for Top 5 Databases,429,100,429,100,188.67,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.15,32,Avg Page Lookups/Sec Trend for Top 5 Databases,429,100,429,100,197.15,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,202.16,63,Avg Transactions/Sec Trend for Top 5 Databases,429,100,429,100,202.16,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.59,65,Performance Metrics,429,100,429,100,102.59,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.80,28,Avg Buffer Cache Hit % Trend for Top 5 Databases,429,100,429,100,200.80,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.74,64,Avg DeadLocks/Sec Trend for Top 5 Databases,429,100,429,100,200.74,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,103.98,63,Avg Transactions/Sec Trend for Top 5 Databases,429,100,429,100,103.98,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.51,29,Avg Page Reads/Sec for Top 5 Databases,429,100,429,100,101.51,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.41,28,Avg Buffer Cache Hit % Trend for Top 5 Databases,429,100,429,100,201.41,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.33,32,Avg Page Lookups/Sec Trend for Top 5 Databases,429,100,429,100,200.33,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,106.33,64,Avg DeadLocks/Sec Trend for Top 5 Databases,429,100,429,100,106.33,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,196.96,28,Avg Buffer Cache Hit % Trend for Top 5 Databases,200,100,200,100,196.96,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.51,66,Avg Page Splits/Sec Trend for Top 5 Databases,429,100,429,100,100.51,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.67,27,Avg Errors/Sec Trend for Top 5 Databases,429,100,429,100,197.67,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.00,56,MSSQL Performance Metrics,429,100,429,100,200.00,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.30,64,Avg DeadLocks/Sec Trend for Top 5 Databases,429,100,429,100,198.30,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.99,64,Avg DeadLocks/Sec Trend for Top 5 Databases,429,100,429,100,100.99,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,296.75,28,Avg Buffer Cache Hit % Trend for Top 5 Databases,429,100,429,100,296.75,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.80,64,Avg DeadLocks/Sec Trend for Top 5 Databases,429,100,429,100,200.80,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.31,29,Avg Page Reads/Sec for Top 5 Databases,429,100,429,100,200.31,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.28,68,Memory Info,429,100,429,100,102.28,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,196.84,59,MSSQL Metrics,429,100,429,100,196.84,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,297.80,27,Avg Errors/Sec Trend for Top 5 Databases,429,100,429,100,297.80,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,195.30,66,Avg Page Splits/Sec Trend for Top 5 Databases,429,100,429,100,195.30,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.38,64,Avg DeadLocks/Sec Trend for Top 5 Databases,429,100,429,100,198.38,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.31,67,Page Metrics,429,100,429,100,102.31,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,295.03,27,Avg Errors/Sec Trend for Top 5 Databases,429,100,429,100,295.03,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,395.15,55,MSSQL Errors/Sec Distribution,200,100,200,100,395.15,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,397.27,27,Avg Errors/Sec Trend for Top 5 Databases,429,100,429,100,397.27,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.15,27,Avg Errors/Sec Trend for Top 5 Databases,429,100,429,100,197.15,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,395.28,58,MSSQL Memory Usage,429,100,429,100,395.28,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.13,19,MSSQL Page Metrics,429,100,429,100,198.13,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.24,68,Memory Info,429,100,429,100,201.24,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,497.26,27,Avg Errors/Sec Trend for Top 5 Databases,429,100,429,100,497.26,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.74,59,MSSQL Metrics,200,100,200,100,201.74,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.19,34,Avg Memory Usage for Top 5 Servers,429,100,429,100,101.19,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.62,59,MSSQL Metrics,429,100,429,100,200.62,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,398.43,59,MSSQL Metrics,429,100,429,100,398.43,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.25,59,MSSQL Metrics,429,100,429,100,199.25,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.82,58,MSSQL Memory Usage,429,100,429,100,197.82,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.88,32,Avg Page Lookups/Sec Trend for Top 5 Databases,429,100,429,100,199.88,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.47,67,Page Metrics,429,100,429,100,100.47,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,304.26,63,Avg Transactions/Sec Trend for Top 5 Databases,429,100,429,100,304.26,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.89,67,Page Metrics,429,100,429,100,197.89,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.15,67,Page Metrics,429,100,429,100,101.15,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.11,34,Avg Memory Usage for Top 5 Servers,429,100,429,100,101.11,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,202.52,59,MSSQL Metrics,429,100,429,100,202.52,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,295.64,67,Page Metrics,429,100,429,100,295.64,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,296.25,24,Memory Clerk,429,100,429,100,296.25,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.24,19,MSSQL Page Metrics,429,100,429,100,100.24,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.89,29,Avg Page Reads/Sec for Top 5 Databases,200,100,200,100,198.89,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.98,19,MSSQL Page Metrics,429,100,429,100,199.98,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.76,19,MSSQL Page Metrics,429,100,429,100,198.76,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.10,67,Page Metrics,429,100,429,100,198.10,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.67,66,Avg Page Splits/Sec Trend for Top 5 Databases,429,100,429,100,100.67,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,297.98,28,Avg Buffer Cache Hit % Trend for Top 5 Databases,429,100,429,100,297.98,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.78,24,Memory Clerk,429,100,429,100,200.78,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,103.45,19,MSSQL Page Metrics,429,100,429,100,103.45,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,103.64,69,Locks & Waits,429,100,429,100,103.64,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.65,32,Avg Page Lookups/Sec Trend for Top 5 Databases,429,100,429,100,102.65,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.23,32,Avg Page Lookups/Sec Trend for Top 5 Databases,429,100,429,100,199.23,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,96.83,32,Avg Page Lookups/Sec Trend for Top 5 Databases,429,100,429,100,96.83,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.73,68,Memory Info,429,100,429,100,101.73,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,104.38,19,MSSQL Page Metrics,429,100,429,100,104.38,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,106.01,32,Avg Page Lookups/Sec Trend for Top 5 Databases,429,100,429,100,106.01,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.32,64,Avg DeadLocks/Sec Trend for Top 5 Databases,429,100,429,100,197.32,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,104.30,29,Avg Page Reads/Sec for Top 5 Databases,429,100,429,100,104.30,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.03,29,Avg Page Reads/Sec for Top 5 Databases,429,100,429,100,199.03,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,203.36,21,Locks Overview,429,100,429,100,203.36,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,204.95,69,Locks & Waits,200,100,200,100,204.95,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.57,27,Avg Errors/Sec Trend for Top 5 Databases,429,100,429,100,99.57,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,193.59,29,Avg Page Reads/Sec for Top 5 Databases,429,100,429,100,193.59,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,202.80,29,Avg Page Reads/Sec for Top 5 Databases,429,100,429,100,202.80,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.59,32,Avg Page Lookups/Sec Trend for Top 5 Databases,429,100,429,100,199.59,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.87,58,MSSQL Memory Usage,429,100,429,100,200.87,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.66,66,Avg Page Splits/Sec Trend for Top 5 Databases,429,100,429,100,100.66,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.41,59,MSSQL Metrics,429,100,429,100,101.41,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.87,66,Avg Page Splits/Sec Trend for Top 5 Databases,429,100,429,100,101.87,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.93,66,Avg Page Splits/Sec Trend for Top 5 Databases,429,100,429,100,197.93,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,195.20,21,Locks Overview,429,100,429,100,195.20,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,196.33,25,Wait Stats,429,100,429,100,196.33,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,195.54,29,Avg Page Reads/Sec for Top 5 Databases,429,100,429,100,195.54,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,194.56,68,Memory Info,200,100,200,100,194.56,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.43,66,Avg Page Splits/Sec Trend for Top 5 Databases,429,100,429,100,198.43,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.51,25,Wait Stats,429,100,429,100,100.51,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.33,34,Avg Memory Usage for Top 5 Servers,429,100,429,100,199.33,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.93,67,Page Metrics,429,100,429,100,200.93,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.29,66,Avg Page Splits/Sec Trend for Top 5 Databases,429,100,429,100,199.29,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,298.89,68,Memory Info,429,100,429,100,298.89,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,298.92,68,Memory Info,429,100,429,100,298.92,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,300.82,42,Avg Lock Waits/Sec Trend for Top 5 Databases,429,100,429,100,300.82,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,297.12,24,Memory Clerk,429,100,429,100,297.12,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.35,58,MSSQL Memory Usage,429,100,429,100,101.35,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,299.69,42,Avg Lock Waits/Sec Trend for Top 5 Databases,429,100,429,100,299.69,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,298.66,19,MSSQL Page Metrics,429,100,429,100,298.66,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,400.70,68,Memory Info,429,100,429,100,400.70,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,402.08,58,MSSQL Memory Usage,200,100,200,100,402.08,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,298.94,68,Memory Info,429,100,429,100,298.94,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,297.54,61,Disk Metrics & Backup Status,429,100,429,100,297.54,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.95,34,Avg Memory Usage for Top 5 Servers,429,100,429,100,198.95,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.40,69,Locks & Waits,429,100,429,100,200.40,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.51,61,Disk Metrics & Backup Status,429,100,429,100,199.51,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,304.10,58,MSSQL Memory Usage,429,100,429,100,304.10,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.83,32,Avg Page Lookups/Sec Trend for Top 5 Databases,200,100,200,100,200.83,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.72,34,Avg Memory Usage for Top 5 Servers,429,100,429,100,200.72,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.31,58,MSSQL Memory Usage,429,100,429,100,201.31,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,199.39,21,Locks Overview,429,100,429,100,199.39,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.64,20,Log Activity,429,100,429,100,200.64,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.97,24,Memory Clerk,429,100,429,100,200.97,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.63,29,Avg Page Reads/Sec for Top 5 Databases,429,100,429,100,201.63,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.77,69,Locks & Waits,429,100,429,100,100.77,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.69,25,Wait Stats,429,100,429,100,102.69,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,496.75,58,MSSQL Memory Usage,429,100,429,100,496.75,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,296.13,24,Memory Clerk,200,100,200,100,296.13,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,396.87,34,Avg Memory Usage for Top 5 Servers,429,100,429,100,396.87,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,98.83,66,Avg Page Splits/Sec Trend for Top 5 Databases,429,100,429,100,98.83,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.78,16,Backup Details,429,100,429,100,201.78,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,402.01,20,Log Activity,429,100,429,100,402.01,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,195.38,21,Locks Overview,429,100,429,100,195.38,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,299.20,34,Avg Memory Usage for Top 5 Servers,429,100,429,100,299.20,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,195.50,42,Avg Lock Waits/Sec Trend for Top 5 Databases,429,100,429,100,195.50,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.86,24,Memory Clerk,429,100,429,100,100.86,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.72,68,Memory Info,429,100,429,100,101.72,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,6.56,25,Wait Stats,429,100,429,100,6.56,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.05,34,Avg Memory Usage for Top 5 Servers,429,100,429,100,200.05,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,195.73,16,Backup Details,429,100,429,100,195.73,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.36,24,Memory Clerk,429,100,429,100,100.36,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,200.81,69,Locks & Waits,429,100,429,100,200.81,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,104.01,61,Disk Metrics & Backup Status,429,100,429,100,104.01,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,6.62,24,Memory Clerk,429,100,429,100,6.62,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,193.43,42,Avg Lock Waits/Sec Trend for Top 5 Databases,429,100,429,100,193.43,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,196.46,69,Locks & Waits,200,100,200,100,196.46,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.76,58,MSSQL Memory Usage,429,100,429,100,197.76,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,103.42,21,Locks Overview,429,100,429,100,103.42,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,98.89,61,Disk Metrics & Backup Status,429,100,429,100,98.89,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,198.61,69,Locks & Waits,429,100,429,100,198.61,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,193.76,69,Locks & Waits,429,100,429,100,193.76,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,196.21,20,Log Activity,429,100,429,100,196.21,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.94,34,Avg Memory Usage for Top 5 Servers,429,100,429,100,99.94,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.82,21,Locks Overview,429,100,429,100,102.82,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,193.63,25,Wait Stats,429,100,429,100,193.63,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,95.83,25,Wait Stats,429,100,429,100,95.83,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,100.86,21,Locks Overview,429,100,429,100,100.86,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,101.17,16,Backup Details,429,100,429,100,101.17,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.45,21,Locks Overview,429,100,429,100,102.45,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,103.42,20,Log Activity,429,100,429,100,103.42,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,99.65,42,Avg Lock Waits/Sec Trend for Top 5 Databases,429,100,429,100,99.65,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,197.95,24,Memory Clerk,200,100,200,100,197.95,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.53,42,Avg Lock Waits/Sec Trend for Top 5 Databases,429,100,429,100,102.53,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,201.98,25,Wait Stats,429,100,429,100,201.98,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,112.21,69,Locks & Waits,429,100,429,100,112.21,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,304.24,25,Wait Stats,429,100,429,100,304.24,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,205.18,61,Disk Metrics & Backup Status,429,100,429,100,205.18,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,331.16,16,Backup Details,429,100,429,100,331.16,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,92.92,20,Log Activity,429,100,429,100,92.92,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,187.51,21,Locks Overview,429,100,429,100,187.51,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,304.86,61,Disk Metrics & Backup Status,429,100,429,100,304.86,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,6.00,16,Backup Details,429,100,429,100,6.00,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.27,42,Avg Lock Waits/Sec Trend for Top 5 Databases,429,100,429,100,102.27,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,207.56,42,Avg Lock Waits/Sec Trend for Top 5 Databases,200,100,200,100,207.56,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,10.82,25,Wait Stats,429,100,429,100,10.82,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,8.19,61,Disk Metrics & Backup Status,429,100,429,100,8.19,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,95.43,20,Log Activity,429,100,429,100,95.43,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,86.97,42,Avg Lock Waits/Sec Trend for Top 5 Databases,429,100,429,100,86.97,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,92.93,61,Disk Metrics & Backup Status,429,100,429,100,92.93,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,85.28,20,Log Activity,429,100,429,100,85.28,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,6.46,61,Disk Metrics & Backup Status,429,100,429,100,6.46,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,94.15,20,Log Activity,429,100,429,100,94.15,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,102.11,16,Backup Details,429,100,429,100,102.11,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,104.41,20,Log Activity,429,100,429,100,104.41,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,98.61,16,Backup Details,429,100,429,100,98.61,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,97.74,16,Backup Details,429,100,429,100,97.74,15m,10,10,10
+2025-10-29 17:22:01,MSSQL Overview Dashboard,296.41,16,Backup Details,200,100,200,100,296.41,15m,10,10,10

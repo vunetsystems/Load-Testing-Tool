@@ -181,7 +181,7 @@ class O11ySources {
 
             console.log('EPS split successful, proceeding to distribution...');
             this.updateSyncProgress(33, 'Step 1 of 3 completed');
-            this.updateStep(1, 'completed', 'check_circle', 'Completed in 1.5s');
+            this.updateStep(1, 'completed', 'check_circle', 'Completed');
             this.updateStep(2, 'in-progress', 'hourglass_top', 'In Progress...');
 
             // Proceed to EPS distribution
@@ -217,7 +217,7 @@ class O11ySources {
 
                 // Immediately show error and stop processing - NO conf.d distribution will be called
                 console.log('Stopping sync process due to EPS distribution failure');
-                this.updateStep(1, 'completed', 'check_circle', 'Completed in 1.5s');
+                this.updateStep(1, 'completed', 'check_circle', 'Completed');
                 this.updateStep(2, 'failed', 'error', 'Failed');
                 this.showSyncError(epsErrorMessage);
                 this.manager.showNotification('Failed to sync configs: ' + epsErrorMessage, 'error');
@@ -229,14 +229,14 @@ class O11ySources {
             // Only proceed to conf.d distribution if EPS distribution succeeded
             console.log('EPS distribution successful, proceeding to conf.d distribution...');
             this.updateSyncProgress(66, 'Step 2 of 3 completed');
-            this.updateStep(2, 'completed', 'check_circle', 'Completed in 2.0s');
+            this.updateStep(2, 'completed', 'check_circle', 'Completed');
             this.updateStep(3, 'in-progress', 'hourglass_top', 'In Progress...');
             console.log('About to call conf.d distribution API...');
             return this.manager.callAPI('/api/o11y/confd/distribute', 'POST');
         })
         .catch(error => {
             if (error.message.includes('EPS distribution failed')) {
-                this.updateStep(1, 'completed', 'check_circle', 'Completed in 1.5s');
+                this.updateStep(1, 'completed', 'check_circle', 'Completed');
                 this.updateStep(2, 'failed', 'error', 'Failed');
             }
             throw error;
@@ -273,14 +273,14 @@ class O11ySources {
 
             // Both APIs succeeded completely
             this.updateSyncProgress(100, 'Sync completed successfully');
-            this.updateStep(3, 'completed', 'check_circle', 'Completed in 3.0s');
+            this.updateStep(3, 'completed', 'check_circle', 'Completed');
             this.showSyncSuccess();
             this.manager.showNotification('Configs synced successfully!', 'success');
         })
         .catch(error => {
             if (error.message.includes('Conf.d distribution failed')) {
-                this.updateStep(1, 'completed', 'check_circle', 'Completed in 1.5s');
-                this.updateStep(2, 'completed', 'check_circle', 'Completed in 2.0s');
+                this.updateStep(1, 'completed', 'check_circle', 'Completed');
+                this.updateStep(2, 'completed', 'check_circle', 'Completed');
                 this.updateStep(3, 'failed', 'error', 'Failed');
             }
             throw error;
@@ -335,9 +335,9 @@ class O11ySources {
 
     showSyncSuccess() {
         this.updateSyncProgress(100, 'Sync completed successfully');
-        this.updateStep(1, 'completed', 'check_circle', 'Completed in 1.5s');
-        this.updateStep(2, 'completed', 'check_circle', 'Completed in 2.0s');
-        this.updateStep(3, 'completed', 'check_circle', 'Completed in 3.0s');
+        this.updateStep(1, 'completed', 'check_circle', 'Completed');
+        this.updateStep(2, 'completed', 'check_circle', 'Completed');
+        this.updateStep(3, 'completed', 'check_circle', 'Completed');
 
         // Auto-hide after 5 seconds
         setTimeout(() => {
