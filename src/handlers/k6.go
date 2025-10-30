@@ -496,6 +496,25 @@ func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
 		params.Interval = 5
 	}
 
+	// Read module configuration and update dashboard config synchronously
+	enabledModules, err := h.readModuleConfig()
+	if err != nil {
+		logger.Error().Err(err).Str("module", "k6").Msg("Failed to read module configuration")
+		// Continue with execution even if config read fails
+	} else {
+		logger.Info().Str("module", "k6").Int("enabled_modules", len(enabledModules)).Msg("Module configuration read successfully")
+	}
+
+	if enabledModules != nil {
+		err = h.updateDashboardConfig(enabledModules)
+		if err != nil {
+			logger.Error().Err(err).Str("module", "k6").Msg("Failed to update dashboard configuration")
+			// Continue with execution even if update fails
+		} else {
+			logger.Info().Str("module", "k6").Msg("Dashboard configuration updated successfully")
+		}
+	}
+
 	// Start execution in background
 	go h.executeCombinedScript(params.TimeRange, params.VUs, params.Iterations, params.Interval)
 
@@ -539,30 +558,7 @@ func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, int
 
 	logger.Info().Str("module", "k6").Msg("Starting combined.sh script execution")
 
-	// Step 1: Read module configuration
-	logger.Info().Str("module", "k6").Msg("Step 1: Reading module configuration")
-	enabledModules, err := h.readModuleConfig()
-	if err != nil {
-		logger.Error().Err(err).Str("module", "k6").Msg("Failed to read module configuration, continuing with test execution")
-	} else {
-		logger.Info().Str("module", "k6").Int("enabled_modules", len(enabledModules)).Msg("Module configuration read successfully")
-	}
-
-	// Step 2: Update dashboard configuration based on enabled modules
-	logger.Info().Str("module", "k6").Msg("Step 2: Updating dashboard configuration")
-	if enabledModules != nil {
-		err = h.updateDashboardConfig(enabledModules)
-		if err != nil {
-			logger.Error().Err(err).Str("module", "k6").Msg("Failed to update dashboard configuration, continuing with test execution")
-		} else {
-			logger.Info().Str("module", "k6").Msg("Dashboard configuration updated successfully")
-		}
-	}
-
-	// Step 3: Execute the combined.sh script
-	logger.Info().Str("module", "k6").Msg("Step 3: Executing combined.sh script")
-
-	// Execute the script
+	// Execute the combined.sh script
 	cmd := exec.Command("./combined.sh", timeRange, fmt.Sprintf("%d", vus), fmt.Sprintf("%d", iterations), fmt.Sprintf("%d", interval))
 	cmd.Dir = "k6_final/k6_dashboard_name/linux-mssql-dashboard" // Working directory
 
@@ -588,30 +584,34 @@ func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, int
 	h.mutex.Unlock()
 }
 
-// readModuleConfig reads the enabled modules from categories.yaml
+// readModuleConfig reads the enabled modules from conf.yml
 func (h *K6Handler) readModuleConfig() ([]string, error) {
-	configPath := "src/configs/categories.yaml"
+	configPath := "src/migrate/conf.d/conf.yml"
 	data, err := os.ReadFile(configPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read categories config: %v", err)
+		return nil, fmt.Errorf("failed to read module config: %v", err)
 	}
 
-	var categoriesConfig struct {
-		Categories map[string]struct {
-			Name            string   `yaml:"name"`
-			Description     string   `yaml:"description"`
-			Sources         []string `yaml:"sources"`
-			MaxEpsPerNode   int      `yaml:"max_eps_per_node"`
-		} `yaml:"categories"`
+	var moduleConfig struct {
+		DataGenerationTime struct {
+			Type string `yaml:"type"`
+		} `yaml:"data_generation_time"`
+		IncludeModuleDirs map[string]struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"include_module_dirs"`
+		Logging   interface{} `yaml:"logging"`
+		Output    interface{} `yaml:"output"`
 	}
 
-	if err := yaml.Unmarshal(data, &categoriesConfig); err != nil {
-		return nil, fmt.Errorf("failed to parse categories config: %v", err)
+	if err := yaml.Unmarshal(data, &moduleConfig); err != nil {
+		return nil, fmt.Errorf("failed to parse module config: %v", err)
 	}
 
 	var enabledModules []string
-	for _, category := range categoriesConfig.Categories {
-		enabledModules = append(enabledModules, category.Sources...)
+	for moduleName, moduleSettings := range moduleConfig.IncludeModuleDirs {
+		if moduleSettings.Enabled {
+			enabledModules = append(enabledModules, moduleName)
+		}
 	}
 
 	return enabledModules, nil

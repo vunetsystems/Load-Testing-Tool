@@ -135,7 +135,9 @@ func main() {
 	api.HandleFunc("/ssh/status", handlers.HandleAPIGetSSHStatus).Methods("GET")
 	// ClickHouse metrics API endpoints
 	api.HandleFunc("/clickhouse/metrics", handlers.HandleAPIGetClickHouseMetrics).Methods("GET")
+	api.HandleFunc("/clickhouse/k6-success-rate", handlers.HandleAPIGetK6SuccessRate).Methods("GET")
 	api.HandleFunc("/clickhouse/k6-max-vus", handlers.HandleAPIGetK6MaxVus).Methods("GET")
+	api.HandleFunc("/clickhouse/pod-logs", handlers.HandleAPIGetPodLogs).Methods("GET")
 	api.HandleFunc("/clickhouse/k6-login-results", handlers.HandleAPIGetK6LoginResults).Methods("GET")
 	api.HandleFunc("/clickhouse/health", handlers.HandleAPIClickHouseHealth).Methods("GET")
 	api.HandleFunc("/clickhouse/kafka-topics", handlers.HandleAPIGetKafkaTopicMetrics).Methods("GET")
@@ -171,6 +173,9 @@ func main() {
 
 	// Process metrics endpoint - collects finalvudatasim metrics directly via SSH
 	api.HandleFunc("/process/metrics", handlers.HandleAPIGetProcessMetrics).Methods("GET")
+
+	// Kubernetes monitoring API endpoints
+	api.HandleFunc("/monitoring/k8/pod-yaml", handlers.HandleAPIMonitoringK8PodYAML).Methods("GET")
 
 	// Initialize ClickHouse client
 	if err := clickhouse.InitClickHouse("src/configs/config.yaml"); err != nil {

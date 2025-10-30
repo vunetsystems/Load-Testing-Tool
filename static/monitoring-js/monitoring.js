@@ -85,6 +85,11 @@ function setupSectionNavigation() {
             // Handle tab initialization for performance section
             if (section === 'performance') {
                 setupPerformanceTabs();
+
+                // Initialize Kafka charts when performance section becomes visible
+                if (realtimeManager && realtimeManager.kafkaManager) {
+                    realtimeManager.kafkaManager.onSectionVisible();
+                }
             }
 
             // Handle pod monitoring section

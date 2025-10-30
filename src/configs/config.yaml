@@ -43,6 +43,13 @@ monitoring_db:
   database: "monitoring"
   username: "monitoring_read"
   password: "StrongP@assword123"
+truncate_db:
+  host: "10.32.1.228"
+  port: 9000
+  database: "vusmart"
+  username: "truncate_db"
+  password: "StrongP@assword123"
+
 # monitored_pods:
 #   - "linuxmonitor-8d545644d-wv77v"
 #   - "apache-metrics-6d7f45d5d8-vbmcf"

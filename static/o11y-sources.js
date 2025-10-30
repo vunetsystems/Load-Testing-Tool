@@ -165,6 +165,7 @@ class O11ySources {
         this.updateStep(2, 'pending', 'schedule', 'Pending');
         this.updateStep(3, 'pending', 'schedule', 'Pending');
         this.updateStep(4, 'pending', 'schedule', 'Pending');
+        this.updateStep(5, 'pending', 'schedule', 'Pending');
 
         return this.manager.callAPI('/api/o11y/eps/split', 'POST', splitRequest)
         .then(splitResponse => {
@@ -274,7 +275,7 @@ class O11ySources {
 
             // Only proceed to Kafka distribution if conf.d distribution succeeded
             console.log('Conf.d distribution successful, proceeding to Kafka distribution...');
-            this.updateSyncProgress(75, 'Step 3 of 4 completed');
+            this.updateSyncProgress(60, 'Step 3 of 5 completed');
             this.updateStep(3, 'completed', 'check_circle', 'Completed');
             this.updateStep(4, 'in-progress', 'hourglass_top', 'In Progress...');
             console.log('About to call Kafka distribute-enabled client API...');
@@ -296,9 +297,35 @@ class O11ySources {
                 throw new Error(kafkaResponse.message || 'Kafka distribution failed');
             }
 
-            // All APIs succeeded completely
-            this.updateSyncProgress(100, 'Sync completed successfully');
+            // Only proceed to ClickHouse truncate if Kafka distribution succeeded
+            console.log('Kafka distribution successful, proceeding to ClickHouse truncate...');
+            this.updateSyncProgress(80, 'Step 4 of 5 completed');
             this.updateStep(4, 'completed', 'check_circle', 'Completed');
+            this.updateStep(5, 'in-progress', 'hourglass_top', 'In Progress...');
+            console.log('About to call ClickHouse truncate-enabled-tables API...');
+            return this.manager.callAPI('/api/clickhouse/truncate-enabled-tables', 'POST');
+        })
+        .catch(error => {
+            if (error.message.includes('Kafka distribution failed')) {
+                this.updateStep(1, 'completed', 'check_circle', 'Completed');
+                this.updateStep(2, 'completed', 'check_circle', 'Completed');
+                this.updateStep(3, 'completed', 'check_circle', 'Completed');
+                this.updateStep(4, 'failed', 'error', 'Failed');
+            }
+            throw error;
+        })
+        .then(truncateResponse => {
+            console.log('ClickHouse truncate response:', truncateResponse);
+
+            if (!truncateResponse.success) {
+                this.updateStep(5, 'failed', 'error', 'Failed');
+                throw new Error(truncateResponse.message || 'ClickHouse truncate failed');
+            }
+
+            // All APIs succeeded completely
+            console.log('All sync steps completed successfully');
+            this.updateSyncProgress(100, 'Sync completed successfully');
+            this.updateStep(5, 'completed', 'check_circle', 'Completed');
             this.showSyncSuccess();
             this.manager.showNotification('Configs synced successfully!', 'success');
         })
@@ -308,6 +335,12 @@ class O11ySources {
                 this.updateStep(2, 'completed', 'check_circle', 'Completed');
                 this.updateStep(3, 'completed', 'check_circle', 'Completed');
                 this.updateStep(4, 'failed', 'error', 'Failed');
+            } else if (error.message.includes('ClickHouse truncate failed')) {
+                this.updateStep(1, 'completed', 'check_circle', 'Completed');
+                this.updateStep(2, 'completed', 'check_circle', 'Completed');
+                this.updateStep(3, 'completed', 'check_circle', 'Completed');
+                this.updateStep(4, 'completed', 'check_circle', 'Completed');
+                this.updateStep(5, 'failed', 'error', 'Failed');
             }
             throw error;
         })
@@ -367,6 +400,7 @@ class O11ySources {
         this.updateStep(2, 'completed', 'check_circle', 'Completed');
         this.updateStep(3, 'completed', 'check_circle', 'Completed');
         this.updateStep(4, 'completed', 'check_circle', 'Completed');
+        this.updateStep(5, 'completed', 'check_circle', 'Completed');
 
         // Auto-hide after 5 seconds
         setTimeout(() => {
@@ -390,6 +424,7 @@ class O11ySources {
         this.updateStep(2, 'pending', 'schedule', 'Pending');
         this.updateStep(3, 'pending', 'schedule', 'Pending');
         this.updateStep(4, 'pending', 'schedule', 'Pending');
+        this.updateStep(5, 'pending', 'schedule', 'Pending');
     }
 
     updateSyncProgress(percent, statusText) {

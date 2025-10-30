@@ -120,6 +120,7 @@ class RealtimeUpdatesManager {
             case 'performance':
                 console.log('RealtimeUpdatesManager: Refreshing kafka manager for performance');
                 // Performance section uses Kafka metrics
+                this.kafkaManager.onSectionVisible();
                 this.kafkaManager.refresh();
                 break;
             case 'system':

@@ -23,9 +23,10 @@ type ClickHouseConfig struct {
 
 // AppConfig holds the entire application configuration
 type AppConfig struct {
-	ClickHouse     ClickHouseConfig `yaml:"clickhouse"`
-	MonitoredNodes []string         `yaml:"monitored_nodes"`
-	MonitoringDB   ClickHouseConfig `yaml:"monitoring_db"`
+	ClickHouse      ClickHouseConfig `yaml:"clickhouse"`
+	MonitoredNodes  []string         `yaml:"monitored_nodes"`
+	MonitoringDB    ClickHouseConfig `yaml:"monitoring_db"`
+	ClickHouseAdmin ClickHouseConfig `yaml:"truncate_db"`
 }
 
 // ClickHouseClient wraps the ClickHouse connection and config
@@ -38,6 +39,12 @@ type ClickHouseClient struct {
 func NewClickHouseClient(config ClickHouseConfig) (*ClickHouseClient, error) {
 	logger.LogWithNode("System", "ClickHouse", "Initializing ClickHouse client connection", "info")
 
+	// Use higher timeout for truncate operations
+	maxExecutionTime := 300 // 5 minutes for truncate operations
+	if config.Username != "truncate_db" {
+		maxExecutionTime = 60 // 1 minute for other operations
+	}
+
 	conn, err := clickhouse.Open(&clickhouse.Options{
 		Addr: []string{fmt.Sprintf("%s:%d", config.Host, config.Port)},
 		Auth: clickhouse.Auth{
@@ -46,7 +53,7 @@ func NewClickHouseClient(config ClickHouseConfig) (*ClickHouseClient, error) {
 			Password: config.Password,
 		},
 		Settings: clickhouse.Settings{
-			"max_execution_time": 60,
+			"max_execution_time": maxExecutionTime,
 		},
 		Compression: &clickhouse.Compression{
 			Method: clickhouse.CompressionLZ4,
@@ -87,6 +94,8 @@ var clickHouseClient *ClickHouseClient
 var clickHouseConfig ClickHouseConfig
 var monitoringDBClient *ClickHouseClient
 var monitoringDBConfig ClickHouseConfig
+var clickHouseAdminClient *ClickHouseClient
+var clickHouseAdminConfig ClickHouseConfig
 var monitoredNodes []string
 
 // LoadConfig loads configuration from YAML file
@@ -104,6 +113,7 @@ func LoadConfig(configPath string) error {
 
 	clickHouseConfig = config.ClickHouse
 	monitoringDBConfig = config.MonitoringDB
+	clickHouseAdminConfig = config.ClickHouseAdmin
 	monitoredNodes = config.MonitoredNodes
 
 	logger.LogWithNode("System", "ClickHouse", "Configuration loaded successfully", "info")
@@ -132,6 +142,17 @@ func InitClickHouse(configPath string) error {
 		} else {
 			monitoringDBClient = monitoringClient
 			logger.LogSuccess("System", "ClickHouse", "Monitoring DB client initialized successfully")
+		}
+	}
+
+	// Initialize admin client if configured
+	if clickHouseAdminConfig.Host != "" {
+		adminClient, err := NewClickHouseClient(clickHouseAdminConfig)
+		if err != nil {
+			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to initialize ClickHouse admin client: %v", err))
+		} else {
+			clickHouseAdminClient = adminClient
+			logger.LogSuccess("System", "ClickHouse", "ClickHouse admin client initialized successfully")
 		}
 	}
 
@@ -170,4 +191,14 @@ func GetMonitoredNodes() []string {
 // GetClickHouseClient returns the global ClickHouse client
 func GetClickHouseClient() *ClickHouseClient {
 	return clickHouseClient
+}
+
+// GetClickHouseAdminClient returns the global ClickHouse admin client
+func GetClickHouseAdminClient() *ClickHouseClient {
+	return clickHouseAdminClient
+}
+
+// GetMonitoringDBClient returns the global monitoring DB client
+func GetMonitoringDBClient() *ClickHouseClient {
+	return monitoringDBClient
 }

@@ -16,6 +16,20 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// getKafkaNodeName retrieves the node name where the Kafka pod is running
+func getKafkaNodeName() (string, error) {
+	cmd := exec.Command("kubectl", "get", "pod", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "-o", "jsonpath={.spec.nodeName}")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get Kafka node name: %v", err)
+	}
+	nodeName := strings.TrimSpace(string(output))
+	if nodeName == "" {
+		return "", fmt.Errorf("empty node name returned")
+	}
+	return nodeName, nil
+}
+
 // O11ySourceManager manages observability source configurations and EPS distribution
 type O11ySourceManager struct {
 	configsDir   string
@@ -330,6 +344,15 @@ func (osm *O11ySourceManager) DistributeEPS(request EPSDistributionRequest) (*EP
 		return &EPSDistributionResponse{
 			Success: false,
 			Message: fmt.Sprintf("Failed to apply distribution: %v", err),
+		}, err
+	}
+
+	// Update kafka hosts in conf.yml after EPS distribution
+	err = osm.updateKafkaHostsInConf()
+	if err != nil {
+		return &EPSDistributionResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to update kafka hosts: %v", err),
 		}, err
 	}
 
@@ -1114,6 +1137,52 @@ func (osm *O11ySourceManager) scpCopy(nodeConfig node_control.NodeConfig, localP
 		return fmt.Errorf("SCP copy failed: %v", err)
 	}
 
+	return nil
+}
+
+// updateKafkaHostsInConf updates the kafka hosts in the main conf.yml file
+func (osm *O11ySourceManager) updateKafkaHostsInConf() error {
+	// Get the Kafka node name
+	nodeName, err := getKafkaNodeName()
+	if err != nil {
+		return fmt.Errorf("failed to get Kafka node name: %v", err)
+	}
+
+	// Load the current conf.yml
+	configPath := "src/migrate/conf.d/conf.yml"
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return fmt.Errorf("failed to read conf.yml: %v", err)
+	}
+
+	// Unmarshal to map for easy manipulation
+	var config map[string]interface{}
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal conf.yml: %v", err)
+	}
+
+	// Update the kafka hosts
+	if outputKafka, ok := config["output.kafka"].(map[string]interface{}); ok {
+		outputKafka["hosts"] = []string{nodeName + ":9094"}
+	}
+
+	// Marshal back to YAML
+	var buf bytes.Buffer
+	encoder := yaml.NewEncoder(&buf)
+	encoder.SetIndent(2)
+	err = encoder.Encode(config)
+	if err != nil {
+		return fmt.Errorf("failed to marshal updated config: %v", err)
+	}
+
+	// Write back to file
+	err = os.WriteFile(configPath, buf.Bytes(), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write updated conf.yml: %v", err)
+	}
+
+	log.Printf("Updated kafka hosts to: %s:9094", nodeName)
 	return nil
 }
 

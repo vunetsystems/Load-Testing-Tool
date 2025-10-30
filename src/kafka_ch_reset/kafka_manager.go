@@ -754,14 +754,22 @@ func (km *KafkaManager) waitForTopicsDeletion(topics []string) error {
 
 // TruncateTable truncates a single ClickHouse table on cluster vusmart
 func (km *KafkaManager) TruncateTable(tableName string) error {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
 
-	query := fmt.Sprintf("TRUNCATE TABLE %s ON CLUSTER vusmart", tableName)
-	client := ch.GetClickHouseClient()
-	if client == nil {
-		return fmt.Errorf("ClickHouse client not initialized")
+	// Use admin client for truncate operation
+	adminClient := ch.GetClickHouseAdminClient()
+	if adminClient == nil {
+		logger.Warn().Msg("ClickHouse admin client not available, falling back to regular client")
+		adminClient = ch.GetClickHouseClient()
+		if adminClient == nil {
+			return fmt.Errorf("ClickHouse client not initialized")
+		}
 	}
-	err := client.Client.Exec(ctx, query)
+
+	// Execute the truncate query using admin client
+	query := fmt.Sprintf("TRUNCATE TABLE %s ON CLUSTER vusmart", tableName)
+	err := adminClient.Client.Exec(ctx, query)
 	if err != nil {
 		logger.Error().Err(err).Str("table", tableName).Msg("Failed to truncate ClickHouse table")
 		return fmt.Errorf("failed to truncate table %s: %v", tableName, err)
@@ -819,9 +827,12 @@ func (km *KafkaManager) TruncateTablesForEnabledSources(confPath string) error {
 		return err
 	}
 
-	// Truncate each table
+	logger.Info().Strs("tables", tables).Msg("Starting truncation of ClickHouse tables")
+
+	// Truncate each table and stop immediately on failure
 	for _, table := range tables {
 		if err := km.TruncateTable(table); err != nil {
+			logger.Error().Err(err).Str("table", table).Msg("Failed to truncate table, stopping entire operation")
 			return fmt.Errorf("failed to truncate table %s: %v", table, err)
 		}
 	}
