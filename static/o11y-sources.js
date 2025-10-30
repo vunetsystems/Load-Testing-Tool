@@ -164,6 +164,7 @@ class O11ySources {
         this.updateStep(1, 'in-progress', 'hourglass_top', 'In Progress...');
         this.updateStep(2, 'pending', 'schedule', 'Pending');
         this.updateStep(3, 'pending', 'schedule', 'Pending');
+        this.updateStep(4, 'pending', 'schedule', 'Pending');
 
         return this.manager.callAPI('/api/o11y/eps/split', 'POST', splitRequest)
         .then(splitResponse => {
@@ -228,7 +229,7 @@ class O11ySources {
 
             // Only proceed to conf.d distribution if EPS distribution succeeded
             console.log('EPS distribution successful, proceeding to conf.d distribution...');
-            this.updateSyncProgress(66, 'Step 2 of 3 completed');
+            this.updateSyncProgress(50, 'Step 2 of 4 completed');
             this.updateStep(2, 'completed', 'check_circle', 'Completed');
             this.updateStep(3, 'in-progress', 'hourglass_top', 'In Progress...');
             console.log('About to call conf.d distribution API...');
@@ -271,17 +272,42 @@ class O11ySources {
                 throw new Error(confDResponse.message || 'Conf.d distribution failed');
             }
 
-            // Both APIs succeeded completely
-            this.updateSyncProgress(100, 'Sync completed successfully');
+            // Only proceed to Kafka distribution if conf.d distribution succeeded
+            console.log('Conf.d distribution successful, proceeding to Kafka distribution...');
+            this.updateSyncProgress(75, 'Step 3 of 4 completed');
             this.updateStep(3, 'completed', 'check_circle', 'Completed');
-            this.showSyncSuccess();
-            this.manager.showNotification('Configs synced successfully!', 'success');
+            this.updateStep(4, 'in-progress', 'hourglass_top', 'In Progress...');
+            console.log('About to call Kafka distribute-enabled client API...');
+            return this.manager.callAPI('/api/kafka/recreate-enabled-client', 'POST');
         })
         .catch(error => {
             if (error.message.includes('Conf.d distribution failed')) {
                 this.updateStep(1, 'completed', 'check_circle', 'Completed');
                 this.updateStep(2, 'completed', 'check_circle', 'Completed');
                 this.updateStep(3, 'failed', 'error', 'Failed');
+            }
+            throw error;
+        })
+        .then(kafkaResponse => {
+            console.log('Kafka distribution response:', kafkaResponse);
+
+            if (!kafkaResponse.success) {
+                this.updateStep(4, 'failed', 'error', 'Failed');
+                throw new Error(kafkaResponse.message || 'Kafka distribution failed');
+            }
+
+            // All APIs succeeded completely
+            this.updateSyncProgress(100, 'Sync completed successfully');
+            this.updateStep(4, 'completed', 'check_circle', 'Completed');
+            this.showSyncSuccess();
+            this.manager.showNotification('Configs synced successfully!', 'success');
+        })
+        .catch(error => {
+            if (error.message.includes('Kafka distribution failed')) {
+                this.updateStep(1, 'completed', 'check_circle', 'Completed');
+                this.updateStep(2, 'completed', 'check_circle', 'Completed');
+                this.updateStep(3, 'completed', 'check_circle', 'Completed');
+                this.updateStep(4, 'failed', 'error', 'Failed');
             }
             throw error;
         })
@@ -301,6 +327,8 @@ class O11ySources {
                 userFriendlyMessage = 'Failed to distribute EPS settings. Please check your o11y source configuration and EPS values.';
             } else if (error.message.includes('Conf.d distribution failed')) {
                 userFriendlyMessage = 'Failed to distribute configuration files to nodes. Please check node connectivity.';
+            } else if (error.message.includes('Kafka distribution failed')) {
+                userFriendlyMessage = 'Failed to distribute Kafka topics for enabled sources. Please check Kafka connectivity and configuration.';
             } else if (error.message.includes('SSH connection failed')) {
                 userFriendlyMessage = 'Unable to connect to nodes via SSH. Please check node credentials and network connectivity.';
             } else if (error.message.includes('all nodes failed')) {
@@ -338,6 +366,7 @@ class O11ySources {
         this.updateStep(1, 'completed', 'check_circle', 'Completed');
         this.updateStep(2, 'completed', 'check_circle', 'Completed');
         this.updateStep(3, 'completed', 'check_circle', 'Completed');
+        this.updateStep(4, 'completed', 'check_circle', 'Completed');
 
         // Auto-hide after 5 seconds
         setTimeout(() => {
@@ -360,6 +389,7 @@ class O11ySources {
         this.updateStep(1, 'pending', 'schedule', 'Pending');
         this.updateStep(2, 'pending', 'schedule', 'Pending');
         this.updateStep(3, 'pending', 'schedule', 'Pending');
+        this.updateStep(4, 'pending', 'schedule', 'Pending');
     }
 
     updateSyncProgress(percent, statusText) {

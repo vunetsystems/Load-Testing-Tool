@@ -9,7 +9,10 @@ import (
 	"strings"
 	"time"
 	"vuDataSim/src/logger"
+	"crypto/tls"
+	"github.com/segmentio/kafka-go"
 	"gopkg.in/yaml.v3"
+	ch "vuDataSim/src/clickhouse"
 )
 
 // TopicName represents a topic name structure
@@ -38,6 +41,7 @@ type TopicMetadata struct {
 type KafkaManager struct {
 	configPath string
 	topics     []TopicConfig
+	admin      *kafka.Client
 }
 
 // O11ySourceConfig represents the configuration for o11y sources from conf.yml
@@ -69,11 +73,44 @@ func (km *KafkaManager) translateSourceName(sourceName string) string {
 	return sourceName
 }
 
+// getKafkaNodeName retrieves the node name where the Kafka pod is running
+func getKafkaNodeName() (string, error) {
+	cmd := exec.Command("kubectl", "get", "pod", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "-o", "jsonpath={.spec.nodeName}")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get Kafka node name: %v", err)
+	}
+	nodeName := strings.TrimSpace(string(output))
+	if nodeName == "" {
+		return "", fmt.Errorf("empty node name returned")
+	}
+	return nodeName, nil
+}
+
 // NewKafkaManager creates a new KafkaManager instance
-func NewKafkaManager(configPath string) *KafkaManager {
+func NewKafkaManager(configPath string) (*KafkaManager, error) {
+	// Get the node name dynamically
+	nodeName, err := getKafkaNodeName()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get Kafka node name: %v", err)
+	}
+
+	// Configure TLS to resolve the "broker appears to be expecting TLS" error on port 9094
+    tlsConfig := &tls.Config{
+        // WARNING: InsecureSkipVerify is ONLY for E2E/testing where broker certs are self-signed.
+        // For production, you would configure RootCAs.
+        InsecureSkipVerify: true,
+    }
+	admin := &kafka.Client{
+		Addr: kafka.TCP(nodeName + ":9094"),
+		Transport: &kafka.Transport{
+            TLS: tlsConfig,
+        },
+	}
 	return &KafkaManager{
 		configPath: configPath,
-	}
+		admin:      admin,
+	}, nil
 }
 
 // SourcesConfig represents the wrapper structure for sources
@@ -132,6 +169,7 @@ func (km *KafkaManager) DescribeTopic(topicName string) (*TopicMetadata, error) 
 		return nil, fmt.Errorf("failed to parse topic description for %s: %v", topicName, err)
 	}
 
+	logger.Info().Str("topic", topicName).Int("partitions", metadata.PartitionCount).Int("replicationFactor", metadata.ReplicationFactor).Msg("Topic described successfully")
 	return metadata, nil
 }
 
@@ -318,7 +356,13 @@ func (km *KafkaManager) DescribeTopicsBulk(topics []string) (map[string]*TopicMe
 	}
 
 	// Parse the output to extract metadata for each topic
-	return km.parseBulkTopicDescription(string(output), topics)
+	topicMetadatas, err := km.parseBulkTopicDescription(string(output), topics)
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Info().Int("topics", len(topicMetadatas)).Msg("Bulk describe command executed successfully")
+	return topicMetadatas, nil
 }
 
 // DeleteTopicsBulk deletes multiple topics in a single kubectl exec call
@@ -474,3 +518,315 @@ func (km *KafkaManager) RecreateTopicsForEnabledSources(confPath string) error {
 	logger.Info().Int("sources", len(enabledSources)).Int("topics", len(allTopics)).Msg("Successfully recreated topics for enabled o11y sources")
 	return nil
 }
+
+// RecreateTopicsForEnabledSourcesUsingClient recreates topics for all enabled o11y sources using kafka-go client
+func (km *KafkaManager) RecreateTopicsForEnabledSourcesUsingClient(confPath string) error {
+	// Load o11y config
+	o11yConfig, err := km.LoadO11yConfig(confPath)
+	if err != nil {
+		return fmt.Errorf("failed to load o11y config: %v", err)
+	}
+
+	// Get enabled sources
+	var enabledSources []string
+	for source, config := range o11yConfig.IncludeModuleDirs {
+		if config.Enabled {
+			enabledSources = append(enabledSources, source)
+		}
+	}
+
+	if len(enabledSources) == 0 {
+		return fmt.Errorf("no enabled o11y sources found")
+	}
+
+	// Collect all topics for enabled sources
+	var allTopics []string
+	sourceTopics := make(map[string][]string)
+	for _, source := range enabledSources {
+		translatedName := km.translateSourceName(source)
+		for _, topicGroup := range km.topics {
+			if topicGroup.Name == translatedName {
+				for _, inputTopic := range topicGroup.InputTopic {
+					allTopics = append(allTopics, inputTopic.Name)
+					sourceTopics[source] = append(sourceTopics[source], inputTopic.Name)
+				}
+				for _, outputTopic := range topicGroup.OutputTopic {
+					allTopics = append(allTopics, outputTopic.Name)
+					sourceTopics[source] = append(sourceTopics[source], outputTopic.Name)
+				}
+				break
+			}
+		}
+	}
+
+	if len(allTopics) == 0 {
+		return fmt.Errorf("no topics found for enabled sources")
+	}
+
+	// Batch describe all topics
+	topicMetadatas, err := km.DescribeTopicsBulkUsingClient(allTopics)
+	if err != nil {
+		return fmt.Errorf("failed to describe topics: %v", err)
+	}
+
+	// Batch delete all topics
+	if err := km.DeleteTopicsBulkUsingClient(allTopics); err != nil {
+		return fmt.Errorf("failed to delete topics: %v", err)
+	}
+
+	// Wait for topics to be fully deleted before recreating
+	if err := km.waitForTopicsDeletion(allTopics); err != nil {
+		return fmt.Errorf("failed waiting for topics deletion: %v", err)
+	}
+
+	// Batch create all topics
+	if err := km.CreateTopicsBulkUsingClient(topicMetadatas); err != nil {
+		return fmt.Errorf("failed to create topics: %v", err)
+	}
+
+	logger.Info().Int("sources", len(enabledSources)).Int("topics", len(allTopics)).Msg("Successfully recreated topics for enabled o11y sources using client")
+	return nil
+}
+
+// DescribeTopicsBulkUsingClient describes multiple topics using kafka-go client
+func (km *KafkaManager) DescribeTopicsBulkUsingClient(topics []string) (map[string]*TopicMetadata, error) {
+	if len(topics) == 0 {
+		return make(map[string]*TopicMetadata), nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req := kafka.MetadataRequest{
+		Topics: topics,
+	}
+
+	res, err := km.admin.Metadata(ctx, &req)
+	if err != nil {
+		logger.Error().Err(err).Strs("topics", topics).Msg("Failed to describe topics using client")
+		return nil, fmt.Errorf("failed to describe topics: %v", err)
+	}
+
+	topicMetadatas := make(map[string]*TopicMetadata)
+	for _, topic := range res.Topics {
+		if topic.Error != nil {
+			logger.Error().Err(topic.Error).Str("topic", topic.Name).Msg("Failed to describe topic")
+			return nil, fmt.Errorf("failed to describe topic %s: %v", topic.Name, topic.Error)
+		}
+
+		// Get partition count and replication factor from partitions
+		if len(topic.Partitions) == 0 {
+			return nil, fmt.Errorf("no partitions found for topic %s", topic.Name)
+		}
+
+		partitionCount := len(topic.Partitions)
+		replicationFactor := len(topic.Partitions[0].Replicas)
+
+		topicMetadatas[topic.Name] = &TopicMetadata{
+			TopicName:         topic.Name,
+			PartitionCount:    partitionCount,
+			ReplicationFactor: replicationFactor,
+		}
+	}
+
+	// Check if we got metadata for all expected topics
+	for _, topic := range topics {
+		if _, exists := topicMetadatas[topic]; !exists {
+			return nil, fmt.Errorf("failed to get metadata for topic %s", topic)
+		}
+	}
+
+	logger.Info().Int("topics", len(topicMetadatas)).Msg("Bulk describe command executed successfully using client")
+	return topicMetadatas, nil
+}
+
+// DeleteTopicsBulkUsingClient deletes multiple topics using kafka-go client
+func (km *KafkaManager) DeleteTopicsBulkUsingClient(topics []string) error {
+	if len(topics) == 0 {
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req := kafka.DeleteTopicsRequest{
+		Topics: topics,
+	}
+
+	_, err := km.admin.DeleteTopics(ctx, &req)
+	if err != nil {
+		logger.Warn().Err(err).Strs("topics", topics).Msg("Delete command had some failures")
+		// Don't return error for delete failures as topics might not exist
+	}
+
+	logger.Info().Int("topics", len(topics)).Msg("Bulk delete command executed using client")
+	return nil
+}
+
+// CreateTopicsBulkUsingClient creates multiple topics using kafka-go client
+func (km *KafkaManager) CreateTopicsBulkUsingClient(topicMetadatas map[string]*TopicMetadata) error {
+	if len(topicMetadatas) == 0 {
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var topics []kafka.TopicConfig
+	for topicName, meta := range topicMetadatas {
+		topics = append(topics, kafka.TopicConfig{
+			Topic:             topicName,
+			NumPartitions:     meta.PartitionCount,
+			ReplicationFactor: meta.ReplicationFactor,
+		})
+	}
+
+	req := kafka.CreateTopicsRequest{
+		Topics: topics,
+	}
+
+	res, err := km.admin.CreateTopics(ctx, &req)
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to execute bulk create command using client")
+		return fmt.Errorf("failed to create topics: %v", err)
+	}
+
+	// Check for errors in individual topic creation
+	for topicName, topicErr := range res.Errors {
+		if topicErr != nil {
+			logger.Error().Err(topicErr).Str("topic", topicName).Msg("Failed to create topic")
+			return fmt.Errorf("failed to create topic %s: %v", topicName, topicErr)
+		}
+	}
+
+	logger.Info().Int("topics", len(topicMetadatas)).Msg("Bulk create command executed successfully using client")
+	return nil
+}
+
+// waitForTopicsDeletion waits for topics to be fully deleted before proceeding
+func (km *KafkaManager) waitForTopicsDeletion(topics []string) error {
+	maxRetries := 30 // Wait up to 30 seconds (30 * 1 second)
+	retryInterval := 1 * time.Second
+
+	for i := 0; i < maxRetries; i++ {
+		allDeleted := true
+
+		for _, topic := range topics {
+			// Check if topic still exists
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			req := kafka.MetadataRequest{
+				Topics: []string{topic},
+			}
+
+			res, err := km.admin.Metadata(ctx, &req)
+			cancel()
+
+			if err != nil {
+				logger.Warn().Err(err).Str("topic", topic).Msg("Error checking topic existence during deletion wait")
+				allDeleted = false
+				break
+			}
+
+			// If topic exists in metadata, it's not fully deleted
+			for _, topicMeta := range res.Topics {
+				if topicMeta.Name == topic && topicMeta.Error == nil {
+					allDeleted = false
+					break
+				}
+			}
+
+			if !allDeleted {
+				break
+			}
+		}
+
+		if allDeleted {
+			logger.Info().Strs("topics", topics).Msg("All topics successfully deleted")
+			return nil
+		}
+
+		logger.Debug().Int("attempt", i+1).Int("maxRetries", maxRetries).Msg("Waiting for topics to be fully deleted")
+		time.Sleep(retryInterval)
+	}
+
+	return fmt.Errorf("timeout waiting for topics to be fully deleted after %d seconds", maxRetries)
+}
+
+// TruncateTable truncates a single ClickHouse table on cluster vusmart
+func (km *KafkaManager) TruncateTable(tableName string) error {
+	ctx := context.Background()
+
+	query := fmt.Sprintf("TRUNCATE TABLE %s ON CLUSTER vusmart", tableName)
+	client := ch.GetClickHouseClient()
+	if client == nil {
+		return fmt.Errorf("ClickHouse client not initialized")
+	}
+	err := client.Client.Exec(ctx, query)
+	if err != nil {
+		logger.Error().Err(err).Str("table", tableName).Msg("Failed to truncate ClickHouse table")
+		return fmt.Errorf("failed to truncate table %s: %v", tableName, err)
+	}
+
+	logger.Info().Str("table", tableName).Msg("Successfully truncated ClickHouse table")
+	return nil
+}
+
+
+// GetTablesForEnabledSources returns ClickHouse tables for all enabled o11y sources
+func (km *KafkaManager) GetTablesForEnabledSources(confPath string) ([]string, error) {
+	// Load o11y config
+	o11yConfig, err := km.LoadO11yConfig(confPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load o11y config: %v", err)
+	}
+
+	// Get enabled sources
+	var enabledSources []string
+	for source, config := range o11yConfig.IncludeModuleDirs {
+		if config.Enabled {
+			enabledSources = append(enabledSources, source)
+		}
+	}
+
+	if len(enabledSources) == 0 {
+		return nil, fmt.Errorf("no enabled o11y sources found")
+	}
+
+	// Collect all tables for enabled sources
+	var allTables []string
+	for _, source := range enabledSources {
+		translatedName := km.translateSourceName(source)
+		for _, topicGroup := range km.topics {
+			if topicGroup.Name == translatedName {
+				allTables = append(allTables, topicGroup.ClickhouseTables...)
+				break
+			}
+		}
+	}
+
+	if len(allTables) == 0 {
+		return nil, fmt.Errorf("no tables found for enabled sources")
+	}
+
+	return allTables, nil
+}
+
+// TruncateTablesForEnabledSources truncates all ClickHouse tables for enabled o11y sources on cluster vusmart
+func (km *KafkaManager) TruncateTablesForEnabledSources(confPath string) error {
+	// Get tables for enabled sources
+	tables, err := km.GetTablesForEnabledSources(confPath)
+	if err != nil {
+		return err
+	}
+
+	// Truncate each table
+	for _, table := range tables {
+		if err := km.TruncateTable(table); err != nil {
+			return fmt.Errorf("failed to truncate table %s: %v", table, err)
+		}
+	}
+
+	logger.Info().Int("tables", len(tables)).Msg("Successfully truncated all ClickHouse tables for enabled o11y sources")
+	return nil
+}
+

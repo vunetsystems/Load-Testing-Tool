@@ -25,9 +25,12 @@ type KafkaHandler struct {
 }
 
 // NewKafkaHandler creates a new KafkaHandler instance
-func NewKafkaHandler() *KafkaHandler {
+func NewKafkaHandler() (*KafkaHandler, error) {
 	configPath := filepath.Join("src", "configs", "topics_tables.yaml")
-	kafkaManager := kafka_ch_reset.NewKafkaManager(configPath)
+	kafkaManager, err := kafka_ch_reset.NewKafkaManager(configPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create Kafka manager: %v", err)
+	}
 
 	// Load configuration
 	if err := kafkaManager.LoadConfig(); err != nil {
@@ -36,7 +39,7 @@ func NewKafkaHandler() *KafkaHandler {
 
 	return &KafkaHandler{
 		kafkaManager: kafkaManager,
-	}
+	}, nil
 }
 
 // GetTopics handles GET /api/kafka/topics - returns all configured topics
@@ -258,6 +261,60 @@ func (kh *KafkaHandler) RecreateEnabledTopics(w http.ResponseWriter, r *http.Req
 	sendJSONResponse(w, http.StatusOK, APIResponse{
 		Success: true,
 		Message: "Topics recreated successfully for all enabled o11y sources",
+	})
+}
+
+// RecreateEnabledTopicsUsingClient handles POST /api/kafka/recreate-enabled-client - recreates topics for enabled o11y sources using kafka client
+func (kh *KafkaHandler) RecreateEnabledTopicsUsingClient(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		sendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
+			Success: false,
+			Message: "Method not allowed. Use POST.",
+		})
+		return
+	}
+
+	confPath := "src/migrate/conf.d/conf.yml"
+	err := kh.kafkaManager.RecreateTopicsForEnabledSourcesUsingClient(confPath)
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to recreate topics for enabled sources using client")
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to recreate topics: %v", err),
+		})
+		return
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "Topics recreated successfully for all enabled o11y sources using client",
+	})
+}
+
+// TruncateEnabledTables handles POST /api/kafka/truncate-enabled-tables - truncates ClickHouse tables for enabled o11y sources
+func (kh *KafkaHandler) TruncateEnabledTables(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		sendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
+			Success: false,
+			Message: "Method not allowed. Use POST.",
+		})
+		return
+	}
+
+	confPath := "src/migrate/conf.d/conf.yml"
+	err := kh.kafkaManager.TruncateTablesForEnabledSources(confPath)
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to truncate tables for enabled sources")
+		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to truncate tables: %v", err),
+		})
+		return
+	}
+
+	sendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "ClickHouse tables truncated successfully for all enabled o11y sources",
 	})
 }
 

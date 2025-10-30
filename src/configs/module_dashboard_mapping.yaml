@@ -1,0 +1,11 @@
+# Module to Dashboard Mapping Configuration
+# Maps vuDataSim modules to K6 dashboard configurations
+# This file defines which modules correspond to which dashboards in k6_config.yaml
+
+module_dashboard_mapping:
+  LinuxMonitor:
+    dashboard_name: "Linux Server Insights"
+    dashboard_slug: "linux-server-insights"
+  Mssql:
+    dashboard_name: "MSSQL Overview Dashboard"
+    dashboard_slug: "mssql-overview-dashboard"

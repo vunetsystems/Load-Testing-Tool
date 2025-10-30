@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"gopkg.in/yaml.v3"
 	"vuDataSim/src/logger"
 )
 
@@ -31,6 +32,28 @@ type K6Status struct {
 	CompletedScripts  []string  `json:"completedScripts"`
 	FailedScripts     []string  `json:"failedScripts"`
 	LastError         string    `json:"lastError,omitempty"`
+}
+
+// ModuleDashboardMapping represents the mapping between modules and dashboards
+type ModuleDashboardMapping struct {
+	ModuleDashboardMapping map[string]struct {
+		DashboardName string `yaml:"dashboard_name"`
+		DashboardSlug string `yaml:"dashboard_slug"`
+	} `yaml:"module_dashboard_mapping"`
+}
+
+// K6DashboardConfig represents the structure of k6_config.yaml
+type K6DashboardConfig struct {
+	BaseURLs struct {
+		DashboardAPI string `yaml:"dashboard_api"`
+		Panel        string `yaml:"panel"`
+	} `yaml:"base_urls"`
+	Dashboards []struct {
+		ID       string `yaml:"id"`
+		Name     string `yaml:"name"`
+		Slug     string `yaml:"slug"`
+		Enabled  bool   `yaml:"enabled"`
+	} `yaml:"dashboards"`
 }
 
 // K6Handler manages K6 load testing operations
@@ -516,6 +539,29 @@ func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, int
 
 	logger.Info().Str("module", "k6").Msg("Starting combined.sh script execution")
 
+	// Step 1: Read module configuration
+	logger.Info().Str("module", "k6").Msg("Step 1: Reading module configuration")
+	enabledModules, err := h.readModuleConfig()
+	if err != nil {
+		logger.Error().Err(err).Str("module", "k6").Msg("Failed to read module configuration, continuing with test execution")
+	} else {
+		logger.Info().Str("module", "k6").Int("enabled_modules", len(enabledModules)).Msg("Module configuration read successfully")
+	}
+
+	// Step 2: Update dashboard configuration based on enabled modules
+	logger.Info().Str("module", "k6").Msg("Step 2: Updating dashboard configuration")
+	if enabledModules != nil {
+		err = h.updateDashboardConfig(enabledModules)
+		if err != nil {
+			logger.Error().Err(err).Str("module", "k6").Msg("Failed to update dashboard configuration, continuing with test execution")
+		} else {
+			logger.Info().Str("module", "k6").Msg("Dashboard configuration updated successfully")
+		}
+	}
+
+	// Step 3: Execute the combined.sh script
+	logger.Info().Str("module", "k6").Msg("Step 3: Executing combined.sh script")
+
 	// Execute the script
 	cmd := exec.Command("./combined.sh", timeRange, fmt.Sprintf("%d", vus), fmt.Sprintf("%d", iterations), fmt.Sprintf("%d", interval))
 	cmd.Dir = "k6_final/k6_dashboard_name/linux-mssql-dashboard" // Working directory
@@ -540,6 +586,94 @@ func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, int
 		logger.Info().Str("module", "k6").Str("output", string(output)).Msg("Combined script output")
 	}
 	h.mutex.Unlock()
+}
+
+// readModuleConfig reads the enabled modules from categories.yaml
+func (h *K6Handler) readModuleConfig() ([]string, error) {
+	configPath := "src/configs/categories.yaml"
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read categories config: %v", err)
+	}
+
+	var categoriesConfig struct {
+		Categories map[string]struct {
+			Name            string   `yaml:"name"`
+			Description     string   `yaml:"description"`
+			Sources         []string `yaml:"sources"`
+			MaxEpsPerNode   int      `yaml:"max_eps_per_node"`
+		} `yaml:"categories"`
+	}
+
+	if err := yaml.Unmarshal(data, &categoriesConfig); err != nil {
+		return nil, fmt.Errorf("failed to parse categories config: %v", err)
+	}
+
+	var enabledModules []string
+	for _, category := range categoriesConfig.Categories {
+		enabledModules = append(enabledModules, category.Sources...)
+	}
+
+	return enabledModules, nil
+}
+
+// updateDashboardConfig updates k6_config.yaml based on enabled modules
+func (h *K6Handler) updateDashboardConfig(enabledModules []string) error {
+	// Read module-dashboard mapping
+	mappingPath := "src/configs/module_dashboard_mapping.yaml"
+	mappingData, err := os.ReadFile(mappingPath)
+	if err != nil {
+		return fmt.Errorf("failed to read module dashboard mapping: %v", err)
+	}
+
+	var mappingConfig ModuleDashboardMapping
+	if err := yaml.Unmarshal(mappingData, &mappingConfig); err != nil {
+		return fmt.Errorf("failed to parse module dashboard mapping: %v", err)
+	}
+
+	// Read current k6_config.yaml
+	k6ConfigPath := "k6_final/k6_dashboard_name/k6_config.yaml"
+	k6Data, err := os.ReadFile(k6ConfigPath)
+	if err != nil {
+		return fmt.Errorf("failed to read k6 config: %v", err)
+	}
+
+	var k6Config K6DashboardConfig
+	if err := yaml.Unmarshal(k6Data, &k6Config); err != nil {
+		return fmt.Errorf("failed to parse k6 config: %v", err)
+	}
+
+	// Create a set of enabled module names for quick lookup
+	enabledModuleSet := make(map[string]bool)
+	for _, module := range enabledModules {
+		enabledModuleSet[module] = true
+	}
+
+	// Update dashboard enabled status based on module availability
+	for i := range k6Config.Dashboards {
+		dashboard := &k6Config.Dashboards[i]
+		// Check if any module maps to this dashboard
+		enabled := false
+		for moduleName, mapping := range mappingConfig.ModuleDashboardMapping {
+			if mapping.DashboardSlug == dashboard.Slug && enabledModuleSet[moduleName] {
+				enabled = true
+				break
+			}
+		}
+		dashboard.Enabled = enabled
+	}
+
+	// Write updated config back to file
+	updatedData, err := yaml.Marshal(&k6Config)
+	if err != nil {
+		return fmt.Errorf("failed to marshal updated k6 config: %v", err)
+	}
+
+	if err := os.WriteFile(k6ConfigPath, updatedData, 0644); err != nil {
+		return fmt.Errorf("failed to write updated k6 config: %v", err)
+	}
+
+	return nil
 }
 
 // GetK6Logs handles GET /api/k6/logs
