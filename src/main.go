@@ -18,7 +18,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var kafkaHandler = handlers.NewKafkaHandler()
+var kafkaHandler, _ = handlers.NewKafkaHandler()
 
 func init() {
 	// Initialize node data using the node_control package
@@ -153,6 +153,8 @@ func main() {
 	api.HandleFunc("/kafka/delete/{topic}", kafkaHandler.DeleteTopic).Methods("DELETE")
 	api.HandleFunc("/kafka/create", kafkaHandler.CreateTopic).Methods("POST")
 	api.HandleFunc("/kafka/recreate-enabled", kafkaHandler.RecreateEnabledTopics).Methods("POST")
+	api.HandleFunc("/kafka/recreate-enabled-client", kafkaHandler.RecreateEnabledTopicsUsingClient).Methods("POST")
+	api.HandleFunc("/clickhouse/truncate-enabled-tables", kafkaHandler.TruncateEnabledTables).Methods("POST")
 
 	// K6 Load Testing API endpoints
 	api.HandleFunc("/k6/config", handlers.HandleAPIGetK6Config).Methods("GET")

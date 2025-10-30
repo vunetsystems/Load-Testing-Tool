@@ -1,980 +1,404 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>vuDataSim Cluster Manager</title>
-    <!-- TODO: For production, install Tailwind CSS locally instead of using CDN -->
-    <!-- Run: npm install -D tailwindcss postcss autoprefixer -->
-    <!-- Then: npx tailwindcss -i ./src/input.css -o ./static/styles.css --watch -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
     <link rel="stylesheet" href="/static/styles.css">
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            DEFAULT: "#3b82f6",
-                            dark: "#60a5fa"
-                        },
-                        "background-light": "#f1f5f9",
-                        "background-dark": "#0b1120",
-                        "surface-light": "#ffffff",
-                        "surface-dark": "#1e293b",
-                        "subtle-light": "#e2e8f0",
-                        "subtle-dark": "#334155",
-                        "text-light": "#0f172a",
-                        "text-dark": "#f8fafc",
-                        "text-secondary-light": "#64748b",
-                        "text-secondary-dark": "#94a3b8",
-                        success: {
-                            DEFAULT: "#22c55e",
-                            dark: "#4ade80"
-                        },
-                        danger: {
-                            DEFAULT: "#ef4444",
-                            dark: "#f87171"
-                        },
-                    },
-                    fontFamily: {
-                        display: ["Inter", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "0.5rem",
-                        lg: "0.75rem",
-                        xl: "1rem",
-                        full: "9999px",
-                    },
-                },
-            },
-        };
-    </script>
 </head>
-<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+<body class="font-sans bg-slate-100 text-slate-800">
     <div class="flex h-screen w-full">
-        <!-- Sidebar -->
-        <aside class="flex w-80 flex-col border-r border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6">
-            <div class="flex items-center gap-3 mb-10">
-                <span class="material-symbols-outlined text-primary dark:text-primary-dark text-4xl">
+        <aside class="flex w-20 lg:w-64 flex-col border-r border-slate-200 bg-white p-4 lg:p-6 transition-all duration-300">
+            <div class="flex items-center gap-3 mb-10 h-10">
+                <span class="material-symbols-outlined text-indigo-600 text-4xl">
                     data_usage
                 </span>
-                <h1 class="text-2xl font-bold tracking-tight">vuDataSim</h1>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 hidden lg:block">vuDataSim</h1>
             </div>
 
-            <h2 class="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">Controls</h2>
-
-            <div class="space-y-6">
-                <!-- O11y Source Selection -->
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary dark:text-primary-dark">source</span>
-                            <span class="font-medium">O11y Sources</span>
-                        </div>
-                        <!-- Category Selection Dropdown -->
-                        <div class="relative">
-                            <select id="o11y-source-mode" class="text-sm rounded-md border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark">
-                                <option value="custom">Custom</option>
-                                <option value="category">Category</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="relative">
-                        <div id="o11y-sources-container" class="w-full min-h-[120px] rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus-within:ring-2 focus-within:ring-primary dark:focus-within:ring-primary-dark focus-within:border-primary dark:focus-within:border-primary-dark transition-all duration-200">
-                            <!-- Dropdown trigger -->
-                            <button id="o11y-sources-dropdown" type="button" class="w-full p-3 text-left flex items-center justify-between hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200">
-                                <div class="flex-1">
-                                    <div id="o11y-sources-placeholder" class="text-text-secondary-light dark:text-text-secondary-dark">Select O11y sources...</div>
-                                    <div id="o11y-sources-selected" class="hidden flex flex-wrap gap-1 mt-1">
-                                        <!-- Selected items will be displayed here -->
-                                    </div>
-                                </div>
-                                <span id="o11y-sources-arrow" class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark transition-transform duration-200">expand_more</span>
-                            </button>
-
-                            <!-- Dropdown options -->
-                            <div id="o11y-sources-options" class="absolute z-10 w-full mt-1 bg-surface-light dark:bg-surface-dark border border-subtle-light dark:border-subtle-dark rounded-lg shadow-lg max-h-60 overflow-y-auto hidden">
-                                <!-- Search input -->
-                                <div class="p-3 border-b border-subtle-light dark:border-subtle-dark">
-                                    <div class="relative">
-                                        <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark">search</span>
-                                        <input id="o11y-sources-search" type="text" placeholder="Search sources..." class="w-full pl-10 pr-4 py-2 rounded-md bg-background-light dark:bg-background-dark border border-subtle-light dark:border-subtle-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark text-sm">
-                                    </div>
-                                </div>
-
-                                <!-- Options list -->
-                                <div id="o11y-sources-list" class="max-h-40 overflow-y-auto">
-                                    <!-- O11y sources will be populated dynamically -->
-                                </div>
-
-                                <!-- Footer with select all/none -->
-                                <div class="p-3 border-t border-subtle-light dark:border-subtle-dark bg-subtle-light/30 dark:bg-subtle-dark/30">
-                                    <div class="flex items-center justify-between text-xs">
-                                        <button id="o11y-sources-select-all" type="button" class="text-primary dark:text-primary-dark hover:text-primary-dark dark:hover:text-primary font-medium transition-colors">
-                                            Select All
-                                        </button>
-                                        <button id="o11y-sources-clear-all" type="button" class="text-text-secondary-light dark:text-text-secondary-dark hover:text-danger dark:hover:text-danger-dark font-medium transition-colors">
-                                            Clear All
-                                        </button>
-                                        <div id="o11y-sources-count" class="text-text-secondary-light dark:text-text-secondary-dark">
-                                            0 selected
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Category Selection Mode -->
-                    <div id="o11y-category-mode" class="hidden">
-                        <div class="mb-3">
-                            <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Select Category</label>
-                            <div class="relative">
-                                <select id="o11y-category-select" class="w-full rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark">
-                                    <option value="">Choose a category...</option>
-                                    <option value="category1">Azure Services (Azure_Firewall, Azure_Redis_Cache)</option>
-                                    <option value="category2">Web & Database (Apache, MongoDB)</option>
-                                    <option value="category3">System & Database (LinuxMonitor, Mssql)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Selected Category Info -->
-                        <div id="selected-category-info" class="mt-4 p-3 rounded-lg bg-primary/10 dark:bg-primary-dark/10 border border-primary/20 dark:border-primary-dark/20 hidden">
-                            <div class="flex items-center gap-2 text-primary dark:text-primary-dark">
-                                <span class="material-symbols-outlined text-sm">info</span>
-                                <span class="text-sm font-medium">Selected: <span id="selected-category-name">None</span></span>
-                            </div>
-                            <div class="mt-1 text-xs text-primary/80 dark:text-primary-dark/80">
-                                Sources: <span id="selected-category-sources">None</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- EPS Configuration -->
-                <div>
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="material-symbols-outlined text-primary dark:text-primary-dark">speed</span>
-                        <span class="font-medium">EPS Configuration</span>
-                    </div>
-                    <div class="relative">
-                        <select id="eps-select" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark">
-                            <option value="">Select EPS target...</option>
-                            <option value="25000">25,000 EPS</option>
-                            <option value="50000">50,000 EPS</option>
-                            <option value="100000">100,000 EPS</option>
-                            <option value="150000">150,000 EPS</option>
-                            <option value="200000">200,000 EPS</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Sync Configs Button -->
-                <button id="sync-configs-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 py-3 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
-                    <span class="material-symbols-outlined">sync</span>
-                    <span>Sync Configs</span>
+            <nav class="flex-1 space-y-3">
+                <h2 class="text-xs font-semibold uppercase text-slate-500 tracking-wider hidden lg:block mb-2">Manage</h2>
+                
+                <button id="node-management-btn" class="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-slate-700 transition-colors hover:bg-indigo-50 hover:text-indigo-600" title="Node Management">
+                    <span class="material-symbols-outlined text-slate-600 group-hover:text-indigo-600">dns</span>
+                    <span class="font-medium hidden lg:inline">Node Management</span>
                 </button>
+                
+                <button id="binary-control-btn" class="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-slate-700 transition-colors hover:bg-indigo-50 hover:text-indigo-600" title="Binary Control">
+                    <span class="material-symbols-outlined text-slate-600 group-hover:text-indigo-600">play_arrow</span>
+                    <span class="font-medium hidden lg:inline">Binary Control</span>
+                </button>
+                
+                <button id="clickhouse-metrics-btn" class="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-slate-700 transition-colors hover:bg-indigo-50 hover:text-indigo-600" title="ClickHouse Metrics">
+                    <span class="material-symbols-outlined text-slate-600 group-hover:text-indigo-600">monitoring</span>
+                    <span class="font-medium hidden lg:inline">ClickHouse Metrics</span>
+                </button>
+                
+                <button onclick="window.location.href='/static/monitoring.html'" class="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-slate-700 transition-colors hover:bg-indigo-50 hover:text-indigo-600" title="Monitoring">
+                    <span class="material-symbols-outlined text-slate-600 group-hover:text-indigo-600">analytics</span>
+                    <span class="font-medium hidden lg:inline">Monitoring</span>
+                </button>
+            </nav>
 
-                <!-- K6 Load Testing Control -->
-                <div>
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="material-symbols-outlined text-primary dark:text-primary-dark">speed</span>
-                        <span class="font-medium">K6 Load Testing</span>
-                    </div>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="block text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">Time Range</label>
-                            <input id="k6-time-range" type="text" class="w-full rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark text-sm px-3 py-2" placeholder="15m" value="15m">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">Virtual Users</label>
-                            <input id="k6-vus" type="number" min="1" max="1000" class="w-full rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark text-sm px-3 py-2" placeholder="10" value="10">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">Iterations</label>
-                            <input id="k6-iterations" type="number" min="1" max="1000" class="w-full rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark text-sm px-3 py-2" placeholder="5" value="5">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">Interval (seconds)</label>
-                            <input id="k6-interval" type="number" min="1" max="300" class="w-full rounded-lg border border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark text-sm px-3 py-2" placeholder="5" value="5">
-                        </div>
-                        <button id="start-k6-test-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg bg-success dark:bg-success-dark px-4 py-2 text-white font-semibold transition-transform hover:scale-105 active:scale-100">
-                            <span class="material-symbols-outlined">play_arrow</span>
-                            <span>Start K6 Test</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="material-symbols-outlined text-primary dark:text-primary-dark">info</span>
-                        <span class="font-medium">Real-time Monitoring</span>
-                    </div>
-                    <p class="text-xs leading-relaxed">
-                        Displaying live CPU and memory metrics collected directly from your configured nodes via SSH.
-                        <br><br>
-                        Updates every 3 seconds with real system data.
-                    </p>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-                 <button id="add-all-cluster-nodes-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-blue-500/50 dark:border-blue-400/50 py-3 text-blue-600 dark:text-blue-400 font-semibold transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                     <span class="material-symbols-outlined">add_circle</span>
-                     <span>Add All Cluster Nodes</span>
-                 </button>
             <div class="mt-auto space-y-3">
-                <button id="binary-control-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-success/50 dark:border-success-dark/50 py-3 text-success dark:text-success-dark font-semibold transition-colors hover:bg-success/10 dark:hover:bg-success-dark/10">
-                    <span class="material-symbols-outlined">play_arrow</span>
-                    <span>Binary Control</span>
-                </button>
-                <button id="clickhouse-metrics-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-warning/50 dark:border-warning-dark/50 py-3 text-warning dark:text-warning-dark font-semibold transition-colors hover:bg-warning/10 dark:hover:bg-warning-dark/10">
-                    <span class="material-symbols-outlined">monitoring</span>
-                    <span>ClickHouse Metrics</span>
-                </button>
-                <button id="monitoring-btn" onclick="window.location.href='/static/monitoring.html'" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-info/50 dark:border-info-dark/50 py-3 text-info dark:text-info-dark font-semibold transition-colors hover:bg-info/10 dark:hover:bg-info-dark/10">
-                    <span class="material-symbols-outlined">analytics</span>
-                    <span>Monitoring</span>
-                </button>
-                <div class="text-xs text-text-secondary-light dark:text-text-secondary-dark text-center">
-                    Showing real metrics from your nodes
+                 <button id="add-all-cluster-nodes-btn" class="group flex w-full items-center justify-center lg:justify-start gap-3 rounded-lg px-3 py-2 text-sm text-cyan-700 transition-colors hover:bg-cyan-50 hover:text-cyan-800" title="Add All Cluster Nodes">
+                     <span class="material-symbols-outlined text-base">add_circle</span>
+                     <span class="font-medium hidden lg:inline">Add All Nodes</span>
+                 </button>
+                <div class="text-xs text-slate-400 text-center hidden lg:block">
+                    Real-time metrics enabled
                 </div>
             </div>
         </aside>
 
-        <!-- Main Dashboard -->
-        <main class="flex-1 overflow-y-auto p-8 bg-background-light dark:bg-background-dark">
-            <div class="flex items-center justify-between mb-8">
-                <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <main class="flex-1 overflow-y-auto p-6 lg:p-10">
+            <header class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-slate-100/80 pb-6 mb-8 backdrop-blur-sm -mx-6 lg:-mx-10 px-6 lg:px-10 pt-2">
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h2>
                 <div class="flex items-center gap-4">
-                    <button id="node-management-btn" class="group flex items-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 px-4 py-2 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
-                        <span class="material-symbols-outlined">dns</span>
-                        <span>Node Management</span>
-                    </button>
-                    <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Node Status:</span>
+                    <span class="text-sm font-medium text-slate-600">Node Status:</span>
                     <div class="flex items-center gap-2" id="node-status-indicators">
-                        <!-- Node status indicators will be populated dynamically -->
-                    </div>
+                        </div>
                 </div>
-            </div>
+            </header>
 
             <div class="space-y-8">
-                <!-- Configuration Sync Status Visualization -->
-                <div class="mt-8">
-                    <div class="w-full max-w-2xl rounded-xl bg-surface-light dark:bg-surface-dark p-6 sm:p-8 shadow-lg border border-subtle-light dark:border-subtle-dark">
-                        <!-- Headline -->
-                        <h3 class="text-text-light dark:text-text-dark tracking-tight text-2xl font-bold leading-tight text-left pb-4">Configuration Sync Status</h3>
-                        <!-- Progress Bar -->
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="text-lg font-semibold text-slate-900 p-6 border-b border-slate-200">Simulation Configuration</h3>
+                        <div class="p-6 space-y-6">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-indigo-600">source</span>
+                                        <span class="font-medium text-slate-700">O11y Sources</span>
+                                    </div>
+                                    <div class="relative">
+                                        <select id="o11y-source-mode" class="text-sm rounded-md border-slate-300 bg-white text-slate-900 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                                            <option value="custom">Custom</option>
+                                            <option value="category">Category</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <div id="o11y-sources-container" class="w-full min-h-[120px] rounded-lg border border-slate-300 bg-white focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-all duration-200">
+                                        <button id="o11y-sources-dropdown" type="button" class="w-full p-3 text-left flex items-center justify-between hover:bg-slate-50 transition-colors duration-200">
+                                            <div class="flex-1">
+                                                <div id="o11y-sources-placeholder" class="text-slate-500">Select O11y sources...</div>
+                                                <div id="o11y-sources-selected" class="hidden flex flex-wrap gap-1 mt-1">
+                                                    </div>
+                                            </div>
+                                            <span id="o11y-sources-arrow" class="material-symbols-outlined text-slate-500 transition-transform duration-200">expand_more</span>
+                                        </button>
+
+                                        <div id="o11y-sources-options" class="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto hidden">
+                                            <div class="p-3 border-b border-slate-200">
+                                                <div class="relative">
+                                                    <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">search</span>
+                                                    <input id="o11y-sources-search" type="text" placeholder="Search sources..." class="w-full pl-10 pr-4 py-2 rounded-md bg-slate-50 border-slate-300 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                                </div>
+                                            </div>
+
+                                            <div id="o11y-sources-list" class="max-h-40 overflow-y-auto">
+                                                </div>
+
+                                            <div class="p-3 border-t border-slate-200 bg-slate-50/50">
+                                                <div class="flex items-center justify-between text-xs">
+                                                    <button id="o11y-sources-select-all" type="button" class="text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+                                                        Select All
+                                                    </button>
+                                                    <button id="o11y-sources-clear-all" type="button" class="text-slate-600 hover:text-red-600 font-medium transition-colors">
+                                                        Clear All
+                                                    </button>
+                                                    <div id="o11y-sources-count" class="text-slate-500">
+                                                        0 selected
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="o11y-category-mode" class="hidden mt-4">
+                                    <div class="mb-3">
+                                        <label class="block text-sm font-medium text-slate-600 mb-2">Select Category</label>
+                                        <div class="relative">
+                                            <select id="o11y-category-select" class="w-full rounded-lg border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                                                <option value="">Choose a category...</option>
+                                                <option value="category1">Azure Services (Azure_Firewall, Azure_Redis_Cache)</option>
+                                                <option value="category2">Web & Database (Apache, MongoDB)</option>
+                                                <option value="category3">System & Database (LinuxMonitor, Mssql)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div id="selected-category-info" class="mt-4 p-3 rounded-lg bg-indigo-50 border border-indigo-200 hidden">
+                                        <div class="flex items-center gap-2 text-indigo-700">
+                                            <span class="material-symbols-outlined text-sm">info</span>
+                                            <span class="text-sm font-medium">Selected: <span id="selected-category-name">None</span></span>
+                                        </div>
+                                        <div class="mt-1 text-xs text-indigo-600">
+                                            Sources: <span id="selected-category-sources">None</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="material-symbols-outlined text-indigo-600">speed</span>
+                                    <span class="font-medium text-slate-700">EPS Configuration</span>
+                                </div>
+                                <div class="relative">
+                                    <select id="eps-select" class="w-full rounded-lg border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">Select EPS target...</option>
+                                        <option value="25000">25,000 EPS</option>
+                                        <option value="50000">50,000 EPS</option>
+                                        <option value="100000">100,000 EPS</option>
+                                        <option value="150000">150,000 EPS</option>
+                                        <option value="200000">200,000 EPS</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button id="sync-configs-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg border border-indigo-200 py-3 text-indigo-700 font-semibold transition-colors hover:bg-indigo-50">
+                                <span class="material-symbols-outlined">sync</span>
+                                <span>Sync Configs</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-1 bg-white rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="text-lg font-semibold text-slate-900 p-6 border-b border-slate-200">K6 Load Testing</h3>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Time Range</label>
+                                    <input id="k6-time-range" type="text" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2" placeholder="15m" value="15m">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Virtual Users</label>
+                                    <input id="k6-vus" type="number" min="1" max="1000" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2" placeholder="10" value="10">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Iterations</label>
+                                    <input id="k6-iterations" type="number" min="1" max="1000" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2" placeholder="5" value="5">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Interval (seconds)</label>
+                                    <input id="k6-interval" type="number" min="1" max="300" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2" placeholder="5" value="5">
+                                </div>
+                                <button id="start-k6-test-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-white font-semibold transition-transform hover:scale-105 active:scale-100 hover:bg-green-600">
+                                    <span class="material-symbols-outlined">play_arrow</span>
+                                    <span>Start K6 Test</span>
+                                </button>
+                            </div>
+                            
+                            <div class="text-sm text-slate-600 mt-6">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="material-symbols-outlined text-cyan-600">info</span>
+                                    <span class="font-medium text-slate-700">Real-time Monitoring</span>
+                                </div>
+                                <p class="text-xs leading-relaxed">
+                                    Displaying live CPU and memory metrics collected directly from your configured nodes via SSH.
+                                    Updates every 3 seconds.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    
+                    <div class="lg:col-span-3 w-full rounded-xl bg-white p-6 sm:p-8 shadow-sm border border-slate-200">
+                        <h3 class="text-slate-900 tracking-tight text-lg font-semibold leading-tight text-left pb-4">Configuration Sync Status</h3>
                         <div class="flex flex-col gap-2 mb-8">
                             <div class="flex gap-4 justify-between items-center">
-                                <p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Overall Progress</p>
-                                <p class="text-primary dark:text-primary-dark text-sm font-semibold leading-normal" id="sync-progress-percent">0%</p>
+                                <p class="text-slate-800 text-sm font-medium leading-normal">Overall Progress</p>
+                                <p class="text-indigo-600 text-sm font-semibold leading-normal" id="sync-progress-percent">0%</p>
                             </div>
-                            <div class="rounded-full h-2 bg-subtle-light dark:bg-subtle-dark">
-                                <div class="h-2 rounded-full bg-primary dark:bg-primary-dark transition-all duration-500" style="width: 0%;" id="sync-progress-bar"></div>
+                            <div class="rounded-full h-2 bg-slate-200">
+                                <div class="h-2 rounded-full bg-indigo-600 transition-all duration-500" style="width: 0%;" id="sync-progress-bar"></div>
                             </div>
-                            <p class="text-text-secondary-light dark:text-text-secondary-dark text-xs font-normal leading-normal" id="sync-status-text">No sync in progress</p>
+                            <p class="text-slate-600 text-xs font-normal leading-normal" id="sync-status-text">No sync in progress</p>
                         </div>
-                        <!-- Timeline / Stepper -->
                         <div class="flex items-start justify-between relative">
                             <div class="flex-1 text-center">
                                 <div class="relative mb-2">
-                                    <div class="relative w-10 h-10 mx-auto flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500" id="step1-container">
+                                    <div class="relative w-10 h-10 mx-auto flex items-center justify-center rounded-full bg-slate-100 text-slate-400" id="step1-container">
                                         <span class="material-symbols-outlined text-xl" id="step1-icon">schedule</span>
                                     </div>
                                     <div aria-hidden="true" class="absolute inset-0 flex items-center">
-                                        <div class="h-0.5 w-full bg-gray-300 dark:bg-gray-600 translate-x-full"></div>
+                                        <div class="h-0.5 w-full bg-slate-200 translate-x-full"></div>
                                     </div>
                                 </div>
-                                <div class="mt-4 p-4 rounded-lg bg-subtle-light/50 dark:bg-subtle-dark/50 border border-subtle-light dark:border-subtle-dark hover:shadow-md transition-shadow" id="step1-box">
-                                    <p class="text-text-secondary-light dark:text-text-secondary-dark text-base font-semibold leading-normal" id="step1-title">EPS Split</p>
-                                    <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal" id="step1-text">Pending</p>
+                                <div class="mt-4 p-4 rounded-lg bg-slate-50/50 border border-slate-200 hover:shadow-md transition-shadow" id="step1-box">
+                                    <p class="text-slate-700 text-sm font-semibold leading-normal" id="step1-title">EPS Split</p>
+                                    <p class="text-slate-500 text-xs font-normal leading-normal" id="step1-text">Pending</p>
                                 </div>
                             </div>
                             <div class="flex-1 text-center px-2">
                                 <div class="relative mb-2">
                                     <div aria-hidden="true" class="absolute inset-0 flex items-center">
-                                        <div class="h-0.5 w-full bg-gray-300 dark:bg-gray-600"></div>
+                                        <div class="h-0.5 w-full bg-slate-200"></div>
                                     </div>
-                                    <div class="relative w-10 h-10 mx-auto flex items-center justify-center rounded-full bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark" id="step2-container">
+                                    <div class="relative w-10 h-10 mx-auto flex items-center justify-center rounded-full bg-slate-100 text-slate-400" id="step2-container">
                                         <span class="material-symbols-outlined text-xl" id="step2-icon">schedule</span>
                                     </div>
                                     <div aria-hidden="true" class="absolute inset-0 flex items-center">
-                                        <div class="h-0.5 w-full bg-gray-300 dark:bg-gray-600 translate-x-full"></div>
+                                        <div class="h-0.5 w-full bg-slate-200 translate-x-full"></div>
                                     </div>
                                 </div>
-                                <div class="mt-4 p-4 rounded-lg bg-subtle-light/50 dark:bg-subtle-dark/50 border border-subtle-light dark:border-subtle-dark hover:shadow-md transition-shadow" id="step2-box">
-                                    <p class="text-text-secondary-light dark:text-text-secondary-dark text-base font-semibold leading-normal" id="step2-title">EPS Distribute</p>
-                                    <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal" id="step2-text">Pending</p>
+                                <div class="mt-4 p-4 rounded-lg bg-slate-50/50 border border-slate-200 hover:shadow-md transition-shadow" id="step2-box">
+                                    <p class="text-slate-700 text-sm font-semibold leading-normal" id="step2-title">EPS Distribute</p>
+                                    <p class="text-slate-500 text-xs font-normal leading-normal" id="step2-text">Pending</p>
+                                </div>
+                            </div>
+                            <div class="flex-1 text-center px-2">
+                                <div class="relative mb-2">
+                                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                                        <div class="h-0.5 w-full bg-slate-200"></div>
+                                    </div>
+                                    <div class="relative w-10 h-10 mx-auto flex items-center justify-center rounded-full bg-slate-100 text-slate-400" id="step3-container">
+                                        <span class="material-symbols-outlined text-xl" id="step3-icon">schedule</span>
+                                    </div>
+                                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                                        <div class="h-0.5 w-full bg-slate-200 translate-x-full"></div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 p-4 rounded-lg bg-slate-50/50 border border-slate-200 hover:shadow-md transition-shadow" id="step3-box">
+                                    <p class="text-slate-700 text-sm font-semibold leading-normal" id="step3-title">Conf.d Distribute</p>
+                                    <p class="text-slate-500 text-xs font-normal leading-normal" id="step3-text">Pending</p>
                                 </div>
                             </div>
                             <div class="flex-1 text-center">
                                 <div class="relative mb-2">
                                     <div aria-hidden="true" class="absolute inset-0 flex items-center">
-                                        <div class="h-0.5 w-1/2 bg-gray-300 dark:bg-gray-600"></div>
+                                        <div class="h-0.5 w-1/2 bg-slate-200"></div>
                                     </div>
-                                    <div class="relative w-10 h-10 mx-auto flex items-center justify-center rounded-full bg-subtle-light dark:bg-subtle-dark text-text-secondary-light dark:text-text-secondary-dark" id="step3-container">
-                                        <span class="material-symbols-outlined text-xl" id="step3-icon">schedule</span>
+                                    <div class="relative w-10 h-10 mx-auto flex items-center justify-center rounded-full bg-slate-100 text-slate-400" id="step4-container">
+                                        <span class="material-symbols-outlined text-xl" id="step4-icon">schedule</span>
                                     </div>
                                 </div>
-                                <div class="mt-4 p-4 rounded-lg bg-subtle-light/50 dark:bg-subtle-dark/50 border border-subtle-light dark:border-subtle-dark hover:shadow-md transition-shadow" id="step3-box">
-                                    <p class="text-text-secondary-light dark:text-text-secondary-dark text-base font-semibold leading-normal" id="step3-title">Conf.d Distribute</p>
-                                    <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal" id="step3-text">Pending</p>
+                                <div class="mt-4 p-4 rounded-lg bg-slate-50/50 border border-slate-200 hover:shadow-md transition-shadow" id="step4-box">
+                                    <p class="text-slate-700 text-sm font-semibold leading-normal" id="step4-title">Kafka Distribute</p>
+                                    <p class="text-slate-500 text-xs font-normal leading-normal" id="step4-text">Pending</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Cluster Overview Table -->
-
-
-
-                <!-- Node Management Modal -->
-                <div id="node-management-modal" class="fixed inset-0 z-50 hidden">
-                    <!-- Modal Backdrop -->
-                    <div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
-
-                    <!-- Modal Content -->
-                    <div class="fixed inset-0 overflow-hidden">
-                        <div class="flex min-h-full items-center justify-center p-4">
-                            <div class="relative w-full max-w-6xl bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl transform transition-all">
-                                <!-- Modal Header -->
-                                <div class="flex items-center justify-between p-6 border-b border-subtle-light dark:border-subtle-dark">
-                                    <h3 class="text-2xl font-bold">Node Management</h3>
-                                    <button id="close-node-modal" class="rounded-lg p-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-subtle-light dark:hover:bg-subtle-dark transition-colors">
-                                        <span class="material-symbols-outlined">close</span>
-                                    </button>
-                                </div>
-
-                                <!-- Modal Body -->
-                                <div class="p-6 max-h-[80vh] overflow-y-auto">
-                                    <!-- Add Node Form -->
-                                    <div class="mb-8">
-                                        <h4 class="text-lg font-semibold mb-4">Add New Node</h4>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Node Name</label>
-                                                <input id="node-name" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="e.g., prod-node-1">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Host/IP</label>
-                                                <input id="node-host" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="192.168.1.100">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">SSH User</label>
-                                                <input id="node-user" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="admin">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">SSH Key Path</label>
-                                                <input id="node-keypath" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="~/.ssh/id_rsa">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Remote Conf Dir</label>
-                                                <input id="node-confdir" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="/opt/vu-data-sim/conf.d">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Remote Binary Dir</label>
-                                                <input id="node-bindir" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="/opt/vu-data-sim/bin">
-                                            </div>
-                                            <div class="md:col-span-2">
-                                                <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Description</label>
-                                                <input id="node-description" type="text" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark" placeholder="Optional description">
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center gap-4">
-                                            <button id="add-node-btn" class="group flex items-center gap-2 rounded-lg bg-primary dark:bg-primary-dark px-6 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100">
-                                                <span class="material-symbols-outlined">add</span>
-                                                <span>Add Node</span>
-                                            </button>
-                                            <label class="flex items-center gap-2">
-                                                <input id="node-enabled" type="checkbox" checked class="rounded border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark text-primary dark:text-primary-dark focus:ring-primary dark:focus:ring-primary-dark">
-                                                <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Enable node after creation</span>
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    <!-- Nodes List -->
-                                    <div>
-                                        <h4 class="text-lg font-semibold mb-4">Configured Nodes</h4>
-                                        <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
-                                            <table class="w-full text-left text-sm">
-                                                <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
-                                                    <tr>
-                                                        <th class="p-4 font-semibold">Node Name</th>
-                                                        <th class="p-4 font-semibold">Host</th>
-                                                        <th class="p-4 font-semibold">Status</th>
-                                                        <th class="p-4 font-semibold">Description</th>
-                                                        <th class="p-4 font-semibold">Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="nodes-table-body" class="divide-y divide-subtle-light dark:divide-subtle-dark">
-                                                    <!-- Nodes will be populated by JavaScript -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div class="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <h3 class="text-lg font-semibold text-slate-900 mb-4">Logs Preview</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="relative">
+                                <label class="block text-sm font-medium text-slate-600 mb-2" for="log-node">Filter by Node</label>
+                                <span class="material-symbols-outlined absolute left-3 top-10 text-slate-500">dns</span>
+                                <select id="log-node" class="w-full rounded-lg border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 pl-10 text-sm">
+                                    <option>All Nodes</option>
+                                    </select>
+                            </div>
+                            <div class="relative">
+                                <label class="block text-sm font-medium text-slate-600 mb-2" for="log-module">Filter by Module</label>
+                                <span class="material-symbols-outlined absolute left-3 top-10 text-slate-500">view_module</span>
+                                <select id="log-module" class="w-full rounded-lg border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 pl-10 text-sm">
+                                    <option>All Modules</option>
+                                    <option>Module A</option>
+                                    <option>Module B</option>
+                                </select>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Binary Control Modal -->
-                <div id="binary-control-modal" class="fixed inset-0 z-50 hidden">
-                    <!-- Modal Backdrop -->
-                    <div id="binary-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
-
-                    <!-- Modal Content -->
-                    <div class="fixed inset-0 overflow-hidden">
-                        <div class="flex min-h-full items-center justify-center p-4">
-                            <div class="relative w-full max-w-4xl bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl transform transition-all">
-                                <!-- Modal Header -->
-                                <div class="flex items-center justify-between p-6 border-b border-subtle-light dark:border-subtle-dark">
-                                    <h3 class="text-2xl font-bold">Binary Control</h3>
-                                    <button id="close-binary-modal" class="rounded-lg p-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-subtle-light dark:hover:bg-subtle-dark transition-colors">
-                                        <span class="material-symbols-outlined">close</span>
-                                    </button>
-                                </div>
-
-                                <!-- Modal Body -->
-                                <div class="p-6 max-h-[80vh] overflow-y-auto">
-                                    <!-- Node Selection and Status -->
-                                    <div class="mb-8">
-                                        <h4 class="text-lg font-semibold mb-4">Binary Management</h4>
-
-                                        <!-- Node Selection -->
-                                        <div class="mb-6">
-                                            <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Select Node</label>
-                                            <div class="relative">
-                                                <span class="material-symbols-outlined absolute left-3 top-3 text-text-secondary-light dark:text-text-secondary-dark">dns</span>
-                                                <select id="binary-node-select" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark pl-10">
-                                                    <option value="">Select a node...</option>
-                                                    <!-- Node options will be populated dynamically -->
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <!-- Binary Path Information -->
-                                        <div id="binary-path-info" class="mb-6 p-4 rounded-lg bg-primary/10 dark:bg-primary-dark/10 hidden">
-                                            <h5 class="font-medium mb-2 text-primary dark:text-primary-dark">Binary Path Information</h5>
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                                <div>
-                                                    <span class="text-text-secondary-light dark:text-text-secondary-dark">Binary Path:</span>
-                                                    <span id="binary-path-display" class="ml-2 font-medium text-primary dark:text-primary-dark">Not selected</span>
-                                                </div>
-                                                <div>
-                                                    <span class="text-text-secondary-light dark:text-text-secondary-dark">Binary Name:</span>
-                                                    <span id="binary-name-display" class="ml-2 font-medium text-primary dark:text-primary-dark">finalvudatasim</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Current Status Display -->
-                                        <div id="binary-status-display" class="mb-6 p-4 rounded-lg bg-subtle-light/50 dark:bg-subtle-dark/50 hidden">
-                                            <h5 class="font-medium mb-2">Current Status</h5>
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                                <div>
-                                                    <span class="text-text-secondary-light dark:text-text-secondary-dark">Status:</span>
-                                                    <span id="binary-current-status" class="ml-2 font-medium">Unknown</span>
-                                                </div>
-                                                <div>
-                                                    <span class="text-text-secondary-light dark:text-text-secondary-dark">PID:</span>
-                                                    <span id="binary-current-pid" class="ml-2 font-medium">-</span>
-                                                </div>
-                                                <div>
-                                                    <span class="text-text-secondary-light dark:text-text-secondary-dark">Start Time:</span>
-                                                    <span id="binary-current-start-time" class="ml-2 font-medium">-</span>
-                                                </div>
-                                                <div>
-                                                    <span class="text-text-secondary-light dark:text-text-secondary-dark">Last Checked:</span>
-                                                    <span id="binary-current-last-checked" class="ml-2 font-medium">-</span>
-                                                </div>
-                                            </div>
-                                            <div class="mt-2">
-                                                <span class="text-text-secondary-light dark:text-text-secondary-dark">Process Info:</span>
-                                                <div id="binary-current-process-info" class="mt-1 p-2 bg-background-light dark:bg-background-dark rounded text-xs font-mono max-h-20 overflow-y-auto">-</div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Control Buttons -->
-                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                                            <button id="refresh-binary-status-btn" class="group flex items-center justify-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 px-4 py-3 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
-                                                <span class="material-symbols-outlined">refresh</span>
-                                                <span>Refresh Status</span>
-                                            </button>
-                                            <button id="start-binary-btn" class="group flex items-center justify-center gap-2 rounded-lg bg-success dark:bg-success-dark px-4 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100 disabled:opacity-50 disabled:cursor-not-allowed">
-                                                <span class="material-symbols-outlined">play_arrow</span>
-                                                <span>Start Binary</span>
-                                            </button>
-                                            <button id="stop-binary-btn" class="group flex items-center justify-center gap-2 rounded-lg bg-danger dark:bg-danger-dark px-4 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100 disabled:opacity-50 disabled:cursor-not-allowed">
-                                                <span class="material-symbols-outlined">stop</span>
-                                                <span>Stop Binary</span>
-                                            </button>
-                                        </div>
-
-                                        <!-- Bulk Control Buttons -->
-                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                                            <button id="start-all-binaries-btn" class="group flex items-center justify-center gap-2 rounded-lg bg-success dark:bg-success-dark px-4 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100">
-                                                <span class="material-symbols-outlined">play_arrow</span>
-                                                <span>Start All Binaries</span>
-                                            </button>
-                                            <button id="stop-all-binaries-btn" class="group flex items-center justify-center gap-2 rounded-lg bg-danger dark:bg-danger-dark px-4 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100">
-                                                <span class="material-symbols-outlined">stop</span>
-                                                <span>Stop All Binaries</span>
-                                            </button>
-                                            <button id="refresh-all-status-btn" class="group flex items-center justify-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 px-4 py-3 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
-                                                <span class="material-symbols-outlined">refresh</span>
-                                                <span>Refresh All Status</span>
-                                            </button>
-                                        </div>
-
-                                        <!-- Timeout Configuration -->
-                                        <div class="mb-6">
-                                            <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Timeout (seconds)</label>
-                                            <div class="relative">
-                                                <input id="binary-timeout-input" type="number" min="10" max="300" value="30" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark">
-                                            </div>
-                                            <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-1">Timeout for start/stop operations (10-300 seconds)</p>
-                                        </div>
-
-                                        <!-- SSH Output Display -->
-                                        <div class="mb-6">
-                                            <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">SSH Output</label>
-                                            <div id="binary-ssh-output" class="h-32 overflow-y-auto rounded-lg bg-gray-900 dark:bg-black p-3 font-mono text-xs text-text-secondary-dark border border-subtle-dark">
-                                                <div class="text-text-secondary-light dark:text-text-secondary-dark">SSH output will appear here...</div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Bulk Operation Logs -->
-                                        <div id="bulk-operation-logs" class="mb-6 hidden">
-                                            <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">Bulk Operation Logs</label>
-                                            <div id="bulk-logs-output" class="h-48 overflow-y-auto rounded-lg bg-gray-900 dark:bg-black p-3 font-mono text-xs text-text-secondary-dark border border-subtle-dark">
-                                                <div class="text-text-secondary-light dark:text-text-secondary-dark">Bulk operation logs will appear here...</div>
-                                            </div>
-                                            <div class="mt-2 flex items-center gap-4 text-xs">
-                                                <span id="bulk-operation-status" class="text-text-secondary-light dark:text-text-secondary-dark">No operation in progress</span>
-                                                <span id="bulk-operation-progress" class="text-primary dark:text-primary-dark">0/0 completed</span>
-                                            </div>
-                                        </div>
-
-                                        <!-- All Nodes Status -->
-                                        <div>
-                                            <h5 class="font-medium mb-3">All Nodes Status</h5>
-                                            <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
-                                                <table class="w-full text-left text-sm">
-                                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
-                                                        <tr>
-                                                            <th class="p-3 font-semibold">Node Name</th>
-                                                            <th class="p-3 font-semibold">Status</th>
-                                                            <th class="p-3 font-semibold">PID</th>
-                                                            <th class="p-3 font-semibold">Last Checked</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="binary-all-status-body" class="divide-y divide-subtle-light dark:divide-subtle-dark">
-                                                        <!-- Status will be populated dynamically -->
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ClickHouse Metrics Modal -->
-                <div id="clickhouse-metrics-modal" class="fixed inset-0 z-50 hidden">
-                    <!-- Modal Backdrop -->
-                    <div id="clickhouse-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
-
-                    <!-- Modal Content -->
-                    <div class="fixed inset-0 overflow-hidden">
-                        <div class="flex min-h-full items-center justify-center p-4">
-                            <div class="relative w-full max-w-7xl bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl transform transition-all">
-                                <!-- Modal Header -->
-                                <div class="flex items-center justify-between p-6 border-b border-subtle-light dark:border-subtle-dark">
-                                    <h3 class="text-2xl font-bold">ClickHouse Live Metrics</h3>
-                                    <button id="close-clickhouse-modal" class="rounded-lg p-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-subtle-light dark:hover:bg-subtle-dark transition-colors">
-                                        <span class="material-symbols-outlined">close</span>
-                                    </button>
-                                </div>
-
-                                <!-- Modal Body -->
-                                <div class="p-6 max-h-[85vh] overflow-y-auto">
-                                    <!-- Status and Controls -->
-                                    <div class="mb-6 flex items-center justify-between">
-                                        <div class="flex items-center gap-4">
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">ClickHouse Status:</span>
-                                                <div id="clickhouse-status">
-                                                    <div class="inline-flex items-center gap-2 rounded-full bg-warning/20 dark:bg-warning-dark/20 px-3 py-1 text-xs font-medium text-warning dark:text-warning-dark">
-                                                        <span class="h-2 w-2 rounded-full bg-warning"></span>Checking...
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div id="clickhouse-last-update" class="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                                                Last updated: Never
-                                            </div>
-                                        </div>
-                                       <div class="flex items-center gap-4">
-                                            <div class="flex items-center gap-2">
-                                                <input type="text" id="metrics-time-range" placeholder="Select time range" class="px-4 py-2 rounded-lg border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark text-sm">
-                                                <div class="flex gap-1">
-                                                    <button id="preset-1min" class="px-3 py-1 text-xs rounded border border-primary/50 dark:border-primary-dark/50 text-primary dark:text-primary-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10">1m</button>
-                                                    <button id="preset-5min" class="px-3 py-1 text-xs rounded border border-primary/50 dark:border-primary-dark/50 text-primary dark:text-primary-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10">5m</button>
-                                                    <button id="preset-15min" class="px-3 py-1 text-xs rounded border border-primary/50 dark:border-primary-dark/50 text-primary dark:text-primary-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10">15m</button>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Node:</span>
-                                                <select id="node-filter-select" class="px-3 py-2 rounded-lg border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark text-sm focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark">
-                                                    <option value="">All Nodes</option>
-                                                    <!-- Node options will be populated dynamically -->
-                                                </select>
-                                            </div>
-                                            <button id="refresh-clickhouse-metrics-btn" class="group flex items-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 px-4 py-2 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
-                                                <span class="material-symbols-outlined">refresh</span>
-                                                <span>Refresh Metrics</span>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <!-- Metrics Tables -->
-                                    <div class="space-y-8">
-                                        <!-- Kafka Producer Metrics -->
-                                        <div>
-                                            <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                                                <span class="material-symbols-outlined text-primary dark:text-primary-dark">stream</span>
-                                                Kafka Producer Metrics
-                                            </h4>
-                                            <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
-                                                <table class="w-full text-left text-sm">
-                                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
-                                                        <tr>
-                                                            <th class="p-3 font-semibold">Timestamp</th>
-                                                            <th class="p-3 font-semibold">Client ID</th>
-                                                            <th class="p-3 font-semibold">Topic</th>
-                                                            <th class="p-3 font-semibold text-right">Records Sent</th>
-                                                            <th class="p-3 font-semibold text-right">Send Rate/sec</th>
-                                                            <th class="p-3 font-semibold text-right">Byte Rate (MB/s)</th>
-                                                            <th class="p-3 font-semibold text-right">Compression %</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="kafka-metrics-table" class="divide-y divide-subtle-light dark:divide-subtle-dark">
-                                                        <tr>
-                                                            <td colspan="7" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">Loading Kafka metrics...</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-
-                                        <!-- Pod Resource Utilization -->
-                                        <div>
-                                            <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                                                <span class="material-symbols-outlined text-primary dark:text-primary-dark">memory</span>
-                                                Pod Resource Utilization
-                                            </h4>
-                                            <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
-                                                <table class="w-full text-left text-sm">
-                                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
-                                                        <tr>
-                                                            <th class="p-3 font-semibold">Cluster ID</th>
-                                                            <th class="p-3 font-semibold">Pod Name</th>
-                                                            <th class="p-3 font-semibold text-right">CPU %</th>
-                                                            <th class="p-3 font-semibold text-right">Memory %</th>
-                                                            <th class="p-3 font-semibold">Last Updated</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="pod-resource-metrics-table" class="divide-y divide-subtle-light dark:divide-subtle-dark">
-                                                        <tr>
-                                                            <td colspan="5" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">Loading pod resource metrics...</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-
-                                        <!-- Pod Status -->
-                                        <div>
-                                            <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                                                <span class="material-symbols-outlined text-primary dark:text-primary-dark">health_metrics</span>
-                                                Pod Status
-                                            </h4>
-                                            <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
-                                                <table class="w-full text-left text-sm">
-                                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
-                                                        <tr>
-                                                            <th class="p-3 font-semibold">Cluster ID</th>
-                                                            <th class="p-3 font-semibold">Node Name</th>
-                                                            <th class="p-3 font-semibold">Pod Name</th>
-                                                            <th class="p-3 font-semibold">Pod Phase</th>
-                                                            <th class="p-3 font-semibold">Container Status</th>
-                                                            <th class="p-3 font-semibold">Running/Total Containers</th>
-                                                            <th class="p-3 font-semibold">Status</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="pod-status-metrics-table" class="divide-y divide-subtle-light dark:divide-subtle-dark">
-                                                        <tr>
-                                                            <td colspan="7" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">Loading pod status metrics...</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-
-                                        <!-- Top Pods by Memory Utilization -->
-                                        <div>
-                                            <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                                                <span class="material-symbols-outlined text-primary dark:text-primary-dark">memory</span>
-                                                Top 5 Pods by Memory Utilization per Node
-                                            </h4>
-                                            <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
-                                                <table class="w-full text-left text-sm">
-                                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
-                                                        <tr>
-                                                            <th class="p-3 font-semibold">Timestamp</th>
-                                                            <th class="p-3 font-semibold">Node IP</th>
-                                                            <th class="p-3 font-semibold">Pod Name</th>
-                                                            <th class="p-3 font-semibold text-right">Memory %</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="top-pod-memory-metrics-table" class="divide-y divide-subtle-light dark:divide-subtle-dark">
-                                                        <tr>
-                                                            <td colspan="4" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">Loading top pod memory metrics...</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-
-                                        <!-- Messages In Per Sec by Topic -->
-                                        <div>
-                                            <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                                                <span class="material-symbols-outlined text-primary dark:text-primary-dark">speed</span>
-                                                Messages In Per Sec by Topic
-                                            </h4>
-                                            <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
-                                                <table class="w-full text-left text-sm">
-                                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
-                                                        <tr>
-                                                            <th class="p-3 font-semibold">Timestamp</th>
-                                                            <th class="p-3 font-semibold">Topic</th>
-                                                            <th class="p-3 font-semibold text-right">Messages In/sec</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="kafka-topic-metrics-table" class="divide-y divide-subtle-light dark:divide-subtle-dark">
-                                                        <tr>
-                                                            <td colspan="3" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">Loading Kafka topic metrics...</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                        <!-- System Metrics
-                                        <div>
-                                            <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                                                <span class="material-symbols-outlined text-success dark:text-success-dark">memory</span>
-                                                System Metrics
-                                            </h4>
-                                            <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
-                                                <table class="w-full text-left text-sm">
-                                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
-                                                        <tr>
-                                                            <th class="p-3 font-semibold">Timestamp</th>
-                                                            <th class="p-3 font-semibold">Host</th>
-                                                            <th class="p-3 font-semibold text-right">CPU %</th>
-                                                            <th class="p-3 font-semibold text-right">Memory %</th>
-                                                            <th class="p-3 font-semibold text-right">Disk %</th>
-                                                            <th class="p-3 font-semibold text-right">Network (RX/TX MB)</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="system-metrics-table" class="divide-y divide-subtle-light dark:divide-subtle-dark">
-                                                        <tr>
-                                                            <td colspan="6" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">Loading system metrics...</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                                                <span class="material-symbols-outlined text-warning dark:text-warning-dark">database</span>
-                                                Database Metrics
-                                            </h4>
-                                            <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
-                                                <table class="w-full text-left text-sm">
-                                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
-                                                        <tr>
-                                                            <th class="p-3 font-semibold">Timestamp</th>
-                                                            <th class="p-3 font-semibold">Database</th>
-                                                            <th class="p-3 font-semibold">Table</th>
-                                                            <th class="p-3 font-semibold text-right">Query Count</th>
-                                                            <th class="p-3 font-semibold text-right">Duration (ms)</th>
-                                                            <th class="p-3 font-semibold text-right">Errors</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="database-metrics-table" class="divide-y divide-subtle-light dark:divide-subtle-dark">
-                                                        <tr>
-                                                            <td colspan="6" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">Loading database metrics...</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                                                <span class="material-symbols-outlined text-danger dark:text-danger-dark">widgets</span>
-                                                Container Metrics
-                                            </h4>
-                                            <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
-                                                <table class="w-full text-left text-sm">
-                                                    <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
-                                                        <tr>
-                                                            <th class="p-3 font-semibold">Timestamp</th>
-                                                            <th class="p-3 font-semibold">Namespace</th>
-                                                            <th class="p-3 font-semibold">Pod</th>
-                                                            <th class="p-3 font-semibold">Container</th>
-                                                            <th class="p-3 font-semibold text-right">CPU %</th>
-                                                            <th class="p-3 font-semibold text-right">Memory %</th>
-                                                            <th class="p-3 font-semibold">Status</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="container-metrics-table" class="divide-y divide-subtle-light dark:divide-subtle-dark">
-                                                        <tr>
-                                                            <td colspan="7" class="p-3 text-center text-text-secondary-light dark:text-text-secondary-dark">Loading container metrics...</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div> -->
-
-                                        
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Logs Preview -->
-                <div class="logs-preview-box rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md">
-                    <h3 class="text-xl font-semibold my-4">Logs Preview</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div class="relative">
-                            <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2" for="log-node">Filter by Node</label>
-                            <span class="material-symbols-outlined absolute left-3 top-10 text-text-secondary-light dark:text-text-secondary-dark">dns</span>
-                            <select id="log-node" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark pl-10">
-                                <option>All Nodes</option>
-                                <!-- Node options will be populated dynamically -->
-                            </select>
-                        </div>
-                        <div class="relative">
-                            <label class="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2" for="log-module">Filter by Module</label>
-                            <span class="material-symbols-outlined absolute left-3 top-10 text-text-secondary-light dark:text-text-secondary-dark">view_module</span>
-                            <select id="log-module" class="w-full rounded-lg border-subtle-light dark:border-subtle-dark bg-background-light dark:bg-background-dark focus:ring-primary dark:focus:ring-primary-dark focus:border-primary dark:focus:border-primary-dark pl-10">
-                                <option>All Modules</option>
-                                <option>Module A</option>
-                                <option>Module B</option>
-                            </select>
-                        </div>
-                        <div class="flex items-end">
-                            <button id="reload-logs-btn" class="group flex items-center gap-2 rounded-lg border border-primary/50 dark:border-primary-dark/50 px-4 py-2 text-primary dark:text-primary-dark font-semibold transition-colors hover:bg-primary/10 dark:hover:bg-primary-dark/10">
-                                <span class="material-symbols-outlined">refresh</span>
+                        <div class="flex items-end mb-4">
+                            <button id="reload-logs-btn" class="group flex items-center gap-2 rounded-lg border border-indigo-200 px-4 py-2 text-indigo-700 font-semibold transition-colors hover:bg-indigo-50 text-sm">
+                                <span class="material-symbols-outlined text-base">refresh</span>
                                 <span>Reload Logs</span>
                             </button>
                         </div>
-                    </div>
-                    <div id="logs-container" class="h-64 overflow-y-auto rounded-xl bg-gray-900 dark:bg-black p-4 font-mono text-xs text-text-secondary-dark border border-subtle-dark shadow-inner">
-                        <div class="space-y-1">
-                            <p class="animate-fade-in">
-                                <span class="text-sky-400">2024-01-20 14:30:00</span> -
-                                <span class="text-purple-400">Node 1</span> -
-                                <span class="text-emerald-400">Module A</span>: Starting simulation...
-                            </p>
-                            <p class="animate-fade-in" style="animation-delay: 50ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:05</span> -
-                                <span class="text-purple-400">Node 1</span> -
-                                <span class="text-emerald-400">Module A</span>: Simulation running...
-                            </p>
-                            <p class="animate-fade-in" style="animation-delay: 100ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:10</span> -
-                                <span class="text-purple-400">Node 1</span> -
-                                <span class="text-emerald-400">Module A</span>: EPS: 9800, Kafka: 4900, CH: 1950
-                            </p>
-                            <p class="animate-fade-in" style="animation-delay: 150ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:15</span> -
-                                <span class="text-purple-400">Node 1</span> -
-                                <span class="text-emerald-400">Module A</span>: EPS: 9900, Kafka: 4950, CH: 1980
-                            </p>
-                            <p class="animate-fade-in" style="animation-delay: 200ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:20</span> -
-                                <span class="text-purple-400">Node 1</span> -
-                                <span class="text-emerald-400">Module A</span>: EPS: 10100, Kafka: 5050, CH: 2020
-                            </p>
-                            <p class="animate-fade-in" style="animation-delay: 250ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:25</span> -
-                                <span class="text-purple-400">Node 2</span> -
-                                <span class="text-yellow-400">Module B</span>: Initializing...
-                            </p>
-                            <p class="animate-fade-in" style="animation-delay: 300ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:30</span> -
-                                <span class="text-purple-400">Node 3</span> -
-                                <span class="text-emerald-400">Module A</span>: Heartbeat OK.
-                            </p>
-                            <p class="animate-fade-in" style="animation-delay: 350ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:35</span> -
-                                <span class="text-purple-400">Node 5</span> -
-                                <span class="text-emerald-400">Module A</span>: Load at 75% capacity.
-                            </p>
-                            <p class="animate-fade-in" style="animation-delay: 400ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:40</span> -
-                                <span class="text-purple-400">Node 1</span> -
-                                <span class="text-emerald-400">Module A</span>: Metric update successful.
-                            </p>
-                            <p class="animate-fade-in" style="animation-delay: 450ms;">
-                                <span class="text-sky-400">2024-01-20 14:30:45</span> -
-                                <span class="text-red-400">Node 4</span> -
-                                <span class="text-gray-500">System</span>: Node is Inactive. No logs to display.
-                            </p>
+                        <div id="logs-container" class="h-64 overflow-y-auto rounded-xl bg-slate-900 p-4 font-mono text-xs text-slate-300 border border-slate-700 shadow-inner">
+                            <div class="space-y-1">
+                                <p class="animate-fade-in">
+                                    <span class="text-sky-400">2024-01-20 14:30:00</span> -
+                                    <span class="text-purple-400">Node 1</span> -
+                                    <span class="text-emerald-400">Module A</span>: Starting simulation...
+                                </p>
+                                <p class="animate-fade-in" style="animation-delay: 50ms;">
+                                    <span class="text-sky-400">2024-01-20 14:30:05</span> -
+                                    <span class="text-purple-400">Node 1</span> -
+                                    <span class="text-emerald-400">Module A</span>: Simulation running...
+                                </p>
+                                <p class="animate-fade-in" style="animation-delay: 100ms;">
+                                    <span class="text-sky-400">2024-01-20 14:30:10</span> -
+                                    <span class="text-purple-400">Node 1</span> -
+                                    <span class="text-emerald-400">Module A</span>: EPS: 9800, Kafka: 4900, CH: 1950
+                                </p>
+                                <p class="animate-fade-in" style="animation-delay: 150ms;">
+                                    <span class="text-sky-400">2024-01-20 14:30:15</span> -
+                                    <span class="text-purple-400">Node 1</span> -
+                                    <span class="text-emerald-400">Module A</span>: EPS: 9900, Kafka: 4950, CH: 1980
+                                </p>
+                                <p class="animate-fade-in" style="animation-delay: 200ms;">
+                                    <span class="text-sky-400">2024-01-20 14:30:20</span> -
+                                    <span class="text-purple-400">Node 1</span> -
+                                    <span class="text-emerald-400">Module A</span>: EPS: 10100, Kafka: 5050, CH: 2020
+                                </p>
+                                <p class="animate-fade-in" style="animation-delay: 250ms;">
+                                    <span class="text-sky-400">2024-01-20 14:30:25</span> -
+                                    <span class="text-purple-400">Node 2</span> -
+                                    <span class="text-yellow-400">Module B</span>: Initializing...
+                                </p>
+                                <p class="animate-fade-in" style="animation-delay: 300ms;">
+                                    <span class="text-sky-400">2024-01-20 14:30:30</span> -
+                                    <span class="text-purple-400">Node 3</span> -
+                                    <span class="text-emerald-400">Module A</span>: Heartbeat OK.
+                                </p>
+                                <p class="animate-fade-in" style="animation-delay: 350ms;">
+                                    <span class="text-sky-400">2024-01-20 14:30:35</span> -
+                                    <span class="text-purple-400">Node 5</span> -
+                                    <span class="text-emerald-400">Module A</span>: Load at 75% capacity.
+                                </p>
+                                <p class="animate-fade-in" style="animation-delay: 400ms;">
+                                    <span class="text-sky-400">2024-01-20 14:30:40</span> -
+                                    <span class="text-purple-400">Node 1</span> -
+                                    <span class="text-emerald-400">Module A</span>: Metric update successful.
+                                </p>
+                                <p class="animate-fade-in" style="animation-delay: 450ms;">
+                                    <span class="text-sky-400">2024-01-20 14:30:45</span> -
+                                    <span class="text-red-400">Node 4</span> -
+                                    <span class="text-gray-500">System</span>: Node is Inactive. No logs to display.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Live Node Metrics Table -->
-                <div class="mt-8">
-                    <h3 class="text-xl font-semibold mb-4">Live Node Metrics</h3>
-                    <div class="overflow-hidden rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark shadow-md">
+
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <h3 class="text-lg font-semibold text-slate-900 p-6 border-b border-slate-200">Live Node Metrics</h3>
+                    <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
-                            <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
+                            <thead class="bg-slate-50">
                                 <tr>
-                                    <th class="p-4 font-semibold">Node</th>
-                                    <th class="p-4 font-semibold">Process Running</th>
-                                    <th class="p-4 font-semibold">PID</th>
-                                    <th class="p-4 font-semibold">Start Time</th>
-                                    <th class="p-4 font-semibold">CPU %</th>
-                                    <th class="p-4 font-semibold">Memory (MB)</th>
-                                    <th class="p-4 font-semibold">System CPU %</th>
-                                    <th class="p-4 font-semibold">System Memory (GB)</th>
-                                    <th class="p-4 font-semibold">Disk Used (GB)</th>
-                                    <th class="p-4 font-semibold">Load Avg</th>
-                                    <th class="p-4 font-semibold">Uptime</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Node</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Process Running</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">PID</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Start Time</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">CPU %</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Memory (MB)</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">System CPU %</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">System Memory (GB)</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Disk Used (GB)</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Load Avg</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Uptime</th>
                                 </tr>
                             </thead>
-                            <tbody id="finalvudatasim-metrics-body">
-                                <!-- Metrics will be populated by JavaScript -->
-                            </tbody>
+                            <tbody id="finalvudatasim-metrics-body" class="divide-y divide-slate-200">
+                                </tbody>
                         </table>
                     </div>
                 </div>
@@ -982,11 +406,436 @@
         </main>
     </div>
 
-    <!-- Include a time picker library (e.g., Flatpickr) -->
+    <div id="node-management-modal" class="fixed inset-0 z-50 hidden">
+        <div id="modal-backdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+
+        <div class="fixed inset-0 overflow-hidden">
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div class="relative w-full max-w-6xl bg-white rounded-xl shadow-2xl transform transition-all">
+                    <div class="flex items-center justify-between p-6 border-b border-slate-200">
+                        <h3 class="text-xl font-semibold text-slate-900">Node Management</h3>
+                        <button id="close-node-modal" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+
+                    <div class="p-6 max-h-[80vh] overflow-y-auto">
+                        <div class="mb-8">
+                            <h4 class="text-lg font-semibold text-slate-900 mb-4">Add New Node</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-600 mb-2">Node Name</label>
+                                    <input id="node-name" type="text" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="e.g., prod-node-1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-600 mb-2">Host/IP</label>
+                                    <input id="node-host" type="text" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="192.168.1.100">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-600 mb-2">SSH User</label>
+                                    <input id="node-user" type="text" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="admin">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-600 mb-2">SSH Key Path</label>
+                                    <input id="node-keypath" type="text" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="~/.ssh/id_rsa">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-600 mb-2">Remote Conf Dir</label>
+                                    <input id="node-confdir" type="text" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="/opt/vu-data-sim/conf.d">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-600 mb-2">Remote Binary Dir</label>
+                                    <input id="node-bindir" type="text" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="/opt/vu-data-sim/bin">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-slate-600 mb-2">Description</label>
+                                    <input id="node-description" type="text" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Optional description">
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <button id="add-node-btn" class="group flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 px-6 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100 shadow-sm">
+                                    <span class="material-symbols-outlined">add</span>
+                                    <span>Add Node</span>
+                                </button>
+                                <label class="flex items-center gap-2">
+                                    <input id="node-enabled" type="checkbox" checked class="rounded border-slate-300 bg-white text-indigo-600 focus:ring-indigo-500">
+                                    <span class="text-sm text-slate-600">Enable node after creation</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-lg font-semibold text-slate-900 mb-4">Configured Nodes</h4>
+                            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left text-sm">
+                                        <thead class="bg-slate-50">
+                                            <tr>
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Node Name</th>
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Host</th>
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Status</th>
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Description</th>
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="nodes-table-body" class="divide-y divide-slate-200">
+                                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="binary-control-modal" class="fixed inset-0 z-50 hidden">
+        <div id="binary-modal-backdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+
+        <div class="fixed inset-0 overflow-hidden">
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div class="relative w-full max-w-4xl bg-white rounded-xl shadow-2xl transform transition-all">
+                    <div class="flex items-center justify-between p-6 border-b border-slate-200">
+                        <h3 class="text-xl font-semibold text-slate-900">Binary Control</h3>
+                        <button id="close-binary-modal" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+
+                    <div class="p-6 max-h-[80vh] overflow-y-auto">
+                        <div class="mb-8">
+                            <h4 class="text-lg font-semibold text-slate-900 mb-4">Binary Management</h4>
+
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-slate-600 mb-2">Select Node</label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-3 top-3 text-slate-500">dns</span>
+                                    <select id="binary-node-select" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-10">
+                                        <option value="">Select a node...</option>
+                                        </select>
+                                </div>
+                            </div>
+
+                            <div id="binary-path-info" class="mb-6 p-4 rounded-lg bg-indigo-50 border border-indigo-200 hidden">
+                                <h5 class="font-medium mb-2 text-indigo-700">Binary Path Information</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-slate-600">Binary Path:</span>
+                                        <span id="binary-path-display" class="ml-2 font-medium text-indigo-700">Not selected</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-600">Binary Name:</span>
+                                        <span id="binary-name-display" class="ml-2 font-medium text-indigo-700">finalvudatasim</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="binary-status-display" class="mb-6 p-4 rounded-lg bg-slate-50 border border-slate-200 hidden">
+                                <h5 class="font-medium text-slate-800 mb-2">Current Status</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-slate-600">Status:</span>
+                                        <span id="binary-current-status" class="ml-2 font-medium">Unknown</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-600">PID:</span>
+                                        <span id="binary-current-pid" class="ml-2 font-medium">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-600">Start Time:</span>
+                                        <span id="binary-current-start-time" class="ml-2 font-medium">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-600">Last Checked:</span>
+                                        <span id="binary-current-last-checked" class="ml-2 font-medium">-</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <span class="text-slate-600 text-sm">Process Info:</span>
+                                    <div id="binary-current-process-info" class="mt-1 p-2 bg-white rounded text-xs font-mono max-h-20 overflow-y-auto border border-slate-200">-</div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <button id="refresh-binary-status-btn" class="group flex items-center justify-center gap-2 rounded-lg border border-indigo-200 px-4 py-3 text-indigo-700 font-semibold transition-colors hover:bg-indigo-50">
+                                    <span class="material-symbols-outlined">refresh</span>
+                                    <span>Refresh Status</span>
+                                </button>
+                                <button id="start-binary-btn" class="group flex items-center justify-center gap-2 rounded-lg bg-green-500 px-4 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span class="material-symbols-outlined">play_arrow</span>
+                                    <span>Start Binary</span>
+                                </button>
+                                <button id="stop-binary-btn" class="group flex items-center justify-center gap-2 rounded-lg bg-red-500 px-4 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span class="material-symbols-outlined">stop</span>
+                                    <span>Stop Binary</span>
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <button id="start-all-binaries-btn" class="group flex items-center justify-center gap-2 rounded-lg bg-green-500 px-4 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100 hover:bg-green-600">
+                                    <span class="material-symbols-outlined">play_arrow</span>
+                                    <span>Start All Binaries</span>
+                                </button>
+                                <button id="stop-all-binaries-btn" class="group flex items-center justify-center gap-2 rounded-lg bg-red-500 px-4 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100 hover:bg-red-600">
+                                    <span class="material-symbols-outlined">stop</span>
+                                    <span>Stop All Binaries</span>
+                                </button>
+                                <button id="refresh-all-status-btn" class="group flex items-center justify-center gap-2 rounded-lg border border-indigo-200 px-4 py-3 text-indigo-700 font-semibold transition-colors hover:bg-indigo-50">
+                                    <span class="material-symbols-outlined">refresh</span>
+                                    <span>Refresh All Status</span>
+                                </button>
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-slate-600 mb-2">Timeout (seconds)</label>
+                                <div class="relative">
+                                    <input id="binary-timeout-input" type="number" min="10" max="300" value="30" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">Timeout for start/stop operations (10-300 seconds)</p>
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-slate-600 mb-2">SSH Output</label>
+                                <div id="binary-ssh-output" class="h-32 overflow-y-auto rounded-lg bg-slate-900 p-3 font-mono text-xs text-slate-300 border border-slate-700">
+                                    <div class="text-slate-500">SSH output will appear here...</div>
+                                </div>
+                            </div>
+
+                            <div id="bulk-operation-logs" class="mb-6 hidden">
+                                <label class="block text-sm font-medium text-slate-600 mb-2">Bulk Operation Logs</label>
+                                <div id="bulk-logs-output" class="h-48 overflow-y-auto rounded-lg bg-slate-900 p-3 font-mono text-xs text-slate-300 border border-slate-700">
+                                    <div class="text-slate-500">Bulk operation logs will appear here...</div>
+                                </div>
+                                <div class="mt-2 flex items-center gap-4 text-xs">
+                                    <span id="bulk-operation-status" class="text-slate-500">No operation in progress</span>
+                                    <span id="bulk-operation-progress" class="text-indigo-600">0/0 completed</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 class="font-medium text-slate-800 mb-3">All Nodes Status</h5>
+                                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left text-sm">
+                                            <thead class="bg-slate-50">
+                                                <tr>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Node Name</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Status</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">PID</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Last Checked</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="binary-all-status-body" class="divide-y divide-slate-200">
+                                                </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="clickhouse-metrics-modal" class="fixed inset-0 z-50 hidden">
+        <div id="clickhouse-modal-backdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+
+        <div class="fixed inset-0 overflow-hidden">
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div class="relative w-full max-w-7xl bg-white rounded-xl shadow-2xl transform transition-all">
+                    <div class="flex items-center justify-between p-6 border-b border-slate-200">
+                        <h3 class="text-xl font-semibold text-slate-900">ClickHouse Live Metrics</h3>
+                        <button id="close-clickhouse-modal" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+
+                    <div class="p-6 max-h-[85vh] overflow-y-auto">
+                        <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm text-slate-600">ClickHouse Status:</span>
+                                    <div id="clickhouse-status">
+                                        <div class="inline-flex items-center gap-2 rounded-full bg-yellow-50 px-3 py-1 text-xs font-medium text-yellow-700">
+                                            <span class="h-2 w-2 rounded-full bg-yellow-500"></span>Checking...
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="clickhouse-last-update" class="text-sm text-slate-500">
+                                    Last updated: Never
+                                </div>
+                            </div>
+                           <div class="flex flex-wrap items-center gap-4">
+                                <div class="flex items-center gap-2">
+                                    <input type="text" id="metrics-time-range" placeholder="Select time range" class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <div class="flex gap-1">
+                                        <button id="preset-1min" class="px-3 py-1 text-xs rounded border border-indigo-200 text-indigo-700 hover:bg-indigo-50">1m</button>
+                                        <button id="preset-5min" class="px-3 py-1 text-xs rounded border border-indigo-200 text-indigo-700 hover:bg-indigo-50">5m</button>
+                                        <button id="preset-15min" class="px-3 py-1 text-xs rounded border border-indigo-200 text-indigo-700 hover:bg-indigo-50">15m</button>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm text-slate-600">Node:</span>
+                                    <select id="node-filter-select" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        <option value="">All Nodes</option>
+                                        </select>
+                                </div>
+                                <button id="refresh-clickhouse-metrics-btn" class="group flex items-center gap-2 rounded-lg border border-indigo-200 px-4 py-2 text-indigo-700 font-semibold transition-colors hover:bg-indigo-50">
+                                    <span class="material-symbols-outlined">refresh</span>
+                                    <span>Refresh Metrics</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-8">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-900">
+                                    <span class="material-symbols-outlined text-indigo-600">stream</span>
+                                    Kafka Producer Metrics
+                                </h4>
+                                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left text-sm">
+                                            <thead class="bg-slate-50">
+                                                <tr>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Timestamp</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Client ID</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Topic</th>
+                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Records Sent</th>
+                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Send Rate/sec</th>
+                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Byte Rate (MB/s)</th>
+                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Compression %</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="kafka-metrics-table" class="divide-y divide-slate-200">
+                                                <tr>
+                                                    <td colspan="7" class="p-4 text-center text-slate-500">Loading Kafka metrics...</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-900">
+                                    <span class="material-symbols-outlined text-indigo-600">memory</span>
+                                    Pod Resource Utilization
+                                </h4>
+                                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left text-sm">
+                                            <thead class="bg-slate-50">
+                                                <tr>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Cluster ID</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Pod Name</th>
+                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">CPU %</th>
+                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Memory %</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Last Updated</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="pod-resource-metrics-table" class="divide-y divide-slate-200">
+                                                <tr>
+                                                    <td colspan="5" class="p-4 text-center text-slate-500">Loading pod resource metrics...</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-900">
+                                    <span class="material-symbols-outlined text-indigo-600">health_metrics</span>
+                                    Pod Status
+                                </h4>
+                                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left text-sm">
+                                            <thead class="bg-slate-50">
+                                                <tr>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Cluster ID</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Node Name</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Pod Name</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Pod Phase</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Container Status</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Running/Total</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="pod-status-metrics-table" class="divide-y divide-slate-200">
+                                                <tr>
+                                                    <td colspan="7" class="p-4 text-center text-slate-500">Loading pod status metrics...</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-900">
+                                    <span class="material-symbols-outlined text-indigo-600">memory</span>
+                                    Top 5 Pods by Memory Utilization per Node
+                                </h4>
+                                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left text-sm">
+                                            <thead class="bg-slate-50">
+                                                <tr>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Timestamp</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Node IP</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Pod Name</th>
+                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Memory %</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="top-pod-memory-metrics-table" class="divide-y divide-slate-200">
+                                                <tr>
+                                                    <td colspan="4" class="p-4 text-center text-slate-500">Loading top pod memory metrics...</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-900">
+                                    <span class="material-symbols-outlined text-indigo-600">speed</span>
+                                    Messages In Per Sec by Topic
+                                </h4>
+                                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left text-sm">
+                                            <thead class="bg-slate-50">
+                                                <tr>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Timestamp</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Topic</th>
+                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Messages In/sec</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="kafka-topic-metrics-table" class="divide-y divide-slate-200">
+                                                <tr>
+                                                    <td colspan="3" class="p-4 text-center text-slate-500">Loading Kafka topic metrics...</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     
-    <!-- Your application scripts -->
     <script src="/static/metrics.js"></script>
     <script src="/static/dashboard.js"></script>
     <script src="/static/node-management.js"></script>

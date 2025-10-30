@@ -60,18 +60,12 @@
                             <span class="material-symbols-outlined text-sm mr-2">memory</span>
                             System Health
                         </button>
-                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-transparent text-slate-600 font-medium transition-colors hover:bg-slate-100 hover:text-slate-900" data-section="logs">
-                            <span class="material-symbols-outlined text-sm mr-2">description</span>
-                            Log Analysis
-                        </button>
+
                         <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-transparent text-slate-600 font-medium transition-colors hover:bg-slate-100 hover:text-slate-900" data-section="k6-monitoring">
                             <span class="material-symbols-outlined text-sm mr-2">speed</span>
                             K6 Monitoring
                         </button>
-                        <button class="monitoring-nav w-full text-left p-3 rounded-lg border border-transparent text-slate-600 font-medium transition-colors hover:bg-slate-100 hover:text-slate-900" data-section="alerts">
-                            <span class="material-symbols-outlined text-sm mr-2">notifications</span>
-                            Alerts & Notifications
-                        </button>
+
                     </div>
                 </div>
 
@@ -277,22 +271,6 @@
                 </div>
 
                 <div id="performance-section" class="hidden space-y-8">
-                    <div class="border-b border-slate-200">
-                        <nav class="flex space-x-8">
-                            <button class="performance-tab active py-4 px-1 border-b-2 border-indigo-600 text-indigo-600 font-semibold text-sm" data-tab="kafka">
-                                <span class="material-symbols-outlined text-sm mr-2">speed</span>
-                                Kafka Metrics
-                            </button>
-                            <button class="performance-tab py-4 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300 font-medium text-sm" data-tab="cluster">
-                                <span class="material-symbols-outlined text-sm mr-2">hub</span>
-                                Cluster Metrics
-                            </button>
-                            <button class="performance-tab py-4 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300 font-medium text-sm" data-tab="system">
-                                <span class="material-symbols-outlined text-sm mr-2">health_and_safety</span>
-                                System Health
-                            </button>
-                        </nav>
-                    </div>
 
                     <div id="kafka-tab" class="performance-tab-content">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -494,7 +472,6 @@
 
                  <div id="pod-monitoring-section" class="hidden space-y-8">
                     <div class="flex flex-wrap justify-between gap-4 items-center mb-6">
-                        <h1 class="text-4xl font-black leading-tight tracking-[-0.033em] text-slate-900">Pod Monitoring</h1>
                         <p class="text-sm text-slate-500">Last updated: <span id="pod-last-update">a few seconds ago</span></p>
                     </div>
 
@@ -574,21 +551,9 @@
                     </div>
                 </div>
 
-                <div id="logs-section" class="hidden space-y-8">
-                    <div class="text-center py-20">
-                        <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">description</span>
-                        <h3 class="text-xl font-semibold mb-2 text-slate-700">Log Analysis</h3>
-                        <p class="text-slate-500">Advanced log analysis and pattern detection</p>
-                    </div>
-                </div>
 
-                <div id="alerts-section" class="hidden space-y-8">
-                    <div class="text-center py-20">
-                        <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">notifications</span>
-                        <h3 class="text-xl font-semibold mb-2 text-slate-700">Alerts & Notifications</h3>
-                        <p class="text-slate-500">Alert management and notification configuration</p>
-                    </div>
-                </div>
+
+
 
                 <div id="k6-monitoring-section" class="hidden space-y-8">
                     <div class="flex flex-wrap justify-between gap-4 items-center mb-6">

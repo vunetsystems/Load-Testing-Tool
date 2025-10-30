@@ -166,3 +166,8 @@ func GetClickHouseHealth() (map[string]interface{}, error) {
 func GetMonitoredNodes() []string {
 	return monitoredNodes
 }
+
+// GetClickHouseClient returns the global ClickHouse client
+func GetClickHouseClient() *ClickHouseClient {
+	return clickHouseClient
+}

@@ -96,6 +96,11 @@ class VuDataSimManager {
             step3Title: document.getElementById('step3-title'),
             step3Container: document.getElementById('step3-container'),
             step3Box: document.getElementById('step3-box'),
+            step4Icon: document.getElementById('step4-icon'),
+            step4Text: document.getElementById('step4-text'),
+            step4Title: document.getElementById('step4-title'),
+            step4Container: document.getElementById('step4-container'),
+            step4Box: document.getElementById('step4-box'),
 
             // Node management elements
             nodeManagementBtn: document.getElementById('node-management-btn'),
