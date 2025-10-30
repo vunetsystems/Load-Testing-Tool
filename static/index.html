@@ -34,10 +34,7 @@
                     <span class="font-medium hidden lg:inline">Binary Control</span>
                 </button>
                 
-                <button id="clickhouse-metrics-btn" class="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-slate-700 transition-colors hover:bg-indigo-50 hover:text-indigo-600" title="ClickHouse Metrics">
-                    <span class="material-symbols-outlined text-slate-600 group-hover:text-indigo-600">monitoring</span>
-                    <span class="font-medium hidden lg:inline">ClickHouse Metrics</span>
-                </button>
+
                 
                 <button onclick="window.location.href='/static/monitoring.html'" class="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-slate-700 transition-colors hover:bg-indigo-50 hover:text-indigo-600" title="Monitoring">
                     <span class="material-symbols-outlined text-slate-600 group-hover:text-indigo-600">analytics</span>
@@ -277,18 +274,35 @@
                                     <p class="text-slate-500 text-xs font-normal leading-normal" id="step3-text">Pending</p>
                                 </div>
                             </div>
-                            <div class="flex-1 text-center">
+                            <div class="flex-1 text-center px-2">
                                 <div class="relative mb-2">
                                     <div aria-hidden="true" class="absolute inset-0 flex items-center">
-                                        <div class="h-0.5 w-1/2 bg-slate-200"></div>
+                                        <div class="h-0.5 w-full bg-slate-200"></div>
                                     </div>
                                     <div class="relative w-10 h-10 mx-auto flex items-center justify-center rounded-full bg-slate-100 text-slate-400" id="step4-container">
                                         <span class="material-symbols-outlined text-xl" id="step4-icon">schedule</span>
+                                    </div>
+                                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                                        <div class="h-0.5 w-full bg-slate-200 translate-x-full"></div>
                                     </div>
                                 </div>
                                 <div class="mt-4 p-4 rounded-lg bg-slate-50/50 border border-slate-200 hover:shadow-md transition-shadow" id="step4-box">
                                     <p class="text-slate-700 text-sm font-semibold leading-normal" id="step4-title">Kafka Distribute</p>
                                     <p class="text-slate-500 text-xs font-normal leading-normal" id="step4-text">Pending</p>
+                                </div>
+                            </div>
+                            <div class="flex-1 text-center">
+                                <div class="relative mb-2">
+                                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                                        <div class="h-0.5 w-1/2 bg-slate-200"></div>
+                                    </div>
+                                    <div class="relative w-10 h-10 mx-auto flex items-center justify-center rounded-full bg-slate-100 text-slate-400" id="step5-container">
+                                        <span class="material-symbols-outlined text-xl" id="step5-icon">schedule</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 p-4 rounded-lg bg-slate-50/50 border border-slate-200 hover:shadow-md transition-shadow" id="step5-box">
+                                    <p class="text-slate-700 text-sm font-semibold leading-normal" id="step5-title">CH Truncate</p>
+                                    <p class="text-slate-500 text-xs font-normal leading-normal" id="step5-text">Pending</p>
                                 </div>
                             </div>
                         </div>
@@ -385,7 +399,7 @@
                             <thead class="bg-slate-50">
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Node</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Process Running</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">VuDataSim Running</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">PID</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Start Time</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">CPU %</th>
@@ -639,198 +653,7 @@
         </div>
     </div>
 
-    <div id="clickhouse-metrics-modal" class="fixed inset-0 z-50 hidden">
-        <div id="clickhouse-modal-backdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
 
-        <div class="fixed inset-0 overflow-hidden">
-            <div class="flex min-h-full items-center justify-center p-4">
-                <div class="relative w-full max-w-7xl bg-white rounded-xl shadow-2xl transform transition-all">
-                    <div class="flex items-center justify-between p-6 border-b border-slate-200">
-                        <h3 class="text-xl font-semibold text-slate-900">ClickHouse Live Metrics</h3>
-                        <button id="close-clickhouse-modal" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">
-                            <span class="material-symbols-outlined">close</span>
-                        </button>
-                    </div>
-
-                    <div class="p-6 max-h-[85vh] overflow-y-auto">
-                        <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-                            <div class="flex items-center gap-4">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm text-slate-600">ClickHouse Status:</span>
-                                    <div id="clickhouse-status">
-                                        <div class="inline-flex items-center gap-2 rounded-full bg-yellow-50 px-3 py-1 text-xs font-medium text-yellow-700">
-                                            <span class="h-2 w-2 rounded-full bg-yellow-500"></span>Checking...
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="clickhouse-last-update" class="text-sm text-slate-500">
-                                    Last updated: Never
-                                </div>
-                            </div>
-                           <div class="flex flex-wrap items-center gap-4">
-                                <div class="flex items-center gap-2">
-                                    <input type="text" id="metrics-time-range" placeholder="Select time range" class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <div class="flex gap-1">
-                                        <button id="preset-1min" class="px-3 py-1 text-xs rounded border border-indigo-200 text-indigo-700 hover:bg-indigo-50">1m</button>
-                                        <button id="preset-5min" class="px-3 py-1 text-xs rounded border border-indigo-200 text-indigo-700 hover:bg-indigo-50">5m</button>
-                                        <button id="preset-15min" class="px-3 py-1 text-xs rounded border border-indigo-200 text-indigo-700 hover:bg-indigo-50">15m</button>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm text-slate-600">Node:</span>
-                                    <select id="node-filter-select" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                        <option value="">All Nodes</option>
-                                        </select>
-                                </div>
-                                <button id="refresh-clickhouse-metrics-btn" class="group flex items-center gap-2 rounded-lg border border-indigo-200 px-4 py-2 text-indigo-700 font-semibold transition-colors hover:bg-indigo-50">
-                                    <span class="material-symbols-outlined">refresh</span>
-                                    <span>Refresh Metrics</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="space-y-8">
-                            <div>
-                                <h4 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-900">
-                                    <span class="material-symbols-outlined text-indigo-600">stream</span>
-                                    Kafka Producer Metrics
-                                </h4>
-                                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                                    <div class="overflow-x-auto">
-                                        <table class="w-full text-left text-sm">
-                                            <thead class="bg-slate-50">
-                                                <tr>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Timestamp</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Client ID</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Topic</th>
-                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Records Sent</th>
-                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Send Rate/sec</th>
-                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Byte Rate (MB/s)</th>
-                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Compression %</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="kafka-metrics-table" class="divide-y divide-slate-200">
-                                                <tr>
-                                                    <td colspan="7" class="p-4 text-center text-slate-500">Loading Kafka metrics...</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-900">
-                                    <span class="material-symbols-outlined text-indigo-600">memory</span>
-                                    Pod Resource Utilization
-                                </h4>
-                                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                                    <div class="overflow-x-auto">
-                                        <table class="w-full text-left text-sm">
-                                            <thead class="bg-slate-50">
-                                                <tr>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Cluster ID</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Pod Name</th>
-                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">CPU %</th>
-                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Memory %</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Last Updated</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="pod-resource-metrics-table" class="divide-y divide-slate-200">
-                                                <tr>
-                                                    <td colspan="5" class="p-4 text-center text-slate-500">Loading pod resource metrics...</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-900">
-                                    <span class="material-symbols-outlined text-indigo-600">health_metrics</span>
-                                    Pod Status
-                                </h4>
-                                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                                    <div class="overflow-x-auto">
-                                        <table class="w-full text-left text-sm">
-                                            <thead class="bg-slate-50">
-                                                <tr>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Cluster ID</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Node Name</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Pod Name</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Pod Phase</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Container Status</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Running/Total</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="pod-status-metrics-table" class="divide-y divide-slate-200">
-                                                <tr>
-                                                    <td colspan="7" class="p-4 text-center text-slate-500">Loading pod status metrics...</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-900">
-                                    <span class="material-symbols-outlined text-indigo-600">memory</span>
-                                    Top 5 Pods by Memory Utilization per Node
-                                </h4>
-                                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                                    <div class="overflow-x-auto">
-                                        <table class="w-full text-left text-sm">
-                                            <thead class="bg-slate-50">
-                                                <tr>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Timestamp</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Node IP</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Pod Name</th>
-                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Memory %</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="top-pod-memory-metrics-table" class="divide-y divide-slate-200">
-                                                <tr>
-                                                    <td colspan="4" class="p-4 text-center text-slate-500">Loading top pod memory metrics...</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-900">
-                                    <span class="material-symbols-outlined text-indigo-600">speed</span>
-                                    Messages In Per Sec by Topic
-                                </h4>
-                                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                                    <div class="overflow-x-auto">
-                                        <table class="w-full text-left text-sm">
-                                            <thead class="bg-slate-50">
-                                                <tr>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Timestamp</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Topic</th>
-                                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Messages In/sec</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="kafka-topic-metrics-table" class="divide-y divide-slate-200">
-                                                <tr>
-                                                    <td colspan="3" class="p-4 text-center text-slate-500">Loading Kafka topic metrics...</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">

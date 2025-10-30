@@ -2,7 +2,7 @@ data_generation_time:
   type: real-time
 include_module_dirs:
   Apache:
-    enabled: false
+    enabled: true
   Azure_Firewall:
     enabled: false
   Azure_Redis_Cache:
@@ -12,7 +12,7 @@ include_module_dirs:
   MongoDB:
     enabled: false
   Mssql:
-    enabled: true
+    enabled: false
 logging:
   console: false
   directory: /home/vunet/vuDataSim/vuDataSim/logs/
@@ -32,7 +32,7 @@ output.kafka:
   compression: gzip
   enabled: true
   hosts:
-    - 164.52.213.181:9094
+    - e2e-106-75:9094
   max_message_bytes: 1000000
   partition.round_robin:
     reachable_only: false

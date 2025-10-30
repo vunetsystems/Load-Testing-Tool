@@ -7866,3 +7866,17 @@
 {"level":"error","error":"Get \"http://216.48.185.179:8086/api/system/metrics\": dial tcp 216.48.185.179:8086: connect: connection refused","node":"e2e-102-179","url":"http://216.48.185.179:8086/api/system/metrics","time":"2025-10-29T19:12:28+05:30","message":"Failed to fetch metrics from metrics API server"}
 {"level":"error","error":"Get \"http://216.48.185.179:8086/api/system/metrics\": dial tcp 216.48.185.179:8086: connect: connection refused","node":"e2e-102-179","url":"http://216.48.185.179:8086/api/system/metrics","time":"2025-10-29T19:12:31+05:30","message":"Failed to fetch metrics from metrics API server"}
 {"level":"error","error":"Get \"http://216.48.185.179:8086/api/system/metrics\": dial tcp 216.48.185.179:8086: connect: connection refused","node":"e2e-102-179","url":"http://216.48.185.179:8086/api/system/metrics","time":"2025-10-29T19:12:34+05:30","message":"Failed to fetch metrics from metrics API server"}
+{"level":"info","version":"1.0.0","time":"2025-10-30T13:54:08+05:30","message":"Starting vuDataSim Cluster Manager"}
+{"level":"info","static_dir":"./static","time":"2025-10-30T13:54:08+05:30","message":"Serving static files"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-30T13:54:08+05:30","message":"Configuration loaded successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-30T13:54:08+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-30T13:54:08+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-30T13:54:08+05:30","message":"Initializing ClickHouse client connection"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-30T13:54:08+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-30T13:54:08+05:30","message":"Monitoring DB client initialized successfully"}
+{"level":"info","node":"System","module":"ClickHouse","type":"success","time":"2025-10-30T13:54:08+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","time":"2025-10-30T13:54:08+05:30","message":"ClickHouse client initialized successfully"}
+{"level":"info","port":"216.48.189.75:8086","time":"2025-10-30T13:54:08+05:30","message":"Server starting"}
+{"level":"info","url":"http://216.48.189.75:8086","time":"2025-10-30T13:54:08+05:30","message":"Open in browser"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-30T13:54:23+05:30","message":"Fetched 78 pods for namespace vsmaps"}
+{"level":"info","node":"System","module":"ClickHouse","type":"info","time":"2025-10-30T13:54:29+05:30","message":"Fetched 78 pods for namespace vsmaps"}

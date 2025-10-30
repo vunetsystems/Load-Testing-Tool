@@ -263,60 +263,149 @@ func (ch *ClickHouseClient) getContainerMetrics(ctx context.Context, limit int) 
 }
 
 // GetKafkaTopicMetrics fetches Messages In Per Sec (OneMinuteRate) by Topic for specific topics from monitoring DB
+// func GetKafkaTopicMetrics(ctx context.Context, topics []string) ([]KafkaTopicMetric, error) {
+// 	if monitoringDBClient == nil {
+// 		return nil, fmt.Errorf("monitoring DB client not initialized")
+// 	}
+
+// 	brokers := []string{
+// 		"http://kafka-cluster-cp-kafka-0.broker-headless.vsmaps:8778/jolokia",
+// 		"http://kafka-cluster-cp-kafka-1.broker-headless.vsmaps:8778/jolokia",
+// 		"http://kafka-cluster-cp-kafka-2.broker-headless.vsmaps:8778/jolokia",
+// 	}
+
+// 	query := `
+// 		SELECT
+// 			t.topic AS metric,
+// 			t.timestamp AS timestamp,
+// 			sum(t.OneMinuteRate) AS OneMinuteRate
+// 		FROM kafka_Broker_Topic_Metrics AS t
+// 		INNER JOIN (
+// 			SELECT
+// 				topic,
+// 				max(timestamp) AS latest_ts
+// 			FROM kafka_Broker_Topic_Metrics
+// 			WHERE
+// 				name = 'MessagesInPerSec'
+// 				AND timestamp >= now() - INTERVAL 10 MINUTE
+// 			GROUP BY topic
+// 		) AS latest
+// 		ON t.topic = latest.topic AND t.timestamp = latest.latest_ts
+// 		WHERE
+// 			t.name = 'MessagesInPerSec'
+// 			AND t.topic IN (?)
+// 		GROUP BY
+// 			t.topic,
+// 			t.timestamp
+// 		ORDER BY
+// 			t.timestamp DESC
+// 	`
+
+// 	rows, err := monitoringDBClient.Client.Query(ctx, query, brokers, brokers, topics)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("error querying Kafka topic metrics: %v", err)
+// 	}
+// 	defer rows.Close()
+
+// 	var metrics []KafkaTopicMetric
+// 	for rows.Next() {
+// 		var m KafkaTopicMetric
+// 		if err := rows.Scan(&m.Topic, &m.Timestamp, &m.OneMinuteRate); err != nil {
+// 			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan Kafka topic metric row: %v", err))
+// 			continue
+// 		}
+// 		metrics = append(metrics, m)
+// 	}
+
+// 	return metrics, nil
+// }
+
 func GetKafkaTopicMetrics(ctx context.Context, topics []string) ([]KafkaTopicMetric, error) {
 	if monitoringDBClient == nil {
 		return nil, fmt.Errorf("monitoring DB client not initialized")
 	}
 
-	brokers := []string{
-		"http://kafka-cluster-cp-kafka-0.broker-headless.vsmaps:8778/jolokia",
-		"http://kafka-cluster-cp-kafka-1.broker-headless.vsmaps:8778/jolokia",
-		"http://kafka-cluster-cp-kafka-2.broker-headless.vsmaps:8778/jolokia",
+	// Ensure topics list isn’t empty
+	if len(topics) == 0 {
+		return nil, fmt.Errorf("no topics provided")
 	}
 
-	query := `
-		SELECT
-			t.topic AS metric,
-			t.timestamp AS timestamp,
-			sum(t.OneMinuteRate) AS OneMinuteRate
-		FROM kafka_Broker_Topic_Metrics AS t
-		INNER JOIN (
-			SELECT
-				topic,
-				max(timestamp) AS latest_ts
-			FROM kafka_Broker_Topic_Metrics
-			WHERE
-				name = 'MessagesInPerSec'
-				AND jolokia_agent_url IN (?)
-				AND timestamp >= now() - INTERVAL 10 MINUTE
-			GROUP BY topic
-		) AS latest
-		ON t.topic = latest.topic AND t.timestamp = latest.latest_ts
-		WHERE
-			t.name = 'MessagesInPerSec'
-			AND t.jolokia_agent_url IN (?)
-			AND t.topic IN (?)
-		GROUP BY
-			t.topic,
-			t.timestamp
-		ORDER BY
-			t.timestamp DESC
-	`
+	// query := `
+	// 	SELECT
+	// 		t.topic AS metric,
+	// 		t.timestamp AS timestamp,
+	// 		sum(t.OneMinuteRate) AS OneMinuteRate
+	// 	FROM kafka_Broker_Topic_Metrics AS t
+	// 	INNER JOIN (
+	// 		SELECT
+	// 			topic,
+	// 			max(timestamp) AS latest_ts
+	// 		FROM kafka_Broker_Topic_Metrics
+	// 		WHERE
+	// 			name = 'MessagesInPerSec'
+	// 			AND timestamp >= now() - INTERVAL 10 MINUTE
+	// 		GROUP BY topic
+	// 	) AS latest
+	// 	ON t.topic = latest.topic AND t.timestamp = latest.latest_ts
+	// 	WHERE
+	// 		t.name = 'MessagesInPerSec'
+	// 		AND has(?, t.topic)         -- ✅ use array parameter binding
+	// 	GROUP BY
+	// 		t.topic,
+	// 		t.timestamp
+	// 	ORDER BY
+	// 		t.timestamp DESC
+	// `
 
-	rows, err := monitoringDBClient.Client.Query(ctx, query, brokers, brokers, topics)
+	query := `
+	SELECT
+		t.topic AS metric,
+		t.timestamp AS timestamp,
+		sum(t.OneMinuteRate) AS OneMinuteRate
+	FROM kafka_Broker_Topic_Metrics AS t
+	INNER JOIN (
+		SELECT
+			topic,
+			max(timestamp) AS latest_ts
+		FROM kafka_Broker_Topic_Metrics
+		WHERE
+			name = 'MessagesInPerSec'
+			AND timestamp >= now() - INTERVAL 10 MINUTE
+		GROUP BY topic
+	) AS latest
+	ON t.topic = latest.topic AND t.timestamp = latest.latest_ts
+	WHERE
+		t.name = 'MessagesInPerSec'
+		AND t.topic IN ?
+	GROUP BY
+		t.topic,
+		t.timestamp
+	ORDER BY
+		t.timestamp DESC
+`
+
+
+	// Pass the topics slice as a single array parameter
+rows, err := monitoringDBClient.Client.Query(ctx, query, topics)
 	if err != nil {
 		return nil, fmt.Errorf("error querying Kafka topic metrics: %v", err)
 	}
 	defer rows.Close()
 
 	var metrics []KafkaTopicMetric
+
 	for rows.Next() {
 		var m KafkaTopicMetric
 		if err := rows.Scan(&m.Topic, &m.Timestamp, &m.OneMinuteRate); err != nil {
-			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan Kafka topic metric row: %v", err))
+			logger.LogWarning("System", "ClickHouse",
+				fmt.Sprintf("Failed to scan Kafka topic metric row: %v", err))
 			continue
 		}
 		metrics = append(metrics, m)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error reading Kafka topic metrics rows: %v", err)
 	}
 
 	return metrics, nil

@@ -7,6 +7,11 @@ class KafkaMetricsManager {
         this.updateInterval = 10000; // 10 seconds
         this.isUpdating = false;
 
+        // In-memory data storage for last 5 minutes
+        this.dataBuffer = new Map(); // topic -> array of data points
+        this.maxDataAge = 5 * 60 * 1000; // 5 minutes in milliseconds
+        this.maxDataPoints = 100; // Maximum points per topic to prevent memory issues
+
         // ECharts instances
         this.charts = {
             trend: null,
@@ -26,12 +31,18 @@ class KafkaMetricsManager {
             light: ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'],
             dark: ['#60a5fa', '#f87171', '#4ade80', '#fbbf24', '#a78bfa', '#22d3ee', '#f472b6', '#bef264']
         };
+
+        // Loading states
+        this.isInitialized = false;
+        this.chartsInitialized = false;
     }
 
     // Initialize Kafka metrics
     async initialize() {
         console.log('Initializing Kafka metrics...');
-        this.initializeCharts();
+        this.isInitialized = true;
+
+        // Don't initialize charts immediately - wait for section to be visible
         this.attachChartEventListeners();
 
         // Add resize listener for responsive charts
@@ -41,31 +52,80 @@ class KafkaMetricsManager {
         this.startAutoUpdate();
     }
 
-    // Initialize ECharts instances
+    // Initialize ECharts instances - only when DOM elements are available
     initializeCharts() {
-        // Get theme colors
-        const isDark = document.documentElement.classList.contains('dark');
-        const colors = isDark ? this.chartColors.dark : this.chartColors.light;
+        if (this.chartsInitialized) return;
 
-        // Initialize trend chart (line/area chart)
-        const trendChartDom = document.getElementById('kafka-trend-chart');
-        if (trendChartDom) {
-            this.charts.trend = echarts.init(trendChartDom);
+        try {
+            // Get theme colors
+            const isDark = document.documentElement.classList.contains('dark');
+            const colors = isDark ? this.chartColors.dark : this.chartColors.light;
+
+            // Initialize trend chart (line/area chart)
+            const trendChartDom = document.getElementById('kafka-trend-chart');
+            if (trendChartDom) {
+                this.charts.trend = echarts.init(trendChartDom);
+                console.log('Trend chart initialized');
+            } else {
+                console.warn('Trend chart DOM element not found');
+            }
+
+            // Initialize comparison chart (bar/horizontal bar chart)
+            const comparisonChartDom = document.getElementById('kafka-comparison-chart');
+            if (comparisonChartDom) {
+                this.charts.comparison = echarts.init(comparisonChartDom);
+                console.log('Comparison chart initialized');
+            } else {
+                console.warn('Comparison chart DOM element not found');
+            }
+
+            // Initialize distribution chart (pie/doughnut chart)
+            const distributionChartDom = document.getElementById('kafka-distribution-chart');
+            if (distributionChartDom) {
+                this.charts.distribution = echarts.init(distributionChartDom);
+                console.log('Distribution chart initialized');
+            } else {
+                console.warn('Distribution chart DOM element not found');
+            }
+
+            this.chartsInitialized = true;
+            console.log('ECharts initialized for Kafka metrics');
+
+        } catch (error) {
+            console.error('Error initializing charts:', error);
+            this.showChartError('Failed to initialize charts. Please refresh the page.');
         }
+    }
 
-        // Initialize comparison chart (bar/horizontal bar chart)
-        const comparisonChartDom = document.getElementById('kafka-comparison-chart');
-        if (comparisonChartDom) {
-            this.charts.comparison = echarts.init(comparisonChartDom);
-        }
+    // Show error message in chart containers
+    showChartError(message) {
+        const errorOption = {
+            title: {
+                text: 'Error',
+                left: 'center',
+                top: 'center',
+                textStyle: {
+                    color: '#ef4444',
+                    fontSize: 14
+                }
+            },
+            graphic: {
+                type: 'text',
+                left: 'center',
+                top: 'middle',
+                style: {
+                    text: message,
+                    fontSize: 12,
+                    fill: '#64748b'
+                }
+            }
+        };
 
-        // Initialize distribution chart (pie/doughnut chart)
-        const distributionChartDom = document.getElementById('kafka-distribution-chart');
-        if (distributionChartDom) {
-            this.charts.distribution = echarts.init(distributionChartDom);
-        }
-
-        console.log('ECharts initialized for Kafka metrics');
+        Object.values(this.charts).forEach(chart => {
+            if (chart) {
+                chart.setOption(errorOption, true);
+            }
+        });
     }
 
     // Attach event listeners for chart type buttons
@@ -101,6 +161,12 @@ class KafkaMetricsManager {
         if (this.isUpdating) return;
 
         this.isUpdating = true;
+
+        // Show loading state in charts if they're initialized
+        if (this.chartsInitialized) {
+            this.showLoadingCharts();
+        }
+
         try {
             const response = await fetch('http://216.48.189.75:8086/api/clickhouse/kafka-topics');
             if (!response.ok) {
@@ -109,17 +175,101 @@ class KafkaMetricsManager {
 
             const result = await response.json();
             if (result.success && result.data) {
+                // Store data in buffer for historical tracking
+                this.storeDataInBuffer(result.data);
+
                 this.kafkaData = result.data;
                 this.lastUpdate = new Date();
                 console.log('Kafka metrics updated:', this.kafkaData);
-                this.updateKafkaDisplay();
+
+                // Only update display if charts are initialized (section is visible)
+                if (this.chartsInitialized) {
+                    this.updateKafkaDisplay();
+                }
             } else {
                 console.error('Failed to fetch Kafka metrics:', result.message);
+                this.showApiError('Failed to fetch Kafka metrics from server');
             }
         } catch (error) {
             console.error('Error fetching Kafka metrics:', error);
+            this.showApiError('Network error while fetching Kafka metrics');
         } finally {
             this.isUpdating = false;
+        }
+    }
+
+    // Store data in in-memory buffer for last 5 minutes
+    storeDataInBuffer(newData) {
+        const now = Date.now();
+
+        newData.forEach(metric => {
+            const topic = metric.topic;
+            if (!this.dataBuffer.has(topic)) {
+                this.dataBuffer.set(topic, []);
+            }
+
+            const topicData = this.dataBuffer.get(topic);
+            const dataPoint = {
+                timestamp: now,
+                oneMinuteRate: metric.oneMinuteRate,
+                rawData: metric
+            };
+
+            topicData.push(dataPoint);
+
+            // Keep only last 5 minutes of data
+            const cutoffTime = now - this.maxDataAge;
+            const filteredData = topicData.filter(point => point.timestamp >= cutoffTime);
+
+            // Limit to maxDataPoints to prevent memory issues
+            if (filteredData.length > this.maxDataPoints) {
+                filteredData.splice(0, filteredData.length - this.maxDataPoints);
+            }
+
+            this.dataBuffer.set(topic, filteredData);
+        });
+
+        // Clean up old data periodically (every 100 data points)
+        if (this.dataBuffer.size > 0 && Math.random() < 0.01) {
+            this.cleanupOldData();
+        }
+    }
+
+    // Clean up old data across all topics
+    cleanupOldData() {
+        const now = Date.now();
+        const cutoffTime = now - this.maxDataAge;
+
+        for (const [topic, data] of this.dataBuffer.entries()) {
+            const filteredData = data.filter(point => point.timestamp >= cutoffTime);
+            if (filteredData.length === 0) {
+                this.dataBuffer.delete(topic);
+            } else {
+                this.dataBuffer.set(topic, filteredData);
+            }
+        }
+    }
+
+    // Show API error in UI
+    showApiError(message) {
+        // Show error in summary cards
+        const errorElements = [
+            document.getElementById('kafka-total-topics'),
+            document.getElementById('kafka-total-rate'),
+            document.getElementById('kafka-avg-latency'),
+            document.getElementById('kafka-error-rate')
+        ];
+
+        errorElements.forEach(element => {
+            if (element) {
+                element.textContent = 'Error';
+                element.style.color = '#ef4444';
+            }
+        });
+
+        // Show error in charts if they're initialized
+        if (this.chartsInitialized) {
+            this.showChartError(message);
         }
     }
 
@@ -327,17 +477,27 @@ class KafkaMetricsManager {
 
     // Update charts with current data
     updateCharts() {
+        if (!this.chartsInitialized) {
+            console.log('Charts not initialized yet, skipping update');
+            return;
+        }
+
         if (!this.kafkaData || this.kafkaData.length === 0) {
             this.showEmptyCharts();
             return;
         }
 
-        this.updateTrendChart();
-        this.updateComparisonChart();
-        this.updateDistributionChart();
-        this.updateLegend();
+        try {
+            this.updateTrendChart();
+            this.updateComparisonChart();
+            this.updateDistributionChart();
+            this.updateLegend();
 
-        console.log('Kafka charts updated');
+            console.log('Kafka charts updated');
+        } catch (error) {
+            console.error('Error updating charts:', error);
+            this.showChartError('Error updating charts. Please refresh the page.');
+        }
     }
 
     // Show empty state for charts when no data
@@ -351,6 +511,16 @@ class KafkaMetricsManager {
                     color: '#64748b',
                     fontSize: 14
                 }
+            },
+            graphic: {
+                type: 'text',
+                left: 'center',
+                top: 'middle',
+                style: {
+                    text: 'Waiting for Kafka metrics...',
+                    fontSize: 12,
+                    fill: '#64748b'
+                }
             }
         };
 
@@ -361,39 +531,98 @@ class KafkaMetricsManager {
         });
     }
 
+    // Show loading state for charts
+    showLoadingCharts() {
+        const loadingOption = {
+            title: {
+                text: 'Loading...',
+                left: 'center',
+                top: 'center',
+                textStyle: {
+                    color: '#64748b',
+                    fontSize: 14
+                }
+            },
+            graphic: {
+                type: 'text',
+                left: 'center',
+                top: 'middle',
+                style: {
+                    text: 'Fetching Kafka metrics...',
+                    fontSize: 12,
+                    fill: '#64748b'
+                }
+            }
+        };
+
+        Object.values(this.charts).forEach(chart => {
+            if (chart) {
+                chart.setOption(loadingOption, true);
+            }
+        });
+    }
+
     // Update trend chart (line/area chart for message rates over time)
     updateTrendChart() {
         if (!this.charts.trend) return;
 
-        // Group data by topic and prepare time series
+        // Use historical data from buffer for better trend visualization
         const topicData = {};
-        this.kafkaData.forEach(metric => {
-            if (!topicData[metric.topic]) {
-                topicData[metric.topic] = [];
-            }
-            topicData[metric.topic].push({
-                timestamp: new Date(metric.timestamp).toLocaleTimeString(),
-                rate: metric.oneMinuteRate
+        const now = Date.now();
+
+        // Get data from buffer for all topics
+        for (const [topic, dataPoints] of this.dataBuffer.entries()) {
+            topicData[topic] = dataPoints.map(point => ({
+                timestamp: point.timestamp,
+                rate: point.oneMinuteRate
+            }));
+        }
+
+        // If no buffer data, fall back to current data
+        if (Object.keys(topicData).length === 0 && this.kafkaData) {
+            this.kafkaData.forEach(metric => {
+                if (!topicData[metric.topic]) {
+                    topicData[metric.topic] = [];
+                }
+                topicData[metric.topic].push({
+                    timestamp: new Date(metric.timestamp).getTime(),
+                    rate: metric.oneMinuteRate
+                });
             });
-        });
+        }
 
         // Get theme colors
         const isDark = document.documentElement.classList.contains('dark');
         const colors = isDark ? this.chartColors.dark : this.chartColors.light;
 
-        const series = Object.entries(topicData).map(([topic, data], index) => ({
-            name: topic,
-            type: this.chartConfig.trend.type === 'area' ? 'line' : 'line',
-            areaStyle: this.chartConfig.trend.type === 'area' ? {} : undefined,
-            data: data.map(d => d.rate),
-            itemStyle: { color: colors[index % colors.length] },
-            smooth: true
-        }));
+        // Prepare series data
+        const series = Object.entries(topicData).map(([topic, data], index) => {
+            // Sort data by timestamp
+            data.sort((a, b) => a.timestamp - b.timestamp);
+
+            return {
+                name: topic,
+                type: 'line',
+                areaStyle: this.chartConfig.trend.type === 'area' ? {} : undefined,
+                data: data.map(d => [d.timestamp, d.rate]),
+                itemStyle: { color: colors[index % colors.length] },
+                smooth: true,
+                showSymbol: false // Hide symbols for better performance
+            };
+        });
 
         const option = {
             tooltip: {
                 trigger: 'axis',
-                axisPointer: { type: 'cross' }
+                axisPointer: { type: 'cross' },
+                formatter: (params) => {
+                    const date = new Date(params[0].value[0]);
+                    let result = date.toLocaleTimeString() + '<br/>';
+                    params.forEach(param => {
+                        result += `${param.seriesName}: ${param.value[1].toFixed(2)} msg/sec<br/>`;
+                    });
+                    return result;
+                }
             },
             legend: {
                 data: Object.keys(topicData),
@@ -407,11 +636,11 @@ class KafkaMetricsManager {
                 containLabel: true
             },
             xAxis: {
-                type: 'category',
+                type: 'time',
                 boundaryGap: false,
-                data: this.kafkaData.filter((m, index, arr) =>
-                    arr.findIndex(am => am.timestamp === m.timestamp) === index
-                ).map(m => new Date(m.timestamp).toLocaleTimeString()).filter((time, index, arr) => arr.indexOf(time) === index)
+                name: 'Time',
+                nameLocation: 'middle',
+                nameGap: 30
             },
             yAxis: {
                 type: 'value',
@@ -601,6 +830,26 @@ class KafkaMetricsManager {
         await this.fetchKafkaMetrics();
     }
 
+    // Initialize charts when section becomes visible
+    onSectionVisible() {
+        if (!this.chartsInitialized && this.isInitialized) {
+            console.log('Kafka metrics section became visible, initializing charts...');
+
+            // Show loading state immediately
+            setTimeout(() => {
+                this.initializeCharts();
+
+                // Update display with current data
+                if (this.kafkaData) {
+                    this.updateKafkaDisplay();
+                } else {
+                    // If no data yet, show loading state
+                    this.showLoadingCharts();
+                }
+            }, 100); // Small delay to ensure DOM is ready
+        }
+    }
+
     // Handle window resize for responsive charts
     handleResize() {
         Object.values(this.charts).forEach(chart => {
@@ -628,8 +877,25 @@ class KafkaMetricsManager {
         return {
             data: this.kafkaData,
             lastUpdate: this.lastUpdate,
-            topicCount: this.kafkaData ? new Set(this.kafkaData.map(m => m.topic)).size : 0
+            topicCount: this.kafkaData ? new Set(this.kafkaData.map(m => m.topic)).size : 0,
+            bufferSize: this.dataBuffer.size,
+            totalBufferedPoints: Array.from(this.dataBuffer.values()).reduce((sum, arr) => sum + arr.length, 0),
+            isInitialized: this.isInitialized,
+            chartsInitialized: this.chartsInitialized
         };
+    }
+
+    // Get historical data for a specific topic
+    getHistoricalData(topic, minutes = 5) {
+        const data = this.dataBuffer.get(topic) || [];
+        const cutoffTime = Date.now() - (minutes * 60 * 1000);
+        return data.filter(point => point.timestamp >= cutoffTime);
+    }
+
+    // Clear old data manually (for debugging/testing)
+    clearOldData() {
+        this.cleanupOldData();
+        console.log('Old data cleared manually');
     }
 }
 

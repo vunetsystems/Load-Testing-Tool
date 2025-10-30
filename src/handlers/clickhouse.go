@@ -164,6 +164,45 @@ func HandleAPIGetPodMonitoring(w http.ResponseWriter, r *http.Request) {
 		Data:    podData,
 	})
 }
+// HandleAPIGetK6SuccessRate handles GET /api/clickhouse/k6-success-rate
+func HandleAPIGetK6SuccessRate(w http.ResponseWriter, r *http.Request) {
+	successRate, err := clickhouse.GetK6SuccessRate(r.Context())
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to get k6 success rate: %v", err),
+		})
+		return
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "K6 success rate retrieved successfully",
+		Data:    successRate,
+	})
+}
+// HandleAPIGetPodLogs handles GET /api/clickhouse/pod-logs
+func HandleAPIGetPodLogs(w http.ResponseWriter, r *http.Request) {
+	namespace := r.URL.Query().Get("namespace")
+	if namespace == "" {
+		namespace = "vsmaps" // default namespace
+	}
+
+	logs, err := clickhouse.GetPodLogs(r.Context(), namespace)
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to get pod logs: %v", err),
+		})
+		return
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "Pod logs retrieved successfully",
+		Data:    logs,
+	})
+}
 // HandleAPIGetK6MaxVus handles GET /api/clickhouse/k6-max-vus
 func HandleAPIGetK6MaxVus(w http.ResponseWriter, r *http.Request) {
 	maxVusResult, err := clickhouse.GetK6MaxVus(r.Context())

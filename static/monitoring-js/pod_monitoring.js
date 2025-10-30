@@ -4,6 +4,8 @@ class PodMonitoringManager {
     constructor() {
         this.podData = [];
         this.filteredData = [];
+        this.podLogsCache = {}; // Cache logs by pod name
+        this.yamlManager = new PodYAMLManager(); // YAML manager for pod YAML data
         this.lastUpdate = null;
         this.updateInterval = 30000; // 30 seconds
         this.isUpdating = false;
@@ -17,6 +19,7 @@ class PodMonitoringManager {
     async initialize() {
         console.log('Initializing pod monitoring...');
         this.attachEventListeners();
+        await this.fetchPodLogs(); // Load logs first
         await this.fetchPodMonitoringData();
         this.startAutoUpdate();
     }
@@ -37,6 +40,7 @@ class PodMonitoringManager {
         if (namespaceFilter) {
             namespaceFilter.addEventListener('change', (e) => {
                 this.selectedNamespace = e.target.value;
+                this.fetchPodLogs(); // Reload logs for new namespace
                 this.fetchPodMonitoringData();
             });
         }
@@ -139,6 +143,35 @@ class PodMonitoringManager {
         }
     }
 
+    // Fetch pod logs for the current namespace
+    async fetchPodLogs() {
+        try {
+            const response = await fetch(`/api/clickhouse/pod-logs?namespace=${this.selectedNamespace}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.success && result.data) {
+                // Group logs by pod name for quick access
+                this.podLogsCache = result.data.reduce((acc, log) => {
+                    if (!acc[log.pod_name]) {
+                        acc[log.pod_name] = [];
+                    }
+                    acc[log.pod_name].push(log);
+                    return acc;
+                }, {});
+                console.log('Pod logs cached for', Object.keys(this.podLogsCache).length, 'pods');
+            } else {
+                console.error('Failed to fetch pod logs:', result.message);
+                this.podLogsCache = {};
+            }
+        } catch (error) {
+            console.error('Error fetching pod logs:', error);
+            this.podLogsCache = {};
+        }
+    }
+
     // Update last update time display
     updateLastUpdateTime() {
         const lastUpdateElement = document.getElementById('pod-last-update');
@@ -175,88 +208,86 @@ class PodMonitoringManager {
     }
 
     // Render pod monitoring table
-    renderPodTable(pods) {
-        const tbody = document.getElementById('pod-monitoring-body');
-        if (!tbody) return;
+renderPodTable(pods) {
+    const tbody = document.getElementById('pod-monitoring-body');
+    if (!tbody) return;
 
-        tbody.innerHTML = '';
+    tbody.innerHTML = '';
 
-        if (pods.length === 0) {
-            const emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = `
-                <td colspan="9" class="px-4 py-8 text-center text-text-secondary-light dark:text-text-secondary-dark">
-                    No pods found matching the current filters
-                </td>
-            `;
-            tbody.appendChild(emptyRow);
-            return;
+    if (pods.length === 0) {
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = `
+            <td colspan="9" class="px-4 py-8 text-center text-slate-500">
+                No pods found matching the current filters
+            </td>
+        `;
+        tbody.appendChild(emptyRow);
+        return;
+    }
+
+    pods.forEach(pod => {
+        const row = document.createElement('tr');
+        row.className =
+            'border-b border-slate-200 last:border-b-0 hover:bg-slate-50 transition-colors';
+
+        // Determine status color and text style
+        let statusClass = 'status-unknown';
+        if (pod.status) {
+            const status = pod.status.toLowerCase();
+            if (status.includes('running')) statusClass = 'status-running';
+            else if (status.includes('pending')) statusClass = 'status-pending';
+            else if (status.includes('failed') || status.includes('error'))
+                statusClass = 'status-failed';
+            else if (status.includes('succeeded')) statusClass = 'status-success';
         }
 
-        pods.forEach(pod => {
-            const row = document.createElement('tr');
-            row.className = 'border-b border-border-light dark:border-border-dark last:border-b-0 hover:bg-background-light dark:hover:bg-background-dark transition-colors';
+        // Format last seen
+        const lastSeen = pod.last_seen ? new Date(pod.last_seen) : new Date();
+        const timeAgo = this.getTimeAgo(lastSeen);
 
-            // Determine status color
-            let statusColor = 'bg-gray-500'; // Unknown
-            if (pod.status) {
-                const status = pod.status.toLowerCase();
-                if (status.includes('running')) {
-                    statusColor = 'bg-running';
-                } else if (status.includes('pending')) {
-                    statusColor = 'bg-pending';
-                } else if (status.includes('failed') || status.includes('error')) {
-                    statusColor = 'bg-failed';
-                } else if (status.includes('succeeded')) {
-                    statusColor = 'bg-success';
-                }
-            }
+        // Handle nulls safely
+        const cpuUsage = pod.cpu_usage != null && !isNaN(pod.cpu_usage) ? pod.cpu_usage : 0;
+        const memoryUsage = pod.memory_usage != null && !isNaN(pod.memory_usage) ? pod.memory_usage : 0;
+        const restarts = pod.restarts != null ? pod.restarts : 0;
 
-            // Format last seen time
-            const lastSeen = pod.last_seen ? new Date(pod.last_seen) : new Date();
-            const timeAgo = this.getTimeAgo(lastSeen);
-
-            // Handle null values safely
-            const cpuUsage = pod.cpu_usage != null && !isNaN(pod.cpu_usage) ? pod.cpu_usage : 0;
-            const memoryUsage = pod.memory_usage != null && !isNaN(pod.memory_usage) ? pod.memory_usage : 0;
-            const restarts = pod.restarts != null ? pod.restarts : 0;
-
-            row.innerHTML = `
-                <td class="h-[72px] px-4 py-2 text-sm">${pod.namespace || 'Unknown'}</td>
-                <td class="h-[72px] px-4 py-2 text-sm font-medium">
-                    <button class="pod-name-btn text-primary hover:text-primary-dark underline cursor-pointer" data-pod-name="${pod.pod_name || 'Unknown'}">
-                        ${pod.pod_name || 'Unknown'}
-                    </button>
-                </td>
-                <td class="h-[72px] px-4 py-2 text-sm">${pod.node_name || 'Unknown'}</td>
-                <td class="h-[72px] px-4 py-2 text-sm">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}/20 text-gray-700 dark:text-gray-300">
-                        ${pod.status || 'Unknown'}
-                    </span>
-                </td>
-                <td class="h-[72px] px-4 py-2 text-sm">${pod.ready || 'N/A'}</td>
-                <td class="h-[72px] px-4 py-2 text-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="w-20 overflow-hidden rounded-full bg-border-light dark:bg-border-dark">
-                            <div class="h-1.5 rounded-full bg-primary" style="width: ${Math.min(cpuUsage, 100)}%;"></div>
-                        </div>
-                        <p class="font-medium">${cpuUsage.toFixed(1)}%</p>
+        row.innerHTML = `
+            <td class="h-[72px] px-4 py-2 text-sm">${pod.namespace || 'Unknown'}</td>
+            <td class="h-[72px] px-4 py-2 text-sm font-medium">
+                <button class="pod-name-btn text-indigo-600 hover:text-indigo-800 underline cursor-pointer" data-pod-name="${pod.pod_name || 'Unknown'}">
+                    ${pod.pod_name || 'Unknown'}
+                </button>
+            </td>
+            <td class="h-[72px] px-4 py-2 text-sm">${pod.node_name || 'Unknown'}</td>
+            <td class="h-[72px] px-4 py-2 text-sm">
+                <span class="status-badge ${statusClass}">
+                    ${pod.status || 'Unknown'}
+                </span>
+            </td>
+            <td class="h-[72px] px-4 py-2 text-sm">${pod.ready || 'N/A'}</td>
+            <td class="h-[72px] px-4 py-2 text-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-20 overflow-hidden rounded-full bg-slate-100 border border-slate-300">
+                        <div class="h-1.5 rounded-full bg-green-500" style="width: ${Math.min(cpuUsage, 100)}%;"></div>
                     </div>
-                </td>
-                <td class="h-[72px] px-4 py-2 text-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="w-20 overflow-hidden rounded-full bg-border-light dark:bg-border-dark">
-                            <div class="h-1.5 rounded-full bg-primary" style="width: ${Math.min(memoryUsage, 100)}%;"></div>
-                        </div>
-                        <p class="font-medium">${memoryUsage.toFixed(1)}%</p>
+                    <p class="font-medium">${cpuUsage.toFixed(1)}%</p>
+                </div>
+            </td>
+            <td class="h-[72px] px-4 py-2 text-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-20 overflow-hidden rounded-full bg-slate-100 border border-slate-300">
+                        <div class="h-1.5 rounded-full bg-blue-500" style="width: ${Math.min(memoryUsage, 100)}%;"></div>
                     </div>
-                </td>
-                <td class="h-[72px] px-4 py-2 text-sm">${restarts}</td>
-                <td class="h-[72px] px-4 py-2 text-sm text-text-secondary-light dark:text-text-secondary-dark">${timeAgo}</td>
-            `;
+                    <p class="font-medium">${memoryUsage.toFixed(1)}%</p>
+                </div>
+            </td>
+            <td class="h-[72px] px-4 py-2 text-sm">${restarts}</td>
+            <td class="h-[72px] px-4 py-2 text-sm text-slate-500">${timeAgo}</td>
+        `;
 
-            tbody.appendChild(row);
-        });
-    }
+        tbody.appendChild(row);
+    });
+}
+
 
     // Update pagination controls
     updatePagination() {
@@ -378,6 +409,66 @@ class PodMonitoringManager {
 
         // Initialize tabs
         this.initializePodDetailTabs();
+
+        // Populate logs for this pod
+        this.populatePodLogs(podName);
+
+        // Fetch YAML for this pod
+        if (this.yamlManager) {
+            this.yamlManager.fetchPodYAML(pod.namespace, podName).catch(error => {
+                console.error('Error fetching pod YAML:', error);
+            });
+        }
+    }
+
+    // Populate pod logs in the logs tab
+    populatePodLogs(podName) {
+        const logsContent = document.getElementById('pod-logs-content');
+        if (!logsContent) return;
+
+        const podLogs = this.podLogsCache[podName] || [];
+
+        if (podLogs.length === 0) {
+            logsContent.innerHTML = '<div class="text-gray-400">No logs available for this pod</div>';
+            return;
+        }
+
+        // Format and display logs
+        const formattedLogs = podLogs.map(log => this.formatLogLine(log)).join('');
+        logsContent.innerHTML = formattedLogs;
+
+        // Auto-scroll to bottom
+        logsContent.scrollTop = logsContent.scrollHeight;
+    }
+
+    // Format a single log line with colors
+    formatLogLine(log) {
+        const timestamp = new Date(log.timestamp).toLocaleString();
+        const levelColor = this.getLogLevelColor(log.log_level);
+        const podColor = 'text-blue-400';
+        const containerColor = 'text-green-400';
+        const messageColor = 'text-gray-300';
+
+        return `
+            <div class="log-line font-mono text-sm mb-1 leading-tight">
+                <span class="text-gray-500 mr-2">${timestamp}</span>
+                <span class="${levelColor} font-bold mr-2">[${log.log_level}]</span>
+                <span class="${podColor} mr-2">${log.pod_name}</span>
+                <span class="${containerColor} mr-2">(${log.container_name})</span>
+                <span class="${messageColor}">${log.message}</span>
+            </div>
+        `;
+    }
+
+    // Get color class for log level
+    getLogLevelColor(level) {
+        switch(level?.toUpperCase()) {
+            case 'ERROR': return 'text-red-400';
+            case 'WARN': case 'WARNING': return 'text-yellow-400';
+            case 'INFO': return 'text-blue-400';
+            case 'DEBUG': return 'text-gray-400';
+            default: return 'text-gray-300';
+        }
     }
 
     // Update element text content
@@ -415,6 +506,14 @@ class PodMonitoringManager {
                 const content = document.getElementById(tabId);
                 if (content) {
                     content.classList.remove('hidden');
+
+                    // Special handling for YAML tab
+                    if (button.dataset.tab === 'yaml') {
+                        const podName = document.getElementById('modal-pod-name').textContent;
+                        if (podName && this.yamlManager) {
+                            this.yamlManager.displayYAML(podName);
+                        }
+                    }
                 }
             });
         });
