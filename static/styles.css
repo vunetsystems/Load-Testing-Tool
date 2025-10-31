@@ -97,6 +97,57 @@
 }
 
 /* Custom dropdown animation */
+
+/* Toast message styles */
+.toast-message {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+    z-index: 9999;
+    font-weight: 500;
+    animation: slideInRight 0.3s ease-out;
+    opacity: 1;
+    transition: opacity 0.3s ease-out;
+}
+
+.toast-message.success {
+    background-color: #10B981; /* emerald-500 */
+    color: white;
+    border: 1px solid #059669; /* emerald-600 */
+}
+
+.toast-message.error {
+    background-color: #EF4444; /* red-500 */
+    color: white;
+    border: 1px solid #DC2626; /* red-600 */
+}
+
+.toast-message.warning {
+    background-color: #F59E0B; /* amber-500 */
+    color: white;
+    border: 1px solid #D97706; /* amber-600 */
+}
+
+.toast-message.info {
+    background-color: #3B82F6; /* blue-500 */
+    color: white;
+    border: 1px solid #2563EB; /* blue-600 */
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
 @keyframes slideDown {
     from {
         opacity: 0;
@@ -108,8 +159,13 @@
     }
 }
 
-.animate-slide-down {
-    animation: slideDown 0.2s ease-out;
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
 }
 
 /* Pulse animation for node status indicators */

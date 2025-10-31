@@ -522,18 +522,22 @@ class VuDataSimManager {
     showNotification(message, type = 'info') {
         // Create notification element
         const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-down ${type === 'success' ? 'bg-success text-white' :
-                type === 'error' ? 'bg-danger text-white' :
-                    type === 'warning' ? 'bg-yellow-500 text-white' :
-                        'bg-primary text-white'
-            }`;
+        notification.className = `toast-message ${type}`;
         notification.textContent = message;
+
+        // Add fade out animation before removing
+        const removeNotification = () => {
+            notification.style.animation = 'fadeOut 0.3s ease-out forwards';
+            notification.addEventListener('animationend', () => {
+                notification.remove();
+            });
+        };
 
         document.body.appendChild(notification);
 
         // Remove after 3 seconds
         setTimeout(() => {
-            notification.remove();
+            removeNotification();
         }, 3000);
     }
 
