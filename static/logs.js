@@ -19,8 +19,13 @@ class LogsManager {
         try {
             const response = await this.manager.callAPI('/api/logs?limit=50');
             if (response.success && response.data && response.data.logs) {
-                this.logEntries = response.data.logs.map(logString => {
-                    const log = JSON.parse(logString);
+                this.logEntries = response.data.logs.map(logItem => {
+                    let log;
+                    if (typeof logItem === 'string') {
+                        log = JSON.parse(logItem);
+                    } else {
+                        log = logItem;
+                    }
                     return {
                         time: log.time,
                         node: log.node,

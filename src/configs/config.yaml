@@ -32,19 +32,19 @@ process:
   graceful_shutdown_timeout: 10
   remote_timeout: 300
 clickhouse:
-  host: "10.32.1.228"
+  host: "10.32.6.121"
   port: 9000
   database: "vusmart"
   username: "monitoring_read"
   password: "StrongP@assword123"
 monitoring_db:
-  host: "10.32.1.228"
+  host: "10.32.6.121"
   port: 9000
   database: "monitoring"
   username: "monitoring_read"
   password: "StrongP@assword123"
 truncate_db:
-  host: "10.32.1.228"
+  host: "10.32.6.121"
   port: 9000
   database: "vusmart"
   username: "truncate_db"

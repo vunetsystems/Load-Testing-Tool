@@ -32,7 +32,7 @@ output.kafka:
   compression: gzip
   enabled: true
   hosts:
-    - e2e-106-75:9094
+    - e2e-83-134:9094
   max_message_bytes: 1000000
   partition.round_robin:
     reachable_only: false

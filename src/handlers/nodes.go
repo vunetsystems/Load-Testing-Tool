@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os/exec"
 	"strings"
+	"time"
 	"vuDataSim/src/node_control"
 
 	"github.com/gorilla/mux"
@@ -302,7 +304,9 @@ func HandleAPIAddAllClusterNodes(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Execute kubectl command to get nodes
-	cmd := exec.Command("kubectl", "get", "nodes", "-o", "wide")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "kubectl", "get", "nodes", "-o", "wide")
 	output, err := cmd.Output()
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{

@@ -75,6 +75,7 @@ type NodeManager struct {
 	logsDir         string
 	nodesConfig     NodesConfig
 	appConfig       AppConfig
+	sshSemaphore    chan struct{} // Semaphore to limit concurrent SSH operations
 }
 
 // NewNodeManager creates a new node manager instance
@@ -95,6 +96,7 @@ func NewNodeManager() *NodeManager {
 			},
 			Nodes: make(map[string]NodeConfig),
 		},
+		sshSemaphore: make(chan struct{}, 3), // Limit to 3 concurrent SSH operations
 	}
 }
 

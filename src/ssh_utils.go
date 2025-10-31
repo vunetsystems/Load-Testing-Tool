@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -287,7 +288,9 @@ func sshExec(nodeConfig node_control.NodeConfig, command string) (string, error)
 		command,
 	}
 
-	cmd := exec.Command("ssh", args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "ssh", args...)
 
 	// Get stdout and stderr separately
 	stdout, err := cmd.StdoutPipe()
@@ -307,6 +310,10 @@ func sshExec(nodeConfig node_control.NodeConfig, command string) (string, error)
 	stderrBytes, _ := io.ReadAll(stderr)
 
 	if err := cmd.Wait(); err != nil {
+		// Check if it's a timeout error
+		if ctx.Err() == context.DeadlineExceeded {
+			return "", fmt.Errorf("SSH command timed out after 30 seconds: %s", command)
+		}
 		return "", fmt.Errorf("SSH command failed: %v, stderr: %s", err, string(stderrBytes))
 	}
 

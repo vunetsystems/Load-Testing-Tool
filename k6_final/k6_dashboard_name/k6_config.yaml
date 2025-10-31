@@ -1,12 +1,12 @@
 base_urls:
-    dashboard_api: https://qa.vunetsystems.com/vui/api/dashboards/uid/
-    panel: https://qa.vunetsystems.com/vui/d/
+    dashboard_api: https://http://216.48.191.10/vui/api/dashboards/uid/
+    panel: https://http://216.48.191.10/vui/d/
 dashboards:
     - id: b1ec2dfd-6a8e-456b-869e-1f8df644e614
       name: MSSQL Overview Dashboard
       slug: mssql-overview-dashboard
-      enabled: true
+      enabled: false
     - id: b95b768c-bb56-4faf-af9e-2db19d50c149
       name: Linux Server Insights
       slug: linux-server-insights
-      enabled: true
+      enabled: false

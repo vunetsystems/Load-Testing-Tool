@@ -1,6 +1,7 @@
 package bin_control
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"gopkg.in/yaml.v3"
@@ -40,6 +42,8 @@ type ClusterSettings struct {
 type BinaryControl struct {
 	nodesConfigPath string
 	nodesConfig     NodesConfig
+	configMutex     sync.RWMutex  // Mutex to protect nodesConfig access
+	sshSemaphore    chan struct{} // Semaphore to limit concurrent SSH operations
 }
 
 type BinaryStatus struct {
@@ -82,10 +86,20 @@ func NewBinaryControl() *BinaryControl {
 	return &BinaryControl{
 		nodesConfigPath: "src/configs/nodes.yaml",
 		nodesConfig:     NodesConfig{Nodes: make(map[string]NodeConfig)},
+		configMutex:     sync.RWMutex{},
+		sshSemaphore:    make(chan struct{}, 3), // Limit to 3 concurrent SSH operations
 	}
 }
 
 func (bc *BinaryControl) LoadNodesConfig() error {
+	if bc == nil {
+		return fmt.Errorf("BinaryControl instance is nil")
+	}
+	
+	// Lock for writing to protect the config
+	bc.configMutex.Lock()
+	defer bc.configMutex.Unlock()
+	
 	if _, err := os.Stat(bc.nodesConfigPath); os.IsNotExist(err) {
 		return fmt.Errorf("nodes config file not found: %s", bc.nodesConfigPath)
 	}
@@ -103,6 +117,14 @@ func (bc *BinaryControl) LoadNodesConfig() error {
 }
 
 func (bc *BinaryControl) GetEnabledNodes() map[string]NodeConfig {
+	if bc == nil {
+		return make(map[string]NodeConfig)
+	}
+	
+	// Lock for reading to protect the config
+	bc.configMutex.RLock()
+	defer bc.configMutex.RUnlock()
+	
 	enabled := make(map[string]NodeConfig)
 	for name, node := range bc.nodesConfig.Nodes {
 		if node.Enabled {
@@ -122,7 +144,11 @@ func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryContr
 		return response(false, fmt.Sprintf("Failed to reload config: %v", err)), err
 	}
 
+	// Lock for reading to protect the config
+	bc.configMutex.RLock()
 	node, ok := bc.nodesConfig.Nodes[nodeName]
+	bc.configMutex.RUnlock()
+	
 	if !ok {
 		log.Printf("Node %s: ERROR - Node not found in config", nodeName)
 		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
@@ -219,7 +245,11 @@ func (bc *BinaryControl) StopBinary(nodeName string, timeout int) (*BinaryContro
 		return response(false, fmt.Sprintf("Failed to reload config: %v", err)), err
 	}
 
+	// Lock for reading to protect the config
+	bc.configMutex.RLock()
 	node, ok := bc.nodesConfig.Nodes[nodeName]
+	bc.configMutex.RUnlock()
+	
 	if !ok {
 		log.Printf("Node %s: ERROR - Node not found in config", nodeName)
 		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
@@ -303,7 +333,11 @@ func (bc *BinaryControl) StartMetricsBinary(nodeName string, timeout int) (*Bina
 		return response(false, fmt.Sprintf("Failed to reload config: %v", err)), err
 	}
 
+	// Lock for reading to protect the config
+	bc.configMutex.RLock()
 	node, ok := bc.nodesConfig.Nodes[nodeName]
+	bc.configMutex.RUnlock()
+	
 	if !ok {
 		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
 	}
@@ -392,7 +426,11 @@ func (bc *BinaryControl) StopMetricsBinary(nodeName string, timeout int) (*Binar
 		return response(false, fmt.Sprintf("Failed to reload config: %v", err)), err
 	}
 
+	// Lock for reading to protect the config
+	bc.configMutex.RLock()
 	node, ok := bc.nodesConfig.Nodes[nodeName]
+	bc.configMutex.RUnlock()
+	
 	if !ok {
 		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
 	}
@@ -476,7 +514,11 @@ func (bc *BinaryControl) DebugMetricsBinary(nodeName string) (*BinaryControlResp
 		return response(false, fmt.Sprintf("Failed to reload config: %v", err)), err
 	}
 
+	// Lock for reading to protect the config
+	bc.configMutex.RLock()
 	node, ok := bc.nodesConfig.Nodes[nodeName]
+	bc.configMutex.RUnlock()
+	
 	if !ok {
 		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
 	}
@@ -550,12 +592,19 @@ func (bc *BinaryControl) DebugMetricsBinary(nodeName string) (*BinaryControlResp
 }
 
 func (bc *BinaryControl) GetBinaryStatus(nodeName string) (*BinaryStatus, error) {
+	if bc == nil {
+		return nil, fmt.Errorf("BinaryControl instance is nil")
+	}
 	// Reload configuration to ensure we have the latest nodes
 	if err := bc.LoadNodesConfig(); err != nil {
 		return nil, fmt.Errorf("failed to reload config: %v", err)
 	}
 
+	// Lock for reading to protect the config
+	bc.configMutex.RLock()
 	node, ok := bc.nodesConfig.Nodes[nodeName]
+	bc.configMutex.RUnlock()
+	
 	if !ok {
 		return nil, fmt.Errorf("node %s not found", nodeName)
 	}
@@ -608,6 +657,12 @@ func (bc *BinaryControl) GetBinaryStatus(nodeName string) (*BinaryStatus, error)
 }
 
 func (bc *BinaryControl) GetAllBinaryStatuses() (*BinaryControlResponse, error) {
+	if bc == nil {
+		return &BinaryControlResponse{
+			Success: false,
+			Message: "BinaryControl instance is nil",
+		}, fmt.Errorf("BinaryControl instance is nil")
+	}
 	// Reload configuration to ensure we have the latest nodes
 	if err := bc.LoadNodesConfig(); err != nil {
 		return &BinaryControlResponse{
@@ -625,19 +680,36 @@ func (bc *BinaryControl) GetAllBinaryStatuses() (*BinaryControlResponse, error) 
 		}, nil
 	}
 
-	var statuses []BinaryStatus
+	// Create a channel to collect results from goroutines
+	type statusResult struct {
+		nodeName string
+		status   *BinaryStatus
+		err      error
+	}
+	resultChan := make(chan statusResult, len(enabledNodes))
+	
+	// Launch goroutines to get status for each node
 	for nodeName := range enabledNodes {
-		status, err := bc.GetBinaryStatus(nodeName)
-		if err != nil {
-			log.Printf("Failed to get status for node %s: %v", nodeName, err)
+		go func(nodeName string) {
+			status, err := bc.GetBinaryStatus(nodeName)
+			resultChan <- statusResult{nodeName: nodeName, status: status, err: err}
+		}(nodeName)
+	}
+	
+	// Collect results
+	var statuses []BinaryStatus
+	for i := 0; i < len(enabledNodes); i++ {
+		result := <-resultChan
+		if result.err != nil {
+			log.Printf("Failed to get status for node %s: %v", result.nodeName, result.err)
 			statuses = append(statuses, BinaryStatus{
-				NodeName:    nodeName,
+				NodeName:    result.nodeName,
 				Status:      "error",
-				ProcessInfo: fmt.Sprintf("Status check failed: %v", err),
+				ProcessInfo: fmt.Sprintf("Status check failed: %v", result.err),
 				LastChecked: time.Now().Format("2006-01-02 15:04:05"),
 			})
 		} else {
-			statuses = append(statuses, *status)
+			statuses = append(statuses, *result.status)
 		}
 	}
 
@@ -676,11 +748,6 @@ func (bc *BinaryControl) StartAllBinaries(timeout int) (*BulkBinaryResponse, err
 	totalNodes := len(enabledNodes)
 	log.Printf("Starting bulk binary start operation on %d nodes", totalNodes)
 
-	var results []BulkBinaryResult
-	var logs []string
-	successful := 0
-	failed := 0
-
 	// Channel to collect results from goroutines
 	resultChan := make(chan BulkBinaryResult, totalNodes)
 
@@ -689,8 +756,6 @@ func (bc *BinaryControl) StartAllBinaries(timeout int) (*BulkBinaryResponse, err
 	for nodeName, node := range enabledNodes {
 		go func(nodeName string, node NodeConfig) {
 			log.Printf("=== STARTING NODE %s ===", nodeName)
-			logEntry := fmt.Sprintf("%s - Starting binary on node %s", time.Now().Format("2006-01-02 15:04:05"), nodeName)
-			logs = append(logs, logEntry)
 			log.Printf("Node %s: Starting binary operation", nodeName)
 
 			// Log node configuration
@@ -726,19 +791,43 @@ func (bc *BinaryControl) StartAllBinaries(timeout int) (*BulkBinaryResponse, err
 		}(nodeName, node)
 	}
 
-	// Collect results
+	// Collect results with timeout
 	log.Printf("Waiting for all operations to complete...")
-	for i := 0; i < totalNodes; i++ {
-		result := <-resultChan
-		log.Printf("Received result for node %s: Success=%v, Message=%s", result.NodeName, result.Success, result.Message)
-		results = append(results, result)
+	collectionTimeout := time.After(60 * time.Second) // Overall timeout for collection
+	collected := 0
+	
+	var results []BulkBinaryResult
+	var logs []string
+	successful := 0
+	failed := 0
+	
+	for collected < totalNodes {
+		select {
+		case result := <-resultChan:
+			log.Printf("Received result for node %s: Success=%v, Message=%s", result.NodeName, result.Success, result.Message)
+			results = append(results, result)
 
-		if result.Success {
-			successful++
-			logs = append(logs, fmt.Sprintf("%s - SUCCESS: %s - %s", time.Now().Format("2006-01-02 15:04:05"), result.NodeName, result.Message))
-		} else {
-			failed++
-			logs = append(logs, fmt.Sprintf("%s - FAILED: %s - %s", time.Now().Format("2006-01-02 15:04:05"), result.NodeName, result.Message))
+			if result.Success {
+				successful++
+				logs = append(logs, fmt.Sprintf("%s - SUCCESS: %s - %s", time.Now().Format("2006-01-02 15:04:05"), result.NodeName, result.Message))
+			} else {
+				failed++
+				logs = append(logs, fmt.Sprintf("%s - FAILED: %s - %s", time.Now().Format("2006-01-02 15:04:05"), result.NodeName, result.Message))
+			}
+			collected++
+		case <-collectionTimeout:
+			log.Printf("Timeout while collecting results, collected %d/%d results", collected, totalNodes)
+			// Add failed results for uncollected nodes
+			for i := collected; i < totalNodes; i++ {
+				results = append(results, BulkBinaryResult{
+					NodeName: fmt.Sprintf("unknown_%d", i),
+					Success:  false,
+					Message:  "Timeout while collecting result",
+				})
+				failed++
+				logs = append(logs, fmt.Sprintf("%s - FAILED: unknown_%d - Timeout while collecting result", time.Now().Format("2006-01-02 15:04:05"), i))
+			}
+			break
 		}
 	}
 
@@ -796,11 +885,6 @@ func (bc *BinaryControl) StopAllBinaries(timeout int) (*BulkBinaryResponse, erro
 	totalNodes := len(enabledNodes)
 	log.Printf("Starting bulk binary stop operation on %d nodes", totalNodes)
 
-	var results []BulkBinaryResult
-	var logs []string
-	successful := 0
-	failed := 0
-
 	// Channel to collect results from goroutines
 	resultChan := make(chan BulkBinaryResult, totalNodes)
 
@@ -809,8 +893,6 @@ func (bc *BinaryControl) StopAllBinaries(timeout int) (*BulkBinaryResponse, erro
 	for nodeName, node := range enabledNodes {
 		go func(nodeName string, node NodeConfig) {
 			log.Printf("=== STOPPING NODE %s ===", nodeName)
-			logEntry := fmt.Sprintf("%s - Stopping binary on node %s", time.Now().Format("2006-01-02 15:04:05"), nodeName)
-			logs = append(logs, logEntry)
 			log.Printf("Node %s: Stopping binary operation", nodeName)
 
 			response, err := bc.StopBinary(nodeName, timeout)
@@ -836,19 +918,43 @@ func (bc *BinaryControl) StopAllBinaries(timeout int) (*BulkBinaryResponse, erro
 		}(nodeName, node)
 	}
 
-	// Collect results
+	// Collect results with timeout
 	log.Printf("Waiting for all operations to complete...")
-	for i := 0; i < totalNodes; i++ {
-		result := <-resultChan
-		log.Printf("Received result for node %s: Success=%v, Message=%s", result.NodeName, result.Success, result.Message)
-		results = append(results, result)
+	collectionTimeout := time.After(60 * time.Second) // Overall timeout for collection
+	collected := 0
+	
+	var results []BulkBinaryResult
+	var logs []string
+	successful := 0
+	failed := 0
+	
+	for collected < totalNodes {
+		select {
+		case result := <-resultChan:
+			log.Printf("Received result for node %s: Success=%v, Message=%s", result.NodeName, result.Success, result.Message)
+			results = append(results, result)
 
-		if result.Success {
-			successful++
-			logs = append(logs, fmt.Sprintf("%s - SUCCESS: %s - %s", time.Now().Format("2006-01-02 15:04:05"), result.NodeName, result.Message))
-		} else {
-			failed++
-			logs = append(logs, fmt.Sprintf("%s - FAILED: %s - %s", time.Now().Format("2006-01-02 15:04:05"), result.NodeName, result.Message))
+			if result.Success {
+				successful++
+				logs = append(logs, fmt.Sprintf("%s - SUCCESS: %s - %s", time.Now().Format("2006-01-02 15:04:05"), result.NodeName, result.Message))
+			} else {
+				failed++
+				logs = append(logs, fmt.Sprintf("%s - FAILED: %s - %s", time.Now().Format("2006-01-02 15:04:05"), result.NodeName, result.Message))
+			}
+			collected++
+		case <-collectionTimeout:
+			log.Printf("Timeout while collecting results, collected %d/%d results", collected, totalNodes)
+			// Add failed results for uncollected nodes
+			for i := collected; i < totalNodes; i++ {
+				results = append(results, BulkBinaryResult{
+					NodeName: fmt.Sprintf("unknown_%d", i),
+					Success:  false,
+					Message:  "Timeout while collecting result",
+				})
+				failed++
+				logs = append(logs, fmt.Sprintf("%s - FAILED: unknown_%d - Timeout while collecting result", time.Now().Format("2006-01-02 15:04:05"), i))
+			}
+			break
 		}
 	}
 
@@ -879,6 +985,14 @@ func (bc *BinaryControl) StopAllBinaries(timeout int) (*BulkBinaryResponse, erro
 }
 
 func (bc *BinaryControl) sshExec(node NodeConfig, command string) error {
+	if bc == nil {
+		return fmt.Errorf("BinaryControl instance is nil")
+	}
+	
+	// Acquire semaphore to limit concurrent SSH operations
+	bc.sshSemaphore <- struct{}{}
+	defer func() { <-bc.sshSemaphore }()
+	
 	args := []string{
 		"-i", node.KeyPath,
 		"-o", "StrictHostKeyChecking=no",
@@ -888,13 +1002,31 @@ func (bc *BinaryControl) sshExec(node NodeConfig, command string) error {
 		node.Host,
 		command,
 	}
-	cmd := exec.Command("ssh", args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "ssh", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		// Check if it's a timeout error
+		if ctx.Err() == context.DeadlineExceeded {
+			return fmt.Errorf("SSH command timed out after 30 seconds: %s", command)
+		}
+		return fmt.Errorf("SSH command failed: %v", err)
+	}
+	return nil
 }
 
 func (bc *BinaryControl) sshExecWithOutput(node NodeConfig, command string) (string, error) {
+	if bc == nil {
+		return "", fmt.Errorf("BinaryControl instance is nil")
+	}
+	
+	// Acquire semaphore to limit concurrent SSH operations
+	bc.sshSemaphore <- struct{}{}
+	defer func() { <-bc.sshSemaphore }()
+	
 	args := []string{
 		"-i", node.KeyPath,
 		"-o", "StrictHostKeyChecking=no",
@@ -904,9 +1036,18 @@ func (bc *BinaryControl) sshExecWithOutput(node NodeConfig, command string) (str
 		node.Host,
 		command,
 	}
-	cmd := exec.Command("ssh", args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "ssh", args...)
 	output, err := cmd.Output()
-	return strings.TrimSpace(string(output)), err
+	if err != nil {
+		// Check if it's a timeout error
+		if ctx.Err() == context.DeadlineExceeded {
+			return "", fmt.Errorf("SSH command timed out after 30 seconds: %s", command)
+		}
+		return "", fmt.Errorf("SSH command failed: %v", err)
+	}
+	return strings.TrimSpace(string(output)), nil
 }
 
 func response(success bool, message string) *BinaryControlResponse {
@@ -925,11 +1066,3 @@ func getNodeNames(nodes map[string]NodeConfig) []string {
 	return names
 }
 
-// Global instance
-var binaryControl = NewBinaryControl()
-
-func init() {
-	if err := binaryControl.LoadNodesConfig(); err != nil {
-		log.Printf("Warning: Failed to load nodes config: %v", err)
-	}
-}

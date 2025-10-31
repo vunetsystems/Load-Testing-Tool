@@ -2,6 +2,7 @@ package o11y_source_manager
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"vuDataSim/src/node_control"
 
@@ -18,7 +20,9 @@ import (
 
 // getKafkaNodeName retrieves the node name where the Kafka pod is running
 func getKafkaNodeName() (string, error) {
-	cmd := exec.Command("kubectl", "get", "pod", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "-o", "jsonpath={.spec.nodeName}")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "kubectl", "get", "pod", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "-o", "jsonpath={.spec.nodeName}")
 	output, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get Kafka node name: %v", err)
@@ -1101,16 +1105,23 @@ func (osm *O11ySourceManager) sshExec(nodeConfig node_control.NodeConfig, comman
 		"-o", "StrictHostKeyChecking=no",
 		"-o", "UserKnownHostsFile=/dev/null",
 		"-o", "ConnectTimeout=10",
+		"-o", "LogLevel=ERROR",
 		nodeConfig.Host,
 		command,
 	}
 
-	cmd := exec.Command("ssh", args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "ssh", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	err := cmd.Run()
 	if err != nil {
+		// Check if it's a timeout error
+		if ctx.Err() == context.DeadlineExceeded {
+			return fmt.Errorf("SSH command timed out after 30 seconds: %s", command)
+		}
 		return fmt.Errorf("SSH command failed: %v", err)
 	}
 
@@ -1124,16 +1135,23 @@ func (osm *O11ySourceManager) scpCopy(nodeConfig node_control.NodeConfig, localP
 		"-o", "StrictHostKeyChecking=no",
 		"-o", "UserKnownHostsFile=/dev/null",
 		"-o", "ConnectTimeout=10",
+		"-o", "LogLevel=ERROR",
 		localPath,
 		fmt.Sprintf("%s:%s", nodeConfig.Host, remotePath),
 	}
 
-	cmd := exec.Command("scp", args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "scp", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	err := cmd.Run()
 	if err != nil {
+		// Check if it's a timeout error
+		if ctx.Err() == context.DeadlineExceeded {
+			return fmt.Errorf("SCP copy timed out after 60 seconds for %s", localPath)
+		}
 		return fmt.Errorf("SCP copy failed: %v", err)
 	}
 
