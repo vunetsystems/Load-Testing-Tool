@@ -75,7 +75,9 @@ func (km *KafkaManager) translateSourceName(sourceName string) string {
 
 // getKafkaNodeName retrieves the node name where the Kafka pod is running
 func getKafkaNodeName() (string, error) {
-	cmd := exec.Command("kubectl", "get", "pod", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "-o", "jsonpath={.spec.nodeName}")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "kubectl", "get", "pod", "kafka-cluster-cp-kafka-0", "-n", "vsmaps", "-o", "jsonpath={.spec.nodeName}")
 	output, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get Kafka node name: %v", err)

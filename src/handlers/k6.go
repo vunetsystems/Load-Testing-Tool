@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"gopkg.in/yaml.v3"
@@ -460,12 +462,34 @@ func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
+	// Check if status indicates running and verify if process is actually running
 	if h.status.IsRunning {
-		SendJSONResponse(w, http.StatusConflict, APIResponse{
-			Success: false,
-			Message: "K6 test is already running",
-		})
-		return
+		// Check if the process is actually still running
+		if h.cmd != nil && h.cmd.Process != nil {
+			if err := h.cmd.Process.Signal(syscall.Signal(0)); err == nil {
+				// Process is still running
+				SendJSONResponse(w, http.StatusConflict, APIResponse{
+					Success: false,
+					Message: "K6 test is already running",
+				})
+				return
+			}
+		}
+		// Process is not running, reset status
+		h.status.IsRunning = false
+		h.status.LastError = ""
+		logger.Warn().Str("module", "k6").Msg("Detected stale running status, resetting")
+	}
+
+	// Check for stuck execution (running for more than 2 hours)
+	if h.status.IsRunning && time.Since(h.status.StartTime) > 2*time.Hour {
+		logger.Warn().Str("module", "k6").Msg("Detected stuck execution, resetting status")
+		h.status.IsRunning = false
+		h.status.LastError = "Execution was stuck and has been reset"
+		if h.cmd != nil && h.cmd.Process != nil {
+			h.cmd.Process.Kill()
+		}
+		h.cmd = nil
 	}
 
 	// Parse request body for parameters
@@ -633,13 +657,22 @@ func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, int
 	go AppState.BroadcastUpdate()
 
 	defer func() {
-		h.mutex.Lock()
-		h.status.IsRunning = false
-		h.status.CurrentScript = ""
-		h.mutex.Unlock()
-
-		// Broadcast final status
-		go AppState.BroadcastUpdate()
+		if r := recover(); r != nil {
+			h.mutex.Lock()
+			h.status.IsRunning = false
+			h.status.LastError = fmt.Sprintf("Panic recovered: %v", r)
+			h.status.CurrentScript = ""
+			h.mutex.Unlock()
+			logger.Error().Interface("panic", r).Str("module", "k6").Msg("Panic recovered in executeCombinedScript")
+			go AppState.BroadcastUpdate()
+		} else {
+			h.mutex.Lock()
+			h.status.IsRunning = false
+			h.status.CurrentScript = ""
+			h.mutex.Unlock()
+			// Broadcast final status
+			go AppState.BroadcastUpdate()
+		}
 	}()
 
 	// STEP 1: User Validation and Creation
@@ -650,7 +683,12 @@ func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, int
 
 	// STEP 2: Execute Combined Script
 	h.updateStatus("🚀 Starting combined K6 test execution...")
-	cmd := exec.Command("./combined.sh", timeRange, fmt.Sprintf("%d", vus), fmt.Sprintf("%d", iterations), fmt.Sprintf("%d", interval))
+
+	// Create context with timeout (2 hours)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Hour)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, "./combined.sh", timeRange, fmt.Sprintf("%d", vus), fmt.Sprintf("%d", iterations), fmt.Sprintf("%d", interval))
 	cmd.Dir = "k6_final/k6_dashboard_name/linux-mssql-dashboard" // Working directory
 
 	// Set up process for potential cancellation
@@ -659,6 +697,12 @@ func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, int
 	h.mutex.Unlock()
 
 	output, err := cmd.CombinedOutput()
+
+	// Check if context was cancelled due to timeout
+	if ctx.Err() == context.DeadlineExceeded {
+		err = fmt.Errorf("script execution timed out after 2 hours")
+		logger.Error().Str("module", "k6").Msg("Combined script execution timed out")
+	}
 
 	h.mutex.Lock()
 	if err != nil {

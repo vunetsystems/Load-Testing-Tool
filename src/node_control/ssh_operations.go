@@ -1,6 +1,7 @@
 package node_control
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 const (
@@ -18,17 +20,29 @@ const (
 )
 
 func (nm *NodeManager) SSHExecWithOutput(nodeConfig NodeConfig, command string) (string, error) {
+	// Acquire semaphore to limit concurrent SSH operations
+	nm.sshSemaphore <- struct{}{}
+	defer func() { <-nm.sshSemaphore }()
+	
 	args := []string{
 		"-i", nodeConfig.KeyPath,
 		"-o", SSHOptionStrictHostKeyChecking,
 		"-o", SSHOptionUserKnownHostsFile,
+		"-o", SSHOptionConnectTimeout,
+		"-o", SSHOptionLogLevel,
 		nodeConfig.Host,
 		command,
 	}
 
-	cmd := exec.Command("ssh", args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "ssh", args...)
 	output, err := cmd.Output()
 	if err != nil {
+		// Check if it's a timeout error
+		if ctx.Err() == context.DeadlineExceeded {
+			return "", fmt.Errorf("SSH command timed out after 30 seconds: %s", command)
+		}
 		return "", fmt.Errorf("SSH command failed: %v", err)
 	}
 
@@ -117,21 +131,33 @@ func (nm *NodeManager) cleanupNodeFiles(nodeName string) error {
 }
 
 func (nm *NodeManager) scpCopyDir(nodeConfig NodeConfig, localDir, remoteDir string) error {
+	// Acquire semaphore to limit concurrent SSH operations
+	nm.sshSemaphore <- struct{}{}
+	defer func() { <-nm.sshSemaphore }()
+	
 	args := []string{
 		"-i", nodeConfig.KeyPath,
 		"-o", SSHOptionStrictHostKeyChecking,
 		"-o", SSHOptionUserKnownHostsFile,
+		"-o", SSHOptionConnectTimeout,
+		"-o", SSHOptionLogLevel,
 		"-r",
 		localDir,
 		fmt.Sprintf("%s:%s", nodeConfig.Host, remoteDir),
 	}
 
-	cmd := exec.Command("scp", args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "scp", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	err := cmd.Run()
 	if err != nil {
+		// Check if it's a timeout error
+		if ctx.Err() == context.DeadlineExceeded {
+			return fmt.Errorf("SCP directory copy timed out after 60 seconds")
+		}
 		return fmt.Errorf("SCP directory copy failed: %v", err)
 	}
 
@@ -141,6 +167,10 @@ func (nm *NodeManager) scpCopyDir(nodeConfig NodeConfig, localDir, remoteDir str
 func (nm *NodeManager) scpCopy(nodeConfig NodeConfig, localPath, remotePath string) error {
 	log.Printf("DEBUG: SCP copying %s to %s:%s", localPath, nodeConfig.Host, remotePath)
 
+	// Acquire semaphore to limit concurrent SSH operations
+	nm.sshSemaphore <- struct{}{}
+	defer func() { <-nm.sshSemaphore }()
+	
 	args := []string{
 		"-i", nodeConfig.KeyPath,
 		"-o", SSHOptionStrictHostKeyChecking,
@@ -163,12 +193,18 @@ func (nm *NodeManager) scpCopy(nodeConfig NodeConfig, localPath, remotePath stri
 
 	log.Printf("DEBUG: Executing SCP command: scp %v", args)
 
-	cmd := exec.Command("scp", args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "scp", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
 		log.Printf("ERROR: SCP command failed for %s: %v", localPath, err)
+		// Check if it's a timeout error
+		if ctx.Err() == context.DeadlineExceeded {
+			return fmt.Errorf("SCP copy timed out after 60 seconds for %s", localPath)
+		}
 		return fmt.Errorf("SCP copy failed: %v", err)
 	}
 
@@ -177,6 +213,10 @@ func (nm *NodeManager) scpCopy(nodeConfig NodeConfig, localPath, remotePath stri
 }
 
 func (nm *NodeManager) sshExec(nodeConfig NodeConfig, command string) error {
+	// Acquire semaphore to limit concurrent SSH operations
+	nm.sshSemaphore <- struct{}{}
+	defer func() { <-nm.sshSemaphore }()
+	
 	args := []string{
 		"-i", nodeConfig.KeyPath,
 		"-o", "StrictHostKeyChecking=no",
@@ -187,7 +227,9 @@ func (nm *NodeManager) sshExec(nodeConfig NodeConfig, command string) error {
 		command,
 	}
 
-	cmd := exec.Command("ssh", args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "ssh", args...)
 
 	// Capture stderr for proper error reporting
 	stderr, err := cmd.StderrPipe()
@@ -203,6 +245,10 @@ func (nm *NodeManager) sshExec(nodeConfig NodeConfig, command string) error {
 	stderrBytes, _ := io.ReadAll(stderr)
 
 	if err := cmd.Wait(); err != nil {
+		// Check if it's a timeout error
+		if ctx.Err() == context.DeadlineExceeded {
+			return fmt.Errorf("SSH command timed out after 30 seconds: %s", command)
+		}
 		return fmt.Errorf("SSH command failed: %v, stderr: %s", err, string(stderrBytes))
 	}
 
