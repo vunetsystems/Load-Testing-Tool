@@ -14,6 +14,7 @@ type K6Result struct {
 	TimeFilter     string    `json:"time_filter"`
 	PanelName      string    `json:"panel_name"`
 	DashboardName  string    `json:"dashboard_name"`
+	PanelStatus    uint16    `json:"panel_status"`
 	P95ResponseTime float64   `json:"p95_response_time"`
 }
 
@@ -30,6 +31,7 @@ func GetK6Results(ctx context.Context, dashboard string) ([]K6Result, error) {
 	   time_range AS "Time Filter",
 	   panel_name AS "Panel Name",
 	   dashboard_name AS "Dashboard Name",
+	   panel_status AS "Panel Status",
 	   quantile(0.9)(panel_avg_response_time) AS "P95 Response time"
 FROM monitoring.k6_results
 WHERE timestamp >= now() - INTERVAL 6 HOUR
@@ -47,8 +49,9 @@ GROUP BY
 	   vus,
 	   time_range,
 	   panel_name,
-	   dashboard_name
-ORDER BY timestamp ASC;
+	   dashboard_name,
+	   panel_status
+ORDER BY timestamp;
 	`
 
 	rows, err := monitoringDBClient.Client.Query(ctx, query)
@@ -67,6 +70,7 @@ ORDER BY timestamp ASC;
 			&result.TimeFilter,
 			&result.PanelName,
 			&result.DashboardName,
+			&result.PanelStatus,
 			&result.P95ResponseTime,
 		)
 		if err != nil {

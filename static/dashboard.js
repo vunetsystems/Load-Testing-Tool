@@ -425,6 +425,88 @@ class DashboardManager {
         }
     }
 
+    async updateVuDataSimButtonState() {
+        const startBtn = this.manager.elements.startVuDataSimBtn;
+        const stopBtn = this.manager.elements.stopVuDataSimBtn;
+
+        if (!startBtn || !stopBtn) return;
+
+        try {
+            // Get the actual binary status from the backend using the same method as binary control
+            const statusResponse = await this.manager.callAPI('/api/binary/status');
+            if (statusResponse.success && statusResponse.data) {
+                // Check if any enabled node has a running binary (for step6 update only)
+                const anyNodeRunning = statusResponse.data.some(status =>
+                    status.Status === 'running' && status.NodeName
+                );
+
+                // Always keep buttons enabled regardless of binary status
+                startBtn.disabled = false;
+                startBtn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span><span>Start vuDataSim</span>';
+                startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                startBtn.classList.add('hover:scale-105', 'active:scale-100');
+
+                stopBtn.disabled = false;
+                stopBtn.innerHTML = '<span class="material-symbols-outlined">stop</span><span>Stop vuDataSim</span>';
+                stopBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                stopBtn.classList.add('hover:scale-105', 'active:scale-100');
+
+                // Update Configuration Sync Status step6
+                this.updateConfigSyncStep6(anyNodeRunning);
+            } else {
+                console.error('Failed to get binary status:', statusResponse.message);
+                // Keep buttons enabled even on error
+                startBtn.disabled = false;
+                startBtn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span><span>Start vuDataSim</span>';
+                startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                startBtn.classList.add('hover:scale-105', 'active:scale-100');
+                stopBtn.disabled = false;
+                stopBtn.innerHTML = '<span class="material-symbols-outlined">stop</span><span>Stop vuDataSim</span>';
+                stopBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                stopBtn.classList.add('hover:scale-105', 'active:scale-100');
+                this.updateConfigSyncStep6(false);
+            }
+        } catch (error) {
+            console.error('Error fetching binary status:', error);
+            // Keep buttons enabled even on error
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span><span>Start vuDataSim</span>';
+            startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            startBtn.classList.add('hover:scale-105', 'active:scale-100');
+            stopBtn.disabled = false;
+            stopBtn.innerHTML = '<span class="material-symbols-outlined">stop</span><span>Stop vuDataSim</span>';
+            stopBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            stopBtn.classList.add('hover:scale-105', 'active:scale-100');
+            this.updateConfigSyncStep6(false);
+        }
+    }
+
+    updateConfigSyncStep6(isRunning) {
+        const step6Icon = this.manager.elements.step6Icon;
+        const step6Text = this.manager.elements.step6Text;
+        const step6Title = this.manager.elements.step6Title;
+        const step6Container = this.manager.elements.step6Container;
+        const step6Box = this.manager.elements.step6Box;
+
+        if (!step6Icon || !step6Text || !step6Title || !step6Container || !step6Box) return;
+
+        if (isRunning) {
+            // Update step6 to show "Running"
+            step6Icon.textContent = 'check_circle';
+            step6Text.textContent = 'Running';
+            step6Title.textContent = 'Start DataSim';
+            step6Container.className = 'relative w-10 h-10 mx-auto flex items-center justify-center rounded-full bg-green-100 text-green-600';
+            step6Box.className = 'mt-4 p-4 rounded-lg bg-green-50/50 border border-green-200 hover:shadow-md transition-shadow';
+        } else {
+            // Reset step6 to pending state
+            step6Icon.textContent = 'schedule';
+            step6Text.textContent = 'Pending';
+            step6Title.textContent = 'Start DataSim';
+            step6Container.className = 'relative w-10 h-10 mx-auto flex items-center justify-center rounded-full bg-slate-100 text-slate-400';
+            step6Box.className = 'mt-4 p-4 rounded-lg bg-slate-50/50 border border-slate-200 hover:shadow-md transition-shadow';
+        }
+    }
+
     displayFinalVuDataSimMetrics(metricsArray) {
         const tbody = document.getElementById('finalvudatasim-metrics-body');
         if (!tbody) return;
@@ -439,8 +521,13 @@ class DashboardManager {
                 </td>
             `;
             tbody.appendChild(row);
+            // Update button state based on actual binary status from backend
+            this.updateVuDataSimButtonState();
             return;
         }
+
+        // Check if any node has vuDataSim running
+        let anyNodeRunning = false;
 
         // Display metrics for each node
         metricsArray.forEach(metrics => {
@@ -453,6 +540,9 @@ class DashboardManager {
 
             // Robust running detection
             const isRunning = process.running || (process.pid && process.pid > 0);
+            if (isRunning) {
+                anyNodeRunning = true;
+            }
 
             // Format load average
             const loadAvg = system.load_avg_1 !== undefined ?
@@ -477,5 +567,8 @@ class DashboardManager {
             `;
             tbody.appendChild(row);
         });
+
+        // Update button state based on actual binary status from backend
+        this.updateVuDataSimButtonState();
     }
 }

@@ -274,7 +274,7 @@ class K6MonitoringManager {
         if (!this.filteredData.length) {
             const emptyRow = document.createElement('tr');
             emptyRow.innerHTML = `
-                <td colspan="6" class="px-4 py-8 text-center text-text-secondary-light dark:text-text-secondary-dark">
+                <td colspan="7" class="px-4 py-8 text-center text-text-secondary-light dark:text-text-secondary-dark">
                     No results match the current filters
                 </td>
             `;
@@ -304,6 +304,7 @@ class K6MonitoringManager {
                 <td class="px-4 py-3 text-sm">${item.time_filter}</td>
                 <td class="px-4 py-3 text-sm">${item.panel_name}</td>
                 <td class="px-4 py-3 text-sm">${item.dashboard_name}</td>
+                <td class="px-4 py-3 text-sm">${item.panel_status}</td>
                 <td class="px-4 py-3 text-sm">
                     <span class="font-medium ${responseTimeClass}">
                         ${item.p95_response_time.toFixed(2)}ms
@@ -452,7 +453,7 @@ class K6MonitoringManager {
         if (!this.k6DashboardData.length) {
             const emptyRow = document.createElement('tr');
             emptyRow.innerHTML = `
-                <td colspan="5" class="px-4 py-8 text-center text-text-secondary-light dark:text-text-secondary-dark">
+                <td colspan="6" class="px-4 py-8 text-center text-text-secondary-light dark:text-text-secondary-dark">
                     No dashboard results available
                 </td>
             `;
@@ -480,6 +481,7 @@ class K6MonitoringManager {
                 <td class="px-4 py-3 text-sm">${timestamp}</td>
                 <td class="px-4 py-3 text-sm font-medium">${item.no_of_users}</td>
                 <td class="px-4 py-3 text-sm">${item.time_filter}</td>
+                <td class="px-4 py-3 text-sm">${item.dashboard_status}</td>
                 <td class="px-4 py-3 text-sm">${item.dashboard_name}</td>
                 <td class="px-4 py-3 text-sm">
                     <span class="font-medium ${responseTimeClass}">

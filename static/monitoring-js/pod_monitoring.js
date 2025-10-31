@@ -13,6 +13,9 @@ class PodMonitoringManager {
         this.itemsPerPage = 25;
         this.searchTerm = '';
         this.selectedNamespace = 'vsmaps';
+        // Sorting properties
+        this.sortColumn = null;
+        this.sortDirection = 'asc'; // 'asc' or 'desc'
     }
 
     // Initialize pod monitoring
@@ -52,6 +55,15 @@ class PodMonitoringManager {
                 this.refresh();
             });
         }
+
+        // Sort button handlers
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('sort-btn') || e.target.closest('.sort-btn')) {
+                const button = e.target.classList.contains('sort-btn') ? e.target : e.target.closest('.sort-btn');
+                const column = button.dataset.column;
+                this.handleSort(column);
+            }
+        });
 
         // Pod name click handler (opens modal)
         document.addEventListener('click', (e) => {
@@ -191,6 +203,9 @@ class PodMonitoringManager {
 
             return matchesSearch;
         });
+
+        // Apply sorting
+        this.applySorting();
 
         // Reset to first page when filtering
         this.currentPage = 1;
@@ -359,6 +374,88 @@ renderPodTable(pods) {
     // Manual refresh
     async refresh() {
         await this.fetchPodMonitoringData();
+    }
+
+    // Handle column sorting
+    handleSort(column) {
+        if (this.sortColumn === column) {
+            // Toggle direction if same column
+            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // New column, default to ascending
+            this.sortColumn = column;
+            this.sortDirection = 'asc';
+        }
+
+        this.updateSortIndicators();
+        this.filterAndDisplayData();
+    }
+
+    // Apply sorting to filtered data
+    applySorting() {
+        if (!this.sortColumn) return;
+
+        this.filteredData.sort((a, b) => {
+            let aValue = a[this.sortColumn];
+            let bValue = b[this.sortColumn];
+
+            // Handle null/undefined values
+            if (aValue == null && bValue == null) return 0;
+            if (aValue == null) return this.sortDirection === 'asc' ? 1 : -1;
+            if (bValue == null) return this.sortDirection === 'asc' ? -1 : 1;
+
+            let comparison = 0;
+
+            // Type-specific sorting
+            switch (this.sortColumn) {
+                case 'cpu_usage':
+                case 'memory_usage':
+                case 'restarts':
+                    // Numeric sorting
+                    aValue = parseFloat(aValue) || 0;
+                    bValue = parseFloat(bValue) || 0;
+                    comparison = aValue - bValue;
+                    break;
+
+                case 'last_seen':
+                    // Date sorting
+                    const aDate = new Date(aValue);
+                    const bDate = new Date(bValue);
+                    comparison = aDate.getTime() - bDate.getTime();
+                    break;
+
+                default:
+                    // String sorting (case-insensitive)
+                    aValue = String(aValue).toLowerCase();
+                    bValue = String(bValue).toLowerCase();
+                    comparison = aValue.localeCompare(bValue);
+                    break;
+            }
+
+            return this.sortDirection === 'asc' ? comparison : -comparison;
+        });
+    }
+
+    // Update sort indicators in table headers
+    updateSortIndicators() {
+        // Reset all sort icons
+        document.querySelectorAll('.sort-icon').forEach(icon => {
+            icon.classList.remove('text-indigo-600');
+            icon.classList.add('opacity-0');
+        });
+
+        // Update active sort column
+        if (this.sortColumn) {
+            const activeButton = document.querySelector(`[data-column="${this.sortColumn}"]`);
+            if (activeButton) {
+                const icon = activeButton.querySelector('.sort-icon');
+                if (icon) {
+                    icon.classList.remove('opacity-0');
+                    icon.classList.add('text-indigo-600');
+                    icon.textContent = this.sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward';
+                }
+            }
+        }
     }
 
     // Show pod details modal (full screen)

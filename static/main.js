@@ -56,6 +56,7 @@ class VuDataSimManager {
             startK6TestBtn: document.getElementById('start-k6-test-btn'),
             logNodeFilter: document.getElementById('log-node'),
             logModuleFilter: document.getElementById('log-module'),
+            logTypeFilter: document.getElementById('log-type'),
             logsContainer: document.getElementById('logs-container'),
 
                         // O11y source management elements
@@ -77,7 +78,10 @@ class VuDataSimManager {
             selectedCategoryName: document.getElementById('selected-category-name'),
             selectedCategorySources: document.getElementById('selected-category-sources'),
             epsSelect: document.getElementById('eps-select'),
-            syncConfigsBtn: document.getElementById('sync-configs-btn'),
+            timeoutInput: document.getElementById('timeout-input'),
+            skipChTruncate: document.getElementById('skip-ch-truncate'),
+            startVuDataSimBtn: document.getElementById('start-vudatasim-btn'),
+            stopVuDataSimBtn: document.getElementById('stop-vudatasim-btn'),
             syncProgressPercent: document.getElementById('sync-progress-percent'),
             syncProgressBar: document.getElementById('sync-progress-bar'),
             syncStatusText: document.getElementById('sync-status-text'),
@@ -106,6 +110,11 @@ class VuDataSimManager {
             step5Title: document.getElementById('step5-title'),
             step5Container: document.getElementById('step5-container'),
             step5Box: document.getElementById('step5-box'),
+            step6Icon: document.getElementById('step6-icon'),
+            step6Text: document.getElementById('step6-text'),
+            step6Title: document.getElementById('step6-title'),
+            step6Container: document.getElementById('step6-container'),
+            step6Box: document.getElementById('step6-box'),
 
             // Node management elements
             nodeManagementBtn: document.getElementById('node-management-btn'),
@@ -208,8 +217,9 @@ class VuDataSimManager {
 
         // Add All Cluster Nodes button event listener
         this.elements.addAllClusterNodesBtn?.addEventListener('click', () => this.addAllClusterNodes());
-        // O11y source management event listeners
-        this.elements.syncConfigsBtn?.addEventListener('click', () => this.o11ySources.syncConfigs());
+        // vuDataSim control event listeners
+        this.elements.startVuDataSimBtn?.addEventListener('click', () => this.startVuDataSim());
+        this.elements.stopVuDataSimBtn?.addEventListener('click', () => this.stopVuDataSim());
 
         // New custom multi-select event listeners
         this.elements.o11ySourcesDropdown?.addEventListener('click', () => this.o11ySources.toggleO11ySourcesDropdown());
@@ -337,6 +347,7 @@ class VuDataSimManager {
         // Log filtering
         this.elements.logNodeFilter?.addEventListener('change', () => this.logsManager.filterLogs());
         this.elements.logModuleFilter?.addEventListener('change', () => this.logsManager.filterLogs());
+        this.elements.logTypeFilter?.addEventListener('change', () => this.logsManager.filterLogs());
 
         // Real-time updates - Update every 3 seconds with real data
         setInterval(() => {
@@ -408,9 +419,14 @@ class VuDataSimManager {
         console.log('WebSocket connection would be established here');
     }
 
-    async callAPI(endpoint, method = 'GET', data = null) {
+    async callAPI(endpoint, method = 'GET', data = null, timeoutMs = 30000) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30-second timeout
+        let timeoutId;
+
+        // Only set timeout if timeoutMs > 0
+        if (timeoutMs > 0) {
+            timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        }
 
         try {
             const config = {
@@ -426,14 +442,22 @@ class VuDataSimManager {
             }
 
             const response = await fetch(`${this.apiBaseUrl}${endpoint}`, config);
-            clearTimeout(timeoutId);
+            if (timeoutId) clearTimeout(timeoutId);
 
-            // Always get the response body, even for error status codes
-            const responseData = await response.json();
+            // Get response data based on content type
+            let responseData;
+            const contentType = response.headers.get('content-type');
+
+            if (contentType && contentType.includes('application/json')) {
+                responseData = await response.json();
+            } else {
+                // For non-JSON responses (like HTML error pages), get as text
+                responseData = await response.text();
+            }
 
             // Check for HTTP error status codes and throw error for them
             if (!response.ok) {
-                const errorMessage = responseData.message || `HTTP ${response.status}: ${response.statusText}`;
+                const errorMessage = (typeof responseData === 'object' && responseData.message) || responseData || `HTTP ${response.status}: ${response.statusText}`;
                 const error = new Error(errorMessage);
                 error.status = response.status;
                 error.responseData = responseData;
@@ -611,6 +635,125 @@ class VuDataSimManager {
             const button = this.elements.startK6TestBtn;
             button.innerHTML = '<span class="material-symbols-outlined">play_arrow</span><span>Start K6 Test</span>';
             button.disabled = false;
+        }
+    }
+
+    async startVuDataSim() {
+        try {
+            // Get values from input fields
+            const selectedSources = [...this.o11ySources.selectedO11ySources];
+            const selectedEPS = parseInt(this.elements.epsSelect.value);
+            const timeoutInput = this.elements.timeoutInput?.value?.trim();
+            const skipChTruncate = this.elements.skipChTruncate?.checked || false;
+            let timeoutSeconds = null;
+
+            // Parse timeout if provided
+            if (timeoutInput) {
+                timeoutSeconds = this.parseTimeoutToSeconds(timeoutInput);
+                if (timeoutSeconds === null) {
+                    this.showNotification('Invalid timeout format. Use format like 60s, 5m, or 3h', 'error');
+                    return;
+                }
+            }
+
+            // Validate inputs
+            if (selectedSources.length === 0) {
+                this.showNotification('Please select at least one o11y source', 'warning');
+                return;
+            }
+
+            if (!selectedEPS || selectedEPS <= 0) {
+                this.showNotification('Please select a valid EPS target greater than 0', 'warning');
+                return;
+            }
+
+            // Disable the start button and show loading state
+            const startBtn = this.elements.startVuDataSimBtn;
+            const stopBtn = this.elements.stopVuDataSimBtn;
+            const originalStartText = startBtn.innerHTML;
+            startBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Starting...</span>';
+            startBtn.disabled = true;
+            stopBtn.disabled = true;
+
+            console.log('Starting vuDataSim with sources:', selectedSources, 'EPS:', selectedEPS, 'Timeout:', timeoutSeconds, 'Skip CH Truncate:', skipChTruncate);
+
+            // Call the syncConfigs function (which now includes binary start)
+            await this.o11ySources.syncConfigs(timeoutSeconds, skipChTruncate);
+
+            // Show success notification
+            this.showNotification('vuDataSim started successfully!', 'success');
+
+        } catch (error) {
+            console.error('Error starting vuDataSim:', error);
+            this.showNotification(`Failed to start vuDataSim: ${error.message}`, 'error');
+
+            // Re-enable buttons on error
+            const startBtn = this.elements.startVuDataSimBtn;
+            const stopBtn = this.elements.stopVuDataSimBtn;
+            startBtn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span><span>Start vuDataSim</span>';
+            startBtn.disabled = false;
+            stopBtn.disabled = false;
+        }
+    }
+
+    async stopVuDataSim() {
+        try {
+            // Disable buttons and show loading state
+            const startBtn = this.elements.startVuDataSimBtn;
+            const stopBtn = this.elements.stopVuDataSimBtn;
+            const originalStopText = stopBtn.innerHTML;
+            startBtn.disabled = true;
+            stopBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Stopping...</span>';
+            stopBtn.disabled = true;
+
+            console.log('Stopping vuDataSim...');
+
+            // Call the API to stop all binaries
+            const response = await this.callAPI('/api/binary/stop-all', 'POST');
+
+            if (!response.success) {
+                throw new Error(response.message || 'Failed to stop vuDataSim');
+            }
+
+            console.log('vuDataSim stopped successfully:', response);
+
+            // Update button states based on actual status from backend
+            await this.dashboard.updateVuDataSimButtonState();
+
+            // Show success notification
+            this.showNotification('vuDataSim stopped successfully!', 'success');
+
+        } catch (error) {
+            console.error('Error stopping vuDataSim:', error);
+            this.showNotification(`Failed to stop vuDataSim: ${error.message}`, 'error');
+
+            // Update button states based on actual status from backend on error
+            await this.dashboard.updateVuDataSimButtonState();
+        }
+    }
+
+    parseTimeoutToSeconds(timeoutStr) {
+        if (!timeoutStr || typeof timeoutStr !== 'string') {
+            return null;
+        }
+
+        const match = timeoutStr.match(/^(\d+)([smh])$/);
+        if (!match) {
+            return null;
+        }
+
+        const value = parseInt(match[1]);
+        const unit = match[2];
+
+        switch (unit) {
+            case 's':
+                return value;
+            case 'm':
+                return value * 60;
+            case 'h':
+                return value * 3600;
+            default:
+                return null;
         }
     }
 

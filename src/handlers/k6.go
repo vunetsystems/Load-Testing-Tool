@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -394,7 +396,7 @@ func (h *K6Handler) executeK6Script(scriptPath string) {
 		os.Remove(scriptPath)
 	}()
 
-	logger.Info().Str("module", "k6").Str("script", scriptPath).Msg("Starting K6 script execution")
+	logger.LogWithNode("System", "k6", fmt.Sprintf("Starting K6 script execution: %s", scriptPath), "info")
 
 	// Execute the script
 	cmd := exec.Command("/bin/bash", scriptPath)
@@ -533,12 +535,96 @@ func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
 		params.TimeRange, params.VUs, params.Iterations, params.Interval), "info")
 }
 
+// updateStatus sends real-time status updates via WebSocket
+func (h *K6Handler) updateStatus(message string) {
+	h.mutex.Lock()
+	h.status.CurrentScript = message
+	h.mutex.Unlock()
+
+	// Broadcast update
+	go AppState.BroadcastUpdate()
+
+	logger.LogWithNode("System", "k6", fmt.Sprintf("Status update: %s", message), "info")
+}
+
+// checkAndCreateUsers checks user validity and creates users if needed
+func (h *K6Handler) checkAndCreateUsers(vus int) string {
+	timeoutPath := "k6_final/user_creation_k6/timeout.txt"
+
+	// Read timeout.txt file
+	data, err := os.ReadFile(timeoutPath)
+	if err != nil {
+		logger.Error().Err(err).Str("module", "k6").Msg("Failed to read timeout.txt")
+		return "Failed to read user timeout file"
+	}
+
+	content := string(data)
+	lines := strings.Split(content, "\n")
+
+	var lastTimestamp time.Time
+	var lastUserCount int
+
+	// Parse timestamp from first line
+	if len(lines) > 0 {
+		if strings.Contains(lines[0], "Script started at:") {
+			timestampStr := strings.TrimPrefix(lines[0], "Script started at: ")
+			if parsed, err := time.Parse("2006-01-02 15:04:05", strings.TrimSpace(timestampStr)); err == nil {
+				lastTimestamp = parsed
+			}
+		}
+	}
+
+	// Parse user count from second line
+	if len(lines) > 1 {
+		if strings.Contains(lines[1], "Target number of users:") {
+			countStr := strings.TrimPrefix(lines[1], "Target number of users: ")
+			if count, err := strconv.Atoi(strings.TrimSpace(countStr)); err == nil {
+				lastUserCount = count
+			}
+		}
+	}
+
+	now := time.Now()
+	timeDiff := now.Sub(lastTimestamp)
+	needsRefresh := timeDiff.Hours() >= 24 || lastUserCount < vus
+
+	if !needsRefresh {
+		return fmt.Sprintf("Users still valid (created %s, %d users available)", lastTimestamp.Format("2006-01-02 15:04:05"), lastUserCount)
+	}
+
+	// Need to create users
+	h.updateStatus("🔧 Creating new users...")
+
+	cmd := exec.Command("python3", "./user_cookies.py", fmt.Sprintf("%d", vus))
+	cmd.Dir = "k6_final/user_creation_k6"
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		logger.Error().Err(err).Str("module", "k6").Str("output", string(output)).Msg("User creation script failed")
+		return fmt.Sprintf("User creation failed: %v", err)
+	}
+
+	// Check if user creation was successful by reading the updated timeout.txt
+	data, err = os.ReadFile(timeoutPath)
+	if err != nil {
+		return "Failed to verify user creation success"
+	}
+
+	content = string(data)
+	if strings.Contains(content, fmt.Sprintf("🎉 All %d/%d users created successfully", vus, vus)) {
+		return fmt.Sprintf("Successfully created %d users", vus)
+	}
+
+	logger.Warn().Str("module", "k6").Str("output", string(output)).Msg("User creation may not have completed successfully")
+	return fmt.Sprintf("User creation completed (verification inconclusive)")
+}
+
 // executeCombinedScript executes the combined.sh script with given parameters
 func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, interval int) {
 	h.mutex.Lock()
 	h.status.IsRunning = true
 	h.status.StartTime = time.Now()
-	h.status.CurrentScript = "combined.sh"
+	h.status.CurrentScript = "Initializing..."
 	h.status.LastError = ""
 	h.cmd = nil
 	h.mutex.Unlock()
@@ -556,9 +642,14 @@ func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, int
 		go AppState.BroadcastUpdate()
 	}()
 
-	logger.Info().Str("module", "k6").Msg("Starting combined.sh script execution")
+	// STEP 1: User Validation and Creation
+	h.updateStatus("🔍 Checking user validity and count...")
+	userCheckResult := h.checkAndCreateUsers(vus)
+	logger.LogWithNode("System", "k6", fmt.Sprintf("User validation completed: %s", userCheckResult), "info")
+	h.updateStatus(fmt.Sprintf("✅ User check completed: %s", userCheckResult))
 
-	// Execute the combined.sh script
+	// STEP 2: Execute Combined Script
+	h.updateStatus("🚀 Starting combined K6 test execution...")
 	cmd := exec.Command("./combined.sh", timeRange, fmt.Sprintf("%d", vus), fmt.Sprintf("%d", iterations), fmt.Sprintf("%d", interval))
 	cmd.Dir = "k6_final/k6_dashboard_name/linux-mssql-dashboard" // Working directory
 
@@ -573,13 +664,23 @@ func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, int
 	if err != nil {
 		h.status.LastError = err.Error()
 		logger.Error().Err(err).Str("module", "k6").Msg("Combined script execution failed")
+		h.updateStatus("❌ K6 test execution failed")
 	} else {
-		logger.Info().Str("module", "k6").Msg("Combined script execution completed successfully")
+		// Check if script completed successfully
+		outputStr := string(output)
+		if strings.Contains(outputStr, "✅ Dashboard data inserted into ClickHouse.") &&
+		   strings.Contains(outputStr, "✅ Login data inserted into ClickHouse.") {
+			logger.LogWithNode("System", "k6", "Combined script execution completed successfully", "success")
+			h.updateStatus("✅ K6 test execution completed successfully")
+		} else {
+			logger.LogWithNode("System", "k6", "Combined script execution completed with potential issues", "warning")
+			h.updateStatus("⚠️ K6 test execution completed with warnings")
+		}
 	}
 
 	// Log output for debugging
 	if len(output) > 0 {
-		logger.Info().Str("module", "k6").Str("output", string(output)).Msg("Combined script output")
+		logger.LogWithNode("System", "k6", fmt.Sprintf("Combined script output: %s", string(output)), "info")
 	}
 	h.mutex.Unlock()
 }

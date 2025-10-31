@@ -210,46 +210,76 @@ func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryContr
 }
 
 func (bc *BinaryControl) StopBinary(nodeName string, timeout int) (*BinaryControlResponse, error) {
+	log.Printf("=== STOPPING BINARY ON NODE %s ===", nodeName)
+	log.Printf("Node %s: Reloading configuration", nodeName)
+
 	// Reload configuration to ensure we have the latest nodes
 	if err := bc.LoadNodesConfig(); err != nil {
+		log.Printf("Node %s: ERROR - Failed to reload config: %v", nodeName, err)
 		return response(false, fmt.Sprintf("Failed to reload config: %v", err)), err
 	}
 
 	node, ok := bc.nodesConfig.Nodes[nodeName]
 	if !ok {
+		log.Printf("Node %s: ERROR - Node not found in config", nodeName)
 		return response(false, fmt.Sprintf("Node %s not found", nodeName)), fmt.Errorf("node %s missing", nodeName)
 	}
 	if !node.Enabled {
+		log.Printf("Node %s: ERROR - Node is disabled", nodeName)
 		return response(false, fmt.Sprintf("Node %s is disabled", nodeName)), fmt.Errorf("node %s disabled", nodeName)
 	}
 
+	log.Printf("Node %s: Checking current binary status", nodeName)
 	status, err := bc.GetBinaryStatus(nodeName)
-	if err != nil || status.Status != "running" {
+	if err != nil {
+		log.Printf("Node %s: ERROR - Status check failed: %v", nodeName, err)
+		return response(false, fmt.Sprintf("Failed to check binary status on node %s: %v", nodeName, err)), err
+	}
+	if status.Status != "running" {
+		log.Printf("Node %s: WARNING - Binary not running (status: %s)", nodeName, status.Status)
 		return response(false, fmt.Sprintf("Binary not running on node %s", nodeName)), fmt.Errorf("binary not running")
 	}
 
-	log.Printf("Stopping binary on node %s (PID: %d)", nodeName, status.PID)
+	log.Printf("Node %s: Binary is running with PID %d", nodeName, status.PID)
 
 	// Attempt graceful kill; if fails, force kill
 	killCmd := fmt.Sprintf("kill %d", status.PID)
+	log.Printf("Node %s: Attempting graceful kill with command: %s", nodeName, killCmd)
 	if err := bc.sshExec(node, killCmd); err != nil {
-		log.Printf("Graceful kill failed, force killing on node %s", nodeName)
+		log.Printf("Node %s: Graceful kill failed, attempting force kill", nodeName)
 		killCmd = fmt.Sprintf("kill -9 %d", status.PID)
+		log.Printf("Node %s: Force killing with command: %s", nodeName, killCmd)
 		if err := bc.sshExec(node, killCmd); err != nil {
+			log.Printf("Node %s: ERROR - Force kill also failed: %v", nodeName, err)
 			return response(false, fmt.Sprintf("Failed to stop binary on node %s: %v", nodeName, err)), err
 		}
+	} else {
+		log.Printf("Node %s: Graceful kill command executed successfully", nodeName)
 	}
 
-	time.Sleep(2 * time.Second)
+	log.Printf("Node %s: Waiting 5 seconds for process to terminate", nodeName)
+	time.Sleep(5 * time.Second)
 
+	log.Printf("Node %s: Checking binary status after kill attempt", nodeName)
 	newStatus, err := bc.GetBinaryStatus(nodeName)
 	if err != nil {
+		log.Printf("Node %s: WARNING - Status check failed after kill: %v", nodeName, err)
 		return &BinaryControlResponse{
 			Success: true,
 			Message: fmt.Sprintf("Stop command sent to node %s, status check failed: %v", nodeName, err),
 			Data:    map[string]string{"warning": "Binary may be stopped, status check failed"},
 		}, nil
 	}
+
+	log.Printf("Node %s: Post-kill status: %s", nodeName, newStatus.Status)
+
+	// Check if binary was actually stopped
+	if newStatus.Status == "running" {
+		log.Printf("Node %s: ERROR - Binary still running after kill attempt (PID: %d)", nodeName, newStatus.PID)
+		return response(false, fmt.Sprintf("Failed to stop binary on node %s - still running after kill attempt", nodeName)), fmt.Errorf("binary still running after kill")
+	}
+
+	log.Printf("Node %s: Binary successfully stopped", nodeName)
 
 	data := map[string]interface{}{
 		"nodeName":    nodeName,
@@ -259,6 +289,7 @@ func (bc *BinaryControl) StopBinary(nodeName string, timeout int) (*BinaryContro
 		"status":      newStatus,
 	}
 
+	log.Printf("Node %s: Stop operation completed successfully", nodeName)
 	return &BinaryControlResponse{
 		Success: true,
 		Message: fmt.Sprintf("Binary stopped successfully on node %s", nodeName),

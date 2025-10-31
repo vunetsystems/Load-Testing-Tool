@@ -124,7 +124,7 @@ class O11ySources {
         console.log(`Successfully populated ${sources.length} o11y sources`);
     }
 
-    syncConfigs() {
+    syncConfigs(timeoutSeconds = null, skipChTruncate = false) {
         const selectedSources = [...this.selectedO11ySources];
         const selectedEPS = parseInt(this.manager.elements.epsSelect.value);
 
@@ -147,7 +147,7 @@ class O11ySources {
         // Show loading state
         this.setSyncButtonLoading(true);
 
-        console.log('Syncing configs for sources:', selectedSources, 'EPS:', selectedEPS, 'Mode:', this.currentMode);
+        console.log('Syncing configs for sources:', selectedSources, 'EPS:', selectedEPS, 'Mode:', this.currentMode, 'Skip CH Truncate:', skipChTruncate);
 
         // Determine type and category for split API
         const splitRequest = {
@@ -166,6 +166,7 @@ class O11ySources {
         this.updateStep(3, 'pending', 'schedule', 'Pending');
         this.updateStep(4, 'pending', 'schedule', 'Pending');
         this.updateStep(5, 'pending', 'schedule', 'Pending');
+        this.updateStep(6, 'pending', 'schedule', 'Pending');
 
         return this.manager.callAPI('/api/o11y/eps/split', 'POST', splitRequest)
         .then(splitResponse => {
@@ -182,7 +183,7 @@ class O11ySources {
             }
 
             console.log('EPS split successful, proceeding to distribution...');
-            this.updateSyncProgress(33, 'Step 1 of 3 completed');
+            this.updateSyncProgress(17, 'Step 1 of 6 completed');
             this.updateStep(1, 'completed', 'check_circle', 'Completed');
             this.updateStep(2, 'in-progress', 'hourglass_top', 'In Progress...');
 
@@ -230,7 +231,7 @@ class O11ySources {
 
             // Only proceed to conf.d distribution if EPS distribution succeeded
             console.log('EPS distribution successful, proceeding to conf.d distribution...');
-            this.updateSyncProgress(50, 'Step 2 of 4 completed');
+            this.updateSyncProgress(33, 'Step 2 of 6 completed');
             this.updateStep(2, 'completed', 'check_circle', 'Completed');
             this.updateStep(3, 'in-progress', 'hourglass_top', 'In Progress...');
             console.log('About to call conf.d distribution API...');
@@ -275,7 +276,7 @@ class O11ySources {
 
             // Only proceed to Kafka distribution if conf.d distribution succeeded
             console.log('Conf.d distribution successful, proceeding to Kafka distribution...');
-            this.updateSyncProgress(60, 'Step 3 of 5 completed');
+            this.updateSyncProgress(50, 'Step 3 of 6 completed');
             this.updateStep(3, 'completed', 'check_circle', 'Completed');
             this.updateStep(4, 'in-progress', 'hourglass_top', 'In Progress...');
             console.log('About to call Kafka distribute-enabled client API...');
@@ -298,12 +299,25 @@ class O11ySources {
             }
 
             // Only proceed to ClickHouse truncate if Kafka distribution succeeded
-            console.log('Kafka distribution successful, proceeding to ClickHouse truncate...');
-            this.updateSyncProgress(80, 'Step 4 of 5 completed');
-            this.updateStep(4, 'completed', 'check_circle', 'Completed');
-            this.updateStep(5, 'in-progress', 'hourglass_top', 'In Progress...');
-            console.log('About to call ClickHouse truncate-enabled-tables API...');
-            return this.manager.callAPI('/api/clickhouse/truncate-enabled-tables', 'POST');
+            if (skipChTruncate) {
+                console.log('Skipping ClickHouse truncate as requested...');
+                this.updateSyncProgress(67, 'Step 4 of 6 completed (CH truncate skipped)');
+                this.updateStep(4, 'completed', 'check_circle', 'Completed');
+                this.updateStep(5, 'completed', 'check_circle', 'Skipped');
+
+                // Return a mock successful response to continue the promise chain
+                return Promise.resolve({
+                    success: true,
+                    message: 'ClickHouse truncate skipped as requested'
+                });
+            } else {
+                console.log('Kafka distribution successful, proceeding to ClickHouse truncate...');
+                this.updateSyncProgress(67, 'Step 4 of 6 completed');
+                this.updateStep(4, 'completed', 'check_circle', 'Completed');
+                this.updateStep(5, 'in-progress', 'hourglass_top', 'In Progress...');
+                console.log('About to call ClickHouse truncate-enabled-tables API...');
+                return this.manager.callAPI('/api/clickhouse/truncate-enabled-tables', 'POST');
+            }
         })
         .catch(error => {
             if (error.message.includes('Kafka distribution failed')) {
@@ -324,25 +338,38 @@ class O11ySources {
 
             // All APIs succeeded completely
             console.log('All sync steps completed successfully');
-            this.updateSyncProgress(100, 'Sync completed successfully');
+
+            // Now start the binaries
+            console.log('Starting binaries after successful config sync...');
+            this.updateSyncProgress(83, 'Starting binaries...');
             this.updateStep(5, 'completed', 'check_circle', 'Completed');
+            this.updateStep(6, 'running', 'play_circle', 'DataSim Running');
+
+            // Update button status to "Running" immediately
+            const startBtn = this.manager.elements.startVuDataSimBtn;
+            const stopBtn = this.manager.elements.stopVuDataSimBtn;
+            startBtn.innerHTML = '<span class="material-symbols-outlined">play_circle</span><span>Running</span>';
+            startBtn.disabled = true; // Keep disabled while running
+            stopBtn.disabled = false; // Enable stop button
+
+            this.updateSyncProgress(100, 'vuDataSim is running');
             this.showSyncSuccess();
-            this.manager.showNotification('Configs synced successfully!', 'success');
-        })
-        .catch(error => {
-            if (error.message.includes('Kafka distribution failed')) {
-                this.updateStep(1, 'completed', 'check_circle', 'Completed');
-                this.updateStep(2, 'completed', 'check_circle', 'Completed');
-                this.updateStep(3, 'completed', 'check_circle', 'Completed');
-                this.updateStep(4, 'failed', 'error', 'Failed');
-            } else if (error.message.includes('ClickHouse truncate failed')) {
-                this.updateStep(1, 'completed', 'check_circle', 'Completed');
-                this.updateStep(2, 'completed', 'check_circle', 'Completed');
-                this.updateStep(3, 'completed', 'check_circle', 'Completed');
-                this.updateStep(4, 'completed', 'check_circle', 'Completed');
-                this.updateStep(5, 'failed', 'error', 'Failed');
-            }
-            throw error;
+            this.manager.showNotification('vuDataSim started successfully!', 'success');
+
+            // Start binaries asynchronously without waiting for response
+            const binaryEndpoint = '/api/binary/start-all';
+            this.manager.callAPI(binaryEndpoint, 'POST', null, 0) // No timeout for binary start
+            .then(binaryResponse => {
+                console.log('Binary start response:', binaryResponse);
+                if (!binaryResponse.success) {
+                    console.error('Binary start failed:', binaryResponse.message);
+                    // Note: UI already shows running, but we log the error
+                }
+            })
+            .catch(binaryError => {
+                console.error('Binary start failed:', binaryError);
+                // Note: UI already shows running, but we log the error
+            });
         })
         .catch(error => {
             console.error('Error syncing configs:', error);
@@ -362,6 +389,8 @@ class O11ySources {
                 userFriendlyMessage = 'Failed to distribute configuration files to nodes. Please check node connectivity.';
             } else if (error.message.includes('Kafka distribution failed')) {
                 userFriendlyMessage = 'Failed to distribute Kafka topics for enabled sources. Please check Kafka connectivity and configuration.';
+            } else if (error.message.includes('ClickHouse truncate failed')) {
+                userFriendlyMessage = 'Failed to truncate ClickHouse tables. Please check ClickHouse connectivity and configuration.';
             } else if (error.message.includes('SSH connection failed')) {
                 userFriendlyMessage = 'Unable to connect to nodes via SSH. Please check node credentials and network connectivity.';
             } else if (error.message.includes('all nodes failed')) {
@@ -382,15 +411,15 @@ class O11ySources {
     }
 
     setSyncButtonLoading(loading) {
-        const button = this.manager.elements.syncConfigsBtn;
+        const button = this.manager.elements.startVuDataSimBtn;
         if (!button) return;
 
         if (loading) {
             button.disabled = true;
-            button.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span><span>Syncing...</span>';
+            button.innerHTML = '<span class="material-symbols-outlined animate-spin">play_arrow</span><span>Starting...</span>';
         } else {
             button.disabled = false;
-            button.innerHTML = '<span class="material-symbols-outlined">sync</span><span>Sync Configs</span>';
+            button.innerHTML = '<span class="material-symbols-outlined">play_arrow</span><span>Start vuDataSim</span>';
         }
     }
 
@@ -401,6 +430,7 @@ class O11ySources {
         this.updateStep(3, 'completed', 'check_circle', 'Completed');
         this.updateStep(4, 'completed', 'check_circle', 'Completed');
         this.updateStep(5, 'completed', 'check_circle', 'Completed');
+        this.updateStep(6, 'completed', 'check_circle', 'Completed');
 
         // Auto-hide after 5 seconds
         setTimeout(() => {
@@ -425,6 +455,7 @@ class O11ySources {
         this.updateStep(3, 'pending', 'schedule', 'Pending');
         this.updateStep(4, 'pending', 'schedule', 'Pending');
         this.updateStep(5, 'pending', 'schedule', 'Pending');
+        this.updateStep(6, 'pending', 'schedule', 'Pending');
     }
 
     updateSyncProgress(percent, statusText) {
@@ -467,6 +498,8 @@ class O11ySources {
         switch (status) {
             case 'completed':
                 return 'bg-success/20 dark:bg-success-dark/20 text-success dark:text-success-dark';
+            case 'running':
+                return 'bg-green-500/20 dark:bg-green-500/20 text-green-600 dark:text-green-400 animate-pulse';
             case 'in-progress':
                 return 'bg-primary/20 dark:bg-primary-dark/20 text-primary dark:text-primary-dark animate-pulse';
             case 'failed':
@@ -480,6 +513,8 @@ class O11ySources {
         switch (status) {
             case 'completed':
                 return 'bg-success/10 dark:bg-success-dark/10';
+            case 'running':
+                return 'bg-green-500/10 dark:bg-green-500/10';
             case 'in-progress':
                 return 'bg-primary/10 dark:bg-primary-dark/10';
             case 'failed':
@@ -493,6 +528,8 @@ class O11ySources {
         switch (status) {
             case 'completed':
                 return 'border-success/30 dark:border-success-dark/30';
+            case 'running':
+                return 'border-green-500/50 dark:border-green-500/50 ring-2 ring-green-500/30 dark:ring-green-500/30';
             case 'in-progress':
                 return 'border-primary/50 dark:border-primary-dark/50 ring-2 ring-primary/30 dark:ring-primary-dark/30';
             case 'failed':
@@ -506,6 +543,8 @@ class O11ySources {
         switch (status) {
             case 'completed':
                 return 'text-success dark:text-success-dark';
+            case 'running':
+                return 'text-green-600 dark:text-green-400';
             case 'in-progress':
                 return 'text-primary dark:text-primary-dark';
             case 'failed':

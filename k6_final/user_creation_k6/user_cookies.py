@@ -3,14 +3,29 @@ import random
 import argparse
 import time
 import urllib3
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 from playwright.sync_api import sync_playwright
+import os
+from pathlib import Path
+from playwright._impl._driver import compute_driver_executable
+import sys
+
+# === Fix for PyInstaller + Playwright ===
+if getattr(sys, 'frozen', False):
+    # running in PyInstaller bundle
+    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = str(Path(sys._MEIPASS) / "playwright-browsers")
+else:
+    # running normally
+    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = str(Path.home() / ".cache/ms-playwright")
 
 # ===== CONFIGURATION =====
 BASE_URL = "https://qa.vunetsystems.com"
 KEYCLOAK_BASE = "https://qa.vunetsystems.com"
 REALM = "vunet"
 
+# Disable all insecure request warnings globally
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+requests.packages.urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 TOKEN_URL = f"{KEYCLOAK_BASE}/realms/{REALM}/protocol/openid-connect/token"
 ADMIN_URL = f"{KEYCLOAK_BASE}/admin/realms/{REALM}/users"
@@ -22,9 +37,7 @@ ADMIN_USERNAME = "vunetadmin"
 ADMIN_PASSWORD = "Qwerty@123"
 COMMON_PASSWORD = "Password123!"
 
-
 # ===== FUNCTIONS =====
-
 def get_admin_token():
     """Get Keycloak admin access token."""
     data = {
@@ -73,40 +86,49 @@ def generate_username(prefix="load_user_"):
 
 def login_vusmartmaps_get_cookies(username):
     """Use Playwright to login to vuSmartMaps and get cookies."""
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        # Ignore invalid SSL certs
-        context = browser.new_context(ignore_https_errors=True)
-        page = context.new_page()
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args=["--no-sandbox", "--disable-dev-shm-usage"]
+            )
+            context = browser.new_context(ignore_https_errors=True)
+            page = context.new_page()
 
-        print(f"🔑 Logging in as {username}...")
-        page.goto(f"{BASE_URL}/vui/login", wait_until="networkidle")
+            print(f"🔑 Logging in as {username}...")
+            page.goto(f"{BASE_URL}/vui/login", wait_until="networkidle")
 
-        # Fill login form (adjust selectors if needed)
-        page.fill("input[name=username]", username)
-        page.fill("input[name=password]", COMMON_PASSWORD)
-        page.click("button[type=submit]")
+            page.fill("input[name=username]", username)
+            page.fill("input[name=password]", COMMON_PASSWORD)
+            page.click("button[type=submit]")
 
-        # Wait for dashboard to load
-        try:
-            page.wait_for_url(f"{BASE_URL}/vui/*", timeout=20000)
-        except:
-            print(f"❌ Failed to login {username} to vuSmartMaps")
+            try:
+                page.wait_for_url(f"{BASE_URL}/vui/*", timeout=20000)
+            except Exception as e:
+                print(f"❌ Failed to login {username} to vuSmartMaps: {e}")
+                browser.close()
+                return None
+
+            cookies = context.cookies()
             browser.close()
-            return None
-
-        cookies = context.cookies()
-        browser.close()
-        cookie_dict = {c["name"]: c["value"] for c in cookies}
-        return cookie_dict
+            return {c["name"]: c["value"] for c in cookies}
+    except Exception as e:
+        print(f"⚠️ Playwright error for {username}: {e}")
+        return None
 
 
 # ===== MAIN FUNCTION =====
-
 def main(num_users):
+    # Log start time
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open("timeout.txt", "w") as timeout_file:
+        timeout_file.write(f"Script started at: {current_time}\n")
+        timeout_file.write(f"Target number of users: {num_users}\n\n")
+
     admin_token = get_admin_token()
+    created_count = 0
+
     with open("user_cookies.txt", "w") as file:
-        # Write header
         file.write("username,password,vunet_session,X-VuNet-HTTP-Info,grafana_session_expiry\n")
 
         for _ in range(num_users):
@@ -114,8 +136,7 @@ def main(num_users):
             if not create_user(admin_token, username):
                 continue
 
-            # Small delay to allow user creation propagation
-            time.sleep(2)
+            time.sleep(2)  # allow user creation to propagate
 
             cookies = login_vusmartmaps_get_cookies(username)
             if not cookies:
@@ -128,6 +149,16 @@ def main(num_users):
 
             file.write(f"{username},{COMMON_PASSWORD},{vunet_session},{X_VuNet_HTTP_Info},{grafana_session_expiry}\n")
             print(f"✅ Cookies saved for {username}")
+            created_count += 1
+
+    final_message = (
+        f"\n🎉 All {created_count}/{num_users} users created successfully "
+        f"at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}!\n"
+    )
+    print(final_message)
+
+    with open("timeout.txt", "a") as timeout_file:
+        timeout_file.write(final_message)
 
 
 # ===== ENTRY POINT =====

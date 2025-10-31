@@ -57,6 +57,23 @@
         background-color: #e2e8f0; /* slate-200 */
         color: #475569; /* slate-600 */
     }
+
+    .sort-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+        padding: 0;
+    }
+
+    .sort-btn:hover {
+        color: #1f2937; /* slate-800 */
+    }
+
+    .sort-icon {
+        transition: opacity 0.2s ease-in-out;
+    }
     
         #pod-yaml-content {
   background-color: #0f172a; /* slate-900 */
@@ -619,33 +636,60 @@
                             <table class="w-full min-w-max text-left">
                                 <thead class="border-b border-slate-200">
                                     <tr>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            Namespace</th>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            Pod Name</th>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            Node</th>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            Status</th>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            Ready</th>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            CPU Usage</th>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            Memory Usage</th>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            Restarts</th>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            Last Seen</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="namespace">
+                                                <span>Namespace</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="pod_name">
+                                                <span>Pod Name</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="node_name">
+                                                <span>Node</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="status">
+                                                <span>Status</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="ready">
+                                                <span>Ready</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="cpu_usage">
+                                                <span>CPU Usage</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="memory_usage">
+                                                <span>Memory Usage</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="restarts">
+                                                <span>Restarts</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="last_seen">
+                                                <span>Last Seen</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody id="pod-monitoring-body" class="divide-y divide-slate-200 text-slate-700">
@@ -756,6 +800,9 @@
                                             Dashboard</th>
                                         <th
                                             class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            Panel Status</th>
+                                        <th
+                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
                                             P95 Response Time (ms)</th>
                                     </tr>
                                 </thead>
@@ -808,6 +855,9 @@
                                             <th
                                                 class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
                                                 Time Filter</th>
+                                            <th
+                                                class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                                Dashboard Status</th>
                                             <th
                                                 class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
                                                 Dashboard Name</th>

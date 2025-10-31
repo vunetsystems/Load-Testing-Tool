@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"vuDataSim/src/logger"
 )
 
 func HandleAPIGetAllBinaryStatus(w http.ResponseWriter, r *http.Request) {
@@ -139,11 +140,74 @@ func HandleAPIStopAllBinaries(w http.ResponseWriter, r *http.Request) {
 
 	response, err := BinaryControl.StopAllBinaries(timeout)
 	if err != nil {
+		logger.LogError("all", "binary_stop", fmt.Sprintf("Failed to stop all binaries: %v", err))
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Failed to stop all binaries: %v", err),
 		})
 		return
+	}
+
+	// Verify all binaries are actually stopped
+	allStopped := true
+	if response.Data != nil {
+		bulkData := response.Data
+		for _, result := range bulkData.Results {
+			if result.Success {
+				// Double-check by getting status for this node
+				status, statusErr := BinaryControl.GetBinaryStatus(result.NodeName)
+				if statusErr != nil || status.Status == "running" {
+					allStopped = false
+					logger.LogWarning(result.NodeName, "binary_stop", fmt.Sprintf("Binary still running after stop operation: status=%s, error=%v", status.Status, statusErr))
+					break
+				}
+			} else {
+				allStopped = false
+				logger.LogWarning(result.NodeName, "binary_stop", "Stop operation reported failure")
+				break
+			}
+		}
+	}
+
+	if !allStopped {
+		logger.LogWarning("all", "binary_stop", "Some binaries still running, attempting second stop operation")
+		// Retry stop operation once more
+		retryResponse, retryErr := BinaryControl.StopAllBinaries(timeout)
+		if retryErr == nil && retryResponse != nil {
+			// Verify again after retry
+			allStopped = true
+			if retryResponse.Data != nil {
+				retryBulkData := retryResponse.Data
+				for _, result := range retryBulkData.Results {
+					if result.Success {
+						status, statusErr := BinaryControl.GetBinaryStatus(result.NodeName)
+						if statusErr != nil || status.Status == "running" {
+							allStopped = false
+							logger.LogError(result.NodeName, "binary_stop", fmt.Sprintf("Binary still running after retry: status=%s, error=%v", status.Status, statusErr))
+							break
+						}
+					} else {
+						allStopped = false
+						logger.LogError(result.NodeName, "binary_stop", "Retry stop operation also failed")
+						break
+					}
+				}
+			}
+			if allStopped {
+				logger.LogSuccess("all", "binary_stop", "All binaries successfully stopped after retry and verified dead")
+				response.Message = "completed"
+				response.Data = retryResponse.Data // Update with retry results
+			} else {
+				logger.LogError("all", "binary_stop", "Some binaries still running after retry operation")
+				response.Message = "partial failure - some binaries still running"
+			}
+		} else {
+			logger.LogError("all", "binary_stop", fmt.Sprintf("Retry stop operation failed: %v", retryErr))
+			response.Message = "stop operation failed with retry"
+		}
+	} else {
+		logger.LogSuccess("all", "binary_stop", "All binaries successfully stopped and verified dead")
+		response.Message = "completed"
 	}
 
 	apiResponse := APIResponse{
