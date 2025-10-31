@@ -62,13 +62,28 @@ K6_INSECURE_SKIP_TLS_VERIFY=true k6 run \
 echo -e "\n📊 Parsing login results..."
 TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
 
-# Parse login metrics
-grep "✅ Login successful" "$LOGIN_OUTPUT" | while IFS= read -r line; do
+# ======================================
+# Parse both success and failure
+# ======================================
+grep -E "Login (successful|failed)" "$LOGIN_OUTPUT" | while IFS= read -r line; do
   if [[ "$line" =~ ✅[[:space:]]Login[[:space:]]successful[[:space:]]\|[[:space:]]User:[[:space:]]([^|]+)[[:space:]]\|[[:space:]]Response[[:space:]]Time:[[:space:]]([^|]+)[[:space:]]ms ]]; then
     USERNAME="${BASH_REMATCH[1]}"
     RESPONSE_TIME="${BASH_REMATCH[2]}"
-    echo "$TIMESTAMP,login,$RESPONSE_TIME,200,100,$VUS,$VUS,$ITERATIONS" >> "$LOGIN_CSV"
+    STATUS=200
+    SUCCESS_RATE=100
+    echo "✅ $USERNAME | ${RESPONSE_TIME}ms"
+  elif [[ "$line" =~ ❌[[:space:]]Login[[:space:]]failed[[:space:]]\|[[:space:]]User:[[:space:]]([^|]+)[[:space:]]\|[[:space:]]Status:[[:space:]]([0-9]+).*Response[[:space:]]Time:[[:space:]]([^|]+)[[:space:]]ms ]]; then
+    USERNAME="${BASH_REMATCH[1]}"
+    STATUS="${BASH_REMATCH[2]}"
+    RESPONSE_TIME="${BASH_REMATCH[3]}"
+    SUCCESS_RATE=0
+    echo "❌ $USERNAME | Status=$STATUS | ${RESPONSE_TIME}ms"
+  else
+    continue
   fi
+
+  # Append parsed result to CSV
+  echo "$TIMESTAMP,login,$RESPONSE_TIME,$STATUS,$SUCCESS_RATE,$VUS,$VUS,$ITERATIONS" >> "$LOGIN_CSV"
 done
 
 echo "✅ Completed Login Test."

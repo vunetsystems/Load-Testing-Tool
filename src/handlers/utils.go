@@ -20,20 +20,29 @@ func SendJSONResponse(w http.ResponseWriter, status int, response APIResponse) {
 
 func ReadLogsFromFile() []map[string]interface{} {
 	logFilePath := "logs/vuDataSim.log"
+	log.Printf("DEBUG: Attempting to read logs from file: %s", logFilePath)
 	file, err := os.Open(logFilePath)
 	if err != nil {
+		log.Printf("DEBUG: Failed to open log file: %v", err)
 		// If log file doesn't exist yet, return empty slice
 		return []map[string]interface{}{}
 	}
 	defer file.Close()
+	log.Printf("DEBUG: Successfully opened log file")
 
 	var logs []map[string]interface{}
 	scanner := bufio.NewScanner(file)
+	// Increase buffer size to handle large log lines
+	buf := make([]byte, 0, 1024*1024) // 1MB buffer
+	scanner.Buffer(buf, 1024*1024)
+	lineCount := 0
 
 	for scanner.Scan() {
+		lineCount++
 		line := scanner.Text()
 		var logEntry map[string]interface{}
 		if err := json.Unmarshal([]byte(line), &logEntry); err != nil {
+			log.Printf("DEBUG: Failed to parse JSON line %d: %v, line content: %s", lineCount, err, line)
 			continue // Skip malformed lines
 		}
 
@@ -48,6 +57,12 @@ func ReadLogsFromFile() []map[string]interface{} {
 
 		logs = append(logs, frontendLog)
 	}
+
+	if err := scanner.Err(); err != nil {
+		log.Printf("DEBUG: Error scanning file: %v", err)
+	}
+
+	log.Printf("DEBUG: Read %d lines from log file, parsed %d valid log entries", lineCount, len(logs))
 
 	// Reverse to show newest first
 	for i, j := 0, len(logs)-1; i < j; i, j = i+1, j-1 {
@@ -101,7 +116,7 @@ func GetLogType(entry map[string]interface{}) string {
 
 // parseLimitParameter extracts and validates the limit parameter
 func ParseLimitParameter(limitStr string) int {
-	limit := 50 // default
+	limit := 100 // default
 	if limitStr != "" {
 		if parsed, err := strconv.Atoi(limitStr); err == nil && parsed > 0 && parsed <= 1000 {
 			limit = parsed

@@ -9,10 +9,11 @@ import (
 
 // K6DashboardResult represents a single k6 dashboard monitoring result
 type K6DashboardResult struct {
-	Timestamp      time.Time `json:"timestamp"`
-	NoOfUsers      uint16    `json:"no_of_users"`
-	TimeFilter     string    `json:"time_filter"`
-	DashboardName  string    `json:"dashboard_name"`
+	Timestamp       time.Time `json:"timestamp"`
+	NoOfUsers       uint16    `json:"no_of_users"`
+	TimeFilter      string    `json:"time_filter"`
+	DashboardStatus  uint16   `json:"dashboard_status"`
+	DashboardName   string    `json:"dashboard_name"`
 	P95ResponseTime float64   `json:"p95_response_time"`
 }
 
@@ -27,16 +28,18 @@ func GetK6DashboardResults(ctx context.Context) ([]K6DashboardResult, error) {
 		    timestamp AS "Timestamp",
 		    vus AS "No of Users",
 		    time_range AS "Time Filter",
+		    dashboard_status AS "Dashboard Status",
 		    dashboard_name AS "Dashboard Name",
 		    quantile(0.9)(dashboard_avg_response_time) AS "P95 Response time"
 		FROM monitoring.k6_results
-		WHERE
-		    timestamp >= (now() - INTERVAL 1 HOUR) - INTERVAL 5 HOUR - INTERVAL 30 MINUTE
-		    AND time_range IN ('15m')
+		WHERE (timestamp >= (((now() - toIntervalHour(1)) - toIntervalHour(5)) - toIntervalMinute(30))) AND (time_range IN ('15m'))
 		GROUP BY
-		    timestamp, vus, time_range, dashboard_name
-		ORDER BY
-		    timestamp;
+		    timestamp,
+		    vus,
+		    time_range,
+		    dashboard_status,
+		    dashboard_name
+		ORDER BY timestamp ASC
 	`
 
 	rows, err := monitoringDBClient.Client.Query(ctx, query)
@@ -53,6 +56,7 @@ func GetK6DashboardResults(ctx context.Context) ([]K6DashboardResult, error) {
 			&result.Timestamp,
 			&result.NoOfUsers,
 			&result.TimeFilter,
+			&result.DashboardStatus,
 			&result.DashboardName,
 			&result.P95ResponseTime,
 		)

@@ -19,14 +19,18 @@ class LogsManager {
         try {
             const response = await this.manager.callAPI('/api/logs?limit=50');
             if (response.success && response.data && response.data.logs) {
-                this.logEntries = response.data.logs.map(log => ({
-                    time: log.timestamp,
-                    node: log.node,
-                    module: log.module,
-                    message: log.message,
-                    type: log.type
-                }));
+                this.logEntries = response.data.logs.map(logString => {
+                    const log = JSON.parse(logString);
+                    return {
+                        time: log.time,
+                        node: log.node,
+                        module: log.module,
+                        message: log.message,
+                        type: log.level || log.type // Use 'level' from JSON, fallback to 'type'
+                    };
+                });
                 this.displayLogs(this.logEntries);
+                this.populateNodeFilters(); // Populate filters after loading logs
             }
         } catch (error) {
             console.error('Error loading logs:', error);
@@ -34,32 +38,70 @@ class LogsManager {
     }
 
     populateNodeFilters() {
-        // Populate log filter dropdown with actual node names
+        // Populate log filter dropdowns with actual values from logs
         const nodeFilter = this.manager.elements.logNodeFilter;
-        if (!nodeFilter) return;
+        const moduleFilter = this.manager.elements.logModuleFilter;
+        const typeFilter = this.manager.elements.logTypeFilter;
 
-        // Clear existing options except "All Nodes"
+        if (!nodeFilter || !moduleFilter || !typeFilter) return;
+
+        // Clear existing options except "All Nodes/Modules/Types"
         while (nodeFilter.children.length > 1) {
             nodeFilter.removeChild(nodeFilter.lastChild);
         }
+        while (moduleFilter.children.length > 1) {
+            moduleFilter.removeChild(moduleFilter.lastChild);
+        }
+        while (typeFilter.children.length > 1) {
+            typeFilter.removeChild(typeFilter.lastChild);
+        }
 
-        // Add actual node names (include both active and error status nodes)
-        Object.keys(this.manager.nodeData).forEach(nodeId => {
+        // Collect unique values from logs
+        const uniqueNodes = new Set();
+        const uniqueModules = new Set();
+        const uniqueTypes = new Set();
+
+        this.logEntries.forEach(log => {
+            if (log.node) uniqueNodes.add(log.node);
+            if (log.module) uniqueModules.add(log.module);
+            if (log.type) uniqueTypes.add(log.type);
+        });
+
+        // Add node options
+        uniqueNodes.forEach(node => {
             const option = document.createElement('option');
-            option.value = nodeId;
-            option.textContent = nodeId;
+            option.value = node;
+            option.textContent = node;
             nodeFilter.appendChild(option);
+        });
+
+        // Add module options
+        uniqueModules.forEach(module => {
+            const option = document.createElement('option');
+            option.value = module;
+            option.textContent = module;
+            moduleFilter.appendChild(option);
+        });
+
+        // Add type options (capitalize first letter)
+        uniqueTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type;
+            option.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+            typeFilter.appendChild(option);
         });
     }
 
     filterLogs() {
         const nodeFilter = this.manager.elements.logNodeFilter.value;
         const moduleFilter = this.manager.elements.logModuleFilter.value;
+        const typeFilter = this.manager.elements.logTypeFilter.value;
 
         const filteredLogs = this.logEntries.filter(log => {
             const nodeMatch = nodeFilter === 'All Nodes' || log.node === nodeFilter;
             const moduleMatch = moduleFilter === 'All Modules' || log.module === moduleFilter;
-            return nodeMatch && moduleMatch;
+            const typeMatch = typeFilter === 'All Types' || log.type.toLowerCase() === typeFilter.toLowerCase();
+            return nodeMatch && moduleMatch && typeMatch;
         });
 
         this.displayLogs(filteredLogs);
@@ -96,7 +138,9 @@ class LogsManager {
             warning: 'text-yellow-400',
             error: 'text-red-400',
             success: 'text-emerald-400',
-            metric: 'text-emerald-400'
+            metric: 'text-emerald-400',
+            debug: 'text-blue-400',
+            fatal: 'text-red-500'
         };
         return classes[type] || 'text-gray-400';
     }
