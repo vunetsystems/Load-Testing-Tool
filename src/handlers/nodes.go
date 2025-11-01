@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
+	"vuDataSim/src/logger"
 	"vuDataSim/src/node_control"
 
 	"github.com/gorilla/mux"
@@ -187,7 +189,28 @@ func HandleUpdateNode(w http.ResponseWriter, r *http.Request, nodeName string) {
 }
 
 func HandleDeleteNode(w http.ResponseWriter, r *http.Request, nodeName string) {
-	err := NodeManager.RemoveNode(nodeName)
+	// Stop node_metrics_api binary before removing node
+	logger.Info().Str("node", nodeName).Msg("Stopping node_metrics_api binary before node removal")
+	_, err := BinaryControl.StopMetricsBinary(nodeName, 10)
+	if err != nil {
+		logger.Warn().Err(err).Str("node", nodeName).Msg("Failed to stop node_metrics_api binary - continuing with removal")
+		// Don't fail the entire operation if metrics binary stop fails
+	} else {
+		logger.LogSuccess(nodeName, "node_control", "node_metrics_api binary stopped successfully")
+	}
+
+	// Stop finalvudatasim binary before removing node
+	logger.Info().Str("node", nodeName).Msg("Stopping finalvudatasim binary before node removal")
+	_, err = BinaryControl.StopBinary(nodeName, 10)
+	if err != nil {
+		logger.Warn().Err(err).Str("node", nodeName).Msg("Failed to stop finalvudatasim binary - continuing with removal")
+		// Don't fail the entire operation if binary stop fails
+	} else {
+		logger.LogSuccess(nodeName, "node_control", "finalvudatasim binary stopped successfully")
+	}
+
+	// Now remove the node from configuration
+	err = NodeManager.RemoveNode(nodeName)
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
@@ -198,7 +221,7 @@ func HandleDeleteNode(w http.ResponseWriter, r *http.Request, nodeName string) {
 
 	SendJSONResponse(w, http.StatusOK, APIResponse{
 		Success: true,
-		Message: fmt.Sprintf("Node %s deleted successfully", nodeName),
+		Message: fmt.Sprintf("Node %s deleted successfully (binaries stopped and node removed from configuration)", nodeName),
 	})
 }
 
@@ -295,7 +318,11 @@ func HandleAPIDebugMetricsBinary(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleAPIAddAllClusterNodes(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+	logger.Info().Msg("🧩 Starting HandleAPIAddAllClusterNodes request")
+
 	if r.Method != http.MethodPost {
+		logger.Warn().Msg("Invalid HTTP method used")
 		SendJSONResponse(w, http.StatusMethodNotAllowed, APIResponse{
 			Success: false,
 			Message: "Method not allowed",
@@ -303,12 +330,16 @@ func HandleAPIAddAllClusterNodes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Execute kubectl command to get nodes
+	logger.Info().Msg("✅ HTTP Method Check passed")
+
+	// Step 2: Fetch all cluster nodes
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
 	cmd := exec.CommandContext(ctx, "kubectl", "get", "nodes", "-o", "wide")
 	output, err := cmd.Output()
 	if err != nil {
+		logger.Error().Err(err).Msg("Failed to execute kubectl command")
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Failed to execute kubectl: %v", err),
@@ -316,9 +347,11 @@ func HandleAPIAddAllClusterNodes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse kubectl output
+	logger.Info().Msg("✅ Successfully fetched kubectl nodes output")
+
 	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
 	if len(lines) < 2 {
+		logger.Error().Msg("No nodes found in kubectl output")
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
 			Message: "No nodes found in kubectl output",
@@ -326,12 +359,38 @@ func HandleAPIAddAllClusterNodes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Skip header line
 	nodeLines := lines[1:]
-
-	currentNodeIP := "164.52.213.158"
-	addedNodes := []string{}
 	fetchedNodes := []map[string]string{}
+	addedNodes := []string{}
+
+	type NodeResult struct {
+		Name    string `json:"name"`
+		IP      string `json:"ip"`
+		Status  string `json:"status"`
+		Message string `json:"message"`
+	}
+
+	nodeResults := []NodeResult{}
+
+	logger.Info().Msg("🔍 Parsing kubectl output for node details")
+
+	// Step 3: Load app config once
+	appConfig, err := NodeManager.LoadAppConfig()
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to load app config")
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to load app config: %v", err),
+		})
+		return
+	}
+
+	logger.Info().Msg("✅ Loaded app configuration")
+
+	currentNodeIP := appConfig.Network.CurrentNodeIP
+
+	var wg sync.WaitGroup
+	var mu sync.Mutex
 
 	for _, line := range nodeLines {
 		fields := strings.Fields(line)
@@ -340,8 +399,8 @@ func HandleAPIAddAllClusterNodes(w http.ResponseWriter, r *http.Request) {
 		}
 
 		nodeName := fields[0]
-		nodeIP := fields[5] // INTERNAL-IP column
-		nodeRole := fields[2] // ROLES column
+		nodeRole := fields[2]
+		nodeIP := fields[5]
 
 		fetchedNodes = append(fetchedNodes, map[string]string{
 			"name": nodeName,
@@ -349,19 +408,9 @@ func HandleAPIAddAllClusterNodes(w http.ResponseWriter, r *http.Request) {
 			"role": nodeRole,
 		})
 
-		// Skip current node
 		if nodeIP == currentNodeIP {
+			logger.Info().Str("node", nodeName).Msg("Skipping current node")
 			continue
-		}
-
-		// Get defaults from config
-		appConfig, err := NodeManager.LoadAppConfig()
-		if err != nil {
-			SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
-				Success: false,
-				Message: fmt.Sprintf("Failed to load app config: %v", err),
-			})
-			return
 		}
 
 		addNodeReq := node_control.AddNodeRequest{
@@ -375,27 +424,59 @@ func HandleAPIAddAllClusterNodes(w http.ResponseWriter, r *http.Request) {
 			Enabled:     true,
 		}
 
-		err = NodeManager.AddNode(addNodeReq)
-		if err != nil {
-			SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
-				Success: false,
-				Message: fmt.Sprintf("Failed to add node %s: %v", nodeName, err),
-			})
-			return
-		}
+		wg.Add(1)
+		go func(req node_control.AddNodeRequest) {
+			defer wg.Done()
 
-		addedNodes = append(addedNodes, nodeName)
+			logger.Info().Str("node", req.Name).Msg("🚀 Starting node addition process")
+
+			err := NodeManager.AddNode(req)
+			mu.Lock()
+			defer mu.Unlock()
+
+			if err != nil {
+				logger.Error().Err(err).Str("node", req.Name).Msg("❌ Failed to add node")
+				nodeResults = append(nodeResults, NodeResult{
+					Name:    req.Name,
+					IP:      req.Host,
+					Status:  "failed",
+					Message: err.Error(),
+				})
+				return
+			}
+
+			logger.Info().Str("node", req.Name).Msg("✅ Node added and binaries started successfully")
+
+			addedNodes = append(addedNodes, req.Name)
+			nodeResults = append(nodeResults, NodeResult{
+				Name:    req.Name,
+				IP:      req.Host,
+				Status:  "success",
+				Message: "Node added and started successfully",
+			})
+		}(addNodeReq)
 	}
+
+	wg.Wait()
+	duration := time.Since(startTime)
+
+	logger.Info().
+		Int("total_fetched", len(fetchedNodes)).
+		Int("total_added", len(addedNodes)).
+		Dur("duration", duration).
+		Msg("🏁 Completed adding all cluster nodes")
 
 	response := map[string]interface{}{
 		"fetched_nodes": fetchedNodes,
+		"node_status":   nodeResults,
 		"added_nodes":   addedNodes,
 		"current_node":  currentNodeIP,
+		"duration_sec":  duration.Seconds(),
 	}
 
 	SendJSONResponse(w, http.StatusOK, APIResponse{
 		Success: true,
-		Message: fmt.Sprintf("Added %d nodes successfully", len(addedNodes)),
+		Message: fmt.Sprintf("Processed %d nodes (added %d successfully)", len(fetchedNodes), len(addedNodes)),
 		Data:    response,
 	})
 }

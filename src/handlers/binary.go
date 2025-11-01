@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"vuDataSim/src/bin_control"
 	"vuDataSim/src/logger"
 )
 
@@ -59,15 +60,7 @@ func HandleAPIStartBinary(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nodeName := vars["node"]
 
-	if nodeName == "" {
-		SendJSONResponse(w, http.StatusBadRequest, APIResponse{
-			Success: false,
-			Message: "Node name is required",
-		})
-		return
-	}
-
-	// Parse timeout from query parameters (default: 30 seconds)
+	// Parse timeout (default 30 seconds)
 	timeout := 30
 	if timeoutStr := r.URL.Query().Get("timeout"); timeoutStr != "" {
 		if parsed, err := strconv.Atoi(timeoutStr); err == nil && parsed > 0 {
@@ -101,9 +94,37 @@ func HandleAPIStartBinary(w http.ResponseWriter, r *http.Request) {
 	SendJSONResponse(w, statusCode, apiResponse)
 }
 
+
+// StartBinaryInternal wraps StartBinary with consistent APIResponse formatting for internal use
+func StartBinaryInternal(bc *bin_control.BinaryControl, nodeName string, timeout int) (*APIResponse, error) {
+	if nodeName == "" {
+		return &APIResponse{
+			Success: false,
+			Message: "Node name is required",
+		}, fmt.Errorf("node name is required")
+	}
+
+	response, err := bc.StartBinary(nodeName, timeout)
+	if err != nil {
+		return &APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to start binary on node %s: %v", nodeName, err),
+		}, err
+	}
+
+	return &APIResponse{
+		Success: response.Success,
+		Message: response.Message,
+		Data:    response.Data,
+	}, nil
+}
+
+
+
+
 // HandleAPIStartAllBinaries handles POST /api/binary/start-all
 func HandleAPIStartAllBinaries(w http.ResponseWriter, r *http.Request) {
-	// Parse timeout from query parameters (default: 30 seconds)
+	// Parse timeout from query parameters (default: 30 minutes)
 	timeout := 30
 	if timeoutStr := r.URL.Query().Get("timeout"); timeoutStr != "" {
 		if parsed, err := strconv.Atoi(timeoutStr); err == nil && parsed > 0 {
@@ -111,22 +132,26 @@ func HandleAPIStartAllBinaries(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	logger.LogWithNode("all", "binary_start", fmt.Sprintf("Received API call to start binaries on all nodes (timeout=%d)", timeout), "info")
+
 	response, err := BinaryControl.StartAllBinaries(timeout)
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Failed to start all binaries: %v", err),
+			Data:    response, // send partial results if available
 		})
 		return
 	}
 
-	apiResponse := APIResponse{
+	SendJSONResponse(w, http.StatusOK, APIResponse{
 		Success: response.Success,
 		Message: response.Message,
 		Data:    response.Data,
-	}
-	SendJSONResponse(w, http.StatusOK, apiResponse)
+	})
 }
+
+
 
 // HandleAPIStopAllBinaries handles POST /api/binary/stop-all
 func HandleAPIStopAllBinaries(w http.ResponseWriter, r *http.Request) {

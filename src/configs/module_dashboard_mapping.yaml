@@ -9,3 +9,15 @@ module_dashboard_mapping:
   Mssql:
     dashboard_name: "MSSQL Overview Dashboard"
     dashboard_slug: "mssql-overview-dashboard"
+  Apache:
+    dashboard_name: "Apache Overview"
+    dashboard_slug: "Apache Overview"    
+  Azure_Firewall:
+    dashboard_name: "Azure Firewall Insights"
+    dashboard_slug: "azure-firewall-insights"        
+  MongoDB:
+    dashboard_name: "MongoDB Overview"
+    dashboard_slug: "mongodb-overview"    
+  Azure_Redis_Cache:
+    dashboard_name: "Azure Redis Cache Overview"
+    dashboard_slug: "Azure-Redis-Cache-Overview"        

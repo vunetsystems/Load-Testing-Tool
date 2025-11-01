@@ -140,9 +140,9 @@ export default function () {
   };
 
   const jar = http.cookieJar();
-  jar.set('https://qa.vunetsystems.com', 'vunet_session', user.vunetSession);
-  jar.set('https://qa.vunetsystems.com', 'X-VuNet-HTTP-Info', user.xVuNetHTTPInfo);
-  jar.set('https://qa.vunetsystems.com', 'grafana_session_expiry', user.grafanaSessionExpiry.toString());
+  jar.set('https://216.48.191.10', 'vunet_session', user.vunetSession);
+  jar.set('https://216.48.191.10', 'X-VuNet-HTTP-Info', user.xVuNetHTTPInfo);
+  jar.set('https://216.48.191.10', 'grafana_session_expiry', user.grafanaSessionExpiry.toString());
 
   const baseDashboardAPI = config.base_urls.dashboard_api;
   const basePanelURL = config.base_urls.panel;

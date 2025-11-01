@@ -457,6 +457,10 @@ button:active {
     }
 }
 
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .o11y-selected-item {

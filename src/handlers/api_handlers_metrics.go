@@ -104,6 +104,9 @@ func HandleProxyMetrics(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Note: We don't check binary status here because node_metrics_api should run independently
+	// of finalvudatasim. System metrics should be available regardless of load testing binary status.
+
 	// Make request to the metrics API server using the node's IP
 	url := fmt.Sprintf("http://%s:8086/api/system/metrics", nodeConfig.Host)
 	resp, err := http.Get(url)

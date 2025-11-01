@@ -50,6 +50,7 @@ type NetworkConfig struct {
 	RemoteUser       string `yaml:"remote_user"`
 	StreamlitAddress string `yaml:"streamlit_address"`
 	StreamlitPort    int    `yaml:"streamlit_port"`
+	CurrentNodeIP    string `yaml:"current_node_ip"`
 }
 
 type PathsConfig struct {

@@ -23,6 +23,19 @@ func HandleAPIGetProcessMetrics(w http.ResponseWriter, r *http.Request) {
 
 	var allMetrics []ProcessMetrics
 	for nodeName, nodeConfig := range enabledNodes {
+		// First check if binary is running before collecting detailed metrics
+		status, err := BinaryControl.GetBinaryStatus(nodeName)
+		if err != nil || status.Status != "running" {
+			// Skip nodes where binary is not running - no need to collect metrics
+			allMetrics = append(allMetrics, ProcessMetrics{
+				NodeID:    nodeName,
+				Timestamp: time.Now(),
+				Running:   false,
+			})
+			continue
+		}
+
+		// Only collect detailed metrics for running binaries
 		metrics := CollectProcessMetricsForNode(nodeName, &nodeConfig)
 		allMetrics = append(allMetrics, metrics)
 	}
