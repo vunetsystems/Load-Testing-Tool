@@ -376,6 +376,16 @@ class VuDataSimManager {
             }
         }, 30000); // 30 seconds
 
+        // Binary status updates for button state - Update every 30 seconds
+        setInterval(async () => {
+            try {
+                console.log('Periodic binary status check for button state...');
+                await this.dashboard.updateVuDataSimButtonState();
+            } catch (error) {
+                console.error('Error in periodic binary status check:', error);
+            }
+        }, 30000); // 30 seconds
+
 
         // SSH status updates - Update every hour
         setInterval(() => {
@@ -684,7 +694,7 @@ class VuDataSimManager {
             // Call the syncConfigs function (which now includes binary start)
             await this.o11ySources.syncConfigs(timeoutSeconds, skipChTruncate);
 
-            // Show success notification
+            // Show success notification only if syncConfigs completed without throwing an error
             this.showNotification('vuDataSim started successfully!', 'success');
 
         } catch (error) {

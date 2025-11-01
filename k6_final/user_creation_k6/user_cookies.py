@@ -19,8 +19,8 @@ else:
     os.environ["PLAYWRIGHT_BROWSERS_PATH"] = str(Path.home() / ".cache/ms-playwright")
 
 # ===== CONFIGURATION =====
-BASE_URL = "http://216.48.191.10/"
-KEYCLOAK_BASE = "http://216.48.191.10/"
+BASE_URL = "https://216.48.191.10"
+KEYCLOAK_BASE = "https://216.48.191.10"
 REALM = "vunet"
 
 # Disable all insecure request warnings globally

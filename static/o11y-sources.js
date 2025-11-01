@@ -343,39 +343,59 @@ class O11ySources {
             console.log('Starting binaries after successful config sync...');
             this.updateSyncProgress(83, 'Starting binaries...');
             this.updateStep(5, 'completed', 'check_circle', 'Completed');
-            this.updateStep(6, 'running', 'play_circle', 'DataSim Running');
+            this.updateStep(6, 'running', 'play_circle', 'Starting vudatasim');
 
-            // Update button status to "Running" immediately
+            // Update button status to "Starting vudatasim" while waiting for binary response
             const startBtn = this.manager.elements.startVuDataSimBtn;
             const stopBtn = this.manager.elements.stopVuDataSimBtn;
-            startBtn.innerHTML = '<span class="material-symbols-outlined">play_circle</span><span>Running</span>';
-            startBtn.disabled = true; // Keep disabled while running
-            stopBtn.disabled = false; // Enable stop button
+            startBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">play_circle</span><span>Starting vudatasim...</span>';
+            startBtn.disabled = true; // Keep disabled while starting
+            stopBtn.disabled = true; // Keep disabled while starting
 
-            this.updateSyncProgress(100, 'vuDataSim is running');
-            this.showSyncSuccess();
-            this.manager.showNotification('vuDataSim started successfully!', 'success');
+            this.updateSyncProgress(83, 'Starting vudatasim...');
+            this.updateStep(6, 'running', 'play_circle', 'Starting vudatasim');
 
-            // Start binaries asynchronously without waiting for response
+            // Start binaries and wait for response before marking complete
             const binaryEndpoint = '/api/binary/start-all';
-            this.manager.callAPI(binaryEndpoint, 'POST', null, 0) // No timeout for binary start
+            return this.manager.callAPI(binaryEndpoint, 'POST', null, 180000) // 3 minutes timeout
             .then(binaryResponse => {
                 console.log('Binary start response:', binaryResponse);
                 if (!binaryResponse.success) {
                     console.error('Binary start failed:', binaryResponse.message);
-                    // Note: UI already shows running, but we log the error
+                    this.updateStep(6, 'failed', 'error', 'Failed');
+                    throw new Error(binaryResponse.message || 'Binary start failed');
+                } else {
+                    // Mark step 6 as completed and update button states
+                    this.updateSyncProgress(100, 'vuDataSim started successfully');
+                    this.updateStep(6, 'completed', 'check_circle', 'Completed');
+                    this.showSyncSuccess();
+                    this.manager.showNotification('vuDataSim started successfully!', 'success');
+
+                    // Update button states to show running
+                    const startBtn = this.manager.elements.startVuDataSimBtn;
+                    const stopBtn = this.manager.elements.stopVuDataSimBtn;
+                    startBtn.innerHTML = '<span class="material-symbols-outlined">play_circle</span><span>Running</span>';
+                    startBtn.disabled = true; // Keep disabled while running
+                    stopBtn.disabled = false; // Enable stop button
                 }
             })
             .catch(binaryError => {
                 console.error('Binary start failed:', binaryError);
-                // Note: UI already shows running, but we log the error
+                this.updateStep(6, 'failed', 'error', 'Failed');
+                // Reset button states on failure
+                const startBtn = this.manager.elements.startVuDataSimBtn;
+                const stopBtn = this.manager.elements.stopVuDataSimBtn;
+                startBtn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span><span>Start vuDataSim</span>';
+                startBtn.disabled = false;
+                stopBtn.disabled = false;
+                throw binaryError;
             });
         })
         .catch(error => {
             console.error('Error syncing configs:', error);
             console.error('Error stack:', error.stack);
 
-            // Ensure button is reset even if error occurs
+            // Re-enable button on failure
             this.setSyncButtonLoading(false);
 
             // Provide more specific error messages based on error content
@@ -403,10 +423,14 @@ class O11ySources {
 
             this.showSyncError(userFriendlyMessage);
             this.manager.showNotification('Failed to sync configs: ' + userFriendlyMessage, 'error');
+
+            // Re-throw the error so that startVuDataSim knows the sync failed
+            throw error;
         })
         .finally(() => {
             console.log('Sync configs operation completed (success or failure)');
-            this.setSyncButtonLoading(false);
+            // Only re-enable button on failure - success case handles button state separately
+            // Button remains disabled during entire chain until success or failure
         });
     }
 
@@ -479,6 +503,12 @@ class O11ySources {
 
         if (iconElement) {
             iconElement.textContent = icon;
+            // Add rotation animation for in-progress status
+            if (status === 'in-progress') {
+                iconElement.classList.add('animate-spin');
+            } else {
+                iconElement.classList.remove('animate-spin');
+            }
         }
         if (textElement) {
             textElement.textContent = text;

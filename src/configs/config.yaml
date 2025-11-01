@@ -20,6 +20,7 @@ network:
   remote_user: vunet
   streamlit_address: 0.0.0.0
   streamlit_port: 8501
+  current_node_ip: "216.48.191.10"
  
 paths:
   local_backups_dir: backups

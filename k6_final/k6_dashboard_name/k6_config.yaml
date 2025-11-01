@@ -1,12 +1,28 @@
 base_urls:
-    dashboard_api: https://http://216.48.191.10/vui/api/dashboards/uid/
-    panel: https://http://216.48.191.10/vui/d/
+    dashboard_api: https://216.48.191.10/vui/api/dashboards/uid/
+    panel: https://216.48.191.10/vui/d/
 dashboards:
     - id: b1ec2dfd-6a8e-456b-869e-1f8df644e614
       name: MSSQL Overview Dashboard
       slug: mssql-overview-dashboard
       enabled: false
-    - id: b95b768c-bb56-4faf-af9e-2db19d50c149
+    - id: cf5c449b-42e0-433d-9183-d5f717ae3a83
       name: Linux Server Insights
       slug: linux-server-insights
       enabled: false
+    - id: a2bf56c5-04d3-4a97-998a-76744f0a7066
+      name: Apache Overview
+      slug: Apache Overview
+      enabled: true
+    - id: cceb91b5-f855-4bdb-b680-2e4d7825d28c
+      name: Azure Firewall Insights
+      slug: azure-firewall-insights
+      enabled: true
+    - id: acaaa547-06a4-4319-91e3-558b3c896864
+      name: MongoDB Overview
+      slug: mongodb-overview
+      enabled: true
+    - id: beuvjppwoeyv4d
+      name: Azure Redis Cache Overview
+      slug: Azure-Redis-Cache-Overview
+      enabled: true

@@ -55,6 +55,15 @@ type MetricsCollector struct {
 	currentSysMetrics SystemMetrics
 	mutex             sync.RWMutex
 	nodeID            string
+	startTime         time.Time
+	lastCPUStats      cpuStats
+}
+
+// cpuStats holds CPU statistics for calculating usage percentage
+type cpuStats struct {
+	total uint64
+	idle  uint64
+	time  time.Time
 }
 
 // NewMetricsCollector creates a new metrics collector
@@ -64,7 +73,10 @@ func NewMetricsCollector(nodeID string) *MetricsCollector {
 		hostname, _ := os.Hostname()
 		nodeID = hostname
 	}
-	return &MetricsCollector{nodeID: nodeID}
+	return &MetricsCollector{
+		nodeID:    nodeID,
+		startTime: time.Now(),
+	}
 }
 
 // collectMetrics runs in background to collect system metrics
@@ -83,104 +95,93 @@ func (mc *MetricsCollector) updateMetrics() {
 	defer mc.mutex.Unlock()
 
 	metrics := FinalVuDataSimMetrics{}
+	
+	// Simplified process detection - find finalvudatasim process
 	output, err := exec.Command("pgrep", "-f", "finalvudatasim").Output()
-	if err == nil && len(output) > 0 {
-		lines := strings.Split(strings.TrimSpace(string(output)), "\n")
-		// Find the actual finalvudatasim process (not wrapper processes)
-		// Since pgrep finds both processes, we need to check each one
-		// The actual binary process should be the one with the exact command "./finalvudatasim"
-		var actualPid string
-		for _, line := range lines {
-			pidStr := strings.TrimSpace(line)
-			if pidStr != "" {
-				// Check if this is the actual binary process
-				psCheck, _ := exec.Command("ps", "-p", pidStr, "-o", "cmd=").Output()
-				cmdLine := strings.TrimSpace(string(psCheck))
-				// Look for processes where the command is exactly "./finalvudatasim"
-				if cmdLine == "./finalvudatasim" {
-					actualPid = pidStr
-					break
-				}
-			}
-		}
-
-		// If we didn't find the exact match, try to find the process with highest CPU usage
-		// as a fallback (the actual working process)
-		if actualPid == "" {
-			var highestPid string
-			var highestCpu float64 = 0
-			for _, line := range lines {
-				pidStr := strings.TrimSpace(line)
-				if pidStr != "" {
-					psOut, _ := exec.Command("ps", "-p", pidStr, "-o", "pcpu=").Output()
-					psLines := strings.Split(strings.TrimSpace(string(psOut)), "\n")
-					if len(psLines) >= 2 {
-						dataLine := strings.TrimSpace(psLines[1])
-						if cpu, err := strconv.ParseFloat(dataLine, 64); err == nil && cpu > highestCpu {
-							highestCpu = cpu
-							highestPid = pidStr
-						}
-					}
-				}
-			}
-			if highestPid != "" {
-				actualPid = highestPid
-			}
-		}
-
-		if actualPid != "" {
-			pid, err := strconv.Atoi(actualPid)
-			if err == nil {
-				metrics.Running = true
-				metrics.PID = pid
-
-				// Get process start time
-				startTimeOut, _ := exec.Command("ps", "-p", actualPid, "-o", "lstart=").Output()
-				metrics.StartTime = strings.TrimSpace(string(startTimeOut))
-
-				// Get CPU and memory usage - use more detailed ps command
-				psOut, _ := exec.Command("ps", "-p", actualPid, "-o", "pcpu,rss,cmd").Output()
-				log.Printf("Raw ps output for PID %s: %q", actualPid, string(psOut))
-
-				psLines := strings.Split(strings.TrimSpace(string(psOut)), "\n")
-				log.Printf("ps lines: %v", psLines)
-
-				if len(psLines) >= 2 {
-					// Skip header line and get the actual data
-					dataLine := psLines[1]
-					log.Printf("Data line: %q", dataLine)
-					psFields := strings.Fields(dataLine)
-					log.Printf("Parsed fields: %v", psFields)
-
-					if len(psFields) >= 3 {
-						if cpu, err := strconv.ParseFloat(psFields[0], 64); err == nil {
-							metrics.CPUPercent = cpu
-							log.Printf("Parsed CPU: %f", cpu)
-						}
-						if memKB, err := strconv.ParseFloat(psFields[1], 64); err == nil {
-							metrics.MemMB = memKB / 1024.0
-							log.Printf("Parsed memory: %f KB -> %f MB", memKB, metrics.MemMB)
-						}
-						metrics.Cmdline = strings.Join(psFields[2:], " ")
-						log.Printf("Parsed cmdline: %s", metrics.Cmdline)
-					}
-				}
-			}
-		} else {
-			metrics.Running = false
-			metrics.PID = 0
-			metrics.StartTime = ""
-			metrics.CPUPercent = 0
-			metrics.MemMB = 0
-			metrics.Cmdline = ""
-		}
-	} else {
+	if err != nil || len(output) == 0 {
+		// Process not running
 		metrics.Running = false
 		metrics.PID = 0
 		metrics.StartTime = ""
 		metrics.CPUPercent = 0
 		metrics.MemMB = 0
 		metrics.Cmdline = ""
+	} else {
+		lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+		
+		// Find the actual finalvudatasim binary process
+		var actualPid string
+		for _, line := range lines {
+			pidStr := strings.TrimSpace(line)
+			if pidStr == "" {
+				continue
+			}
+			
+			// Check if this is the actual binary process
+			psCheck, err := exec.Command("ps", "-p", pidStr, "-o", "comm=").Output()
+			if err != nil {
+				continue
+			}
+			
+			cmdName := strings.TrimSpace(string(psCheck))
+			// Look for the actual binary name (not shell scripts)
+			if cmdName == "finalvudatasim" || strings.HasSuffix(cmdName, "finalvudatasim") {
+				actualPid = pidStr
+				break
+			}
+		}
+		
+		// If no exact match, use the first PID (most likely the parent process)
+		if actualPid == "" && len(lines) > 0 {
+			actualPid = strings.TrimSpace(lines[0])
+		}
+		
+		if actualPid != "" {
+			pid, err := strconv.Atoi(actualPid)
+			if err != nil {
+				log.Printf("Error converting PID to int: %v", err)
+				metrics.Running = false
+			} else {
+				metrics.Running = true
+				metrics.PID = pid
+				
+				// Get process start time
+				startTimeOut, err := exec.Command("ps", "-p", actualPid, "-o", "lstart=").Output()
+				if err == nil {
+					metrics.StartTime = strings.TrimSpace(string(startTimeOut))
+				}
+				
+				// Get CPU and memory usage - use headerless format for reliable parsing
+				psOut, err := exec.Command("ps", "-p", actualPid, "-o", "pcpu=,rss=,cmd=").Output()
+				if err != nil {
+					log.Printf("Error getting process stats: %v", err)
+				} else {
+					// Parse the output - no header with "=" format
+					dataLine := strings.TrimSpace(string(psOut))
+					psFields := strings.Fields(dataLine)
+					
+					if len(psFields) >= 2 {
+						if cpu, err := strconv.ParseFloat(psFields[0], 64); err == nil {
+							metrics.CPUPercent = cpu
+						} else {
+							log.Printf("Error parsing CPU: %v", err)
+						}
+						
+						if memKB, err := strconv.ParseFloat(psFields[1], 64); err == nil {
+							metrics.MemMB = memKB / 1024.0
+						} else {
+							log.Printf("Error parsing memory: %v", err)
+						}
+						
+						if len(psFields) >= 3 {
+							metrics.Cmdline = strings.Join(psFields[2:], " ")
+						}
+					}
+				}
+			}
+		} else {
+			metrics.Running = false
+		}
 	}
 	metrics.Timestamp = time.Now()
 
@@ -202,7 +203,7 @@ func (mc *MetricsCollector) updateMetrics() {
 		sysMetrics.CPUCores = coreCount
 	}
 
-	// CPU usage (from /proc/stat)
+	// CPU usage (from /proc/stat) - calculate percentage using time delta
 	if cpuData, err := os.ReadFile("/proc/stat"); err == nil {
 		lines := strings.Split(string(cpuData), "\n")
 		if len(lines) > 0 {
@@ -217,8 +218,32 @@ func (mc *MetricsCollector) updateMetrics() {
 						}
 					}
 				}
-				if total > 0 {
-					sysMetrics.CPUUsage = float64(total-idle) / float64(total) * 100
+				
+				// Calculate CPU usage percentage using delta from last reading
+				now := time.Now()
+				if mc.lastCPUStats.time.IsZero() {
+					// First reading - initialize but don't calculate percentage yet
+					mc.lastCPUStats = cpuStats{
+						total: total,
+						idle:  idle,
+						time:  now,
+					}
+					sysMetrics.CPUUsage = 0
+				} else {
+					// Calculate percentage based on delta
+					totalDelta := total - mc.lastCPUStats.total
+					idleDelta := idle - mc.lastCPUStats.idle
+					
+					if totalDelta > 0 {
+						sysMetrics.CPUUsage = float64(totalDelta-idleDelta) / float64(totalDelta) * 100
+					}
+					
+					// Update last stats
+					mc.lastCPUStats = cpuStats{
+						total: total,
+						idle:  idle,
+						time:  now,
+					}
 				}
 			}
 		}
@@ -382,7 +407,7 @@ func (mc *MetricsCollector) handleHealth(w http.ResponseWriter, r *http.Request)
 		"status":    "healthy",
 		"nodeId":    mc.nodeID,
 		"timestamp": time.Now(),
-		"uptime":    time.Since(mc.currentMetrics.Timestamp).String(),
+		"uptime":    time.Since(mc.startTime).String(),
 	}
 
 	if err := json.NewEncoder(w).Encode(health); err != nil {
