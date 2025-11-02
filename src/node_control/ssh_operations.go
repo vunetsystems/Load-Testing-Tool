@@ -22,7 +22,7 @@ func (nm *NodeManager) SSHExecWithOutput(nodeConfig NodeConfig, command string) 
 	// Acquire semaphore to limit concurrent SSH operations
 	nm.sshSemaphore <- struct{}{}
 	defer func() { <-nm.sshSemaphore }()
-	
+
 	args := []string{
 		"-i", nodeConfig.KeyPath,
 		"-o", SSHOptionStrictHostKeyChecking,
@@ -42,6 +42,13 @@ func (nm *NodeManager) SSHExecWithOutput(nodeConfig NodeConfig, command string) 
 		if ctx.Err() == context.DeadlineExceeded {
 			return "", fmt.Errorf("SSH command timed out after 30 seconds: %s", command)
 		}
+
+		// Don't log pgrep exit status 1 as error (process not found is expected)
+		if strings.Contains(command, "pgrep") && strings.Contains(err.Error(), "exit status 1") {
+			// Process not found - this is expected behavior, not an error
+			return "", fmt.Errorf("process not found")
+		}
+
 		return "", fmt.Errorf("SSH command failed: %v", err)
 	}
 

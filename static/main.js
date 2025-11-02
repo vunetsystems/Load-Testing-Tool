@@ -562,8 +562,8 @@ class VuDataSimManager {
 
             console.log('Starting to add all cluster nodes...');
 
-            // Call the API to add all cluster nodes
-            const response = await this.callAPI('/api/nodes/add-all-cluster', 'POST');
+            // Call the API to add all cluster nodes (no timeout)
+            const response = await this.callAPI('/api/nodes/add-all-cluster', 'POST', null, 0);
 
             if (!response.success) {
                 throw new Error(response.message || 'Failed to add cluster nodes');
@@ -659,13 +659,13 @@ class VuDataSimManager {
             const selectedEPS = parseInt(this.elements.epsSelect.value);
             const timeoutInput = this.elements.timeoutInput?.value?.trim();
             const skipChTruncate = this.elements.skipChTruncate?.checked || false;
-            let timeoutSeconds = null;
+            let timeoutSeconds = 0;
 
             // Parse timeout if provided
             if (timeoutInput) {
                 timeoutSeconds = this.parseTimeoutToSeconds(timeoutInput);
                 if (timeoutSeconds === null) {
-                    this.showNotification('Invalid timeout format. Use format like 60s, 5m, or 3h', 'error');
+                    this.showNotification('Invalid timeout format. Use format like 60s, 5m, 3h or 1d ', 'error');
                     return;
                 }
             }
@@ -751,7 +751,7 @@ class VuDataSimManager {
             return null;
         }
 
-        const match = timeoutStr.match(/^(\d+)([smh])$/);
+        const match = timeoutStr.match(/^(\d+)([smhd])$/);
         if (!match) {
             return null;
         }
@@ -766,6 +766,8 @@ class VuDataSimManager {
                 return value * 60;
             case 'h':
                 return value * 3600;
+            case 'd':
+                return value * 86400;
             default:
                 return null;
         }

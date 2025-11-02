@@ -1,0 +1,342 @@
+timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,iterations
+2025-11-02 21:34:00,Apache Overview,44.50,,,'200',100,,,44.50,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,51.64,,,'200',100,,,51.64,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,54.42,,,'200',100,,,54.42,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,139.64,,,'200',100,,,139.64,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,142.53,,,'200',100,,,142.53,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,142.77,,,'200',100,,,142.77,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,144.68,,,'200',100,,,144.68,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,143.02,,,'200',100,,,143.02,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,241.93,,,'200',100,,,241.93,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,242.83,,,'200',100,,,242.83,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,244.23,,,'200',100,,,244.23,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,184.50,42,Untitled,200,100,200,100,184.50,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,195.45,42,Untitled,200,100,200,100,195.45,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,100.97,42,Untitled,200,100,200,100,100.97,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,188.54,42,Untitled,200,100,200,100,188.54,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,100.22,37,No. of Servers,200,100,200,100,100.22,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,194.45,42,Untitled,200,100,200,100,194.45,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,195.44,42,Untitled,200,100,200,100,195.44,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,200.72,42,Untitled,200,100,200,100,200.72,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,197.49,42,Untitled,200,100,200,100,197.49,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,206.04,42,Untitled,200,100,200,100,206.04,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,209.09,37,No. of Servers,200,100,200,100,209.09,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,211.07,37,No. of Servers,200,100,200,100,211.07,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,295.35,42,Untitled,200,100,200,100,295.35,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,200.95,43,Total Requests,200,100,200,100,200.95,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,310.73,37,No. of Servers,200,100,200,100,310.73,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,212.86,37,No. of Servers,200,100,200,100,212.86,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,212.21,37,No. of Servers,200,100,200,100,212.21,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,398.28,42,Untitled,200,100,200,100,398.28,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,299.89,37,No. of Servers,200,100,200,100,299.89,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,196.41,43,Total Requests,200,100,200,100,196.41,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,303.82,37,No. of Servers,200,100,200,100,303.82,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,201.75,37,No. of Servers,200,100,200,100,201.75,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,112.52,37,No. of Servers,200,100,200,100,112.52,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,202.12,43,Total Requests,200,100,200,100,202.12,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,20.05,43,Total Requests,200,100,200,100,20.05,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,95.31,43,Total Requests,200,100,200,100,95.31,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,90.42,43,Total Requests,200,100,200,100,90.42,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,97.99,43,Total Requests,200,100,200,100,97.99,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,193.87,43,Total Requests,200,100,200,100,193.87,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,109.16,37,No. of Servers,200,100,200,100,109.16,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,195.44,48,HTTP Failure Percentage,200,100,200,100,195.44,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,189.66,48,HTTP Failure Percentage,200,100,200,100,189.66,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,389.81,43,Total Requests,200,100,200,100,389.81,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,389.73,43,Total Requests,200,100,200,100,389.73,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,407.52,48,HTTP Failure Percentage,200,100,200,100,407.52,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,281.96,48,HTTP Failure Percentage,200,100,200,100,281.96,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,204.20,53,Alert Summary,200,100,200,100,204.20,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,309.87,48,HTTP Failure Percentage,200,100,200,100,309.87,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,308.88,48,HTTP Failure Percentage,200,100,200,100,308.88,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,302.57,43,Total Requests,200,100,200,100,302.57,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,307.43,48,HTTP Failure Percentage,200,100,200,100,307.43,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,297.60,53,Alert Summary,200,100,200,100,297.60,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,391.98,48,HTTP Failure Percentage,200,100,200,100,391.98,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,198.39,53,Alert Summary,200,100,200,100,198.39,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,204.55,48,HTTP Failure Percentage,200,100,200,100,204.55,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,201.15,53,Alert Summary,200,100,200,100,201.15,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,212.18,48,HTTP Failure Percentage,200,100,200,100,212.18,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,194.82,53,Alert Summary,200,100,200,100,194.82,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,189.86,48,HTTP Failure Percentage,200,100,200,100,189.86,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,195.89,53,Alert Summary,200,100,200,100,195.89,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,106.67,53,Alert Summary,200,100,200,100,106.67,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,194.60,53,Alert Summary,200,100,200,100,194.60,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,195.89,53,Alert Summary,200,100,200,100,195.89,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,302.25,1,Current Idle Workers,200,100,200,100,302.25,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,200.02,1,Current Idle Workers,200,100,200,100,200.02,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,201.68,53,Alert Summary,200,100,200,100,201.68,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,298.41,1,Current Idle Workers,200,100,200,100,298.41,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,393.79,1,Current Idle Workers,200,100,200,100,393.79,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,297.58,1,Current Idle Workers,200,100,200,100,297.58,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,294.25,1,Current Idle Workers,200,100,200,100,294.25,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,310.83,1,Current Idle Workers,200,100,200,100,310.83,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,307.88,1,Current Idle Workers,200,100,200,100,307.88,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,290.73,49,Worker Utilization %,200,100,200,100,290.73,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,401.39,53,Alert Summary,200,100,200,100,401.39,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,292.95,1,Current Idle Workers,200,100,200,100,292.95,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,211.55,49,Worker Utilization %,200,100,200,100,211.55,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,303.45,49,Worker Utilization %,200,100,200,100,303.45,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,392.54,1,Current Idle Workers,200,100,200,100,392.54,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,201.38,49,Worker Utilization %,200,100,200,100,201.38,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,192.23,49,Worker Utilization %,200,100,200,100,192.23,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,93.63,50,Current Busy Workers,200,100,200,100,93.63,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,202.42,49,Worker Utilization %,200,100,200,100,202.42,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,189.99,50,Current Busy Workers,200,100,200,100,189.99,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,295.33,49,Worker Utilization %,200,100,200,100,295.33,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,202.57,1,Current Idle Workers,200,100,200,100,202.57,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,199.17,49,Worker Utilization %,200,100,200,100,199.17,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,302.64,49,Worker Utilization %,200,100,200,100,302.64,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,210.19,50,Current Busy Workers,200,100,200,100,210.19,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,98.79,50,Current Busy Workers,200,100,200,100,98.79,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,107.13,50,Current Busy Workers,200,100,200,100,107.13,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,202.63,49,Worker Utilization %,200,100,200,100,202.63,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,194.57,6,Keep Alive Connections,200,100,200,100,194.57,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,97.11,49,Worker Utilization %,200,100,200,100,97.11,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,206.41,50,Current Busy Workers,200,100,200,100,206.41,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,108.66,50,Current Busy Workers,200,100,200,100,108.66,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,193.08,50,Current Busy Workers,200,100,200,100,193.08,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,283.25,6,Keep Alive Connections,200,100,200,100,283.25,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,196.18,50,Current Busy Workers,200,100,200,100,196.18,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,302.72,6,Keep Alive Connections,200,100,200,100,302.72,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,204.49,8,Writing Connections,200,100,200,100,204.49,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,110.23,6,Keep Alive Connections,200,100,200,100,110.23,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,293.03,6,Keep Alive Connections,200,100,200,100,293.03,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,393.55,6,Keep Alive Connections,200,100,200,100,393.55,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,299.04,6,Keep Alive Connections,200,100,200,100,299.04,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,400.63,50,Current Busy Workers,200,100,200,100,400.63,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,481.63,6,Keep Alive Connections,200,100,200,100,481.63,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,193.08,8,Writing Connections,200,100,200,100,193.08,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,401.77,50,Current Busy Workers,200,100,200,100,401.77,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,194.67,7,Closing Connections,200,100,200,100,194.67,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,217.34,8,Writing Connections,200,100,200,100,217.34,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,215.30,6,Keep Alive Connections,200,100,200,100,215.30,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,205.35,8,Writing Connections,200,100,200,100,205.35,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,191.80,6,Keep Alive Connections,200,100,200,100,191.80,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,194.68,8,Writing Connections,200,100,200,100,194.68,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,202.62,8,Writing Connections,200,100,200,100,202.62,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,114.44,8,Writing Connections,200,100,200,100,114.44,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,211.11,8,Writing Connections,200,100,200,100,211.11,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,200.48,5,Request/Sec,200,100,200,100,200.48,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,280.13,7,Closing Connections,200,100,200,100,280.13,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,300.48,6,Keep Alive Connections,200,100,200,100,300.48,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,288.13,7,Closing Connections,200,100,200,100,288.13,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,384.85,8,Writing Connections,200,100,200,100,384.85,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,298.17,7,Closing Connections,200,100,200,100,298.17,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,206.46,3,Bytes/Sec,200,100,200,100,206.46,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,294.59,7,Closing Connections,200,100,200,100,294.59,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,309.60,8,Writing Connections,200,100,200,100,309.60,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,304.68,7,Closing Connections,200,100,200,100,304.68,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,414.01,7,Closing Connections,200,100,200,100,414.01,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,200.45,5,Request/Sec,200,100,200,100,200.45,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,396.12,7,Closing Connections,200,100,200,100,396.12,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,107.38,7,Closing Connections,200,100,200,100,107.38,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,118.53,5,Request/Sec,200,100,200,100,118.53,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,302.06,5,Request/Sec,200,100,200,100,302.06,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,300.24,8,Writing Connections,200,100,200,100,300.24,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,201.85,17,Bytes Per Request,200,100,200,100,201.85,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,287.21,5,Request/Sec,200,100,200,100,287.21,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,290.03,7,Closing Connections,200,100,200,100,290.03,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,291.54,5,Request/Sec,200,100,200,100,291.54,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,201.00,5,Request/Sec,200,100,200,100,201.00,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,300.17,5,Request/Sec,200,100,200,100,300.17,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,207.47,3,Bytes/Sec,200,100,200,100,207.47,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,195.43,3,Bytes/Sec,200,100,200,100,195.43,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,289.82,5,Request/Sec,200,100,200,100,289.82,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,123.30,3,Bytes/Sec,200,100,200,100,123.30,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,193.32,3,Bytes/Sec,200,100,200,100,193.32,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,284.58,45,Latency,200,100,200,100,284.58,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,299.61,7,Closing Connections,200,100,200,100,299.61,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,197.82,3,Bytes/Sec,200,100,200,100,197.82,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,309.13,3,Bytes/Sec,200,100,200,100,309.13,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,302.01,5,Request/Sec,200,100,200,100,302.01,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,289.21,17,Bytes Per Request,200,100,200,100,289.21,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,298.19,3,Bytes/Sec,200,100,200,100,298.19,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,210.09,3,Bytes/Sec,200,100,200,100,210.09,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,298.12,17,Bytes Per Request,200,100,200,100,298.12,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,205.74,54,Latency Trend For Top 5 Servers,200,100,200,100,205.74,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,206.25,17,Bytes Per Request,200,100,200,100,206.25,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,236.76,17,Bytes Per Request,200,100,200,100,236.76,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,323.11,17,Bytes Per Request,200,100,200,100,323.11,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,234.94,17,Bytes Per Request,200,100,200,100,234.94,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,245.19,5,Request/Sec,200,100,200,100,245.19,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,139.68,17,Bytes Per Request,200,100,200,100,139.68,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,198.05,45,Latency,200,100,200,100,198.05,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,194.57,45,Latency,200,100,200,100,194.57,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,202.20,3,Bytes/Sec,200,100,200,100,202.20,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,199.09,17,Bytes Per Request,200,100,200,100,199.09,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,109.28,45,Latency,200,100,200,100,109.28,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,112.58,14,Active Alerts,200,100,200,100,112.58,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,157.00,45,Latency,200,100,200,100,157.00,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,155.81,45,Latency,200,100,200,100,155.81,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,162.71,45,Latency,200,100,200,100,162.71,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,192.39,45,Latency,200,100,200,100,192.39,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,254.15,3,Bytes/Sec,200,100,200,100,254.15,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,286.02,54,Latency Trend For Top 5 Servers,200,100,200,100,286.02,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,357.49,45,Latency,200,100,200,100,357.49,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,297.61,54,Latency Trend For Top 5 Servers,200,100,200,100,297.61,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,292.32,23,High Worker Utilization Trend For Top 5 Servers,200,100,200,100,292.32,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,200.82,54,Latency Trend For Top 5 Servers,200,100,200,100,200.82,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,208.99,54,Latency Trend For Top 5 Servers,200,100,200,100,208.99,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,110.22,17,Bytes Per Request,200,100,200,100,110.22,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,312.57,17,Bytes Per Request,200,100,200,100,312.57,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,294.85,54,Latency Trend For Top 5 Servers,200,100,200,100,294.85,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,399.50,54,Latency Trend For Top 5 Servers,200,100,200,100,399.50,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,97.54,14,Active Alerts,200,100,200,100,97.54,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,187.14,45,Latency,200,100,200,100,187.14,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,195.45,40,Worker Utilization Details,200,100,200,100,195.45,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,202.12,14,Active Alerts,200,100,200,100,202.12,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,104.53,14,Active Alerts,200,100,200,100,104.53,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,193.31,45,Latency,200,100,200,100,193.31,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,112.75,14,Active Alerts,200,100,200,100,112.75,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,208.88,54,Latency Trend For Top 5 Servers,200,100,200,100,208.88,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,312.74,54,Latency Trend For Top 5 Servers,200,100,200,100,312.74,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,204.17,14,Active Alerts,200,100,200,100,204.17,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,297.69,14,Active Alerts,200,100,200,100,297.69,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,200.01,54,Latency Trend For Top 5 Servers,200,100,200,100,200.01,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,283.50,14,Active Alerts,200,100,200,100,283.50,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,387.38,23,High Worker Utilization Trend For Top 5 Servers,200,100,200,100,387.38,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,295.71,58,Requests,200,100,200,100,295.71,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,298.83,23,High Worker Utilization Trend For Top 5 Servers,200,100,200,100,298.83,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,107.37,14,Active Alerts,200,100,200,100,107.37,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,307.19,23,High Worker Utilization Trend For Top 5 Servers,200,100,200,100,307.19,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,389.49,23,High Worker Utilization Trend For Top 5 Servers,200,100,200,100,389.49,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,390.58,54,Latency Trend For Top 5 Servers,200,100,200,100,390.58,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,393.82,14,Active Alerts,200,100,200,100,393.82,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,314.20,23,High Worker Utilization Trend For Top 5 Servers,200,100,200,100,314.20,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,397.73,23,High Worker Utilization Trend For Top 5 Servers,200,100,200,100,397.73,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,179.54,40,Worker Utilization Details,200,100,200,100,179.54,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,195.70,40,Worker Utilization Details,200,100,200,100,195.70,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,203.61,40,Worker Utilization Details,200,100,200,100,203.61,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,103.75,40,Worker Utilization Details,200,100,200,100,103.75,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,210.12,23,High Worker Utilization Trend For Top 5 Servers,200,100,200,100,210.12,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,207.42,25,Request per Sec Trend For Top 5 Servers,200,100,200,100,207.42,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,289.38,23,High Worker Utilization Trend For Top 5 Servers,200,100,200,100,289.38,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,186.12,40,Worker Utilization Details,200,100,200,100,186.12,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,196.77,14,Active Alerts,200,100,200,100,196.77,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,195.12,23,High Worker Utilization Trend For Top 5 Servers,200,100,200,100,195.12,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,191.92,40,Worker Utilization Details,200,100,200,100,191.92,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,103.69,58,Requests,200,100,200,100,103.69,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,133.88,58,Requests,200,100,200,100,133.88,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,191.59,58,Requests,200,100,200,100,191.59,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,197.15,58,Requests,200,100,200,100,197.15,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,192.30,27,Bytes per Sec Trend For Top 5 Servers,200,100,200,100,192.30,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,108.41,40,Worker Utilization Details,200,100,200,100,108.41,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,208.64,40,Worker Utilization Details,200,100,200,100,208.64,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,193.33,40,Worker Utilization Details,200,100,200,100,193.33,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,300.77,58,Requests,200,100,200,100,300.77,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,305.56,23,High Worker Utilization Trend For Top 5 Servers,200,100,200,100,305.56,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,293.95,58,Requests,200,100,200,100,293.95,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,300.11,26,Bytes Served/Request Trend For Top 5 Servers,200,100,200,100,300.11,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,401.39,25,Request per Sec Trend For Top 5 Servers,200,100,200,100,401.39,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,210.57,58,Requests,200,100,200,100,210.57,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,403.66,58,Requests,200,100,200,100,403.66,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,294.65,58,Requests,200,100,200,100,294.65,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,112.05,25,Request per Sec Trend For Top 5 Servers,200,100,200,100,112.05,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,314.45,25,Request per Sec Trend For Top 5 Servers,200,100,200,100,314.45,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,467.90,25,Request per Sec Trend For Top 5 Servers,200,100,200,100,467.90,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,191.68,40,Worker Utilization Details,200,100,200,100,191.68,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,401.67,25,Request per Sec Trend For Top 5 Servers,200,100,200,100,401.67,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,102.57,25,Request per Sec Trend For Top 5 Servers,200,100,200,100,102.57,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,97.78,58,Requests,200,100,200,100,97.78,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,191.20,25,Request per Sec Trend For Top 5 Servers,200,100,200,100,191.20,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,195.97,25,Request per Sec Trend For Top 5 Servers,200,100,200,100,195.97,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,203.11,41,Request Information,200,100,200,100,203.11,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,197.60,27,Bytes per Sec Trend For Top 5 Servers,200,100,200,100,197.60,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,194.70,25,Request per Sec Trend For Top 5 Servers,200,100,200,100,194.70,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,111.59,27,Bytes per Sec Trend For Top 5 Servers,200,100,200,100,111.59,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,283.95,27,Bytes per Sec Trend For Top 5 Servers,200,100,200,100,283.95,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,285.41,27,Bytes per Sec Trend For Top 5 Servers,200,100,200,100,285.41,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,205.38,27,Bytes per Sec Trend For Top 5 Servers,200,100,200,100,205.38,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,297.74,27,Bytes per Sec Trend For Top 5 Servers,200,100,200,100,297.74,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,211.04,27,Bytes per Sec Trend For Top 5 Servers,200,100,200,100,211.04,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,295.29,27,Bytes per Sec Trend For Top 5 Servers,200,100,200,100,295.29,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,204.68,26,Bytes Served/Request Trend For Top 5 Servers,200,100,200,100,204.68,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,199.72,26,Bytes Served/Request Trend For Top 5 Servers,200,100,200,100,199.72,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,309.95,25,Request per Sec Trend For Top 5 Servers,200,100,200,100,309.95,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,306.50,59,Connections,200,100,200,100,306.50,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,213.99,26,Bytes Served/Request Trend For Top 5 Servers,200,100,200,100,213.99,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,304.33,26,Bytes Served/Request Trend For Top 5 Servers,200,100,200,100,304.33,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,390.21,27,Bytes per Sec Trend For Top 5 Servers,200,100,200,100,390.21,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,399.18,26,Bytes Served/Request Trend For Top 5 Servers,200,100,200,100,399.18,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,202.77,26,Bytes Served/Request Trend For Top 5 Servers,200,100,200,100,202.77,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,206.25,26,Bytes Served/Request Trend For Top 5 Servers,200,100,200,100,206.25,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,198.50,41,Request Information,200,100,200,100,198.50,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,196.64,34,Bytes Transferred Trend For Top 5 Servers,200,100,200,100,196.64,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,115.34,26,Bytes Served/Request Trend For Top 5 Servers,200,100,200,100,115.34,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,205.37,41,Request Information,200,100,200,100,205.37,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,215.60,26,Bytes Served/Request Trend For Top 5 Servers,200,100,200,100,215.60,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,285.89,41,Request Information,200,100,200,100,285.89,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,289.35,41,Request Information,200,100,200,100,289.35,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,296.76,41,Request Information,200,100,200,100,296.76,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,394.33,27,Bytes per Sec Trend For Top 5 Servers,200,100,200,100,394.33,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,302.93,41,Request Information,200,100,200,100,302.93,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,288.90,46,Async Connections Trend,200,100,200,100,288.90,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,386.25,41,Request Information,200,100,200,100,386.25,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,291.07,59,Connections,200,100,200,100,291.07,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,295.94,41,Request Information,200,100,200,100,295.94,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,207.62,59,Connections,200,100,200,100,207.62,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,313.97,59,Connections,200,100,200,100,313.97,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,215.03,59,Connections,200,100,200,100,215.03,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,381.61,41,Request Information,200,100,200,100,381.61,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,189.98,59,Connections,200,100,200,100,189.98,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,100.84,59,Connections,200,100,200,100,100.84,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,208.31,26,Bytes Served/Request Trend For Top 5 Servers,200,100,200,100,208.31,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,302.33,59,Connections,200,100,200,100,302.33,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,202.51,34,Bytes Transferred Trend For Top 5 Servers,200,100,200,100,202.51,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,210.73,47,Scoreboard Connections Trend,200,100,200,100,210.73,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,188.13,41,Request Information,200,100,200,100,188.13,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,289.75,34,Bytes Transferred Trend For Top 5 Servers,200,100,200,100,289.75,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,202.47,34,Bytes Transferred Trend For Top 5 Servers,200,100,200,100,202.47,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,382.89,34,Bytes Transferred Trend For Top 5 Servers,200,100,200,100,382.89,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,384.45,34,Bytes Transferred Trend For Top 5 Servers,200,100,200,100,384.45,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,399.81,59,Connections,200,100,200,100,399.81,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,287.34,39,Connection Information,200,100,200,100,287.34,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,402.62,59,Connections,200,100,200,100,402.62,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,296.02,34,Bytes Transferred Trend For Top 5 Servers,200,100,200,100,296.02,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,207.50,59,Connections,200,100,200,100,207.50,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,410.54,34,Bytes Transferred Trend For Top 5 Servers,200,100,200,100,410.54,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,211.53,46,Async Connections Trend,200,100,200,100,211.53,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,201.55,46,Async Connections Trend,200,100,200,100,201.55,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,296.51,46,Async Connections Trend,200,100,200,100,296.51,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,208.13,46,Async Connections Trend,200,100,200,100,208.13,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,201.34,34,Bytes Transferred Trend For Top 5 Servers,200,100,200,100,201.34,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,406.53,46,Async Connections Trend,200,100,200,100,406.53,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,189.24,47,Scoreboard Connections Trend,200,100,200,100,189.24,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,207.87,16,Apache Scoreboards,200,100,200,100,207.87,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,205.39,34,Bytes Transferred Trend For Top 5 Servers,200,100,200,100,205.39,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,201.41,46,Async Connections Trend,200,100,200,100,201.41,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,106.98,47,Scoreboard Connections Trend,200,100,200,100,106.98,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,204.25,34,Bytes Transferred Trend For Top 5 Servers,200,100,200,100,204.25,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,115.29,47,Scoreboard Connections Trend,200,100,200,100,115.29,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,300.89,46,Async Connections Trend,200,100,200,100,300.89,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,196.39,46,Async Connections Trend,200,100,200,100,196.39,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,194.29,47,Scoreboard Connections Trend,200,100,200,100,194.29,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,294.52,47,Scoreboard Connections Trend,200,100,200,100,294.52,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,193.99,46,Async Connections Trend,200,100,200,100,193.99,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,293.50,39,Connection Information,200,100,200,100,293.50,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,204.94,47,Scoreboard Connections Trend,200,100,200,100,204.94,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,308.07,39,Connection Information,200,100,200,100,308.07,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,289.58,39,Connection Information,200,100,200,100,289.58,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,396.29,39,Connection Information,200,100,200,100,396.29,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,199.49,39,Connection Information,200,100,200,100,199.49,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,201.58,47,Scoreboard Connections Trend,200,100,200,100,201.58,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,403.70,46,Async Connections Trend,200,100,200,100,403.70,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,309.21,47,Scoreboard Connections Trend,200,100,200,100,309.21,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,104.55,39,Connection Information,200,100,200,100,104.55,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,486.82,47,Scoreboard Connections Trend,200,100,200,100,486.82,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,187.96,16,Apache Scoreboards,200,100,200,100,187.96,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,180.01,16,Apache Scoreboards,200,100,200,100,180.01,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,104.21,16,Apache Scoreboards,200,100,200,100,104.21,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,93.64,47,Scoreboard Connections Trend,200,100,200,100,93.64,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,106.84,16,Apache Scoreboards,200,100,200,100,106.84,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,115.40,16,Apache Scoreboards,200,100,200,100,115.40,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,104.08,39,Connection Information,200,100,200,100,104.08,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,101.86,16,Apache Scoreboards,200,100,200,100,101.86,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,100.21,39,Connection Information,200,100,200,100,100.21,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,207.02,39,Connection Information,200,100,200,100,207.02,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,201.00,39,Connection Information,200,100,200,100,201.00,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,184.28,16,Apache Scoreboards,200,100,200,100,184.28,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,90.37,16,Apache Scoreboards,200,100,200,100,90.37,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,110.86,16,Apache Scoreboards,200,100,200,100,110.86,15m,11,11,11
+2025-11-02 21:34:00,Apache Overview,20.24,16,Apache Scoreboards,200,100,200,100,20.24,15m,11,11,11

@@ -356,7 +356,7 @@ class O11ySources {
             this.updateStep(6, 'running', 'play_circle', 'Starting vudatasim');
 
             // Start binaries and wait for response before marking complete
-            const binaryEndpoint = '/api/binary/start-all';
+            const binaryEndpoint = `/api/binary/start-all?timeout=${timeoutSeconds}`;
             return this.manager.callAPI(binaryEndpoint, 'POST', null, 180000) // 3 minutes timeout
             .then(binaryResponse => {
                 console.log('Binary start response:', binaryResponse);

@@ -183,7 +183,25 @@ func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryContr
 	}
 
 	// ✅ Build start command (background-safe)
-	startCmd := fmt.Sprintf("cd %s && (nohup ./finalvudatasim >/dev/null 2>&1 &) && exit", node.BinaryDir)
+	// startCmd := fmt.Sprintf("cd %s && (nohup ./finalvudatasim >/dev/null 2>&1 &) && exit", node.BinaryDir)
+
+	var startCmd string
+	if timeout > 0 {
+		// Use Linux `timeout` command to auto-terminate after given seconds
+		startCmd = fmt.Sprintf(
+			"cd %s && (nohup timeout %ds ./finalvudatasim >/dev/null 2>&1 &) && exit",
+			node.BinaryDir, timeout,
+		)
+		log.Info().Int("timeout", timeout).Msg("Starting binary with auto-timeout")
+	} else {
+		// No timeout — run indefinitely
+		startCmd = fmt.Sprintf(
+			"cd %s && (nohup ./finalvudatasim >/dev/null 2>&1 &) && exit",
+			node.BinaryDir,
+		)
+		log.Info().Msg("Starting binary without timeout")
+	}
+
 	log.Info().Str("command", startCmd).Msg("Executing start command on remote node")
 
 	err = bc.sshExec(node, startCmd)
@@ -223,13 +241,13 @@ func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryContr
 		data["status"] = newStatus.Status
 	}
 
-	// ✅ Optional kill after timeout (only if PID known)
-	if timeout > 0 {
-		if pid, ok := data["pid"].(int); ok && pid > 0 {
-			killCmd := fmt.Sprintf("(sleep %d; kill %d) >/dev/null 2>&1 &", timeout*60, pid)
-			_ = bc.sshExec(node, killCmd)
-		}
-	}
+	// // ✅ Optional kill after timeout (only if PID known)
+	// if timeout > 0 {
+	// 	if pid, ok := data["pid"].(int); ok && pid > 0 {
+	// 		killCmd := fmt.Sprintf("(sleep %d; kill %d) >/dev/null 2>&1 &", timeout, pid)
+	// 		_ = bc.sshExec(node, killCmd)
+	// 	}
+	// }
 
 	// ✅ Final response decision
 	if statusErr == nil && newStatus.Status == "running" {
@@ -1158,6 +1176,13 @@ func (bc *BinaryControl) sshExecWithOutput(node NodeConfig, command string) (str
 	// Handle error but still return partial output for diagnostics
 	if err != nil {
 		outStr := strings.TrimSpace(string(output))
+
+		// Don't log pgrep exit status 1 as error (process not found is expected)
+		if strings.Contains(command, "pgrep") && strings.Contains(err.Error(), "exit status 1") {
+			// Process not found - this is expected behavior, not an error
+			return outStr, fmt.Errorf("process not found")
+		}
+
 		errMsg := fmt.Sprintf("SSH command failed: %v", err)
 		if outStr != "" {
 			errMsg += " | output: " + outStr

@@ -78,9 +78,15 @@ function setupSectionNavigation() {
             const section = this.getAttribute('data-section');
             showSection(section);
 
-            // Update active state
-            navButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
+            // Reset all buttons to inactive state
+            navButtons.forEach(btn => {
+                btn.classList.remove('border-indigo-200', 'bg-indigo-50', 'text-indigo-700', 'font-semibold');
+                btn.classList.add('border-transparent', 'text-slate-600', 'font-medium');
+            });
+
+            // Set clicked button to active state
+            this.classList.remove('border-transparent', 'text-slate-600', 'font-medium');
+            this.classList.add('border-indigo-200', 'bg-indigo-50', 'text-indigo-700', 'font-semibold');
 
             // Handle tab initialization for performance section
             if (section === 'performance') {

@@ -1,0 +1,303 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+time="2025-11-02T21:32:46+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_4438\",\"password\":\"Password123!\"},{\"username\":\"load_user_6814\",\"password\":\"Password123!\"},{\"username\":\"load_user_216\",\"password\":\"Password123!\"},{\"username\":\"load_user_2293\",\"password\":\"Password123!\"},{\"username\":\"load_user_5702\",\"password\":\"Password123!\"},{\"username\":\"load_user_7520\",\"password\":\"Password123!\"},{\"username\":\"load_user_5795\",\"password\":\"Password123!\"},{\"username\":\"load_user_4561\",\"password\":\"Password123!\"},{\"username\":\"load_user_5647\",\"password\":\"Password123!\"},{\"username\":\"load_user_2671\",\"password\":\"Password123!\"},{\"username\":\"load_user_9886\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-02T21:32:46+05:30" level=warning msg="\"cli\" level configuration overrode scenarios configuration entirely"
+     execution: local
+        script: /home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard/login.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 11 max VUs, 10m30s max duration (incl. graceful stop):
+              * default: 11 iterations shared among 11 VUs (maxDuration: 10m0s, gracefulStop: 30s)
+
+time="2025-11-02T21:32:46+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_4438\",\"password\":\"Password123!\"},{\"username\":\"load_user_6814\",\"password\":\"Password123!\"},{\"username\":\"load_user_216\",\"password\":\"Password123!\"},{\"username\":\"load_user_2293\",\"password\":\"Password123!\"},{\"username\":\"load_user_5702\",\"password\":\"Password123!\"},{\"username\":\"load_user_7520\",\"password\":\"Password123!\"},{\"username\":\"load_user_5795\",\"password\":\"Password123!\"},{\"username\":\"load_user_4561\",\"password\":\"Password123!\"},{\"username\":\"load_user_5647\",\"password\":\"Password123!\"},{\"username\":\"load_user_2671\",\"password\":\"Password123!\"},{\"username\":\"load_user_9886\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_4438\",\"password\":\"Password123!\"},{\"username\":\"load_user_6814\",\"password\":\"Password123!\"},{\"username\":\"load_user_216\",\"password\":\"Password123!\"},{\"username\":\"load_user_2293\",\"password\":\"Password123!\"},{\"username\":\"load_user_5702\",\"password\":\"Password123!\"},{\"username\":\"load_user_7520\",\"password\":\"Password123!\"},{\"username\":\"load_user_5795\",\"password\":\"Password123!\"},{\"username\":\"load_user_4561\",\"password\":\"Password123!\"},{\"username\":\"load_user_5647\",\"password\":\"Password123!\"},{\"username\":\"load_user_2671\",\"password\":\"Password123!\"},{\"username\":\"load_user_9886\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_4438\",\"password\":\"Password123!\"},{\"username\":\"load_user_6814\",\"password\":\"Password123!\"},{\"username\":\"load_user_216\",\"password\":\"Password123!\"},{\"username\":\"load_user_2293\",\"password\":\"Password123!\"},{\"username\":\"load_user_5702\",\"password\":\"Password123!\"},{\"username\":\"load_user_7520\",\"password\":\"Password123!\"},{\"username\":\"load_user_5795\",\"password\":\"Password123!\"},{\"username\":\"load_user_4561\",\"password\":\"Password123!\"},{\"username\":\"load_user_5647\",\"password\":\"Password123!\"},{\"username\":\"load_user_2671\",\"password\":\"Password123!\"},{\"username\":\"load_user_9886\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_4438\",\"password\":\"Password123!\"},{\"username\":\"load_user_6814\",\"password\":\"Password123!\"},{\"username\":\"load_user_216\",\"password\":\"Password123!\"},{\"username\":\"load_user_2293\",\"password\":\"Password123!\"},{\"username\":\"load_user_5702\",\"password\":\"Password123!\"},{\"username\":\"load_user_7520\",\"password\":\"Password123!\"},{\"username\":\"load_user_5795\",\"password\":\"Password123!\"},{\"username\":\"load_user_4561\",\"password\":\"Password123!\"},{\"username\":\"load_user_5647\",\"password\":\"Password123!\"},{\"username\":\"load_user_2671\",\"password\":\"Password123!\"},{\"username\":\"load_user_9886\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_4438\",\"password\":\"Password123!\"},{\"username\":\"load_user_6814\",\"password\":\"Password123!\"},{\"username\":\"load_user_216\",\"password\":\"Password123!\"},{\"username\":\"load_user_2293\",\"password\":\"Password123!\"},{\"username\":\"load_user_5702\",\"password\":\"Password123!\"},{\"username\":\"load_user_7520\",\"password\":\"Password123!\"},{\"username\":\"load_user_5795\",\"password\":\"Password123!\"},{\"username\":\"load_user_4561\",\"password\":\"Password123!\"},{\"username\":\"load_user_5647\",\"password\":\"Password123!\"},{\"username\":\"load_user_2671\",\"password\":\"Password123!\"},{\"username\":\"load_user_9886\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_4438\",\"password\":\"Password123!\"},{\"username\":\"load_user_6814\",\"password\":\"Password123!\"},{\"username\":\"load_user_216\",\"password\":\"Password123!\"},{\"username\":\"load_user_2293\",\"password\":\"Password123!\"},{\"username\":\"load_user_5702\",\"password\":\"Password123!\"},{\"username\":\"load_user_7520\",\"password\":\"Password123!\"},{\"username\":\"load_user_5795\",\"password\":\"Password123!\"},{\"username\":\"load_user_4561\",\"password\":\"Password123!\"},{\"username\":\"load_user_5647\",\"password\":\"Password123!\"},{\"username\":\"load_user_2671\",\"password\":\"Password123!\"},{\"username\":\"load_user_9886\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_4438\",\"password\":\"Password123!\"},{\"username\":\"load_user_6814\",\"password\":\"Password123!\"},{\"username\":\"load_user_216\",\"password\":\"Password123!\"},{\"username\":\"load_user_2293\",\"password\":\"Password123!\"},{\"username\":\"load_user_5702\",\"password\":\"Password123!\"},{\"username\":\"load_user_7520\",\"password\":\"Password123!\"},{\"username\":\"load_user_5795\",\"password\":\"Password123!\"},{\"username\":\"load_user_4561\",\"password\":\"Password123!\"},{\"username\":\"load_user_5647\",\"password\":\"Password123!\"},{\"username\":\"load_user_2671\",\"password\":\"Password123!\"},{\"username\":\"load_user_9886\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_4438\",\"password\":\"Password123!\"},{\"username\":\"load_user_6814\",\"password\":\"Password123!\"},{\"username\":\"load_user_216\",\"password\":\"Password123!\"},{\"username\":\"load_user_2293\",\"password\":\"Password123!\"},{\"username\":\"load_user_5702\",\"password\":\"Password123!\"},{\"username\":\"load_user_7520\",\"password\":\"Password123!\"},{\"username\":\"load_user_5795\",\"password\":\"Password123!\"},{\"username\":\"load_user_4561\",\"password\":\"Password123!\"},{\"username\":\"load_user_5647\",\"password\":\"Password123!\"},{\"username\":\"load_user_2671\",\"password\":\"Password123!\"},{\"username\":\"load_user_9886\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_4438\",\"password\":\"Password123!\"},{\"username\":\"load_user_6814\",\"password\":\"Password123!\"},{\"username\":\"load_user_216\",\"password\":\"Password123!\"},{\"username\":\"load_user_2293\",\"password\":\"Password123!\"},{\"username\":\"load_user_5702\",\"password\":\"Password123!\"},{\"username\":\"load_user_7520\",\"password\":\"Password123!\"},{\"username\":\"load_user_5795\",\"password\":\"Password123!\"},{\"username\":\"load_user_4561\",\"password\":\"Password123!\"},{\"username\":\"load_user_5647\",\"password\":\"Password123!\"},{\"username\":\"load_user_2671\",\"password\":\"Password123!\"},{\"username\":\"load_user_9886\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_4438\",\"password\":\"Password123!\"},{\"username\":\"load_user_6814\",\"password\":\"Password123!\"},{\"username\":\"load_user_216\",\"password\":\"Password123!\"},{\"username\":\"load_user_2293\",\"password\":\"Password123!\"},{\"username\":\"load_user_5702\",\"password\":\"Password123!\"},{\"username\":\"load_user_7520\",\"password\":\"Password123!\"},{\"username\":\"load_user_5795\",\"password\":\"Password123!\"},{\"username\":\"load_user_4561\",\"password\":\"Password123!\"},{\"username\":\"load_user_5647\",\"password\":\"Password123!\"},{\"username\":\"load_user_2671\",\"password\":\"Password123!\"},{\"username\":\"load_user_9886\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_4438\",\"password\":\"Password123!\"},{\"username\":\"load_user_6814\",\"password\":\"Password123!\"},{\"username\":\"load_user_216\",\"password\":\"Password123!\"},{\"username\":\"load_user_2293\",\"password\":\"Password123!\"},{\"username\":\"load_user_5702\",\"password\":\"Password123!\"},{\"username\":\"load_user_7520\",\"password\":\"Password123!\"},{\"username\":\"load_user_5795\",\"password\":\"Password123!\"},{\"username\":\"load_user_4561\",\"password\":\"Password123!\"},{\"username\":\"load_user_5647\",\"password\":\"Password123!\"},{\"username\":\"load_user_2671\",\"password\":\"Password123!\"},{\"username\":\"load_user_9886\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[2025-11-02T16:02:46.303Z] 🔹 VU 1 Logging in as: username" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[2025-11-02T16:02:46.303Z] 🔹 VU 2 Logging in as: load_user_4438" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[2025-11-02T16:02:46.303Z] 🔹 VU 7 Logging in as: load_user_7520" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[2025-11-02T16:02:46.304Z] 🔹 VU 6 Logging in as: load_user_5702" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[2025-11-02T16:02:46.303Z] 🔹 VU 10 Logging in as: load_user_5647" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[2025-11-02T16:02:46.304Z] 🔹 VU 11 Logging in as: load_user_2671" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[2025-11-02T16:02:46.303Z] 🔹 VU 5 Logging in as: load_user_2293" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[2025-11-02T16:02:46.304Z] 🔹 VU 4 Logging in as: load_user_216" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[2025-11-02T16:02:46.304Z] 🔹 VU 3 Logging in as: load_user_6814" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[2025-11-02T16:02:46.304Z] 🔹 VU 9 Logging in as: load_user_4561" source=console
+time="2025-11-02T21:32:46+05:30" level=info msg="[2025-11-02T16:02:46.304Z] 🔹 VU 8 Logging in as: load_user_5795" source=console
+
+running (00m01.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m01.0s/10m0s  00/11 shared iters
+
+running (00m02.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m02.0s/10m0s  00/11 shared iters
+
+running (00m03.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m03.0s/10m0s  00/11 shared iters
+
+running (00m04.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m04.0s/10m0s  00/11 shared iters
+
+running (00m05.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m05.0s/10m0s  00/11 shared iters
+
+running (00m06.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m06.0s/10m0s  00/11 shared iters
+
+running (00m07.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m07.0s/10m0s  00/11 shared iters
+
+running (00m08.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m08.0s/10m0s  00/11 shared iters
+
+running (00m09.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m09.0s/10m0s  00/11 shared iters
+
+running (00m10.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m10.0s/10m0s  00/11 shared iters
+
+running (00m11.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m11.0s/10m0s  00/11 shared iters
+
+running (00m12.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m12.0s/10m0s  00/11 shared iters
+
+running (00m13.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m13.0s/10m0s  00/11 shared iters
+
+running (00m14.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m14.0s/10m0s  00/11 shared iters
+
+running (00m15.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m15.0s/10m0s  00/11 shared iters
+
+running (00m16.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m16.0s/10m0s  00/11 shared iters
+
+running (00m17.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m17.0s/10m0s  00/11 shared iters
+
+running (00m18.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m18.0s/10m0s  00/11 shared iters
+time="2025-11-02T21:33:04+05:30" level=info msg="{\"Referrer-Policy\":\"no-referrer\",\"Set-Cookie\":\"AUTH_SESSION_ID=c6c92c68-3306-4800-bc34-0b30ef3d1a88;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..fyQV-x6VWaXOjhfDDDpf5w.PrlgH0MNQrukN5jmhnSxGUqGJJDj2v9PWh7AuOpI_GZfbxUyYOcTnOgmVMag0BhjvG_0R49YIRAAQi1NKNjPJFgeDt7ox0akAh1lqGq3uwAHc3Xo0MpVKSzzlF-i2EaBSGRERek0q3z0GrfnYCMAQggmZw1cMlVVcAWRnFURirHH3XNqlvCd7xf6VoiHUY3Oyq2GN19V082mRHaaKCclrskGafDyZV8_kn9Hk0X4c0UrHKvSPTRx-gf2JPuQBAzZIgJTk49fxivjtK3V5BhATHF-ufdhNDXCHRNV-pXsBDHLD5nz-C9s7_PYcYTGGvXpVi9B7oNWq1EpOKblgpyJUutXD6NG3aDmYNz7plpz1v0NhI37KqIFh1t6bpgCeBgSD61_jbFSdiMyv2KM_-p9LtMLTjCxM_YENdtmsAdSnptMBr5M6DbYvT5BM0MEdCOpWcGKPC9W5byUSM5-sWFrdd5WsP87EZz558uUr9CSlHfiULCRRtM-Anu8AgL-TodEW7_nJ2tqP2xZwaTpG6s2XNaBPFIBvMT_li4e0Xp0xu1T_YVdDU6qrTyF5YJPKcvWRNon_uNE_vaiW6jQNlzF0ZfTOo-BT-qe3LRkVtG7Cps0U6HzoUP_qtY7kmwRIrglda82JKIXWIRlYqWttzQMbK2yBtAMn2lwI00_InKh9YrxdeNH9FSZ2WtJ2olEJlOWqK-FyVPyfeXv0wzW1UYJa2vAU8sJ4P952ATVDA4B5MyYonCJky00EuPnUWhGqSMgHwp32kZTaYrvnZDTLHOgIEPyup1X9evH1KbYdHqYBwqp7BjooCwPVBbI8bgSZkf0csg6oSQfCQuOqkrQPLqFhUSS27XTjWELg7FA_SaxRZlC4LheCsgtrcmJO4ILsEDGdHhQN2ovkiKQ-kxIeYCErrNpSjbzgUt1sAsau5hqHI4D3_yCyMzNewYmTE-y99rWiBppLv_tjR_Wrjc_x9-dnUGIoKAjoH9q-YtCbsW-oVqb8duNSXBXG6A_jzrOW3gAYRqU4VgkT-iY-BmYNBVM869tVKLzUbnYdXUGvB7Ck5GtRBvA0gLXZfjhTVUVpgPF.Oebon1_4gfsbzF1I0er4xw;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\",\"X-Frame-Options\":\"SAMEORIGIN\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"X-Content-Type-Options\":\"nosniff\",\"Date\":\"Sun, 02 Nov 2025 16:03:01 GMT\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"X-Robots-Tag\":\"none\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"Content-Language\":\"en\",\"X-Xss-Protection\":\"1; mode=block\",\"Content-Length\":\"7191\",\"Content-Type\":\"text/html;charset=utf-8\"}" source=console
+time="2025-11-02T21:33:04+05:30" level=info msg="{\"Content-Language\":\"en\",\"Content-Type\":\"text/html;charset=utf-8\",\"Date\":\"Sun, 02 Nov 2025 16:03:03 GMT\",\"Referrer-Policy\":\"no-referrer\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"X-Robots-Tag\":\"none\",\"X-Xss-Protection\":\"1; mode=block\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"Set-Cookie\":\"AUTH_SESSION_ID=d1707f23-9154-482f-80a1-47e9ec2b11e5;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..tH7gmKfO5oNiQSwt_CIq_g.n7iM10Zn9MLPJZ51w_0xjRUkB36vcUg0cC3ySvCtbzi9jbCMHJ2k6KRjyrl30O-wULNFLUg6GvK3SUCNePRyT4zQpXupk9gCx0bX1d7xnLw90YqqItDSs4u99nf5wIug84PXVSVbAe6ZOwrgS7541QcpPYxSbXHXAKL2zum5aeMqtvYenrZmZOoDp8V2n0lO0x-oeqqJgu--Nb7zrGf0ZNYbegD9kgn4KYoMegx9wlOGfUdRdYF5bME501pxT9F34KvwaEejWLHNgKvd2f7hqMx1zGzXHDvIEQIqXuF07EtFcBBvefwk4Z9Iynn01_601BkGbzaQzqOCS1Qprw4KYn212Boi6SsKOWD4is2-lo4jeMTvrnWJm5H_h9ZX7lhxKnse1A4nHWY5cGOH5FkuBe8AmC4vKEsk2NdRnxww1eeFGrgcw3OHDAd4W2bq_zuGT8uM9SVvjX8mdAE4CkhN3Fe8bzmDTGWe24pcr1ZPVuoD2udGkWhsLYpx59axOAdZq7ue66JUy-CKipC6yt3lNJE9XfQ7TWE4J069XfxvkZ8RdSWHn2NoyogwJtmLEnm_Mdbjlv9kg3y-j65Ns8grzo3HtH6U3J5mkbta8NlWBqTTfrG03iEszg-nAF9TDiFwh7lKFGqr2-AywrIQHLZPD6VzlzxH9l0SnfTRMDwHJmRYzjKEyI53aPMiSfwRnDUGB2i6fhkmMsoI7w3TAZZuRyO25qtSlYD7nx4cJuQNQqOaW5t_7BI3-6UlurzNqozy0bNjvdEi5fjov5JIxWzn5jI2ewnEaYjYTDYUBJpdHb4ty2w9HM84k2W7HLFXHz1FW8xmEfJ3cMv3hiHhr2l6g2VP5zpVu6rRPfPLppKn5xCSOEuPpZ-dyIGpEJeVrsQQsJ3L4MwmUM6O9CAJeg4_bvo4H9Q9n6qfx_nEzI_TJWkSNx9S4auIoKGGy7aWlIJvCPuTVwUrS2lF0rGTqGNI4g6qdEkqW4vPQuq-eAnzYG1yXVO15uMxtKR-w3eUsTlg7R8QVrgjXwxG-tEd0Gh9_E2Oxye6e-JYglkKOUnVRHwpPzGrjmxKRpPogZ0iEPeu.fR4EhsfuflcLnDDgAgHhwg;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\",\"X-Content-Type-Options\":\"nosniff\",\"X-Frame-Options\":\"SAMEORIGIN\",\"Content-Length\":\"7191\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\"}" source=console
+time="2025-11-02T21:33:04+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-02T21:33:04+05:30" level=info msg="[2025-11-02T16:02:46.304Z] ✅ Login successful | User: load_user_5702 | Response Time: 2079.769769 ms" source=console
+time="2025-11-02T21:33:04+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-02T21:33:04+05:30" level=info msg="[2025-11-02T16:02:46.303Z] ✅ Login successful | User: load_user_5647 | Response Time: 4095.495831 ms" source=console
+
+running (00m19.0s), 09/11 VUs, 2 complete and 0 interrupted iterations
+default   [  18% ] 11 VUs  00m19.0s/10m0s  02/11 shared iters
+
+running (00m20.0s), 09/11 VUs, 2 complete and 0 interrupted iterations
+default   [  18% ] 11 VUs  00m20.0s/10m0s  02/11 shared iters
+
+running (00m21.0s), 09/11 VUs, 2 complete and 0 interrupted iterations
+default   [  18% ] 11 VUs  00m21.0s/10m0s  02/11 shared iters
+
+running (00m22.0s), 09/11 VUs, 2 complete and 0 interrupted iterations
+default   [  18% ] 11 VUs  00m22.0s/10m0s  02/11 shared iters
+
+running (00m23.0s), 09/11 VUs, 2 complete and 0 interrupted iterations
+default   [  18% ] 11 VUs  00m23.0s/10m0s  02/11 shared iters
+time="2025-11-02T21:33:10+05:30" level=info msg="{\"Referrer-Policy\":\"no-referrer\",\"Content-Length\":\"7191\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"Set-Cookie\":\"AUTH_SESSION_ID=812afd0c-2537-4a6f-8b85-134240db902c;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..Xz3cpH5CJm-FwuPOt7Ut3g.mbD52fFge2G8AnFgaES8iL3ggsplQ8vmJTHOv1suUJvRf32E7PaEln6Q-98zqwEyfFmPDPKwWWsP-g5SgMJqK8mh6QbMEBS4KHmICkV4NlcxW_7LPF1h_aGP4Ghh9CJSYZhWAzitwag1e4in6IVsSylhOFKOP_rrlfZ21AmQfuC2H1-lv-7BDKvmBUv3Xf9rRjwvGWHzpjlaiSWDUrcvz1wrZTXrnRLia_9QiBVsk0dPtt915PwGX3Qi88FDi5lBcoxYV8lCwZkXtZSQ2_xsDA3Ua-yquzjZBpdxLV6hW3o38RseJ2ac8AC8wo_jA0ovmliOQmGONpGQ0QANobk0ia9tcF-yd1vSJpG1Yt7nmR9edMGSK7ExP2WxJT4UAIvuTU5yn3Z4TSHUioOqtifk_UQUQmhqwFj0zHu1xZGgeE6Y-LweQVqh8BLGeAtKVmTCb5_y-ATQY5urlwf_B3xG4e8NvOeiSAR6Wyu34bWwfArF7VnUkjMFYAUruvSFDCI163CgV9GbH7lVA3t1Po57XIjgmmOGXf1S3vqa8IzqfDeKiLtuJAYfHA6Cko5Nv9qRtuaEyWLumvtx25nCA0LGsOK8kfo4PhlWqow5pN-zYG2z3OV3rrxUNXedf42d0LVRtTkLgCOEyZEKLmlXm2GJOZCxZsyGRWAfrHxVtoHCKFVOYBkXuoRYE_O1ik6PH78JmalCNOWdGXHfExMdOXHuDIgt3d-FnIjpxYEUjWZQkSwjExkEkEntNiCT-hZjzgL_uV_P5RmMalhl4Ik3WISWucslOfL1dd_Mb3N2yEu7tpIyKOoqNPU9f0NiV9mgjN6_XLThW7KnVAgMr9sYR9mvRc44FvgVbIG6UREX7-vGCNWvWBoI6Sk3Ow3SgwFVDCy6A3prgDNunBA6gQGhU1NvBNmPUSBaOJFIMER9MvKY9_aGO46sniCWFaDcKXOp__JUo7w7wOZk9mkJDC6WYcHcpUhdb2Lmf5C61hDuG9SGZDuCrmax8hhnyDCPRaXAww9PqAYMUy5w383HBYqhLaftf-rYMSycU5NzmejYoySHYdI8vWlrKW4ZKHu34GtXdTrV.nzRJzUt6Oc48dsViy1XxVg;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"X-Robots-Tag\":\"none\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"Content-Type\":\"text/html;charset=utf-8\",\"Date\":\"Sun, 02 Nov 2025 16:03:09 GMT\",\"Content-Language\":\"en\",\"X-Content-Type-Options\":\"nosniff\",\"X-Frame-Options\":\"SAMEORIGIN\",\"X-Xss-Protection\":\"1; mode=block\"}" source=console
+time="2025-11-02T21:33:10+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-02T21:33:10+05:30" level=info msg="[2025-11-02T16:02:46.304Z] ✅ Login successful | User: load_user_2671 | Response Time: 2079.694331 ms" source=console
+
+running (00m24.0s), 08/11 VUs, 3 complete and 0 interrupted iterations
+default   [  27% ] 11 VUs  00m24.0s/10m0s  03/11 shared iters
+
+running (00m25.0s), 08/11 VUs, 3 complete and 0 interrupted iterations
+default   [  27% ] 11 VUs  00m25.0s/10m0s  03/11 shared iters
+
+running (00m26.0s), 08/11 VUs, 3 complete and 0 interrupted iterations
+default   [  27% ] 11 VUs  00m26.0s/10m0s  03/11 shared iters
+
+running (00m27.0s), 08/11 VUs, 3 complete and 0 interrupted iterations
+default   [  27% ] 11 VUs  00m27.0s/10m0s  03/11 shared iters
+
+running (00m28.0s), 08/11 VUs, 3 complete and 0 interrupted iterations
+default   [  27% ] 11 VUs  00m28.0s/10m0s  03/11 shared iters
+
+running (00m29.0s), 08/11 VUs, 3 complete and 0 interrupted iterations
+default   [  27% ] 11 VUs  00m29.0s/10m0s  03/11 shared iters
+time="2025-11-02T21:33:16+05:30" level=info msg="{\"X-Content-Type-Options\":\"nosniff\",\"X-Frame-Options\":\"SAMEORIGIN\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"Content-Type\":\"text/html;charset=utf-8\",\"X-Robots-Tag\":\"none\",\"Content-Length\":\"7191\",\"X-Xss-Protection\":\"1; mode=block\",\"Date\":\"Sun, 02 Nov 2025 16:03:15 GMT\",\"Content-Language\":\"en\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"Referrer-Policy\":\"no-referrer\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"Set-Cookie\":\"AUTH_SESSION_ID=15335444-2bb7-492e-8bb4-cedc18672472;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..aFW6YMNmhVckhm-a7cM7bg.GaRw9yYwuVgQr1dUWFM0xhByJi76FitHovekpFcx3LYzB4KQw-EV-b03n9XuG3srV85BJdTIWAcUS8La4urEQW7-pPlQrUXbtBlIFgdU8IuciUyht5o6Mo6tKpBEmfmhj2SC52Ws6gWOQbYDsYvgrMckn4jOn0Ev4znMUTtKUnNZN7H12mLH8wnNIsZHWAz0n12B8_P_BTLin_9KTI4vxi8t8JVHBiKq1trpHnEllRKDJSVSaHGM0AE-QxVBnUzc8QjMuoVmkpuMXa9eY6-KntShvOLJkALQtBWgF3ijMsv4CRAhZipMtXBORncJfRHJIi7fQrqG_5iLWV9DQr47GDVfyKxvO3HfVMm3m1hg1z2XtYn1pBlYnoVBF-eQ2uOAPot2PoFLEiUiVVpe0jPD9xvPlnUcp3ELXf0eHh7kvC4xmEWvPCg63Pie0f7bzne5WbRYMrBHIDRk4C1HjPpo9AwI_3ypc5Jd-tQ9l1K_7BGVFCgjnfx6EYqS-cNbE-HxKf7-eJ8q-008AGxfe9hbXMYtCi60xB46wxW4rTO_07xIzTyI4fW7k_qk_vz6g2EEhZqJk31lOo3aYXygDWM-HBn115JgqwEOCbFT3k1rjVpim6LO0AMM7HpTywfrnIeTSDKhJoaRAYSjOGjd3QJJNaHW8Bdvn0VncBpVSqtqSbCCzMSwTTLhUapB8M1pZPfdmMebGvFalKAW73au9DaJLvw6YHKym65wJAoHCJG1qEAJbIOsotW7M-Net_T2SwKthbgFR__8Jmd0V0YXuIMeEIYwzMl92ZuU7qtMd3FtZk8I4n1w7bgCma07A3pYAfC-6Lop_bhQMHdmo54oFnr_-RyJ6DdFYUIJVOpjDWcVBM2pxYMpc4T0aAsa3L-h6umU1WWHCXBObeF1rKnsZxtHsdhZANel5xwX2ngM8DMnCfdpaA5hLIaTl-33qb6UYzPe8oTk9izgSRuDa--bXI9XH_sQqOHZNxBCSnR0Baxu7Bf1szt8X0-l0P9OUPREsEVIJNAq4qipC6I74DXuw-Rs4DXKT_Wyed3roMfXCEQTGNfDWqFIJOyqbNpS6rhEFKiB.7yHWq8GaTfbKwY0U610oew;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\"}" source=console
+time="2025-11-02T21:33:16+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-02T21:33:16+05:30" level=info msg="[2025-11-02T16:02:46.303Z] ✅ Login successful | User: load_user_4438 | Response Time: 2075.919047 ms" source=console
+
+running (00m30.0s), 07/11 VUs, 4 complete and 0 interrupted iterations
+default   [  36% ] 11 VUs  00m30.0s/10m0s  04/11 shared iters
+
+running (00m31.0s), 07/11 VUs, 4 complete and 0 interrupted iterations
+default   [  36% ] 11 VUs  00m31.0s/10m0s  04/11 shared iters
+
+running (00m32.0s), 07/11 VUs, 4 complete and 0 interrupted iterations
+default   [  36% ] 11 VUs  00m32.0s/10m0s  04/11 shared iters
+
+running (00m33.0s), 07/11 VUs, 4 complete and 0 interrupted iterations
+default   [  36% ] 11 VUs  00m33.0s/10m0s  04/11 shared iters
+
+running (00m34.0s), 07/11 VUs, 4 complete and 0 interrupted iterations
+default   [  36% ] 11 VUs  00m34.0s/10m0s  04/11 shared iters
+
+running (00m35.0s), 07/11 VUs, 4 complete and 0 interrupted iterations
+default   [  36% ] 11 VUs  00m35.0s/10m0s  04/11 shared iters
+
+running (00m36.0s), 07/11 VUs, 4 complete and 0 interrupted iterations
+default   [  36% ] 11 VUs  00m36.0s/10m0s  04/11 shared iters
+
+running (00m37.0s), 07/11 VUs, 4 complete and 0 interrupted iterations
+default   [  36% ] 11 VUs  00m37.0s/10m0s  04/11 shared iters
+
+running (00m38.0s), 07/11 VUs, 4 complete and 0 interrupted iterations
+default   [  36% ] 11 VUs  00m38.0s/10m0s  04/11 shared iters
+
+running (00m39.0s), 07/11 VUs, 4 complete and 0 interrupted iterations
+default   [  36% ] 11 VUs  00m39.0s/10m0s  04/11 shared iters
+
+running (00m40.0s), 07/11 VUs, 4 complete and 0 interrupted iterations
+default   [  36% ] 11 VUs  00m40.0s/10m0s  04/11 shared iters
+time="2025-11-02T21:33:26+05:30" level=info msg="{\"Content-Type\":\"text/html;charset=utf-8\",\"Referrer-Policy\":\"no-referrer\",\"X-Content-Type-Options\":\"nosniff\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"Content-Language\":\"en\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"X-Robots-Tag\":\"none\",\"Date\":\"Sun, 02 Nov 2025 16:03:25 GMT\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"X-Frame-Options\":\"SAMEORIGIN\",\"X-Xss-Protection\":\"1; mode=block\",\"Content-Length\":\"7191\",\"Set-Cookie\":\"AUTH_SESSION_ID=dd4d80a7-efb7-4aa9-9d2d-9f143127fdca;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..9dZ9aWkhyVSM8IpEA8V7wA.ZAHewMA9top-ao_n9o-wa50rkBxcz92E0USaqhrXb5OiolSAMXcUDtEvMVy3uVTnBURbn-SoN29zpkyQbta7v40dbzK0n2PcDg6HuRQxYZH3MFJfduexr3PKOYNmk_UHSSXKCqaNlP_Mmpq14pg_tyU65Fh6yXjU1pqlOSNVYZPAA7p_zTJTq2NxtODlERa4UzGuK3E65GKWEzta5-CrwUZaQDcFZLnpjjjf_vITe0_eIEebLQlpyuAOxzRAgQHsF1tbuYGJYnsrZ4V62btq1KbGcPopg50MJlsLsNWT6HgxSl-2HgpTDG5ilcM7GcoSfW9u48OGKW1CgNKsL9ucy8ZrQa6vmIW5FvZtvmi4RjXP51c-pNHEIrZjJ3J0KuAT_-Szt5f-JzEki8fVUkdIpJViFYH-O5vvPat6YY4pkhYofOg6VvrO0Jj_w5_Jvl3tLLbK-S7SDTPRC8Hwgkd6f0kkerlKWU2t4iEFPdSfmFbW7ViOLRqNYkrd6IUhCJpXmvWflBnCklBi8xlOoWGvKoZ9tL4tQzvvgm8a5v5OW7-kByFvkutqxDfGEJxa9AHn0mUpfcPrZkTGxhCoZLlHiln8JUT0YZ00yBNzsiAP9-brD30prJxgzBvzph_UvXyHjNRrSbA8BE3St-CWMvVOT9mgTGnBSbS8-pRxuYSPqRNz-cFP5PdK-s1Gykx_A4BQoYBveygYKCmm0pAkazSWcD-Q5c2j22VpzNBZ9psPp3EYLXIgSgI0YDErspWNWsqP3Dx0TeL5XSJUeUnwW0TCovXMQYvG_1n9nvVbLQSRgtT_9GlTkUQGK86pvOOx-ZqWux6gvRL7owXHpyROR5H4f0KO8nAW_a7V-MIwofMtQFSRfIBS4JrxH-QBRITCYbUSqo6lr31_k2q7s16pu2J31DIQ-AH_ljpJyFJLgJ1alIT0qutoGU7bo6Yy5tqc6Dyi7prEeiZ-8YQNAk8peODBIhr6unBXk9ggihoHf5Rl6qfxA5F3QRtIYkwHIh7U1W3ONConIDULZhgoD6oEOc_abcniEd82EheWElZY7vvThvUw1-wLBQHD_2iPUU6TgqS9.iGkQKVYvCl1x1vFPMh96eQ;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\"}" source=console
+time="2025-11-02T21:33:26+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-02T21:33:26+05:30" level=info msg="[2025-11-02T16:02:46.304Z] ✅ Login successful | User: load_user_216 | Response Time: 2067.270199 ms" source=console
+
+running (00m41.0s), 06/11 VUs, 5 complete and 0 interrupted iterations
+default   [  45% ] 11 VUs  00m41.0s/10m0s  05/11 shared iters
+
+running (00m42.0s), 06/11 VUs, 5 complete and 0 interrupted iterations
+default   [  45% ] 11 VUs  00m42.0s/10m0s  05/11 shared iters
+
+running (00m43.0s), 06/11 VUs, 5 complete and 0 interrupted iterations
+default   [  45% ] 11 VUs  00m43.0s/10m0s  05/11 shared iters
+time="2025-11-02T21:33:29+05:30" level=info msg="{\"Referrer-Policy\":\"no-referrer\",\"X-Xss-Protection\":\"1; mode=block\",\"Content-Length\":\"7191\",\"Content-Type\":\"text/html;charset=utf-8\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"X-Content-Type-Options\":\"nosniff\",\"X-Robots-Tag\":\"none\",\"Date\":\"Sun, 02 Nov 2025 16:03:28 GMT\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"X-Frame-Options\":\"SAMEORIGIN\",\"Content-Language\":\"en\",\"Set-Cookie\":\"AUTH_SESSION_ID=547d46fd-db98-4e5a-8466-285bc47c2aa3;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..Rj02Stm_6e6tLMOncdDGGQ.SUpVChWnWT1kbPk1QnUfY-9I-ox3fWlqVD6CfoMLw3qLDSOmYhpY2TWyI3mSC7_OfCUifNAZhYsZGnSXmuazDHvBN2hTIJBapmI7oY_n7KTOR1wgtVsvEXQpMluTt1Soejhv07Xfglj_QfOcz92j7-3lXmkN0OY5JnECu3jJg45kLA0Eyj7SD7H6F_2aYd-LDhZ6oLJL6Ni3xEGbAVA1lL3ID0XQPwlPrueKIdKQwNIGGlt11MKhfug1DbI8QvLGGPPG1E9m3j_SNfWEvfwM3QFd7Pi54hIYCvIVOlkEopHSDN-0NLkA_1FLloxian_Ft0aXPPzGFsSsKRbCZyEeTu7OcBUSSj2mrNyLnnQui7r9a_1Ym1aD4BFPjEjDyj9BzsqH5EtRnbpc2-shh3gPd6fOSdd9HlCpri2BBSC8YjmteU07XMm4-oC4Wx8kFzcd-n0f70teSjQ5-BsS9yVKeqB988UNnZt3Qb3XDrPm9htOodUFNeRPJfAsywrp1flnHPAebu_cHgQ3GpfRYt6c-ts6vllDeBV3imuuUMY5LwR6NOpixHCgWj98vbUHWmXLGOa7c7LxNIKk9qKzEOBDy0mHisMOCI-cmZWpU47ah1C_m4eS7y6YqS3cv2ADmzWGbGxUonsylhYanUnvObvDzpKJBEoxFuFA8DFq3JRUO3x_7o-m8svX0dN_DNdMNhGERaBD1TKR0yceVLI4TmsIov_gBYVEOED8WBnzhJF_7Vq5Gk18-aTKtHS3SkkVWytFcqI6KO5YiTBBRXb5oTUtOR3CaCjiFm_1YX_HLUU5M1ihF-S_pz2WYZ2R_wuVjPZBEiAeRUVpJBOEQcSi3Msebiw7As4LXYswfypF4XImlFiz2Y27SsxHSQifizbDUPpTYS47tdyERMEJ3rNlDtSS7adJEkiB-x6yZ20DlDCCL9_ILDR_PjqaUb0Se74K_IePqFIBivwNkY9apvSrqYKN4w8EpHYKZXG-JUJ9QgTznj_h7ZDEO0WAoL1e6zHt1EO4awm-B4M3ZG-aEmQ5qPQyFHO-cPXOctp-yCNfAF2N2zHWV2UsE-BWm_Z6icv8WPqF.twLPr7ineUAwPQJ5gJ-qzg;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\"}" source=console
+time="2025-11-02T21:33:29+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-02T21:33:29+05:30" level=info msg="[2025-11-02T16:02:46.303Z] ✅ Login successful | User: load_user_7520 | Response Time: 1023.576066 ms" source=console
+
+running (00m44.0s), 05/11 VUs, 6 complete and 0 interrupted iterations
+default   [  55% ] 11 VUs  00m44.0s/10m0s  06/11 shared iters
+
+running (00m45.0s), 05/11 VUs, 6 complete and 0 interrupted iterations
+default   [  55% ] 11 VUs  00m45.0s/10m0s  06/11 shared iters
+
+running (00m46.0s), 05/11 VUs, 6 complete and 0 interrupted iterations
+default   [  55% ] 11 VUs  00m46.0s/10m0s  06/11 shared iters
+
+running (00m47.0s), 05/11 VUs, 6 complete and 0 interrupted iterations
+default   [  55% ] 11 VUs  00m47.0s/10m0s  06/11 shared iters
+
+running (00m48.0s), 05/11 VUs, 6 complete and 0 interrupted iterations
+default   [  55% ] 11 VUs  00m48.0s/10m0s  06/11 shared iters
+
+running (00m49.0s), 05/11 VUs, 6 complete and 0 interrupted iterations
+default   [  55% ] 11 VUs  00m49.0s/10m0s  06/11 shared iters
+
+running (00m50.0s), 05/11 VUs, 6 complete and 0 interrupted iterations
+default   [  55% ] 11 VUs  00m50.0s/10m0s  06/11 shared iters
+
+running (00m51.0s), 05/11 VUs, 6 complete and 0 interrupted iterations
+default   [  55% ] 11 VUs  00m51.0s/10m0s  06/11 shared iters
+
+running (00m52.0s), 05/11 VUs, 6 complete and 0 interrupted iterations
+default   [  55% ] 11 VUs  00m52.0s/10m0s  06/11 shared iters
+
+running (00m53.0s), 05/11 VUs, 6 complete and 0 interrupted iterations
+default   [  55% ] 11 VUs  00m53.0s/10m0s  06/11 shared iters
+
+running (00m54.0s), 05/11 VUs, 6 complete and 0 interrupted iterations
+default   [  55% ] 11 VUs  00m54.0s/10m0s  06/11 shared iters
+
+running (00m55.0s), 05/11 VUs, 6 complete and 0 interrupted iterations
+default   [  55% ] 11 VUs  00m55.0s/10m0s  06/11 shared iters
+time="2025-11-02T21:33:42+05:30" level=info msg="{\"Content-Type\":\"text/html;charset=utf-8\",\"X-Xss-Protection\":\"1; mode=block\",\"Date\":\"Sun, 02 Nov 2025 16:03:41 GMT\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"Set-Cookie\":\"AUTH_SESSION_ID=fa3f8733-78d5-4589-99c6-408a33e038d3;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..D87j8g0baXWa7InZjxl80Q.kmPr8Jo6T-SkZV6qtkbDZ07jhI9dspgtahW3oHS93Op5mX_nH4rrDhUqd9N8Cbn4Yf0svrdlBrJmYDlG9elt_mKX9-qRVU_KTmWtHDeOk6NFpOg7MImVho-CNaMnPUmKWNSg0sZPx7OYd48gIMAEEeZhx39qcltSPL4k7sygtq5UcfV4jTALoxpUte9VYDeD_qqRUPcBH995c6hqR2WT4OXOcSfkjYKMoI_RfrY-YfMzAjTD3chIBxlzfkcAcoa20mbGMgTiax5uBrn6gYhWuBlJEYF94GCYg0mojYn06Rn3YOydaAvAKQgBU4xns7OGtEIDsc-2oELDeF7qWc7oIsXny1Na832US9CdV6eb236JHfYnFHEhwxmk7kRImgRLgVBm5M5MXyAvfMslRSASB0myqsr-JJaR-Dsj0owwrEexe38LcDUkd6Nrs1723RVLLCS78yex5BUHtomSjsRVDND49gchfDYQOnxeu5igsc2ocDol0Ll6eVkdF6QclkbC7XF0nrw7XmkVVFVKXLxzT0g1jdNHjnhN2fSnIzS6TQdO9Z2yFQod3aipj-3wUDrXTR6xTUFdtsxn7cLhzs8uqLXBq698o4vNzx1oknzjoUUfrNPmJVGxnhZzoRZFNWQuWpJLf_yk_6f0LzGJvrhOhN2wUhHDphfG87zwhRk7JnREXo1DTwVuHzrhxfbf5O1pJYpOnkNiqiMrvnzIupcs3D8-fW8MRUGg8c0FT7rqVEsFVd9BoEpj_1TSHOc01fbM8fHITEs2309diVzsWZaWbXOXnIb3lA_DxqIMmEL4tE_n8m5cUlP2Kboh469TGnX3LqD1DzetZrVzyBz0EijhLVn5Q3CrCc31z1z96jXk7_CgOV6tUZHdqgKbphK_RB3EGh9ySlFOSpdkADQvVtQgtAzD1qmbSIhrYpEYx493Y2KGB3JZQ_qmEPmd5XrmP4vbWvOAfvEX_9RrCs7ud0YGnNfIoiS8E380CTQIsdU-VDNinKH2-SPgcxaKarr9_j5FIYkSsmRwOrfSMrT7sei7vCMz1fa5IDOpUs5btsKiFAP6tV8t6iiNwhW3pxdvOo9j.ULT0ANWP_1YvGiJJztMNug;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"X-Content-Type-Options\":\"nosniff\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"Referrer-Policy\":\"no-referrer\",\"X-Robots-Tag\":\"none\",\"X-Frame-Options\":\"SAMEORIGIN\",\"Content-Length\":\"7191\",\"Content-Language\":\"en\"}" source=console
+time="2025-11-02T21:33:42+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-02T21:33:42+05:30" level=info msg="[2025-11-02T16:02:46.303Z] ✅ Login successful | User: username | Response Time: 4064.022084 ms" source=console
+
+running (00m56.0s), 04/11 VUs, 7 complete and 0 interrupted iterations
+default   [  64% ] 11 VUs  00m56.0s/10m0s  07/11 shared iters
+
+running (00m57.0s), 04/11 VUs, 7 complete and 0 interrupted iterations
+default   [  64% ] 11 VUs  00m57.0s/10m0s  07/11 shared iters
+time="2025-11-02T21:33:44+05:30" level=info msg="{\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"X-Content-Type-Options\":\"nosniff\",\"X-Frame-Options\":\"SAMEORIGIN\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"Content-Type\":\"text/html;charset=utf-8\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"X-Robots-Tag\":\"none\",\"Date\":\"Sun, 02 Nov 2025 16:03:43 GMT\",\"Content-Language\":\"en\",\"Referrer-Policy\":\"no-referrer\",\"Set-Cookie\":\"AUTH_SESSION_ID=b9225033-c8c1-4119-aec8-ff8f6d8a396b;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..R9ChR8a2YZmXmuP30w7cag.AgOS2CCluv2Clfafma1T03R_lZX6beATtiTeLCVeUE6FRhcUV-qZUw-16K_itr8Rr-m35wWlhg4gaiOg5JWWZOUOPAhmUmtHSTbz8ZPzNbbFXeTtQczna5-Cbsfe2lmAE3G9lemUj_j35FDs6goj4yDz5nt3OkIay5pg2BBJOl-zrHVxXEbSbnWR-J3XWNuggGIrMfWrlitxspnApuLAZN3uuE7vkYk_DCA7KuvhrJDbFZqVI6m9P3fCzrpyaAj_JJsFx-n4pJ8J7KwHpfjT60fd-JV6kA66pIyBvhEYl0-T51lEicUW5x6t9OAQ3eZAb2lEbgLPYbLJ3uxE1Cb2nJlvedaz139X0lN17BBMWB4PC-JPYYXBFY2dKQD1YW4z2HUAs7XnkMGYDmY-Ym_lGYDTvi72LAQtGnv6dxUAaKhuxSBLjPNF3Osi9tyY_cRSEDWFG1t2rWxtvQ-juvGWwMTxmyd3Zl4sL0fP1m-X-8QI1ZNbp3R8yNH8av9cnZXTnjQUE8QR7uZmSnNQ686XFyuQJOFcK7owIvXt14VBeFN726qO0ACffriSbfiOxw9fzDVPwSDCFz9CLFF3Ia6PezCoF3AoyqB1YmMxKGGmvg_M-ISeFcDOx5xeIdxX53IeVE10lP6iEcgo8yWXLAcAHvl-fa5Mx6eK0UewI8OM3kvJyrEEYCtAm3uHNgk_QbM9cFxDS6846AvScuDGNnnC1J6NsAI5YWCEqYc_8meDI7Xz00aLwzzXo2YljypSIEUb5l2LiT2wpoMMA2Fqjhoy9hto5BTsZhClp4nFe0Aex82DapV_Y-UE-J2EzoAURKMaYAci1CxrSbXKQnPG4murN783znuVtYSdgLw3DxiZjsLM3biLT9l5RG3d0ldyJf-BMoUcTqhgMG-lCU16ocMlUck6KV8L4m3bwHDqfVtx5XinEbS00W3PPjP2y_FAA1rBD_Nsj2u7uDMxxU3LcVhJ-zpTE2rAUmjBTfb8w_Bo7y3th0QuPsASb3OjPPzhYkmLLTErU4MhLhIIxgWo9Zl_bU9qQS-74Yn8aW3-JWvbxseK3CET33Ay_NN7bBNFZxMj.K3MOv6-qLus_SKSiIf5xsA;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\",\"X-Xss-Protection\":\"1; mode=block\",\"Content-Length\":\"7191\"}" source=console
+time="2025-11-02T21:33:44+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-02T21:33:44+05:30" level=info msg="[2025-11-02T16:02:46.304Z] ✅ Login successful | User: load_user_4561 | Response Time: 4063.551145 ms" source=console
+
+running (00m58.0s), 03/11 VUs, 8 complete and 0 interrupted iterations
+default   [  73% ] 11 VUs  00m58.0s/10m0s  08/11 shared iters
+
+running (00m59.0s), 03/11 VUs, 8 complete and 0 interrupted iterations
+default   [  73% ] 11 VUs  00m59.0s/10m0s  08/11 shared iters
+
+running (01m00.0s), 03/11 VUs, 8 complete and 0 interrupted iterations
+default   [  73% ] 11 VUs  01m00.0s/10m0s  08/11 shared iters
+time="2025-11-02T21:33:46+05:30" level=warning msg="Request Failed" error="Post \"https://qa.vunetsystems.com/vui/login/generic_oauth\": request timeout"
+time="2025-11-02T21:33:46+05:30" level=warning msg="Request Failed" error="Post \"https://qa.vunetsystems.com/vui/login/generic_oauth\": request timeout"
+time="2025-11-02T21:33:46+05:30" level=info msg="{}" source=console
+time="2025-11-02T21:33:46+05:30" level=warning msg="Request Failed" error="Post \"https://qa.vunetsystems.com/vui/login\": request timeout"
+time="2025-11-02T21:33:46+05:30" level=info msg="[K6-METRIC] status_code=0" source=console
+time="2025-11-02T21:33:46+05:30" level=error msg="[2025-11-02T16:02:46.304Z] ❌ Login failed | User: load_user_5795 | Status: 0 | Response Time: 27706.920423 ms | Response: null" source=console
+time="2025-11-02T21:33:46+05:30" level=info msg="{}" source=console
+time="2025-11-02T21:33:46+05:30" level=info msg="{}" source=console
+time="2025-11-02T21:33:46+05:30" level=info msg="[K6-METRIC] status_code=0" source=console
+time="2025-11-02T21:33:46+05:30" level=error msg="[2025-11-02T16:02:46.303Z] ❌ Login failed | User: load_user_2293 | Status: 0 | Response Time: 28732.494457 ms | Response: null" source=console
+time="2025-11-02T21:33:46+05:30" level=info msg="[K6-METRIC] status_code=0" source=console
+time="2025-11-02T21:33:46+05:30" level=error msg="[2025-11-02T16:02:46.304Z] ❌ Login failed | User: load_user_6814 | Status: 0 | Response Time: 29754.118474 ms | Response: null" source=console
+time="2025-11-02T21:33:46+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_4438\",\"password\":\"Password123!\"},{\"username\":\"load_user_6814\",\"password\":\"Password123!\"},{\"username\":\"load_user_216\",\"password\":\"Password123!\"},{\"username\":\"load_user_2293\",\"password\":\"Password123!\"},{\"username\":\"load_user_5702\",\"password\":\"Password123!\"},{\"username\":\"load_user_7520\",\"password\":\"Password123!\"},{\"username\":\"load_user_5795\",\"password\":\"Password123!\"},{\"username\":\"load_user_4561\",\"password\":\"Password123!\"},{\"username\":\"load_user_5647\",\"password\":\"Password123!\"},{\"username\":\"load_user_2671\",\"password\":\"Password123!\"},{\"username\":\"load_user_9886\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 11     0.183326/s
+    checks_succeeded...: 72.72% 8 out of 11
+    checks_failed......: 27.27% 3 out of 11
+
+    ✓ Login Success (load_user_5647)
+    ✓ Login Success (load_user_5702)
+    ✓ Login Success (load_user_2671)
+    ✓ Login Success (load_user_4438)
+    ✓ Login Success (load_user_216)
+    ✓ Login Success (load_user_7520)
+    ✓ Login Success (username)
+    ✓ Login Success (load_user_4561)
+    ✗ Login Success (load_user_5795)
+      ↳  0% — ✓ 0 / ✗ 1
+    ✗ Login Success (load_user_2293)
+      ↳  0% — ✓ 0 / ✗ 1
+    ✗ Login Success (load_user_6814)
+      ↳  0% — ✓ 0 / ✗ 1
+
+    CUSTOM
+    login_response_time............: avg=9794.802893 min=1023.576066 med=4063.551145 max=29754.118474 p(90)=28732.494457 p(95)=29243.306465
+    login_success_rate.............: 72.72% 8 out of 11
+
+    HTTP
+    http_req_duration..............: avg=11.59s      min=7.15ms      med=4.07s       max=45.48s       p(90)=30s          p(95)=30.79s      
+      { expected_response:true }...: avg=10.2s       min=7.15ms      med=4.06s       max=45.48s       p(90)=30s          p(95)=33.11s      
+    http_req_failed................: 7.50%  3 out of 40
+    http_reqs......................: 40     0.666638/s
+
+    EXECUTION
+    iteration_duration.............: avg=42.58s      min=18.53s      med=43.42s      max=1m0s         p(90)=1m0s         p(95)=1m0s        
+    iterations.....................: 11     0.183326/s
+    vus............................: 3      min=3       max=11
+    vus_max........................: 11     min=11      max=11
+
+    NETWORK
+    data_received..................: 109 kB 1.8 kB/s
+    data_sent......................: 14 kB  229 B/s
+
+
+
+
+running (01m00.0s), 00/11 VUs, 11 complete and 0 interrupted iterations
+default ✓ [ 100% ] 11 VUs  01m00.0s/10m0s  11/11 shared iters

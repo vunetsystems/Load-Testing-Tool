@@ -17,12 +17,12 @@ dashboards:
     - id: cceb91b5-f855-4bdb-b680-2e4d7825d28c
       name: Azure Firewall Insights
       slug: azure-firewall-insights
-      enabled: true
+      enabled: false
     - id: acaaa547-06a4-4319-91e3-558b3c896864
       name: MongoDB Overview
       slug: mongodb-overview
-      enabled: true
+      enabled: false
     - id: beuvjppwoeyv4d
       name: Azure Redis Cache Overview
       slug: Azure-Redis-Cache-Overview
-      enabled: true
+      enabled: false

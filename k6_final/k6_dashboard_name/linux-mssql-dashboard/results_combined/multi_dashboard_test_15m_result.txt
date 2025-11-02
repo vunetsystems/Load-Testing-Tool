@@ -1,0 +1,482 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard/multi_dashboard_test.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 11 max VUs, 10m30s max duration (incl. graceful stop):
+              * default: 11 iterations shared among 11 VUs (maxDuration: 10m0s, gracefulStop: 30s)
+
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=44.50ms" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=51.64ms" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=54.42ms" source=console
+time="2025-11-02T21:33:51+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=139.64ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=142.53ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=142.77ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=144.68ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=143.02ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=184.50ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=195.45ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=100.97ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=188.54ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=241.93ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=242.83ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=244.23ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=100.22ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=194.45ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=195.44ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=200.72ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=197.49ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=206.04ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=209.09ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=211.07ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=295.35ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=200.95ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=310.73ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=212.86ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=212.21ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=398.28ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=299.89ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=196.41ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=303.82ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=201.75ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=112.52ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=202.12ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=20.05ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=95.31ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=90.42ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=97.99ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=193.87ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=109.16ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=195.44ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=189.66ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=389.81ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=389.73ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=407.52ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=281.96ms" source=console
+
+running (00m01.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m01.0s/10m0s  00/11 shared iters
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=204.20ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=309.87ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=308.88ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=302.57ms" source=console
+time="2025-11-02T21:33:52+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=307.43ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=297.60ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=391.98ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=198.39ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=204.55ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=201.15ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=212.18ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=194.82ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=189.86ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=195.89ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=106.67ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=194.60ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=195.89ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=302.25ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=200.02ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=201.68ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=298.41ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=393.79ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=297.58ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=294.25ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=310.83ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=307.88ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=290.73ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=401.39ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=292.95ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=211.55ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=303.45ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=392.54ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=201.38ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=192.23ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=93.63ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=202.42ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=189.99ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=295.33ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=202.57ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=199.17ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=302.64ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=210.19ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=98.79ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=107.13ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=202.63ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=194.57ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=97.11ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=206.41ms" source=console
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=108.66ms" source=console
+
+running (00m02.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m02.0s/10m0s  00/11 shared iters
+time="2025-11-02T21:33:53+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=193.08ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=283.25ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=196.18ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=302.72ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=204.49ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=110.23ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=293.03ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=393.55ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=299.04ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=400.63ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=481.63ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=193.08ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=401.77ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=194.67ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=217.34ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=215.30ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=205.35ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=191.80ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=194.68ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=202.62ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=114.44ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=211.11ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=200.48ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=280.13ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=300.48ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=288.13ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=384.85ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=298.17ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=206.46ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=294.59ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=309.60ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=304.68ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=414.01ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=200.45ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=396.12ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=107.38ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=118.53ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=302.06ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=300.24ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=201.85ms" source=console
+
+running (00m03.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m03.0s/10m0s  00/11 shared iters
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=287.21ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=290.03ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=291.54ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=201.00ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=300.17ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=207.47ms" source=console
+time="2025-11-02T21:33:54+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=195.43ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=289.82ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=123.30ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=193.32ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=284.58ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=299.61ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=197.82ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=309.13ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=302.01ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=289.21ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=298.19ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=210.09ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=298.12ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=205.74ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=206.25ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=236.76ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=323.11ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=234.94ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=245.19ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=139.68ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=198.05ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=194.57ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=202.20ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=199.09ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=109.28ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=112.58ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=157.00ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=155.81ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=162.71ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=192.39ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=254.15ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=286.02ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=357.49ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=297.61ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=292.32ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=200.82ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=208.99ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=110.22ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=312.57ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=294.85ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=399.50ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=97.54ms" source=console
+
+running (00m04.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m04.0s/10m0s  00/11 shared iters
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=187.14ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=195.45ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=202.12ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=104.53ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=193.31ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=112.75ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=208.88ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=312.74ms" source=console
+time="2025-11-02T21:33:55+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=204.17ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=297.69ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=200.01ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=283.50ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=387.38ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=295.71ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=298.83ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=107.37ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=307.19ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=389.49ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=390.58ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=393.82ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=314.20ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=397.73ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=179.54ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=195.70ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=203.61ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=103.75ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=210.12ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=207.42ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=289.38ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=186.12ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=196.77ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=195.12ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=191.92ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=103.69ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=133.88ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=191.59ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=197.15ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=192.30ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=108.41ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=208.64ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=193.33ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=300.77ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=305.56ms" source=console
+
+running (00m05.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m05.0s/10m0s  00/11 shared iters
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=293.95ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=300.11ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=401.39ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=210.57ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=403.66ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=294.65ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=112.05ms" source=console
+time="2025-11-02T21:33:56+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=314.45ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=467.90ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=191.68ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=401.67ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=102.57ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=97.78ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=191.20ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=195.97ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=203.11ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=197.60ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=194.70ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=111.59ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=283.95ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=285.41ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=205.38ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=297.74ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=211.04ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=295.29ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=204.68ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=199.72ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=309.95ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=306.50ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=213.99ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=304.33ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=390.21ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=399.18ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=202.77ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=206.25ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=198.50ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=196.64ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=115.34ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=205.37ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=215.60ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=285.89ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=289.35ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=296.76ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=394.33ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=302.93ms" source=console
+
+running (00m06.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m06.0s/10m0s  00/11 shared iters
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=288.90ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=386.25ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=291.07ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=295.94ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=207.62ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=313.97ms" source=console
+time="2025-11-02T21:33:57+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=215.03ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=381.61ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=189.98ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=100.84ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=208.31ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=302.33ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=202.51ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=210.73ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=188.13ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=289.75ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=202.47ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=382.89ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=384.45ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=399.81ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=287.34ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=402.62ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=296.02ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=207.50ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=410.54ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=211.53ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=201.55ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=296.51ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=208.13ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=201.34ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=406.53ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=189.24ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=207.87ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=205.39ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=201.41ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=106.98ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=204.25ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=115.29ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=300.89ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=196.39ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=194.29ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=294.52ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=193.99ms" source=console
+
+running (00m07.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m07.0s/10m0s  00/11 shared iters
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=293.50ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=204.94ms" source=console
+time="2025-11-02T21:33:58+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=308.07ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=289.58ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=396.29ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=199.49ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=201.58ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=403.70ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=309.21ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=104.55ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=486.82ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=187.96ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=180.01ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=104.21ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=93.64ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=106.84ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=115.40ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=104.08ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=101.86ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=100.21ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=207.02ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=201.00ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=184.28ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=90.37ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=110.86ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=20.24ms" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-02T21:33:59+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+
+running (00m08.0s), 10/11 VUs, 1 complete and 0 interrupted iterations
+default   [   9% ] 11 VUs  00m08.0s/10m0s  01/11 shared iters
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-02T21:34:00+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 11      1.299391/s
+    checks_succeeded...: 100.00% 11 out of 11
+    checks_failed......: 0.00%   0 out of 11
+
+    ✓ Dashboard loaded successfully
+
+    CUSTOM
+    dashboard_response_time........: avg=144.744409 min=44.502201 med=142.76557  max=244.230974 p(90)=242.832932 p(95)=243.531953
+    dashboard_success_count........: 11     1.299391/s
+    panel_response_time............: avg=237.417212 min=20.045604 med=207.218591 max=486.823247 p(90)=387.593721 p(95)=399.354811
+    panel_success_count............: 330    38.981717/s
+
+    HTTP
+    http_req_duration..............: avg=234.42ms   min=20.04ms   med=206.41ms   max=486.82ms   p(90)=386.24ms   p(95)=399.17ms  
+      { expected_response:true }...: avg=234.42ms   min=20.04ms   med=206.41ms   max=486.82ms   p(90)=386.24ms   p(95)=399.17ms  
+    http_req_failed................: 0.00%  0 out of 341
+    http_reqs......................: 341    40.281107/s
+
+    EXECUTION
+    iteration_duration.............: avg=8.28s      min=7.74s     med=8.25s      max=8.46s      p(90)=8.46s      p(95)=8.46s     
+    iterations.....................: 11     1.299391/s
+    vus............................: 10     min=10       max=11
+    vus_max........................: 11     min=11       max=11
+
+    NETWORK
+    data_received..................: 26 MB  3.1 MB/s
+    data_sent......................: 110 kB 13 kB/s
+
+
+
+
+running (00m08.5s), 00/11 VUs, 11 complete and 0 interrupted iterations
+default ✓ [ 100% ] 11 VUs  00m08.5s/10m0s  11/11 shared iters

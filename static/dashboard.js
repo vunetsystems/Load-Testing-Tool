@@ -374,17 +374,18 @@ class DashboardManager {
 
             const allMetrics = [];
 
-            // Fetch metrics from each enabled node
+            // Fetch metrics from each enabled node using the proxy endpoint
+            // The proxy endpoint now returns both system and process metrics from node_metrics_api
             for (const node of enabledNodes) {
                 try {
                     console.log(`Fetching metrics from node: ${node.name}`);
 
-                    // Use proxy endpoint with node name parameter
+                    // Use proxy endpoint with node name parameter - now includes process metrics
                     const response = await this.manager.callAPI(`/api/proxy/metrics/${node.name}`);
                     console.log(`=== METRICS FROM ${node.name} ===`);
                     console.log('Full response:', response);
 
-                    // The proxy endpoint returns the raw metrics data directly
+                    // The proxy endpoint returns the raw metrics data directly (both system and process)
                     if (response && typeof response === 'object' && response.nodeId) {
                         console.log(`Valid metrics data received from ${node.name}, adding to display...`);
                         // Add node name to the response for display

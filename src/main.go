@@ -143,6 +143,7 @@ func main() {
 	api.HandleFunc("/clickhouse/kafka-topics", handlers.HandleAPIGetKafkaTopicMetrics).Methods("GET")
 	api.HandleFunc("/clickhouse/k6-dashboard-results", handlers.HandleAPIGetK6DashboardResults).Methods("GET")
 	api.HandleFunc("/clickhouse/k6-results", handlers.HandleAPIGetK6Results).Methods("GET")
+	api.HandleFunc("/clickhouse/pod-events", handlers.HandleAPIGetPodEvents).Methods("GET")
 	api.HandleFunc("/clickhouse/pod-monitoring", handlers.HandleAPIGetPodMonitoring).Methods("GET")
 	// Removed pod-metrics endpoint
 
@@ -168,11 +169,8 @@ func main() {
 	api.HandleFunc("/k6/logs", handlers.HandleAPIGetK6Logs).Methods("GET")
 	api.HandleFunc("/k6/run-combined", handlers.HandleAPIRunCombinedScript).Methods("POST")
 
-	// Proxy endpoint for node metrics API
+	// Proxy endpoint for node metrics API - now includes both system and process metrics
 	api.HandleFunc("/proxy/metrics/{name}", handlers.HandleProxyMetrics).Methods("GET")
-
-	// Process metrics endpoint - collects finalvudatasim metrics directly via SSH
-	api.HandleFunc("/process/metrics", handlers.HandleAPIGetProcessMetrics).Methods("GET")
 
 	// Kubernetes monitoring API endpoints
 	api.HandleFunc("/monitoring/k8/pod-yaml", handlers.HandleAPIMonitoringK8PodYAML).Methods("GET")
