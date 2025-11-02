@@ -82,13 +82,33 @@ func CollectProcessMetricsForNode(nodeName string, nodeConfig *node_control.Node
 
 	// Get process start time
 	startTimeOut, err := NodeManager.SSHExecWithOutput(*nodeConfig, fmt.Sprintf("ps -p %s -o lstart=", pidStr))
-	if err == nil && startTimeOut != "" {
+	if err != nil {
+		// Check if it's "process not found" vs actual SSH error
+		if strings.Contains(err.Error(), "exit status 1") {
+			metrics.Running = false
+			return metrics
+		}
+		// Log actual SSH errors but not process not found
+		metrics.Error = fmt.Sprintf("SSH error: %v", err)
+		return metrics
+	}
+	if startTimeOut != "" {
 		metrics.StartTime = strings.TrimSpace(startTimeOut)
 	}
 
 	// Get CPU and memory usage
 	psOut, err := NodeManager.SSHExecWithOutput(*nodeConfig, fmt.Sprintf("ps -p %s -o %%cpu,rss,cmd", pidStr))
-	if err == nil && psOut != "" {
+	if err != nil {
+		// Check if it's "process not found" vs actual SSH error
+		if strings.Contains(err.Error(), "exit status 1") {
+			metrics.Running = false
+			return metrics
+		}
+		// Log actual SSH errors but not process not found
+		metrics.Error = fmt.Sprintf("SSH error: %v", err)
+		return metrics
+	}
+	if psOut != "" {
 		psFields := strings.Fields(psOut)
 		if len(psFields) >= 3 {
 			metrics.CPUPercent, _ = strconv.ParseFloat(psFields[0], 64)

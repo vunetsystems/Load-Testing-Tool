@@ -203,6 +203,29 @@ func HandleAPIGetPodLogs(w http.ResponseWriter, r *http.Request) {
 		Data:    logs,
 	})
 }
+
+// HandleAPIGetPodEvents handles GET /api/clickhouse/pod-events
+func HandleAPIGetPodEvents(w http.ResponseWriter, r *http.Request) {
+	namespace := r.URL.Query().Get("namespace")
+	if namespace == "" {
+		namespace = "vsmaps" // default namespace
+	}
+
+	events, err := clickhouse.GetPodEvents(r.Context(), namespace)
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to get pod events: %v", err),
+		})
+		return
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "Pod events retrieved successfully",
+		Data:    events,
+	})
+}
 // HandleAPIGetK6MaxVus handles GET /api/clickhouse/k6-max-vus
 func HandleAPIGetK6MaxVus(w http.ResponseWriter, r *http.Request) {
 	maxVusResult, err := clickhouse.GetK6MaxVus(r.Context())
