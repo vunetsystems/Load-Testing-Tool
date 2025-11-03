@@ -8,11 +8,11 @@ include_module_dirs:
   Azure_Redis_Cache:
     enabled: false
   LinuxMonitor:
-    enabled: false
-  MongoDB:
     enabled: true
-  Mssql:
+  MongoDB:
     enabled: false
+  Mssql:
+    enabled: true
 logging:
   console: false
   directory: /home/vunet/vuDataSim/vuDataSim/logs/

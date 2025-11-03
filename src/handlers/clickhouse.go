@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 	"vuDataSim/src/clickhouse"
 	"vuDataSim/src/logger"
@@ -306,6 +307,92 @@ func HandleAPIGetK6Results(w http.ResponseWriter, r *http.Request) {
 		Success: true,
 		Message: "K6 results retrieved successfully",
 		Data:    k6Results,
+	})
+}
+// HandleAPIGetKafkaPodMemory handles GET /api/clickhouse/kafka-pod-memory
+func HandleAPIGetKafkaPodMemory(w http.ResponseWriter, r *http.Request) {
+	data, err := clickhouse.GetKafkaPodMemoryData(r.Context())
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to fetch Kafka pod memory data: %v", err),
+		})
+		return
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "Kafka pod memory data retrieved successfully",
+		Data:    data,
+	})
+}
+// HandleAPIGetKafkaNetwork handles GET /api/clickhouse/kafka-network
+func HandleAPIGetKafkaNetwork(w http.ResponseWriter, r *http.Request) {
+	// Get pagination parameters
+	pageStr := r.URL.Query().Get("page")
+	limitStr := r.URL.Query().Get("limit")
+
+	page := 1
+	limit := 5 // Default to 5 records as requested
+
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			page = p
+		}
+	}
+
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+			limit = l
+		}
+	}
+
+	data, err := clickhouse.GetKafkaNetworkData(r.Context())
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to fetch Kafka network data: %v", err),
+		})
+		return
+	}
+
+	// Apply pagination
+	totalRecords := len(data)
+	startIndex := (page - 1) * limit
+	endIndex := startIndex + limit
+
+	if startIndex >= totalRecords {
+		// Return empty data for out of bounds pages
+		SendJSONResponse(w, http.StatusOK, APIResponse{
+			Success: true,
+			Message: "Kafka network data retrieved successfully",
+			Data: map[string]interface{}{
+				"data":         []clickhouse.KafkaNetworkData{},
+				"page":         page,
+				"limit":        limit,
+				"totalRecords": totalRecords,
+				"totalPages":   (totalRecords + limit - 1) / limit,
+			},
+		})
+		return
+	}
+
+	if endIndex > totalRecords {
+		endIndex = totalRecords
+	}
+
+	paginatedData := data[startIndex:endIndex]
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "Kafka network data retrieved successfully",
+		Data: map[string]interface{}{
+			"data":         paginatedData,
+			"page":         page,
+			"limit":        limit,
+			"totalRecords": totalRecords,
+			"totalPages":   (totalRecords + limit - 1) / limit,
+		},
 	})
 }
 

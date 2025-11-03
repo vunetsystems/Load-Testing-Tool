@@ -25,22 +25,22 @@ func GetK6DashboardResults(ctx context.Context) ([]K6DashboardResult, error) {
 
 	query := `
 		SELECT
-	   timestamp AS "timestamp",
-	   vus AS "No of Users",
-	   time_range AS "Time Filter",
-	   dashboard_status AS "Dashboard Status",
-	   dashboard_name AS "Dashboard Name",
-	   quantile(0.9)(dashboard_avg_response_time) AS "P95 Response time"
+    timestamp AS "Timestamp",
+    vus AS "No of Users",
+    time_range AS "Time Filter",
+    dashboard_status AS "Dashboard Status",
+    dashboard_name AS "Dashboard Name",
+    quantile(0.9)(dashboard_avg_response_time) AS "P95 Response Time"
 FROM monitoring.k6_results
 WHERE timestamp >= now() - INTERVAL 1 HOUR
-	 AND time_range IN ('15m')
 GROUP BY
     timestamp,
     vus,
     time_range,
     dashboard_status,
     dashboard_name
-ORDER BY timestamp ASC
+ORDER BY timestamp ASC;
+
 
 	`
 
