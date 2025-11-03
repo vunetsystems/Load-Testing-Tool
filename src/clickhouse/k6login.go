@@ -23,7 +23,7 @@ func GetK6LoginResults(ctx context.Context) ([]K6LoginResult, error) {
 
 	query := `
 		SELECT
-		    timestamp AS "Timestamp",
+		    timestamp AS "timestamp",
 		    vus AS "No of Users",
 		    test_name AS "Test Name",
 		    quantile(0.9)(avg_response_time) AS "P95 Response time"

@@ -34,8 +34,8 @@ class LogsManager {
                         type: log.level || log.type // Use 'level' from JSON, fallback to 'type'
                     };
                 });
-                this.displayLogs(this.logEntries);
                 this.populateNodeFilters(); // Populate filters after loading logs
+                this.filterLogs(); // Apply current filters instead of displaying all logs
             }
         } catch (error) {
             console.error('Error loading logs:', error);
@@ -49,6 +49,11 @@ class LogsManager {
         const typeFilter = this.manager.elements.logTypeFilter;
 
         if (!nodeFilter || !moduleFilter || !typeFilter) return;
+
+        // Store current selections before clearing
+        const currentNodeValue = nodeFilter.value;
+        const currentModuleValue = moduleFilter.value;
+        const currentTypeValue = typeFilter.value;
 
         // Clear existing options except "All Nodes/Modules/Types"
         while (nodeFilter.children.length > 1) {
@@ -95,6 +100,17 @@ class LogsManager {
             option.textContent = type.charAt(0).toUpperCase() + type.slice(1);
             typeFilter.appendChild(option);
         });
+
+        // Restore previous selections if they still exist in the options
+        if (currentNodeValue && Array.from(nodeFilter.options).some(opt => opt.value === currentNodeValue)) {
+            nodeFilter.value = currentNodeValue;
+        }
+        if (currentModuleValue && Array.from(moduleFilter.options).some(opt => opt.value === currentModuleValue)) {
+            moduleFilter.value = currentModuleValue;
+        }
+        if (currentTypeValue && Array.from(typeFilter.options).some(opt => opt.value === currentTypeValue)) {
+            typeFilter.value = currentTypeValue;
+        }
     }
 
     filterLogs() {

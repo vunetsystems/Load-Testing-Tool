@@ -49,6 +49,14 @@ async function initializeMonitoring() {
     // Initialize any charts or visualizations
     initializeCharts();
 
+    // Automatically show Kafka metrics (performance section) on page load
+    setTimeout(() => {
+        const kafkaButton = document.querySelector('.monitoring-nav[data-section="performance"]');
+        if (kafkaButton) {
+            kafkaButton.click();
+        }
+    }, 100);
+
     console.log('initializeMonitoring: Monitoring dashboard initialized successfully');
 }
 
