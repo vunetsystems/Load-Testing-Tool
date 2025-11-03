@@ -18,6 +18,8 @@ class K6MonitoringManager {
         this.dashboardItemsPerPage = 5;
         this.loginCurrentPage = 1;
         this.loginItemsPerPage = 5;
+        this.currentChartView = 'all';
+        this.chartInstance = null;
     }
 
     // Initialize K6 monitoring
@@ -29,6 +31,7 @@ class K6MonitoringManager {
         await this.fetchK6DashboardData();
         await this.fetchK6SuccessRate();
         await this.fetchK6LoginData();
+        this.initializeChart();
     }
 
     // Attach event listeners
@@ -50,8 +53,28 @@ class K6MonitoringManager {
                 this.currentDashboardFilter = e.target.value;
                 console.log('Dashboard filter changed:', this.currentDashboardFilter);
                 this.filterAndDisplayData(); // Apply filter locally without refetching
+                this.updateChart(); // Update chart when filter changes
             });
         }
+
+        // Chart view buttons
+        const chartViewBtns = document.querySelectorAll('.k6-chart-view-btn');
+        chartViewBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Remove active class from all buttons
+                chartViewBtns.forEach(b => {
+                    b.classList.remove('bg-indigo-100', 'text-indigo-700', 'font-medium');
+                    b.classList.add('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+                });
+
+                // Add active class to clicked button
+                e.target.classList.remove('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+                e.target.classList.add('bg-indigo-100', 'text-indigo-700', 'font-medium');
+
+                this.currentChartView = e.target.dataset.view;
+                this.updateChart();
+            });
+        });
 
         // Refresh button
         const refreshBtn = document.getElementById('k6-refresh-btn');
@@ -70,6 +93,7 @@ class K6MonitoringManager {
                 if (this.currentPage > 1) {
                     this.currentPage--;
                     this.displayCurrentPage();
+                    this.updateChart(); // Update chart when page changes
                 }
             });
         }
@@ -80,6 +104,7 @@ class K6MonitoringManager {
                 if (this.currentPage < totalPages) {
                     this.currentPage++;
                     this.displayCurrentPage();
+                    this.updateChart(); // Update chart when page changes
                 }
             });
         }
@@ -262,6 +287,284 @@ class K6MonitoringManager {
         console.log('Filtered data:', this.filteredData.length, 'items from', this.k6Data.length, 'total');
         console.log('Current search:', this.currentSearch);
         console.log('Current dashboard filter:', this.currentDashboardFilter);
+    }
+
+    // Initialize the ECharts instance
+    initializeChart() {
+        const chartContainer = document.getElementById('k6-panel-comparison-chart');
+        if (!chartContainer) {
+            console.warn('Chart container not found');
+            return;
+        }
+
+        console.log('Initializing chart with container:', chartContainer);
+        console.log('Container dimensions:', chartContainer.offsetWidth, 'x', chartContainer.offsetHeight);
+
+        // Ensure container has dimensions
+        chartContainer.style.width = '100%';
+        chartContainer.style.height = '500px';
+        chartContainer.style.minHeight = '400px';
+        console.log('Set container dimensions to 100% x 500px');
+
+        // Force layout recalculation
+        chartContainer.offsetHeight;
+
+        this.chartInstance = echarts.init(chartContainer);
+
+        // Resize chart after initialization
+        setTimeout(() => {
+            this.chartInstance.resize();
+            console.log('Chart resized');
+        }, 100);
+        console.log('ECharts instance created:', this.chartInstance);
+
+        // Test with a simple chart first
+        const testOption = {
+            title: {
+                text: 'Test Chart'
+            },
+            xAxis: {
+                type: 'category',
+                data: ['A', 'B', 'C']
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [{
+                data: [1, 2, 3],
+                type: 'bar'
+            }]
+        };
+
+        this.chartInstance.setOption(testOption);
+        console.log('Test chart rendered');
+
+        // Wait a bit then update with real data
+        setTimeout(() => {
+            this.chartInstance.resize();
+            this.updateChart();
+        }, 1000);
+    }
+
+    // Update the chart with current data
+    updateChart() {
+        if (!this.chartInstance) {
+            console.warn('Chart instance not initialized');
+            return;
+        }
+
+        // Resize first
+        this.chartInstance.resize();
+
+        const chartData = this.prepareChartData();
+        console.log('Chart data prepared:', chartData.length, 'items');
+        const option = this.createChartOption(chartData);
+        console.log('Chart option created:', option);
+        this.chartInstance.setOption(option, true);
+        console.log('Chart updated successfully');
+    }
+
+    // Get current page data for chart
+    getCurrentPageData() {
+        if (!this.filteredData.length) return [];
+
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = Math.min(startIndex + this.itemsPerPage, this.filteredData.length);
+        return this.filteredData.slice(startIndex, endIndex);
+    }
+
+    // Prepare data for the chart (only current page)
+    prepareChartData() {
+        const data = this.getCurrentPageData();
+        console.log('Using current page data for chart:', data.length, 'items');
+
+        if (!data.length) {
+            console.log('No data for current page');
+            return [];
+        }
+
+        // Group data by dashboard and calculate averages for current page only
+        const dashboardStats = {};
+
+        data.forEach(item => {
+            const dashboard = item.dashboard_name || 'Unknown';
+            if (!dashboardStats[dashboard]) {
+                dashboardStats[dashboard] = {
+                    totalResponseTime: 0,
+                    panelCount: 0,
+                    panels: []
+                };
+            }
+
+            dashboardStats[dashboard].totalResponseTime += item.p95_response_time;
+            dashboardStats[dashboard].panelCount += 1;
+            dashboardStats[dashboard].panels.push({
+                name: item.panel_name,
+                responseTime: item.p95_response_time,
+                status: item.panel_status
+            });
+        });
+
+        console.log('Current page dashboard stats:', dashboardStats);
+
+        // Calculate dashboard averages and panel deviations for current page
+        const result = [];
+        Object.keys(dashboardStats).forEach(dashboard => {
+            const stats = dashboardStats[dashboard];
+            const dashboardAvg = stats.totalResponseTime / stats.panelCount;
+
+            stats.panels.forEach(panel => {
+                const deviation = ((panel.responseTime - dashboardAvg) / dashboardAvg) * 100;
+                const performance = this.categorizePerformance(deviation);
+
+                result.push({
+                    dashboard: dashboard,
+                    panel: panel.name,
+                    responseTime: panel.responseTime,
+                    dashboardAvg: dashboardAvg,
+                    deviation: deviation,
+                    performance: performance,
+                    status: panel.status
+                });
+            });
+        });
+
+        console.log('Processed current page chart data:', result.length, 'items');
+
+        // Sort and filter based on current view
+        if (this.currentChartView === 'outliers') {
+            return result.filter(item => item.performance === 'worse');
+        }
+
+        // Return all current page data (up to 10 items)
+        return result.sort((a, b) => b.responseTime - a.responseTime);
+    }
+
+    // Categorize performance based on deviation from dashboard average
+    categorizePerformance(deviation) {
+        if (deviation < -20) return 'better'; // More than 20% better
+        if (deviation > 20) return 'worse';   // More than 20% worse
+        return 'similar';                     // Within 20% of average
+    }
+
+    // Create ECharts option
+    createChartOption(data) {
+        console.log('Creating chart option with data:', data);
+
+        if (!data || data.length === 0) {
+            console.warn('No data provided to createChartOption');
+            return {
+                title: {
+                    text: 'No Data Available',
+                    left: 'center'
+                }
+            };
+        }
+
+        const categories = [...new Set(data.map(item => item.panel))];
+        console.log('Chart categories:', categories);
+
+        const dashboardAvgs = {};
+        data.forEach(item => {
+            dashboardAvgs[item.panel] = item.dashboardAvg;
+        });
+
+        const barData = data.map(item => ({
+            value: item.responseTime,
+            itemStyle: {
+                color: this.getPerformanceColor(item.performance)
+            }
+        }));
+
+        const lineData = categories.map(panel => dashboardAvgs[panel]);
+
+        console.log('Bar data:', barData);
+        console.log('Line data:', lineData);
+
+        const option = {
+            title: {
+                text: `Current Page Panel Performance (${data.length} panels)`,
+                left: 'center',
+                textStyle: {
+                    fontSize: 14,
+                    fontWeight: 'normal'
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                },
+                formatter: (params) => {
+                    const item = data[params[0].dataIndex];
+                    return `
+                        <strong>${item.panel}</strong><br/>
+                        Dashboard: ${item.dashboard}<br/>
+                        Response Time: ${item.responseTime.toFixed(2)}ms<br/>
+                        Dashboard Avg: ${item.dashboardAvg.toFixed(2)}ms<br/>
+                        Deviation: ${item.deviation > 0 ? '+' : ''}${item.deviation.toFixed(1)}%<br/>
+                        Status: ${item.status}
+                    `;
+                }
+            },
+            legend: {
+                data: ['Panel Response Time', 'Dashboard Average'],
+                top: 30
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '15%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                data: categories,
+                axisLabel: {
+                    rotate: 45,
+                    interval: 0,
+                    fontSize: 10
+                }
+            },
+            yAxis: {
+                type: 'value',
+                name: 'Response Time (ms)',
+                nameLocation: 'middle',
+                nameGap: 50
+            },
+            series: [
+                {
+                    name: 'Panel Response Time',
+                    type: 'bar',
+                    data: barData,
+                    barWidth: '60%'
+                },
+                {
+                    name: 'Dashboard Average',
+                    type: 'line',
+                    data: lineData,
+                    lineStyle: {
+                        color: '#6B7280',
+                        width: 2,
+                        type: 'dashed'
+                    },
+                    symbol: 'none'
+                }
+            ]
+        };
+
+        console.log('Final chart option:', option);
+        return option;
+    }
+
+    // Get color based on performance category
+    getPerformanceColor(performance) {
+        switch (performance) {
+            case 'better': return '#10B981'; // green
+            case 'similar': return '#F59E0B'; // yellow
+            case 'worse': return '#EF4444';  // red
+            default: return '#6B7280';        // gray
+        }
     }
 
     // Render the data table (shows current page only)
@@ -716,6 +1019,9 @@ class K6MonitoringManager {
         await this.fetchK6DashboardData();
         await this.fetchK6SuccessRate();
         await this.fetchK6LoginData();
+
+        // Update chart after refresh
+        this.updateChart();
     }
 
     // Get current data
