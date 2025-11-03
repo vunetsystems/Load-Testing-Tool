@@ -770,7 +770,7 @@
                                 <option value="Linux Server Insights">Linux Server Insights</option>
                                 <option value="MSSQL Overview Dashboard">MSSQL Overview Dashboard</option>
                             </select>
-                        
+
                             <button
                                 class="p-2.5 rounded-lg text-slate-600 bg-slate-50 border border-slate-300 hover:bg-slate-100 transition-colors"
                                 id="k6-refresh-btn">
@@ -809,6 +809,42 @@
                                 <tbody id="k6-results-body" class="divide-y divide-slate-200 text-slate-700">
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <!-- Panel vs Dashboard Performance Chart (Below table) -->
+                    <div class="mt-8">
+                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-xl font-semibold text-slate-900">Panel Performance Analysis</h3>
+                                <div class="flex gap-3">
+                                    <button
+                                        class="k6-chart-view-btn px-4 py-2 text-sm rounded-lg bg-indigo-100 text-indigo-700 font-medium transition-colors hover:bg-indigo-200"
+                                        data-view="all">All Panels</button>
+                                    <button
+                                        class="k6-chart-view-btn px-4 py-2 text-sm rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                                        data-view="outliers">Outliers Only</button>
+                                </div>
+                            </div>
+                            <div id="k6-panel-comparison-chart" class="w-full" style="height: 500px; min-height: 400px;"></div>
+                            <div class="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm text-slate-600">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 bg-green-500 rounded"></div>
+                                    <span>Better than dashboard average</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 bg-yellow-500 rounded"></div>
+                                    <span>Similar to dashboard average</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 bg-red-500 rounded"></div>
+                                    <span>Worse than dashboard average</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-1 h-4 bg-slate-400 border-2 border-dashed border-slate-400"></div>
+                                    <span>Dashboard average line</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
