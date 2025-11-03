@@ -20,6 +20,15 @@ class K6MonitoringManager {
         this.loginItemsPerPage = 5;
         this.currentChartView = 'all';
         this.chartInstance = null;
+        // Sorting properties for panel table
+        this.panelSortColumn = null;
+        this.panelSortDirection = 'asc'; // 'asc' or 'desc'
+        // Sorting properties for dashboard table
+        this.dashboardSortColumn = null;
+        this.dashboardSortDirection = 'asc';
+        // Sorting properties for login table
+        this.loginSortColumn = null;
+        this.loginSortDirection = 'asc';
     }
 
     // Initialize K6 monitoring
@@ -154,6 +163,23 @@ class K6MonitoringManager {
                 }
             });
         }
+
+        // Sort button handlers for all tables
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('sort-btn') || e.target.closest('.sort-btn')) {
+                const button = e.target.classList.contains('sort-btn') ? e.target : e.target.closest('.sort-btn');
+                const column = button.dataset.column;
+                const table = button.dataset.table; // Add data-table attribute to sort buttons
+
+                if (table === 'panel') {
+                    this.handlePanelSort(column);
+                } else if (table === 'dashboard') {
+                    this.handleDashboardSort(column);
+                } else if (table === 'login') {
+                    this.handleLoginSort(column);
+                }
+            }
+        });
     }
 
     // Fetch K6 data from API
@@ -280,6 +306,9 @@ class K6MonitoringManager {
 
             return matchesSearch && matchesDashboard;
         });
+
+        // Apply sorting
+        this.applyPanelSorting();
 
         // Reset to first page when filtering
         this.currentPage = 1;
@@ -765,6 +794,9 @@ class K6MonitoringManager {
             return;
         }
 
+        // Apply sorting
+        this.applyDashboardSorting();
+
         // Calculate pagination
         const startIndex = (this.dashboardCurrentPage - 1) * this.dashboardItemsPerPage;
         const endIndex = Math.min(startIndex + this.dashboardItemsPerPage, this.k6DashboardData.length);
@@ -945,6 +977,9 @@ class K6MonitoringManager {
             return;
         }
 
+        // Apply sorting
+        this.applyLoginSorting();
+
         // Calculate pagination
         const startIndex = (this.loginCurrentPage - 1) * this.loginItemsPerPage;
         const endIndex = Math.min(startIndex + this.loginItemsPerPage, this.k6LoginData.length);
@@ -1022,6 +1057,231 @@ class K6MonitoringManager {
 
         // Update chart after refresh
         this.updateChart();
+    }
+
+    // Handle column sorting for panel table
+    handlePanelSort(column) {
+        if (this.panelSortColumn === column) {
+            // Toggle direction if same column
+            this.panelSortDirection = this.panelSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // New column, default to ascending
+            this.panelSortColumn = column;
+            this.panelSortDirection = 'asc';
+        }
+
+        this.updatePanelSortIndicators();
+        this.filterAndDisplayData(); // This will trigger re-rendering with sorting
+    }
+
+    // Handle column sorting for dashboard table
+    handleDashboardSort(column) {
+        if (this.dashboardSortColumn === column) {
+            this.dashboardSortDirection = this.dashboardSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            this.dashboardSortColumn = column;
+            this.dashboardSortDirection = 'asc';
+        }
+
+        this.updateDashboardSortIndicators();
+        this.renderDashboardTable();
+    }
+
+    // Handle column sorting for login table
+    handleLoginSort(column) {
+        if (this.loginSortColumn === column) {
+            this.loginSortDirection = this.loginSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            this.loginSortColumn = column;
+            this.loginSortDirection = 'asc';
+        }
+
+        this.updateLoginSortIndicators();
+        this.renderLoginTable();
+    }
+
+    // Apply sorting to panel filtered data
+    applyPanelSorting() {
+        if (!this.panelSortColumn) return;
+
+        this.filteredData.sort((a, b) => {
+            let aValue = a[this.panelSortColumn];
+            let bValue = b[this.panelSortColumn];
+
+            // Handle null/undefined values
+            if (aValue == null && bValue == null) return 0;
+            if (aValue == null) return this.panelSortDirection === 'asc' ? 1 : -1;
+            if (bValue == null) return this.panelSortDirection === 'asc' ? -1 : 1;
+
+            let comparison = 0;
+
+            // Type-specific sorting
+            switch (this.panelSortColumn) {
+                case 'no_of_users':
+                case 'p95_response_time':
+                    // Numeric sorting
+                    aValue = parseFloat(aValue) || 0;
+                    bValue = parseFloat(bValue) || 0;
+                    comparison = aValue - bValue;
+                    break;
+
+                case 'timestamp':
+                    // Date sorting
+                    const aDate = new Date(aValue);
+                    const bDate = new Date(bValue);
+                    comparison = aDate.getTime() - bDate.getTime();
+                    break;
+
+                default:
+                    // String sorting (case-insensitive)
+                    aValue = String(aValue).toLowerCase();
+                    bValue = String(bValue).toLowerCase();
+                    comparison = aValue.localeCompare(bValue);
+                    break;
+            }
+
+            return this.panelSortDirection === 'asc' ? comparison : -comparison;
+        });
+    }
+
+    // Apply sorting to dashboard data
+    applyDashboardSorting() {
+        if (!this.dashboardSortColumn) return;
+
+        this.k6DashboardData.sort((a, b) => {
+            let aValue = a[this.dashboardSortColumn];
+            let bValue = b[this.dashboardSortColumn];
+
+            if (aValue == null && bValue == null) return 0;
+            if (aValue == null) return this.dashboardSortDirection === 'asc' ? 1 : -1;
+            if (bValue == null) return this.dashboardSortDirection === 'asc' ? -1 : 1;
+
+            let comparison = 0;
+
+            switch (this.dashboardSortColumn) {
+                case 'no_of_users':
+                case 'p95_response_time':
+                    aValue = parseFloat(aValue) || 0;
+                    bValue = parseFloat(bValue) || 0;
+                    comparison = aValue - bValue;
+                    break;
+
+                case 'timestamp':
+                    const aDate = new Date(aValue);
+                    const bDate = new Date(bValue);
+                    comparison = aDate.getTime() - bDate.getTime();
+                    break;
+
+                default:
+                    aValue = String(aValue).toLowerCase();
+                    bValue = String(bValue).toLowerCase();
+                    comparison = aValue.localeCompare(bValue);
+                    break;
+            }
+
+            return this.dashboardSortDirection === 'asc' ? comparison : -comparison;
+        });
+    }
+
+    // Apply sorting to login data
+    applyLoginSorting() {
+        if (!this.loginSortColumn) return;
+
+        this.k6LoginData.sort((a, b) => {
+            let aValue = a[this.loginSortColumn];
+            let bValue = b[this.loginSortColumn];
+
+            if (aValue == null && bValue == null) return 0;
+            if (aValue == null) return this.loginSortDirection === 'asc' ? 1 : -1;
+            if (bValue == null) return this.loginSortDirection === 'asc' ? -1 : 1;
+
+            let comparison = 0;
+
+            switch (this.loginSortColumn) {
+                case 'no_of_users':
+                case 'p95_response_time':
+                    aValue = parseFloat(aValue) || 0;
+                    bValue = parseFloat(bValue) || 0;
+                    comparison = aValue - bValue;
+                    break;
+
+                case 'timestamp':
+                    const aDate = new Date(aValue);
+                    const bDate = new Date(bValue);
+                    comparison = aDate.getTime() - bDate.getTime();
+                    break;
+
+                default:
+                    aValue = String(aValue).toLowerCase();
+                    bValue = String(bValue).toLowerCase();
+                    comparison = aValue.localeCompare(bValue);
+                    break;
+            }
+
+            return this.loginSortDirection === 'asc' ? comparison : -comparison;
+        });
+    }
+
+    // Update sort indicators for panel table
+    updatePanelSortIndicators() {
+        // Reset all sort icons in panel table
+        document.querySelectorAll('.sort-btn[data-table="panel"] .sort-icon').forEach(icon => {
+            icon.classList.remove('text-indigo-600');
+            icon.classList.add('opacity-0');
+        });
+
+        // Update active sort column
+        if (this.panelSortColumn) {
+            const activeButton = document.querySelector(`[data-column="${this.panelSortColumn}"][data-table="panel"]`);
+            if (activeButton) {
+                const icon = activeButton.querySelector('.sort-icon');
+                if (icon) {
+                    icon.classList.remove('opacity-0');
+                    icon.classList.add('text-indigo-600');
+                    icon.textContent = this.panelSortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward';
+                }
+            }
+        }
+    }
+
+    // Update sort indicators for dashboard table
+    updateDashboardSortIndicators() {
+        document.querySelectorAll('.sort-btn[data-table="dashboard"] .sort-icon').forEach(icon => {
+            icon.classList.remove('text-indigo-600');
+            icon.classList.add('opacity-0');
+        });
+
+        if (this.dashboardSortColumn) {
+            const activeButton = document.querySelector(`[data-column="${this.dashboardSortColumn}"][data-table="dashboard"]`);
+            if (activeButton) {
+                const icon = activeButton.querySelector('.sort-icon');
+                if (icon) {
+                    icon.classList.remove('opacity-0');
+                    icon.classList.add('text-indigo-600');
+                    icon.textContent = this.dashboardSortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward';
+                }
+            }
+        }
+    }
+
+    // Update sort indicators for login table
+    updateLoginSortIndicators() {
+        document.querySelectorAll('.sort-btn[data-table="login"] .sort-icon').forEach(icon => {
+            icon.classList.remove('text-indigo-600');
+            icon.classList.add('opacity-0');
+        });
+
+        if (this.loginSortColumn) {
+            const activeButton = document.querySelector(`[data-column="${this.loginSortColumn}"][data-table="login"]`);
+            if (activeButton) {
+                const icon = activeButton.querySelector('.sort-icon');
+                if (icon) {
+                    icon.classList.remove('opacity-0');
+                    icon.classList.add('text-indigo-600');
+                    icon.textContent = this.loginSortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward';
+                }
+            }
+        }
     }
 
     // Get current data
