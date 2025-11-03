@@ -16,6 +16,9 @@ class PodMonitoringManager {
         // Sorting properties
         this.sortColumn = null;
         this.sortDirection = 'asc'; // 'asc' or 'desc'
+        // Trend chart properties
+        this.selectedPodForTrend = '';
+        this.trendChart = null;
     }
 
     // Initialize pod monitoring
@@ -24,6 +27,7 @@ class PodMonitoringManager {
         this.attachEventListeners();
         await this.fetchPodLogs(); // Load logs first
         await this.fetchPodMonitoringData();
+        this.initializeTrendChart();
         this.startAutoUpdate();
     }
 
@@ -120,6 +124,29 @@ class PodMonitoringManager {
                 if (this.currentPage < totalPages) {
                     this.currentPage++;
                     this.displayCurrentPage();
+                }
+            });
+        }
+
+        // Pod trend chart controls
+        const podTrendSelect = document.getElementById('pod-trend-select');
+        const podTrendRefresh = document.getElementById('pod-trend-refresh');
+
+        if (podTrendSelect) {
+            podTrendSelect.addEventListener('change', (e) => {
+                this.selectedPodForTrend = e.target.value;
+                if (this.selectedPodForTrend) {
+                    this.fetchPodTrendData();
+                } else {
+                    this.showTrendNoData();
+                }
+            });
+        }
+
+        if (podTrendRefresh) {
+            podTrendRefresh.addEventListener('click', () => {
+                if (this.selectedPodForTrend) {
+                    this.fetchPodTrendData();
                 }
             });
         }
@@ -343,6 +370,9 @@ renderPodTable(pods) {
         this.updateCardValue('running-pods', runningPods);
         this.updateCardValue('avg-cpu-usage', `${avgCpuUsage.toFixed(1)}%`);
         this.updateCardValue('avg-memory-usage', `${avgMemoryUsage.toFixed(1)}%`);
+
+        // Update pod trend dropdown with current pods
+        this.updatePodTrendDropdown();
     }
 
     // Update card value
@@ -374,6 +404,240 @@ renderPodTable(pods) {
     // Manual refresh
     async refresh() {
         await this.fetchPodMonitoringData();
+    }
+
+    // Initialize trend chart
+    initializeTrendChart() {
+        const chartContainer = document.getElementById('pod-trend-chart');
+        if (!chartContainer) {
+            console.warn('Pod trend chart container not found');
+            return;
+        }
+
+        // Ensure container has dimensions
+        chartContainer.style.width = '100%';
+        chartContainer.style.height = '400px';
+
+        this.trendChart = echarts.init(chartContainer);
+
+        // Add window resize listener for responsiveness
+        window.addEventListener('resize', () => {
+            if (this.trendChart) {
+                this.trendChart.resize();
+            }
+        });
+
+        this.showTrendNoData();
+    }
+
+    // Update pod trend dropdown with current pods
+    updatePodTrendDropdown() {
+        const select = document.getElementById('pod-trend-select');
+        if (!select) return;
+
+        const currentValue = select.value;
+
+        // Clear existing options except the first one
+        select.innerHTML = '<option value="">Select a pod...</option>';
+
+        // Add current pods as options
+        this.podData.forEach(pod => {
+            const option = document.createElement('option');
+            option.value = pod.pod_name;
+            option.textContent = `${pod.pod_name} (${pod.namespace})`;
+            select.appendChild(option);
+        });
+
+        // Restore previous selection if it still exists
+        if (currentValue && this.podData.some(pod => pod.pod_name === currentValue)) {
+            select.value = currentValue;
+        }
+
+        console.log('Pod trend dropdown updated with', this.podData.length, 'pods');
+    }
+
+    // Fetch pod trend data
+    async fetchPodTrendData() {
+        if (!this.selectedPodForTrend) return;
+
+        try {
+            this.showTrendLoading();
+            console.log('Fetching trend data for pod:', this.selectedPodForTrend, 'in namespace:', this.selectedNamespace);
+
+            const response = await fetch(`/api/clickhouse/pod-trend?namespace=${this.selectedNamespace}&pod=${this.selectedPodForTrend}&hours=24`);
+            console.log('Trend API response status:', response.status);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('Trend API response:', result);
+
+            if (result.success && result.data) {
+                console.log('Rendering trend chart with', result.data.length, 'data points');
+                this.renderTrendChart(result.data);
+                this.hideTrendLoading();
+            } else {
+                console.error('Failed to fetch pod trend data:', result.message);
+                this.showTrendNoData();
+            }
+        } catch (error) {
+            console.error('Error fetching pod trend data:', error);
+            this.showTrendNoData();
+        }
+    }
+
+    // Render trend chart
+    renderTrendChart(data) {
+        if (!this.trendChart || !data.length) {
+            console.log('No trend chart or no data, showing no data state');
+            this.showTrendNoData();
+            return;
+        }
+
+        console.log('Rendering trend chart with data:', data);
+
+        const timestamps = data.map(item => new Date(item.timestamp).toLocaleString());
+        const cpuData = data.map(item => item.cpu_usage || 0);
+        const memoryData = data.map(item => item.memory_usage || 0);
+
+        console.log('Timestamps:', timestamps.length, 'CPU data points:', cpuData.length, 'Memory data points:', memoryData.length);
+
+        const option = {
+            title: {
+                text: `Resource Usage Trends - ${this.selectedPodForTrend}`,
+                left: 'center',
+                textStyle: {
+                    fontSize: 16,
+                    fontWeight: 'normal'
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross'
+                },
+                formatter: (params) => {
+                    const timestamp = params[0].name;
+                    let result = `<strong>${timestamp}</strong><br/>`;
+                    params.forEach(param => {
+                        result += `${param.seriesName}: ${param.value.toFixed(2)}%<br/>`;
+                    });
+                    return result;
+                }
+            },
+            legend: {
+                data: ['CPU Usage', 'Memory Usage'],
+                top: 30
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '15%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: timestamps,
+                axisLabel: {
+                    rotate: 45,
+                    fontSize: 10
+                }
+            },
+            yAxis: {
+                type: 'value',
+                name: 'Usage (%)',
+                nameLocation: 'middle',
+                nameGap: 50
+            },
+            series: [
+                {
+                    name: 'CPU Usage',
+                    type: 'line',
+                    data: cpuData,
+                    smooth: true,
+                    lineStyle: {
+                        color: '#3B82F6',
+                        width: 2
+                    },
+                    itemStyle: {
+                        color: '#3B82F6'
+                    },
+                    areaStyle: {
+                        color: 'rgba(59, 130, 246, 0.1)'
+                    }
+                },
+                {
+                    name: 'Memory Usage',
+                    type: 'line',
+                    data: memoryData,
+                    smooth: true,
+                    lineStyle: {
+                        color: '#10B981',
+                        width: 2
+                    },
+                    itemStyle: {
+                        color: '#10B981'
+                    },
+                    areaStyle: {
+                        color: 'rgba(16, 185, 129, 0.1)'
+                    }
+                }
+            ]
+        };
+
+        console.log('Setting chart option:', option);
+        this.trendChart.setOption(option, true);
+        console.log('Chart option set successfully');
+
+        // Force resize after setting options to ensure proper dimensions
+        setTimeout(() => {
+            if (this.trendChart) {
+                this.trendChart.resize();
+            }
+        }, 100);
+
+        this.hideTrendLoading();
+        this.showTrendChart();
+    }
+
+    // Show trend loading state
+    showTrendLoading() {
+        const loading = document.getElementById('pod-trend-loading');
+        const noData = document.getElementById('pod-trend-no-data');
+        const chart = document.getElementById('pod-trend-chart');
+
+        if (loading) loading.classList.remove('hidden');
+        if (noData) noData.classList.add('hidden');
+        if (chart) chart.style.display = 'none';
+    }
+
+    // Hide trend loading state
+    hideTrendLoading() {
+        const loading = document.getElementById('pod-trend-loading');
+        if (loading) loading.classList.add('hidden');
+    }
+
+    // Show trend no data state
+    showTrendNoData() {
+        const loading = document.getElementById('pod-trend-loading');
+        const noData = document.getElementById('pod-trend-no-data');
+        const chart = document.getElementById('pod-trend-chart');
+
+        if (loading) loading.classList.add('hidden');
+        if (noData) noData.classList.remove('hidden');
+        if (chart) chart.style.display = 'none';
+    }
+
+    // Show trend chart
+    showTrendChart() {
+        const noData = document.getElementById('pod-trend-no-data');
+        const chart = document.getElementById('pod-trend-chart');
+
+        if (noData) noData.classList.add('hidden');
+        if (chart) chart.style.display = 'block';
     }
 
     // Handle column sorting

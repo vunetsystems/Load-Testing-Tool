@@ -396,3 +396,44 @@ func HandleAPIGetKafkaNetwork(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// HandleAPIGetPodTrendData handles GET /api/clickhouse/pod-trend
+func HandleAPIGetPodTrendData(w http.ResponseWriter, r *http.Request) {
+	namespace := r.URL.Query().Get("namespace")
+	podName := r.URL.Query().Get("pod")
+	hoursStr := r.URL.Query().Get("hours")
+
+	if namespace == "" {
+		namespace = "vsmaps" // default namespace
+	}
+
+	if podName == "" {
+		SendJSONResponse(w, http.StatusBadRequest, APIResponse{
+			Success: false,
+			Message: "Pod name is required",
+		})
+		return
+	}
+
+	hours := 24 // default to 24 hours
+	if hoursStr != "" {
+		if h, err := strconv.Atoi(hoursStr); err == nil && h > 0 && h <= 168 { // max 1 week
+			hours = h
+		}
+	}
+
+	trendData, err := clickhouse.GetPodTrendData(r.Context(), namespace, podName, hours)
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to get pod trend data: %v", err),
+		})
+		return
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "Pod trend data retrieved successfully",
+		Data:    trendData,
+	})
+}
+

@@ -541,6 +541,19 @@ func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
     h.status.LastUpdated = time.Now()
     h.mutex.Unlock()
 
+    // Add config sync before execution
+    enabledModules, err := h.readModuleConfig()
+    if err != nil {
+        logger.LogError("System", "k6", fmt.Sprintf("Failed to read module config: %v", err))
+        // Handle error appropriately
+    } else {
+        err = h.updateDashboardConfig(enabledModules)
+        if err != nil {
+            logger.LogError("System", "k6", fmt.Sprintf("Failed to update dashboard config: %v", err))
+            // Handle error appropriately
+        }
+    }
+
     logger.LogWithNode("System", "k6", fmt.Sprintf("Starting combined script with VUs=%d, Iterations=%d, Interval=%d, TimeRange=%s", params.VUs, params.Iterations, params.Interval, params.TimeRange), "info")
 
     // Run asynchronously

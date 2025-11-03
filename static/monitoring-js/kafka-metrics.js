@@ -319,24 +319,29 @@ class KafkaMetricsManager {
             topicCard.className = 'rounded-xl border border-subtle-light dark:border-subtle-dark bg-surface-light dark:bg-surface-dark p-6 shadow-md';
 
             topicCard.innerHTML = `
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold">${topic}</h3>
-                    <span class="material-symbols-outlined text-primary dark:text-primary-dark">topic</span>
-                </div>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Messages/sec</span>
-                        <span class="font-semibold">${avgRate.toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Latest Rate</span>
-                        <span class="font-semibold">${latestMetric.oneMinuteRate.toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Data Points</span>
-                        <span class="font-semibold">${metrics.length}</span>
-                    </div>
-                </div>
+<div class="bg-white p-4 rounded-2xl shadow">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-semibold">${topic}</h3>
+    <span class="material-symbols-outlined text-primary dark:text-primary-dark">topic</span>
+  </div>
+
+  <div class="space-y-3">
+    <div class="flex justify-between items-center">
+      <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Messages/sec</span>
+      <span class="font-semibold">${avgRate.toFixed(2)}</span>
+    </div>
+
+    <div class="flex justify-between items-center">
+      <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Latest Rate</span>
+      <span class="font-semibold">${latestMetric.oneMinuteRate.toFixed(2)}</span>
+    </div>
+
+    <div class="flex justify-between items-center">
+      <span class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Data Points</span>
+      <span class="font-semibold">${metrics.length}</span>
+    </div>
+  </div>
+</div>
             `;
 
             topicsOverview.appendChild(topicCard);
@@ -367,18 +372,20 @@ class KafkaMetricsManager {
         table.className = 'w-full text-left text-sm';
 
         table.innerHTML = `
-            <thead class="bg-subtle-light/50 dark:bg-subtle-dark/50">
-                <tr>
-                    <th class="p-4 font-semibold">Topic</th>
-                    <th class="p-4 font-semibold">Latest Rate</th>
-                    <th class="p-4 font-semibold">Avg Rate</th>
-                    <th class="p-4 font-semibold">Peak Rate</th>
-                    <th class="p-4 font-semibold">Data Points</th>
-                    <th class="p-4 font-semibold">Last Update</th>
-                </tr>
-            </thead>
-            <tbody class="kafka-metrics-body divide-y divide-subtle-light dark:divide-subtle-dark">
-            </tbody>
+<thead class="bg-white">
+  <tr>
+    <th class="p-4 font-semibold">Topic</th>
+    <th class="p-4 font-semibold">Latest Rate</th>
+    <th class="p-4 font-semibold">Avg Rate</th>
+    <th class="p-4 font-semibold">Peak Rate</th>
+    <th class="p-4 font-semibold">Data Points</th>
+    <th class="p-4 font-semibold">Last Update</th>
+  </tr>
+</thead>
+
+<tbody class="kafka-metrics-body divide-y divide-subtle-light dark:divide-subtle-dark bg-white">
+</tbody>
+
         `;
 
         const tbody = table.querySelector('.kafka-metrics-body');

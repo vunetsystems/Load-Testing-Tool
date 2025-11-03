@@ -123,6 +123,8 @@ function setupSectionNavigation() {
             if (section === 'pod-monitoring') {
                 if (podMonitoringManager) {
                     podMonitoringManager.refresh();
+                    // Update pod trend dropdown when section becomes visible
+                    podMonitoringManager.updatePodTrendDropdown();
                 }
             }
 
