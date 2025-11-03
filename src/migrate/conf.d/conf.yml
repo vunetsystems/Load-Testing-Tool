@@ -2,15 +2,15 @@ data_generation_time:
   type: real-time
 include_module_dirs:
   Apache:
-    enabled: false
+    enabled: true
   Azure_Firewall:
     enabled: false
   Azure_Redis_Cache:
     enabled: false
   LinuxMonitor:
-    enabled: true
-  MongoDB:
     enabled: false
+  MongoDB:
+    enabled: true
   Mssql:
     enabled: false
 logging:

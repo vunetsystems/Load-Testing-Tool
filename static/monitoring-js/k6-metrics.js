@@ -692,8 +692,8 @@ class K6MonitoringManager {
     // Format timestamp for display
     formatTimestamp(timestamp) {
         try {
-            const date = new Date(timestamp);
-            return date.toLocaleString();
+            // Return raw timestamp from ClickHouse without formatting
+            return timestamp;
         } catch (e) {
             return timestamp;
         }

@@ -117,13 +117,13 @@ func (h *K6Handler) loadConfig() {
 
 	data, err := os.ReadFile(configPath)
 	if err != nil {
-		logger.Error().Err(err).Str("module", "k6").Msg("Failed to read K6 config file")
+		logger.LogError("System", "k6", fmt.Sprintf("Failed to read K6 config file: %v", err))
 		return
 	}
 
 	var config K6Config
 	if err := json.Unmarshal(data, &config); err != nil {
-		logger.Error().Err(err).Str("module", "k6").Msg("Failed to parse K6 config file")
+		logger.LogError("System", "k6", fmt.Sprintf("Failed to parse K6 config file: %v", err))
 		return
 	}
 
@@ -132,7 +132,7 @@ func (h *K6Handler) loadConfig() {
 	h.status.CurrentUserCount = config.GlobalUserCount
 	h.mutex.Unlock()
 
-	logger.Info().Str("module", "k6").Msg("K6 configuration loaded successfully")
+	logger.LogSuccess("System", "k6", "K6 configuration loaded successfully")
 }
 
 // saveConfig saves current K6 configuration to file
@@ -140,16 +140,16 @@ func (h *K6Handler) saveConfig() {
 	configPath := "src/k6_config.json"
 	data, err := json.MarshalIndent(h.config, "", "  ")
 	if err != nil {
-		logger.Error().Err(err).Str("module", "k6").Msg("Failed to marshal K6 config")
+		logger.LogError("System", "k6", fmt.Sprintf("Failed to marshal K6 config: %v", err))
 		return
 	}
 
 	if err := os.WriteFile(configPath, data, 0644); err != nil {
-		logger.Error().Err(err).Str("module", "k6").Msg("Failed to write K6 config file")
+		logger.LogError("System", "k6", fmt.Sprintf("Failed to write K6 config file: %v", err))
 		return
 	}
 
-	logger.Info().Str("module", "k6").Msg("K6 configuration saved successfully")
+	logger.LogSuccess("System", "k6", "K6 configuration saved successfully")
 }
 
 // GetK6Config handles GET /api/k6/config
@@ -273,7 +273,7 @@ func (h *K6Handler) StopK6Test(w http.ResponseWriter, r *http.Request) {
 	// Stop the running K6 process
 	if h.cmd != nil && h.cmd.Process != nil {
 		if err := h.cmd.Process.Kill(); err != nil {
-			logger.Error().Err(err).Str("module", "k6").Msg("Failed to kill K6 process")
+			logger.LogError("System", "k6", fmt.Sprintf("Failed to kill K6 process: %v", err))
 		}
 	}
 
@@ -290,35 +290,46 @@ func (h *K6Handler) StopK6Test(w http.ResponseWriter, r *http.Request) {
 
 // validateConfig validates the K6 configuration parameters
 func (h *K6Handler) validateConfig(config K6Config) error {
+	logger.LogWithNode("System", "k6", "Validating K6 configuration parameters", "info")
+
 	if config.GlobalUserCount < 1 || config.GlobalUserCount > 1000 {
+		logger.LogWarning("System", "k6", fmt.Sprintf("Invalid global user count: %d (must be between 1 and 1000)", config.GlobalUserCount))
 		return fmt.Errorf("global user count must be between 1 and 1000")
 	}
 
 	if config.TestDuration == "" {
+		logger.LogWarning("System", "k6", "Test duration is required but not provided")
 		return fmt.Errorf("test duration is required")
 	}
 
 	if config.RampUpDuration < 1 {
+		logger.LogWarning("System", "k6", fmt.Sprintf("Invalid ramp up duration: %d (must be at least 1 second)", config.RampUpDuration))
 		return fmt.Errorf("ramp up duration must be at least 1 second")
 	}
 
 	if config.MaxDuration < 1 {
+		logger.LogWarning("System", "k6", fmt.Sprintf("Invalid max duration: %d (must be at least 1 second)", config.MaxDuration))
 		return fmt.Errorf("max duration must be at least 1 second")
 	}
 
 	if config.IntervalBetweenTests < 0 {
+		logger.LogWarning("System", "k6", fmt.Sprintf("Invalid interval between tests: %d (cannot be negative)", config.IntervalBetweenTests))
 		return fmt.Errorf("interval between tests cannot be negative")
 	}
 
 	if len(config.EnabledScripts) == 0 {
+		logger.LogWarning("System", "k6", "No scripts enabled - at least one script must be enabled")
 		return fmt.Errorf("at least one script must be enabled")
 	}
 
+	logger.LogSuccess("System", "k6", "K6 configuration validation passed")
 	return nil
 }
 
 // generateK6Script generates a dynamic K6 script based on current configuration
 func (h *K6Handler) generateK6Script() (string, error) {
+	logger.LogWithNode("System", "k6", "Generating dynamic K6 script based on current configuration", "info")
+
 	template := `#!/bin/bash
 
 # Auto-generated K6 script
@@ -376,9 +387,11 @@ echo "K6 load test completed"
 	// Write to temporary file
 	scriptPath := "/tmp/k6_dynamic_script.sh"
 	if err := os.WriteFile(scriptPath, []byte(generatedScript), 0755); err != nil {
+		logger.LogError("System", "k6", fmt.Sprintf("Failed to write dynamic script to %s: %v", scriptPath, err))
 		return "", fmt.Errorf("failed to write dynamic script: %v", err)
 	}
 
+	logger.LogSuccess("System", "k6", fmt.Sprintf("Dynamic K6 script generated successfully at %s", scriptPath))
 	return scriptPath, nil
 }
 
@@ -424,14 +437,14 @@ func (h *K6Handler) executeK6Script(scriptPath string) {
 	h.mutex.Lock()
 	if err != nil {
 		h.status.LastError = err.Error()
-		logger.Error().Err(err).Str("module", "k6").Msg("K6 script execution failed")
+		logger.LogError("System", "k6", fmt.Sprintf("K6 script execution failed: %v", err))
 	} else {
-		logger.Info().Str("module", "k6").Msg("K6 script execution completed successfully")
+		logger.LogSuccess("System", "k6", "K6 script execution completed successfully")
 	}
 
 	// Log output for debugging
 	if len(output) > 0 {
-		logger.Info().Str("module", "k6").Str("output", string(output)).Msg("K6 script output")
+		logger.LogWithNode("System", "k6", fmt.Sprintf("K6 script output: %s", string(output)), "info")
 	}
 	h.mutex.Unlock()
 }
@@ -470,11 +483,10 @@ func (h *K6Handler) ResetK6Config(w http.ResponseWriter, r *http.Request) {
 // RunCombinedScript handles POST /api/k6/run-combined
 // RunCombinedScript handles API requests to start the K6 combined script
 func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
-    logger := logger.Logger.With().Str("module", "k6_run").Logger()
-
     // Decode request
     var params K6ScriptParams
     if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+        logger.LogError("System", "k6", fmt.Sprintf("Invalid request body: %v", err))
         SendJSONResponse(w, http.StatusBadRequest, APIResponse{
             Success: false,
             Message: fmt.Sprintf("Invalid request body: %v", err),
@@ -529,9 +541,7 @@ func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
     h.status.LastUpdated = time.Now()
     h.mutex.Unlock()
 
-    logger.Info().Str("module", "k6_run").
-        Msgf("Starting combined script with VUs=%d, Iterations=%d, Interval=%d, TimeRange=%s",
-            params.VUs, params.Iterations, params.Interval, params.TimeRange)
+    logger.LogWithNode("System", "k6", fmt.Sprintf("Starting combined script with VUs=%d, Iterations=%d, Interval=%d, TimeRange=%s", params.VUs, params.Iterations, params.Interval, params.TimeRange), "info")
 
     // Run asynchronously
     go h.executeCombinedScript(params.TimeRange, params.VUs, params.Iterations, params.Interval)
@@ -561,8 +571,8 @@ func (h *K6Handler) checkAndCreateUsers(vus int) string {
 	// Read timeout.txt file
 	data, err := os.ReadFile(timeoutPath)
 	if err != nil {
-		logger.Error().Err(err).Str("module", "k6").Msg("Failed to read timeout.txt")
-		return "Failed to read user timeout file"
+	  logger.LogError("System", "k6", fmt.Sprintf("Failed to read timeout.txt: %v", err))
+	  return "Failed to read user timeout file"
 	}
 
 	content := string(data)
@@ -607,8 +617,8 @@ func (h *K6Handler) checkAndCreateUsers(vus int) string {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		logger.Error().Err(err).Str("module", "k6").Str("output", string(output)).Msg("User creation script failed")
-		return fmt.Sprintf("User creation failed: %v", err)
+	  logger.LogError("System", "k6", fmt.Sprintf("User creation script failed: %v, output: %s", err, string(output)))
+	  return fmt.Sprintf("User creation failed: %v", err)
 	}
 
 	// Check if user creation was successful by reading the updated timeout.txt
@@ -622,14 +632,12 @@ func (h *K6Handler) checkAndCreateUsers(vus int) string {
 		return fmt.Sprintf("Successfully created %d users", vus)
 	}
 
-	logger.Warn().Str("module", "k6").Str("output", string(output)).Msg("User creation may not have completed successfully")
+	logger.LogWarning("System", "k6", fmt.Sprintf("User creation may not have completed successfully, output: %s", string(output)))
 	return fmt.Sprintf("User creation completed (verification inconclusive)")
 }
 
 // executeCombinedScript executes the combined.sh script with given parameters
 func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, interval int) {
-    logger := logger.Logger.With().Str("module", "k6_exec").Logger()
-
     // Context with timeout
     ctx, cancel := context.WithTimeout(context.Background(), 2*time.Hour)
     defer cancel()
@@ -641,20 +649,19 @@ func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, int
     cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true} // ensure we can kill all children
     h.cmd = cmd
 
-    logger.Info().Msg("About to execute combined.sh ...")
+    logger.LogWithNode("System", "k6", "About to execute combined.sh", "info")
 
     start := time.Now()
     output, err := cmd.CombinedOutput()
     duration := time.Since(start)
 
-    logger.Info().Str("module", "k6_exec").
-        Msgf("combined.sh finished in %s", duration.String())
+    logger.LogWithNode("System", "k6", fmt.Sprintf("combined.sh finished in %s", duration.String()), "info")
 
     if ctx.Err() == context.DeadlineExceeded {
         // kill process group if context timed out
         if cmd.Process != nil {
             _ = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
-            logger.Error().Str("module", "k6_exec").Msg("Killed combined.sh due to timeout")
+            logger.LogError("System", "k6", "Killed combined.sh due to timeout")
         }
     }
 
@@ -663,16 +670,16 @@ func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, int
     logPath := filepath.Join(logDir, fmt.Sprintf("combined_output_%d.log", time.Now().Unix()))
     if err := os.MkdirAll(logDir, 0755); err == nil {
         if writeErr := os.WriteFile(logPath, output, 0644); writeErr == nil {
-            logger.Info().Str("module", "k6_exec").Msgf("K6 combined script output saved to %s", logPath)
+            logger.LogSuccess("System", "k6", fmt.Sprintf("K6 combined script output saved to %s", logPath))
         } else {
-            logger.Error().Err(writeErr).Msg("Failed to write combined output")
+            logger.LogError("System", "k6", fmt.Sprintf("Failed to write combined output: %v", writeErr))
         }
     } else {
         logger.Error().Err(err).Msg("Failed to create logs directory")
     }
 
     if err != nil {
-        logger.Error().Err(err).Msg("K6 combined script execution failed")
+        logger.LogError("System", "k6", fmt.Sprintf("K6 combined script execution failed: %v", err))
     }
 
     // Update status safely after run
@@ -683,16 +690,18 @@ func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, int
     h.cmd = nil
     h.mutex.Unlock()
 
-    logger.Info().Str("module", "k6_exec").
-        Msg("K6 combined script execution completed and state reset.")
+    logger.LogSuccess("System", "k6", "K6 combined script execution completed and state reset")
 }
 
 
 // readModuleConfig reads the enabled modules from conf.yml
 func (h *K6Handler) readModuleConfig() ([]string, error) {
+	logger.LogWithNode("System", "k6", "Reading enabled modules from configuration", "info")
+
 	configPath := "src/migrate/conf.d/conf.yml"
 	data, err := os.ReadFile(configPath)
 	if err != nil {
+		logger.LogError("System", "k6", fmt.Sprintf("Failed to read module config from %s: %v", configPath, err))
 		return nil, fmt.Errorf("failed to read module config: %v", err)
 	}
 
@@ -708,6 +717,7 @@ func (h *K6Handler) readModuleConfig() ([]string, error) {
 	}
 
 	if err := yaml.Unmarshal(data, &moduleConfig); err != nil {
+		logger.LogError("System", "k6", fmt.Sprintf("Failed to parse module config YAML: %v", err))
 		return nil, fmt.Errorf("failed to parse module config: %v", err)
 	}
 
@@ -718,20 +728,25 @@ func (h *K6Handler) readModuleConfig() ([]string, error) {
 		}
 	}
 
+	logger.LogSuccess("System", "k6", fmt.Sprintf("Successfully read %d enabled modules from configuration", len(enabledModules)))
 	return enabledModules, nil
 }
 
 // updateDashboardConfig updates k6_config.yaml based on enabled modules
 func (h *K6Handler) updateDashboardConfig(enabledModules []string) error {
+	logger.LogWithNode("System", "k6", fmt.Sprintf("Updating dashboard config for %d enabled modules", len(enabledModules)), "info")
+
 	// Read module-dashboard mapping
 	mappingPath := "src/configs/module_dashboard_mapping.yaml"
 	mappingData, err := os.ReadFile(mappingPath)
 	if err != nil {
+		logger.LogError("System", "k6", fmt.Sprintf("Failed to read module dashboard mapping from %s: %v", mappingPath, err))
 		return fmt.Errorf("failed to read module dashboard mapping: %v", err)
 	}
 
 	var mappingConfig ModuleDashboardMapping
 	if err := yaml.Unmarshal(mappingData, &mappingConfig); err != nil {
+		logger.LogError("System", "k6", fmt.Sprintf("Failed to parse module dashboard mapping YAML: %v", err))
 		return fmt.Errorf("failed to parse module dashboard mapping: %v", err)
 	}
 
@@ -739,11 +754,13 @@ func (h *K6Handler) updateDashboardConfig(enabledModules []string) error {
 	k6ConfigPath := "k6_final/k6_dashboard_name/k6_config.yaml"
 	k6Data, err := os.ReadFile(k6ConfigPath)
 	if err != nil {
+		logger.LogError("System", "k6", fmt.Sprintf("Failed to read k6 config from %s: %v", k6ConfigPath, err))
 		return fmt.Errorf("failed to read k6 config: %v", err)
 	}
 
 	var k6Config K6DashboardConfig
 	if err := yaml.Unmarshal(k6Data, &k6Config); err != nil {
+		logger.LogError("System", "k6", fmt.Sprintf("Failed to parse k6 config YAML: %v", err))
 		return fmt.Errorf("failed to parse k6 config: %v", err)
 	}
 
@@ -770,13 +787,16 @@ func (h *K6Handler) updateDashboardConfig(enabledModules []string) error {
 	// Write updated config back to file
 	updatedData, err := yaml.Marshal(&k6Config)
 	if err != nil {
+		logger.LogError("System", "k6", fmt.Sprintf("Failed to marshal updated k6 config: %v", err))
 		return fmt.Errorf("failed to marshal updated k6 config: %v", err)
 	}
 
 	if err := os.WriteFile(k6ConfigPath, updatedData, 0644); err != nil {
+		logger.LogError("System", "k6", fmt.Sprintf("Failed to write updated k6 config to %s: %v", k6ConfigPath, err))
 		return fmt.Errorf("failed to write updated k6 config: %v", err)
 	}
 
+	logger.LogSuccess("System", "k6", fmt.Sprintf("Dashboard configuration updated successfully for %d enabled modules", len(enabledModules)))
 	return nil
 }
 
