@@ -147,6 +147,7 @@ func main() {
 	api.HandleFunc("/clickhouse/kafka-pod-memory", handlers.HandleAPIGetKafkaPodMemory).Methods("GET")
 	api.HandleFunc("/clickhouse/kafka-network", handlers.HandleAPIGetKafkaNetwork).Methods("GET")
 	api.HandleFunc("/clickhouse/pod-monitoring", handlers.HandleAPIGetPodMonitoring).Methods("GET")
+	api.HandleFunc("/clickhouse/pod-trend", handlers.HandleAPIGetPodTrendData).Methods("GET")
 	// Removed pod-metrics endpoint
 
 	// Removed Kubernetes API endpoints

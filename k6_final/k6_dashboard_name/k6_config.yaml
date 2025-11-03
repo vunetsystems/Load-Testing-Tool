@@ -5,15 +5,15 @@ dashboards:
     - id: b1ec2dfd-6a8e-456b-869e-1f8df644e614
       name: MSSQL Overview Dashboard
       slug: mssql-overview-dashboard
-      enabled: true
+      enabled: false
     - id: cf5c449b-42e0-433d-9183-d5f717ae3a83
       name: Linux Server Insights
       slug: linux-server-insights
-      enabled: true
+      enabled: false
     - id: a2bf56c5-04d3-4a97-998a-76744f0a7066
       name: Apache Overview
       slug: Apache Overview
-      enabled: false
+      enabled: true
     - id: cceb91b5-f855-4bdb-b680-2e4d7825d28c
       name: Azure Firewall Insights
       slug: azure-firewall-insights

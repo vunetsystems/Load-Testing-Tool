@@ -218,3 +218,55 @@ func GetPodMonitoringDataAllNamespaces(ctx context.Context) ([]PodMonitoringData
 	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Fetched %d pods from all namespaces", len(pods)), "info")
 	return pods, nil
 }
+
+// PodTrendData represents time-series data for pod metrics
+type PodTrendData struct {
+	Timestamp  time.Time `json:"timestamp"`
+	CPUUsage   float64   `json:"cpu_usage"`
+	MemoryUsage float64  `json:"memory_usage"`
+}
+
+// GetPodTrendData fetches historical trend data for a specific pod
+func GetPodTrendData(ctx context.Context, namespace, podName string, hours int) ([]PodTrendData, error) {
+	if clickHouseClient == nil {
+		return nil, fmt.Errorf("ClickHouse client not initialized")
+	}
+
+	query := `
+		SELECT
+		    toStartOfInterval(timestamp, INTERVAL 5 minute) AS time_bucket,
+		    ROUND(avg(cpu_usage_nanocores) / 1000000000 * 100, 2) AS avg_cpu_usage,
+		    ROUND(avg(memory_usage_bytes) * 100.0 / NULLIF(max(resource_limits_memory_bytes), 0), 2) AS avg_memory_usage
+		FROM monitoring.kubernetes_pod_container_data
+		WHERE timestamp >= now() - toIntervalHour(?)
+		  AND namespace = ?
+		  AND pod_name = ?
+		GROUP BY time_bucket
+		ORDER BY time_bucket ASC
+	`
+
+	rows, err := clickHouseClient.Client.Query(ctx, query, hours, namespace, podName)
+	if err != nil {
+		logger.LogError("System", "ClickHouse", fmt.Sprintf("Failed to query pod trend data: %v", err))
+		return nil, fmt.Errorf("failed to query pod trend data: %v", err)
+	}
+	defer rows.Close()
+
+	var trendData []PodTrendData
+	for rows.Next() {
+		var data PodTrendData
+		err := rows.Scan(
+			&data.Timestamp,
+			&data.CPUUsage,
+			&data.MemoryUsage,
+		)
+		if err != nil {
+			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan pod trend row: %v", err))
+			continue
+		}
+		trendData = append(trendData, data)
+	}
+
+	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Fetched %d trend data points for pod %s/%s", len(trendData), namespace, podName), "info")
+	return trendData, nil
+}

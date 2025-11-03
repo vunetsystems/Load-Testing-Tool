@@ -431,7 +431,7 @@ drop_in - The total number of received packets dropped by the interface">
                             </div>
                         </div>
 
-                        <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                        <!-- <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                             <table class="w-full text-left text-sm">
                                 <thead class="bg-slate-50">
                                     <tr>
@@ -450,7 +450,7 @@ drop_in - The total number of received packets dropped by the interface">
                                 <tbody id="cluster-node-status-body" class="divide-y divide-slate-200 text-slate-700">
                                 </tbody>
                             </table>
-                        </div>
+                        </div> -->
                     </div>
 
                     <!-- <div id="system-tab" class="performance-tab-content hidden">
@@ -535,6 +535,33 @@ drop_in - The total number of received packets dropped by the interface">
                             <p class="text-base font-medium text-slate-500">Avg Memory Usage</p>
                             <p class="tracking-light text-3xl font-bold text-slate-900" id="avg-memory-usage">-</p>
                         </div>
+                    </div>
+
+                    <!-- Pod Trend Chart Section -->
+                    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mb-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-semibold text-slate-900">Pod Resource Trends</h3>
+                            <div class="flex items-center gap-4">
+                                <select id="pod-trend-select" class="h-10 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                                    <option value="">Select a pod...</option>
+                                </select>
+                                <button id="pod-trend-refresh" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">
+                                    <span class="material-symbols-outlined">refresh</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="pod-trend-loading" class="text-center py-8 hidden">
+                            <div class="inline-flex items-center gap-3">
+                                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                                <span class="text-slate-500">Loading trend data...</span>
+                            </div>
+                        </div>
+                        <div id="pod-trend-no-data" class="text-center py-8 hidden">
+                            <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">analytics</span>
+                            <h3 class="text-xl font-semibold mb-2 text-slate-700">No Trend Data Available</h3>
+                            <p class="text-slate-500">Select a pod to view its resource usage trends over time.</p>
+                        </div>
+                        <div id="pod-trend-chart" class="w-full" style="height: 400px;"></div>
                     </div>
 
                     <div

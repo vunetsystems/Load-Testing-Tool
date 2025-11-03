@@ -1,0 +1,983 @@
+⚠️  Iterations (5) < VUs (11). Adjusting iterations = VUs
+
+🔐 STEP 1: Running LOGIN TEST...
+   Script: login.js
+   VUs: 11 | Iterations: 11
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+time="2025-11-03T16:00:11+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_5512\",\"password\":\"Password123!\"},{\"username\":\"load_user_1654\",\"password\":\"Password123!\"},{\"username\":\"load_user_9375\",\"password\":\"Password123!\"},{\"username\":\"load_user_777\",\"password\":\"Password123!\"},{\"username\":\"load_user_4651\",\"password\":\"Password123!\"},{\"username\":\"load_user_4015\",\"password\":\"Password123!\"},{\"username\":\"load_user_9820\",\"password\":\"Password123!\"},{\"username\":\"load_user_829\",\"password\":\"Password123!\"},{\"username\":\"load_user_9506\",\"password\":\"Password123!\"},{\"username\":\"load_user_5858\",\"password\":\"Password123!\"},{\"username\":\"load_user_4661\",\"password\":\"Password123!\"},{\"username\":\"load_user_2294\",\"password\":\"Password123!\"},{\"username\":\"load_user_7974\",\"password\":\"Password123!\"},{\"username\":\"load_user_9865\",\"password\":\"Password123!\"},{\"username\":\"load_user_1810\",\"password\":\"Password123!\"},{\"username\":\"load_user_6051\",\"password\":\"Password123!\"},{\"username\":\"load_user_4051\",\"password\":\"Password123!\"},{\"username\":\"load_user_8354\",\"password\":\"Password123!\"},{\"username\":\"load_user_380\",\"password\":\"Password123!\"},{\"username\":\"load_user_3211\",\"password\":\"Password123!\"},{\"username\":\"load_user_6966\",\"password\":\"Password123!\"},{\"username\":\"load_user_1734\",\"password\":\"Password123!\"},{\"username\":\"load_user_3140\",\"password\":\"Password123!\"},{\"username\":\"load_user_7058\",\"password\":\"Password123!\"},{\"username\":\"load_user_8108\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-03T16:00:11+05:30" level=warning msg="\"cli\" level configuration overrode scenarios configuration entirely"
+     execution: local
+        script: /home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard/login.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 11 max VUs, 10m30s max duration (incl. graceful stop):
+              * default: 11 iterations shared among 11 VUs (maxDuration: 10m0s, gracefulStop: 30s)
+
+time="2025-11-03T16:00:11+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_5512\",\"password\":\"Password123!\"},{\"username\":\"load_user_1654\",\"password\":\"Password123!\"},{\"username\":\"load_user_9375\",\"password\":\"Password123!\"},{\"username\":\"load_user_777\",\"password\":\"Password123!\"},{\"username\":\"load_user_4651\",\"password\":\"Password123!\"},{\"username\":\"load_user_4015\",\"password\":\"Password123!\"},{\"username\":\"load_user_9820\",\"password\":\"Password123!\"},{\"username\":\"load_user_829\",\"password\":\"Password123!\"},{\"username\":\"load_user_9506\",\"password\":\"Password123!\"},{\"username\":\"load_user_5858\",\"password\":\"Password123!\"},{\"username\":\"load_user_4661\",\"password\":\"Password123!\"},{\"username\":\"load_user_2294\",\"password\":\"Password123!\"},{\"username\":\"load_user_7974\",\"password\":\"Password123!\"},{\"username\":\"load_user_9865\",\"password\":\"Password123!\"},{\"username\":\"load_user_1810\",\"password\":\"Password123!\"},{\"username\":\"load_user_6051\",\"password\":\"Password123!\"},{\"username\":\"load_user_4051\",\"password\":\"Password123!\"},{\"username\":\"load_user_8354\",\"password\":\"Password123!\"},{\"username\":\"load_user_380\",\"password\":\"Password123!\"},{\"username\":\"load_user_3211\",\"password\":\"Password123!\"},{\"username\":\"load_user_6966\",\"password\":\"Password123!\"},{\"username\":\"load_user_1734\",\"password\":\"Password123!\"},{\"username\":\"load_user_3140\",\"password\":\"Password123!\"},{\"username\":\"load_user_7058\",\"password\":\"Password123!\"},{\"username\":\"load_user_8108\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_5512\",\"password\":\"Password123!\"},{\"username\":\"load_user_1654\",\"password\":\"Password123!\"},{\"username\":\"load_user_9375\",\"password\":\"Password123!\"},{\"username\":\"load_user_777\",\"password\":\"Password123!\"},{\"username\":\"load_user_4651\",\"password\":\"Password123!\"},{\"username\":\"load_user_4015\",\"password\":\"Password123!\"},{\"username\":\"load_user_9820\",\"password\":\"Password123!\"},{\"username\":\"load_user_829\",\"password\":\"Password123!\"},{\"username\":\"load_user_9506\",\"password\":\"Password123!\"},{\"username\":\"load_user_5858\",\"password\":\"Password123!\"},{\"username\":\"load_user_4661\",\"password\":\"Password123!\"},{\"username\":\"load_user_2294\",\"password\":\"Password123!\"},{\"username\":\"load_user_7974\",\"password\":\"Password123!\"},{\"username\":\"load_user_9865\",\"password\":\"Password123!\"},{\"username\":\"load_user_1810\",\"password\":\"Password123!\"},{\"username\":\"load_user_6051\",\"password\":\"Password123!\"},{\"username\":\"load_user_4051\",\"password\":\"Password123!\"},{\"username\":\"load_user_8354\",\"password\":\"Password123!\"},{\"username\":\"load_user_380\",\"password\":\"Password123!\"},{\"username\":\"load_user_3211\",\"password\":\"Password123!\"},{\"username\":\"load_user_6966\",\"password\":\"Password123!\"},{\"username\":\"load_user_1734\",\"password\":\"Password123!\"},{\"username\":\"load_user_3140\",\"password\":\"Password123!\"},{\"username\":\"load_user_7058\",\"password\":\"Password123!\"},{\"username\":\"load_user_8108\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_5512\",\"password\":\"Password123!\"},{\"username\":\"load_user_1654\",\"password\":\"Password123!\"},{\"username\":\"load_user_9375\",\"password\":\"Password123!\"},{\"username\":\"load_user_777\",\"password\":\"Password123!\"},{\"username\":\"load_user_4651\",\"password\":\"Password123!\"},{\"username\":\"load_user_4015\",\"password\":\"Password123!\"},{\"username\":\"load_user_9820\",\"password\":\"Password123!\"},{\"username\":\"load_user_829\",\"password\":\"Password123!\"},{\"username\":\"load_user_9506\",\"password\":\"Password123!\"},{\"username\":\"load_user_5858\",\"password\":\"Password123!\"},{\"username\":\"load_user_4661\",\"password\":\"Password123!\"},{\"username\":\"load_user_2294\",\"password\":\"Password123!\"},{\"username\":\"load_user_7974\",\"password\":\"Password123!\"},{\"username\":\"load_user_9865\",\"password\":\"Password123!\"},{\"username\":\"load_user_1810\",\"password\":\"Password123!\"},{\"username\":\"load_user_6051\",\"password\":\"Password123!\"},{\"username\":\"load_user_4051\",\"password\":\"Password123!\"},{\"username\":\"load_user_8354\",\"password\":\"Password123!\"},{\"username\":\"load_user_380\",\"password\":\"Password123!\"},{\"username\":\"load_user_3211\",\"password\":\"Password123!\"},{\"username\":\"load_user_6966\",\"password\":\"Password123!\"},{\"username\":\"load_user_1734\",\"password\":\"Password123!\"},{\"username\":\"load_user_3140\",\"password\":\"Password123!\"},{\"username\":\"load_user_7058\",\"password\":\"Password123!\"},{\"username\":\"load_user_8108\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_5512\",\"password\":\"Password123!\"},{\"username\":\"load_user_1654\",\"password\":\"Password123!\"},{\"username\":\"load_user_9375\",\"password\":\"Password123!\"},{\"username\":\"load_user_777\",\"password\":\"Password123!\"},{\"username\":\"load_user_4651\",\"password\":\"Password123!\"},{\"username\":\"load_user_4015\",\"password\":\"Password123!\"},{\"username\":\"load_user_9820\",\"password\":\"Password123!\"},{\"username\":\"load_user_829\",\"password\":\"Password123!\"},{\"username\":\"load_user_9506\",\"password\":\"Password123!\"},{\"username\":\"load_user_5858\",\"password\":\"Password123!\"},{\"username\":\"load_user_4661\",\"password\":\"Password123!\"},{\"username\":\"load_user_2294\",\"password\":\"Password123!\"},{\"username\":\"load_user_7974\",\"password\":\"Password123!\"},{\"username\":\"load_user_9865\",\"password\":\"Password123!\"},{\"username\":\"load_user_1810\",\"password\":\"Password123!\"},{\"username\":\"load_user_6051\",\"password\":\"Password123!\"},{\"username\":\"load_user_4051\",\"password\":\"Password123!\"},{\"username\":\"load_user_8354\",\"password\":\"Password123!\"},{\"username\":\"load_user_380\",\"password\":\"Password123!\"},{\"username\":\"load_user_3211\",\"password\":\"Password123!\"},{\"username\":\"load_user_6966\",\"password\":\"Password123!\"},{\"username\":\"load_user_1734\",\"password\":\"Password123!\"},{\"username\":\"load_user_3140\",\"password\":\"Password123!\"},{\"username\":\"load_user_7058\",\"password\":\"Password123!\"},{\"username\":\"load_user_8108\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_5512\",\"password\":\"Password123!\"},{\"username\":\"load_user_1654\",\"password\":\"Password123!\"},{\"username\":\"load_user_9375\",\"password\":\"Password123!\"},{\"username\":\"load_user_777\",\"password\":\"Password123!\"},{\"username\":\"load_user_4651\",\"password\":\"Password123!\"},{\"username\":\"load_user_4015\",\"password\":\"Password123!\"},{\"username\":\"load_user_9820\",\"password\":\"Password123!\"},{\"username\":\"load_user_829\",\"password\":\"Password123!\"},{\"username\":\"load_user_9506\",\"password\":\"Password123!\"},{\"username\":\"load_user_5858\",\"password\":\"Password123!\"},{\"username\":\"load_user_4661\",\"password\":\"Password123!\"},{\"username\":\"load_user_2294\",\"password\":\"Password123!\"},{\"username\":\"load_user_7974\",\"password\":\"Password123!\"},{\"username\":\"load_user_9865\",\"password\":\"Password123!\"},{\"username\":\"load_user_1810\",\"password\":\"Password123!\"},{\"username\":\"load_user_6051\",\"password\":\"Password123!\"},{\"username\":\"load_user_4051\",\"password\":\"Password123!\"},{\"username\":\"load_user_8354\",\"password\":\"Password123!\"},{\"username\":\"load_user_380\",\"password\":\"Password123!\"},{\"username\":\"load_user_3211\",\"password\":\"Password123!\"},{\"username\":\"load_user_6966\",\"password\":\"Password123!\"},{\"username\":\"load_user_1734\",\"password\":\"Password123!\"},{\"username\":\"load_user_3140\",\"password\":\"Password123!\"},{\"username\":\"load_user_7058\",\"password\":\"Password123!\"},{\"username\":\"load_user_8108\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_5512\",\"password\":\"Password123!\"},{\"username\":\"load_user_1654\",\"password\":\"Password123!\"},{\"username\":\"load_user_9375\",\"password\":\"Password123!\"},{\"username\":\"load_user_777\",\"password\":\"Password123!\"},{\"username\":\"load_user_4651\",\"password\":\"Password123!\"},{\"username\":\"load_user_4015\",\"password\":\"Password123!\"},{\"username\":\"load_user_9820\",\"password\":\"Password123!\"},{\"username\":\"load_user_829\",\"password\":\"Password123!\"},{\"username\":\"load_user_9506\",\"password\":\"Password123!\"},{\"username\":\"load_user_5858\",\"password\":\"Password123!\"},{\"username\":\"load_user_4661\",\"password\":\"Password123!\"},{\"username\":\"load_user_2294\",\"password\":\"Password123!\"},{\"username\":\"load_user_7974\",\"password\":\"Password123!\"},{\"username\":\"load_user_9865\",\"password\":\"Password123!\"},{\"username\":\"load_user_1810\",\"password\":\"Password123!\"},{\"username\":\"load_user_6051\",\"password\":\"Password123!\"},{\"username\":\"load_user_4051\",\"password\":\"Password123!\"},{\"username\":\"load_user_8354\",\"password\":\"Password123!\"},{\"username\":\"load_user_380\",\"password\":\"Password123!\"},{\"username\":\"load_user_3211\",\"password\":\"Password123!\"},{\"username\":\"load_user_6966\",\"password\":\"Password123!\"},{\"username\":\"load_user_1734\",\"password\":\"Password123!\"},{\"username\":\"load_user_3140\",\"password\":\"Password123!\"},{\"username\":\"load_user_7058\",\"password\":\"Password123!\"},{\"username\":\"load_user_8108\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_5512\",\"password\":\"Password123!\"},{\"username\":\"load_user_1654\",\"password\":\"Password123!\"},{\"username\":\"load_user_9375\",\"password\":\"Password123!\"},{\"username\":\"load_user_777\",\"password\":\"Password123!\"},{\"username\":\"load_user_4651\",\"password\":\"Password123!\"},{\"username\":\"load_user_4015\",\"password\":\"Password123!\"},{\"username\":\"load_user_9820\",\"password\":\"Password123!\"},{\"username\":\"load_user_829\",\"password\":\"Password123!\"},{\"username\":\"load_user_9506\",\"password\":\"Password123!\"},{\"username\":\"load_user_5858\",\"password\":\"Password123!\"},{\"username\":\"load_user_4661\",\"password\":\"Password123!\"},{\"username\":\"load_user_2294\",\"password\":\"Password123!\"},{\"username\":\"load_user_7974\",\"password\":\"Password123!\"},{\"username\":\"load_user_9865\",\"password\":\"Password123!\"},{\"username\":\"load_user_1810\",\"password\":\"Password123!\"},{\"username\":\"load_user_6051\",\"password\":\"Password123!\"},{\"username\":\"load_user_4051\",\"password\":\"Password123!\"},{\"username\":\"load_user_8354\",\"password\":\"Password123!\"},{\"username\":\"load_user_380\",\"password\":\"Password123!\"},{\"username\":\"load_user_3211\",\"password\":\"Password123!\"},{\"username\":\"load_user_6966\",\"password\":\"Password123!\"},{\"username\":\"load_user_1734\",\"password\":\"Password123!\"},{\"username\":\"load_user_3140\",\"password\":\"Password123!\"},{\"username\":\"load_user_7058\",\"password\":\"Password123!\"},{\"username\":\"load_user_8108\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_5512\",\"password\":\"Password123!\"},{\"username\":\"load_user_1654\",\"password\":\"Password123!\"},{\"username\":\"load_user_9375\",\"password\":\"Password123!\"},{\"username\":\"load_user_777\",\"password\":\"Password123!\"},{\"username\":\"load_user_4651\",\"password\":\"Password123!\"},{\"username\":\"load_user_4015\",\"password\":\"Password123!\"},{\"username\":\"load_user_9820\",\"password\":\"Password123!\"},{\"username\":\"load_user_829\",\"password\":\"Password123!\"},{\"username\":\"load_user_9506\",\"password\":\"Password123!\"},{\"username\":\"load_user_5858\",\"password\":\"Password123!\"},{\"username\":\"load_user_4661\",\"password\":\"Password123!\"},{\"username\":\"load_user_2294\",\"password\":\"Password123!\"},{\"username\":\"load_user_7974\",\"password\":\"Password123!\"},{\"username\":\"load_user_9865\",\"password\":\"Password123!\"},{\"username\":\"load_user_1810\",\"password\":\"Password123!\"},{\"username\":\"load_user_6051\",\"password\":\"Password123!\"},{\"username\":\"load_user_4051\",\"password\":\"Password123!\"},{\"username\":\"load_user_8354\",\"password\":\"Password123!\"},{\"username\":\"load_user_380\",\"password\":\"Password123!\"},{\"username\":\"load_user_3211\",\"password\":\"Password123!\"},{\"username\":\"load_user_6966\",\"password\":\"Password123!\"},{\"username\":\"load_user_1734\",\"password\":\"Password123!\"},{\"username\":\"load_user_3140\",\"password\":\"Password123!\"},{\"username\":\"load_user_7058\",\"password\":\"Password123!\"},{\"username\":\"load_user_8108\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_5512\",\"password\":\"Password123!\"},{\"username\":\"load_user_1654\",\"password\":\"Password123!\"},{\"username\":\"load_user_9375\",\"password\":\"Password123!\"},{\"username\":\"load_user_777\",\"password\":\"Password123!\"},{\"username\":\"load_user_4651\",\"password\":\"Password123!\"},{\"username\":\"load_user_4015\",\"password\":\"Password123!\"},{\"username\":\"load_user_9820\",\"password\":\"Password123!\"},{\"username\":\"load_user_829\",\"password\":\"Password123!\"},{\"username\":\"load_user_9506\",\"password\":\"Password123!\"},{\"username\":\"load_user_5858\",\"password\":\"Password123!\"},{\"username\":\"load_user_4661\",\"password\":\"Password123!\"},{\"username\":\"load_user_2294\",\"password\":\"Password123!\"},{\"username\":\"load_user_7974\",\"password\":\"Password123!\"},{\"username\":\"load_user_9865\",\"password\":\"Password123!\"},{\"username\":\"load_user_1810\",\"password\":\"Password123!\"},{\"username\":\"load_user_6051\",\"password\":\"Password123!\"},{\"username\":\"load_user_4051\",\"password\":\"Password123!\"},{\"username\":\"load_user_8354\",\"password\":\"Password123!\"},{\"username\":\"load_user_380\",\"password\":\"Password123!\"},{\"username\":\"load_user_3211\",\"password\":\"Password123!\"},{\"username\":\"load_user_6966\",\"password\":\"Password123!\"},{\"username\":\"load_user_1734\",\"password\":\"Password123!\"},{\"username\":\"load_user_3140\",\"password\":\"Password123!\"},{\"username\":\"load_user_7058\",\"password\":\"Password123!\"},{\"username\":\"load_user_8108\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_5512\",\"password\":\"Password123!\"},{\"username\":\"load_user_1654\",\"password\":\"Password123!\"},{\"username\":\"load_user_9375\",\"password\":\"Password123!\"},{\"username\":\"load_user_777\",\"password\":\"Password123!\"},{\"username\":\"load_user_4651\",\"password\":\"Password123!\"},{\"username\":\"load_user_4015\",\"password\":\"Password123!\"},{\"username\":\"load_user_9820\",\"password\":\"Password123!\"},{\"username\":\"load_user_829\",\"password\":\"Password123!\"},{\"username\":\"load_user_9506\",\"password\":\"Password123!\"},{\"username\":\"load_user_5858\",\"password\":\"Password123!\"},{\"username\":\"load_user_4661\",\"password\":\"Password123!\"},{\"username\":\"load_user_2294\",\"password\":\"Password123!\"},{\"username\":\"load_user_7974\",\"password\":\"Password123!\"},{\"username\":\"load_user_9865\",\"password\":\"Password123!\"},{\"username\":\"load_user_1810\",\"password\":\"Password123!\"},{\"username\":\"load_user_6051\",\"password\":\"Password123!\"},{\"username\":\"load_user_4051\",\"password\":\"Password123!\"},{\"username\":\"load_user_8354\",\"password\":\"Password123!\"},{\"username\":\"load_user_380\",\"password\":\"Password123!\"},{\"username\":\"load_user_3211\",\"password\":\"Password123!\"},{\"username\":\"load_user_6966\",\"password\":\"Password123!\"},{\"username\":\"load_user_1734\",\"password\":\"Password123!\"},{\"username\":\"load_user_3140\",\"password\":\"Password123!\"},{\"username\":\"load_user_7058\",\"password\":\"Password123!\"},{\"username\":\"load_user_8108\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_5512\",\"password\":\"Password123!\"},{\"username\":\"load_user_1654\",\"password\":\"Password123!\"},{\"username\":\"load_user_9375\",\"password\":\"Password123!\"},{\"username\":\"load_user_777\",\"password\":\"Password123!\"},{\"username\":\"load_user_4651\",\"password\":\"Password123!\"},{\"username\":\"load_user_4015\",\"password\":\"Password123!\"},{\"username\":\"load_user_9820\",\"password\":\"Password123!\"},{\"username\":\"load_user_829\",\"password\":\"Password123!\"},{\"username\":\"load_user_9506\",\"password\":\"Password123!\"},{\"username\":\"load_user_5858\",\"password\":\"Password123!\"},{\"username\":\"load_user_4661\",\"password\":\"Password123!\"},{\"username\":\"load_user_2294\",\"password\":\"Password123!\"},{\"username\":\"load_user_7974\",\"password\":\"Password123!\"},{\"username\":\"load_user_9865\",\"password\":\"Password123!\"},{\"username\":\"load_user_1810\",\"password\":\"Password123!\"},{\"username\":\"load_user_6051\",\"password\":\"Password123!\"},{\"username\":\"load_user_4051\",\"password\":\"Password123!\"},{\"username\":\"load_user_8354\",\"password\":\"Password123!\"},{\"username\":\"load_user_380\",\"password\":\"Password123!\"},{\"username\":\"load_user_3211\",\"password\":\"Password123!\"},{\"username\":\"load_user_6966\",\"password\":\"Password123!\"},{\"username\":\"load_user_1734\",\"password\":\"Password123!\"},{\"username\":\"load_user_3140\",\"password\":\"Password123!\"},{\"username\":\"load_user_7058\",\"password\":\"Password123!\"},{\"username\":\"load_user_8108\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[2025-11-03T10:30:11.584Z] 🔹 VU 9 Logging in as: load_user_829" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[2025-11-03T10:30:11.584Z] 🔹 VU 7 Logging in as: load_user_4015" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[2025-11-03T10:30:11.584Z] 🔹 VU 3 Logging in as: load_user_1654" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[2025-11-03T10:30:11.584Z] 🔹 VU 1 Logging in as: username" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[2025-11-03T10:30:11.584Z] 🔹 VU 6 Logging in as: load_user_4651" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[2025-11-03T10:30:11.584Z] 🔹 VU 8 Logging in as: load_user_9820" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[2025-11-03T10:30:11.584Z] 🔹 VU 10 Logging in as: load_user_9506" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[2025-11-03T10:30:11.584Z] 🔹 VU 11 Logging in as: load_user_5858" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[2025-11-03T10:30:11.584Z] 🔹 VU 2 Logging in as: load_user_5512" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[2025-11-03T10:30:11.584Z] 🔹 VU 5 Logging in as: load_user_777" source=console
+time="2025-11-03T16:00:11+05:30" level=info msg="[2025-11-03T10:30:11.584Z] 🔹 VU 4 Logging in as: load_user_9375" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="{\"Content-Type\":\"text/html;charset=utf-8\",\"Referrer-Policy\":\"no-referrer\",\"X-Robots-Tag\":\"none\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"Content-Language\":\"en\",\"Set-Cookie\":\"AUTH_SESSION_ID=8d0320e0-4cba-4a58-bb7b-838f1945408d;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..k4MKK2_B8Ay485FDZNrDaQ.GTICNBOCuSx4R4f23iXeF7FW6PN8sztELshg8VOQMZ6-4B5wUPUDkrNsB1zxMrgDNK0IwAR-AHTE-LdMMnSUp5HfawAxQHGlcW9OwqI8_BHP0lO3jrL9Zr8NqzYezLKcnD1DHxhXG3U6z8F1P_DmvxEgt9S4-ay7X1TIJf7ODCbQj1O9ZhHBONxJRV9IoZdNc2Z5xTYPYVK-07CIKl3UZapcF3JEWojLTV5NJkCUB88ZqQiW9wCW2_Db7qF3p6qibKfD9rRw9T5LUKV5wcyp7zn2sClcJ5lpFS9ag-HBrNdLMMMAJWS49-8YCEUl-z8zMJK8cFLBnPWUdPedtrL1iKu_YtNk430i6WnUJPKQ6TwDbFtniWZ9i9V3j7uv7Xp3XztYH4oHZKJUNXyEx-v6rhR1USZMDx2BKId2xcHkGX4WwLDyzT3MfiKXjTU5AxJLEPugX-uBT8oXxYHek5n_TjULjMD5Kiv0y6DWCawoizn57q7WKhWBqOgmT1VA5zSAdx38w1zlgOCA1PlsWdScBswfHBlu7dIQ8XFS-qROJLq3XLJcVp-hCu3kvjIGtBKppnirGQdi4nQoX7EoPmrc8KaOvcTzlfLSV08EiFoyaH1j4wyr9KiEYgotFc7-9wJIZSPDE_vkvrytmkmX1puofgiH78exB1U-ftBrOYVwHFCSa4JSDoWJjvj86RQm0MWuHi1W4bPb79wbbbcCvJiDvPdbBUviUiJE65FnhQUYCSwT01nw9jaAMO09XvREMIagDfvGYop8oJ-GLj5RKB0qRNHVPwAHRvmco_NBpk5XDyDpPVGXwLNcbbuY5uvj5-aREUZpHi8B-kUoNGzFiDBrb55BcHWLOE_zVTVHKQzyTO7dV8nK62fSlkQLMv2YTGDCUPF94rN9AMDQHvG4YAfZ6kVI4OesdXPclyrTsAKy-J_vOnwxP8syOLCGptgHCAIcNAD9zXwL74DL6MT2klg_HhlxaH5dbb7aaL8DdOVN9RETOVtKJ7bFbwj9Oix_bQI2DxLzXnVONfDmEaqrPuHqP22vLCLcn_Y3uhHvtAwHIH76zVmg_MAO98PMfIORIIj6.BM85nQdSmb370SrsTb536Q;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"X-Frame-Options\":\"SAMEORIGIN\",\"X-Content-Type-Options\":\"nosniff\",\"X-Xss-Protection\":\"1; mode=block\",\"Content-Length\":\"7191\",\"Date\":\"Mon, 03 Nov 2025 10:30:12 GMT\"}" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="[2025-11-03T10:30:11.584Z] ✅ Login successful | User: load_user_777 | Response Time: 199.144277 ms" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="{\"Content-Type\":\"text/html;charset=utf-8\",\"Set-Cookie\":\"AUTH_SESSION_ID=f21161c4-5295-4604-a940-560e9e54e1e0;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..ADWL2KVMbsrVaO8-iIWF3g.kvsGCUbJvddMDYBNncEz4rPNFrhvwwiWoN5jca50HdR2KgYocQV1V8Z-PcTAA1QkAKnJLv63y3O504aXRot7O3UZj4kWeNu6-8Wc9wMdI3Qp_G-vNO1YrchUDkDgWbwOOfPhjO7mLuv0lpAm9Ex6KcSrRoPrDPXkLLy9qYkK4xEJPRbUynTXzo7lthwlOgtY-d4V6lae0LUE9M83ALwJSA1vvpkjKn68iN8PkZCwaj7Ij3kullhUfbza0wO_yBIHC8Rsyn9fcD_SUSRaJhOG2u9sjdt56QCkHFtrT5MEJPjlm-95HD8M7Hwz2dzvedmYCYg3ycCiQOAPScboUx-hAyi9QPg_xxMaS__Z8bb9rQsQG4jwJbi3uJZ6yv81cIhZPWuqlrH7xaysZLyObEwGUu02UagCF82-US4uagSwPTJUp2jZwBRxeXtGdtXR_b3FpBDpSb7hOYCGauKN599HdRvIVoZM-NCVzS0j3UBSoMHkCdXw7UA98hJ0mxBYLcvhdjXFO4g4t5KKizIH4gNh4jcLRnq3Adv4THQJBVXYbYXIO84i_6meuQAQ6edjPD2HJKGVbnIOR5ahJ9iA1hkS9ZW70fT31_H6nkuypEV3twHlaxHicKOT0TZkZqql3xHUljluRrpbImMLUXR44IaNsUyaxcys-TosSIGqe8N6S0oqd3sM9V14vFLBir6Ey_-aPZ7xqL7vkIrFZUkwMvorLVXS6Xa_63G4k2V4qb4sBmnnGXglpxwqghgB3cjhLCrOAqy9Zb8KBm96KPQATAN5m2ZTfwitppZw3xn_KmzQEmTJxnsMdlWbDYz8cm8MCf7RrU5ClyUPRLQmWEovJfXFGFRTEF38ZPFSFat8NsHb5vZd-ZNU5Peg5aBhFcFJzbXtju3lB53qT0l0ZIKzvehK-ka9swMs8XME4hztbPfDrsC85FS_9QbLALQKR8axf7NSW0yEGrDJcd7KX15KaZRmgiOxBJoyWVugtYw-6cR2es8JBPkAWX1CFW4CKLOWyh7slbT1p8HE0tSLQL9QXz9bnhM5oEK-ePH-zcSY1gvfzekbXfs2vZXsuZUpMCY25p_K.l9Ao_Vg7G2AiT46v2nv3OQ;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"X-Robots-Tag\":\"none\",\"X-Frame-Options\":\"SAMEORIGIN\",\"X-Xss-Protection\":\"1; mode=block\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"Referrer-Policy\":\"no-referrer\",\"X-Content-Type-Options\":\"nosniff\",\"Content-Length\":\"7191\",\"Date\":\"Mon, 03 Nov 2025 10:30:12 GMT\",\"Content-Language\":\"en\"}" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="{\"Content-Language\":\"en\",\"Referrer-Policy\":\"no-referrer\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"Set-Cookie\":\"AUTH_SESSION_ID=7c143ce5-2049-4e4e-a332-cbdc55223d29;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..0EE42BqU3Pr_-ZJNXxC11A.gUnNwEhMrANxX2NoiDKD_mCw4edb3moV_jW2NV4-cSx4eGUPqYcNE3OEvD-u1yEtxCJub-_yC-ziKjROArVF_yft4DAFxShDIJ1I_Oc8JuYrC2paOe8j9_IstVbw_rVlDqGAi1gaAlzrid96yHQpI7Bo2Rb7r3gSfUtxDFsp_lv07UXRZtyh5SHLLlM9J6QfJdh6sMjlMJBbz0W4iP5QZ5MF9P_ADo9hG-BJVstNVJEt_zTdOgzbCKKQQvV3tlIDx2jREjRfXxrjaEeznK04YYZ_Qzu-hdDu1ToK5eWf5w8dfzlBkNLZGSNhXq09hSL7PD9e48Z8_Li7vA4AToCLFbYKruJ4SmcrS7_s08N1YdBS1d9Plk4iGAzx_RIXzIhaAwXGx3Vu0khya6BC_rjuDuLHZRKkBmdmDf4if9JAhlke8IZETbvHLndyRyJeaVn_uoAdAjlIWK2hAq5UvPSZ-6TZBvrjptpZhomzjl0nf2sZ4-NBNY8sL76MmYevWq-OhOsRoGYm2RywPTkV9uWGPraXbPl8--QemWQC8U4vpqqzaxaGtXzmM4jIIS-HAqfA2DAyULTsh5w3CJcMO1qcRzYq7Rh8p3af5POcuWQczUjL6S67Bw5yjBfhBMMsNCr2SHfwoBxRcgGxY9dEngctlULUo9yKNSWRdhvCjJGcX0YXqVZlBGBa3QenAKqJjiPnpPIg9Vk_B9ieMwI-9xiGgmLP-Ldu-r_iiRge7bJnbH7_FY5O1Seu-IE30kBMslboL7omszTxUhp1eNh05qUW_GYHxn6iP1Z0kchVx_8oIn_Hz-OSYLdvW2khKFOzSN9zGZVkOa6alV2vZ9wtfxnue7a2-4naVunp8eYPawA22q0viPceHkvdoUjb7rjdaJrmAs-x2Qv9M0BOlHR2GDu2iv5qcmoG5HOheL-1Ou6GWOuHcXWwH8ti1utwFSqnzB9-9f6b_KV5a_Zg2jwB4tFLg6U_1ZJ8S5YZVZtmNiEcSfBW1C2QUMmaJb_grohVvkIYTUsdAHNyq6vFMUw5y2ATwLO51PccHKvPZSSHjwq-OBzdCqkf3kQTsfYVLbWICtZA.mFupvnH57kZnV3ZiP3b4LQ;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\",\"X-Content-Type-Options\":\"nosniff\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"X-Robots-Tag\":\"none\",\"Date\":\"Mon, 03 Nov 2025 10:30:12 GMT\",\"Content-Type\":\"text/html;charset=utf-8\",\"X-Frame-Options\":\"SAMEORIGIN\",\"X-Xss-Protection\":\"1; mode=block\",\"Content-Length\":\"7191\"}" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="[2025-11-03T10:30:11.584Z] ✅ Login successful | User: load_user_1654 | Response Time: 500.264927 ms" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="[2025-11-03T10:30:11.584Z] ✅ Login successful | User: load_user_9506 | Response Time: 297.645262 ms" source=console
+
+running (00m01.0s), 08/11 VUs, 3 complete and 0 interrupted iterations
+default   [  27% ] 11 VUs  00m01.0s/10m0s  03/11 shared iters
+time="2025-11-03T16:00:12+05:30" level=info msg="{\"X-Content-Type-Options\":\"nosniff\",\"X-Xss-Protection\":\"1; mode=block\",\"Date\":\"Mon, 03 Nov 2025 10:30:12 GMT\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"Set-Cookie\":\"AUTH_SESSION_ID=9803849d-a4af-415b-9775-dd153be9928d;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..k1cdE4X4_sDFec9YQYNAgA.8ftG0UqkMDTdEyAj3I2CPQ0pAqsz8wfXW3CGoOQj1ppmXHvhPfg3CaCEwgOseHgIELCVguTm7h-GJmP8bEgYumfjNpJsYfXEO0nWn-xVe48rKXgXRf-NBxDOLbj3WRoM76_3PS9vXhLM8PxYEfeX388p3Um-ElCiMiaWDfpN8wMW1J0IUcKJdSqkSOsxpYUq-Zz0_Omtde4AspzME3LFPz0vfyhi5N1PZ_TO4QgmsnxvVNxU07cDH1RBCpV-N7cf2GY1Xzc-Z6H2WQcX6tRr8Y64jBkpAGUm3HetKaxTb1NUgKif1ylfzLNGK2OXXjd-hX4hSdAQ6vE9FsvVAI7c2UHwx5awQzgOnBL8-fAM9VBjC9AVfFgaJcBDRXeDfjRY-FEzfouZL43nBhj2-QS5SJoXhJzSOUWDa98yeOF9kNduGyaPNUKKpnMR4vHyJo8uFdj-hMEC4u3t5TibW3fHryGC8u2-NpdrKchY8y4O1uEMGOJOGit5jZJdzgxUVbbMpQ40HzzCX-x1nsklCOm6_uCFVzfxiVk04dsfR8i_eYSy5mtMQ2qDU0VieEXR3fmbb92GhDtrx56XZmWa5V7bwZlc546HgEQuR_N_KKAr-Af-Gfse22Cj_P1xQhd6qUlxbVG_Qr5i1Yqf7m-6O49-9HUO_ANeMBX5CH5Owx66DmQYM0pquRcbHXEb7gjzoubWw_6ATdMSr4Zfy9AzEb8M7gGtVlTd-k9mVBlWtnsdGVIVzXu8NCOzUvn2tSTeiv6C0TKy8FHLbONQNIyxdXb1MSp8TneMW9xkXOsADuO7Z65xNgH2rA8H7PysSkML5CZT6SdecBVBKRrFudgwmNMeu_48B2doe70dnkjoNYne51-pmnJuoLd3lmkSSNn-L16IzGGLy3PHPRTVpDe6K6IAE28nP9p_ionecMoTl7kcKIyIJiQzCqfz2rbviXrXStBpAlB4LKwfiB_tF8PEQq1NXGQyqe9AQI52u5j0vxXspYIkEbU0D6bx5Az-wCxYkgfdIDAnXgCdPYxm0sF-HOWQD_vhFtKQFb43NEHDQ7OP8uLa7swXaBandsufbX_OrIQP.YVVVx-aNSNbOYlCbsll8tQ;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"X-Frame-Options\":\"SAMEORIGIN\",\"Content-Length\":\"7191\",\"Content-Language\":\"en\",\"Content-Type\":\"text/html;charset=utf-8\",\"Referrer-Policy\":\"no-referrer\",\"X-Robots-Tag\":\"none\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\"}" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="[2025-11-03T10:30:11.584Z] ✅ Login successful | User: load_user_9375 | Response Time: 405.475197 ms" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="{\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"X-Content-Type-Options\":\"nosniff\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"X-Xss-Protection\":\"1; mode=block\",\"Content-Length\":\"7191\",\"Content-Type\":\"text/html;charset=utf-8\",\"Date\":\"Mon, 03 Nov 2025 10:30:12 GMT\",\"Content-Language\":\"en\",\"Referrer-Policy\":\"no-referrer\",\"X-Frame-Options\":\"SAMEORIGIN\",\"X-Robots-Tag\":\"none\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"Set-Cookie\":\"AUTH_SESSION_ID=54fa897e-6674-4b60-8dd4-99d963c75657;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..4zUxhQB41Ba-Cam9unGWYA.57z1xbcfWgsB1FqFMmTic67c-Bcnaitd53PWzsSfU3FiiLHvjLz03gggwHVsKbCxRzkZWBhCzIWl4yU57UY-0TWaMHe68J1pY_0xIW_BpzdcnQoLene1lfQRXMXZp-Kr9rJ95Rqo1JL1JwwRv74AoyIZ9TmdB9IGy4hvd39bDMY2VW9m66ozPi7FHDeJxhkFuQvbJoKDtKBV7ukp6ymkRa5o5DT1LU3KL9x1Yu0oJWy2LRo_oMKxoybPaYzXNMF3dOOlSJjyBJD6xXYo8D4QDIKOoKPOaR2gnuBhgpf6mgegISEqsy2rMDSpasEn3lTmPS8tOE4KFfDg8tvouazRz58DiYZZGCuav05W5ePVuvgjeZ4z2X3AMByLM4NM99GP6Jr4UNRmW0MzlOm9u3RmK-mq7AL-Q78oRAxvtjbuaFhGF8nJaw8iSe75GLsUT0ZGhmdUxg_HSjEdgD5SxZPDqs6yugGN1BRgln0jKgP6HXhJ17KeomQ2cc-BtRLvn6v5iJ18g5uouFeeK5lH3oaweCjrEqOkYkoU7VHcJ-JjLBpMZdEZpc8ZtuBAxNrWNW9wJDvLFUtDKUSNyNgKYVmXO6OVmNDzB1Lgs8xJf7EKL_gEdctac9279oCuDFlXaD-iI2Als9-sT3ms4-nVEjWMFYdHscWp-3lovIFGdJz0T3IF3aB3f5sZBFUePsJcfnY8-yqlqLN-AEW46kYKBu2yrn3Y6xZDmkTZOJQ-tM5_jG-W_2U9MPlRaDzsRf62jEyB2OnLyFkxepjviiHbKkhV1Mp1EzAT_-_rGX0ZZhk_9zqvmnxckKz1EIGnCR1QnqDXanJ-dCSknOWVvHnZMjEuABG4fwluMDcRhaCWTZPhcGx1xiz4o0NNNx03sHOdqWpHBFUpQilBl8XR196m47HXCRfc_IdUs7nhDSIDT3qUujWNMUCdnrvvDuRoyjThbk8RvSzOIN2ecGSpS0DQThbsiFfUrJ4OQPmuQRpsWJTMaK1bSwCA1qbLpTqq0uJ-SkAmhcv4ijYrjkNKlQ5THYIL8s244nsELGK9AMl6-lFxy_JmB2CCDcsyeAkQGHTJgd1S.XDiaem4fEpJAkVUOPkrA6g;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\"}" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="[2025-11-03T10:30:11.584Z] ✅ Login successful | User: load_user_829 | Response Time: 398.757961 ms" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="{\"X-Content-Type-Options\":\"nosniff\",\"Referrer-Policy\":\"no-referrer\",\"X-Frame-Options\":\"SAMEORIGIN\",\"X-Robots-Tag\":\"none\",\"Content-Length\":\"7191\",\"Date\":\"Mon, 03 Nov 2025 10:30:12 GMT\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"X-Xss-Protection\":\"1; mode=block\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"Content-Language\":\"en\",\"Content-Type\":\"text/html;charset=utf-8\",\"Set-Cookie\":\"AUTH_SESSION_ID=2cfcfcf6-f388-4fae-ad11-1e31675c01b1;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..021aeTAePGFeos3MK7FzDw.giEx9NAgNGTw5AhaJaUilECaasPQjJFyz87biibp9ZgFgEVYLkx9HPR8XlAQpxIa8wPV8cTbKY1Zf5lzNxi8AXS8j_M8zceXpCjweQbWwqm5362S6rPieRc1791fIHHFAEtG1G9ZFyIo7RjWsrjBdnfQZpfTuZQN5FWphO8t_QSEu6CGRqAkWdeu0NRrAkPBVm9SXIs-kHE4DCCgaOGqpI6R3V3wsrKKEa9jX1-p9ZS4FUJrsXk1PMV2zZnm6KDt7Ooh0Q7rXduR8mRbjDSuowj5fgVTz92j_XfUIjkGrRS_p_qgjEgJ2qKxfrkz0nO5wJEaMKsPDb4qj_LYeZS2YmhhdRbZnV22fBkMqtBII5Vnd65XTbp42oO8_qADCgcVyVUv1nWVPL0CQzgLjtyA5oiR85JLc8_136cY8lhd-Uk-BFEPR7BaCv0Sv3lQ1AanHDXhZOTVPRmSXaj9F1g26fLNl9vwfsa1ZPP5kfscRGdc4QU4Y2Qny8ZjLAkDLA78X2xm1FzInz4aiZBk2hafF6JdALwmA0KglPgQY8B9CePTnGVxTNPmDeVosetKZ6vkTG51FcxOpZl8XxiG9fbIznRnLdF69hKmrDE7ME3sui92YCHjmiFrgqr5JUC3nPbpmSHLh-vpc8VKXu4CVZ8JnN9WwwK2kqAWey8kMJ358BeCyh-TvS4dmD_Wy2Dw7zZ_IzWZpuV-LNCEG_0jc9BGVWrXm9mlXj3O69s3ehQ3sMEPDVQ2grxHrKVPyoPako0wjpKP7AVL2fS49qHcV4wdXec8DnGBFwxDy3cYKlOsMSr3zRwoYY4god_4aCLAa7q8wLJupT7TBg3WGXnz3Swe83o5JUina3sOWsOb361rpKTUKiCxPjw--Y3_eLV5e8DP375McXp8eShTeG6mYwWTH7mQwiaPIDR_e0WUeSjDUt7lYASqhHymu55_k9dUpumigtaakbgkimNVKARrpRwSdZuycQJCokBbU4ZaN0SaZL0OAAs5HSugKmO0BNqT7eYgokPwLMGuK6IC1VImibT77NrWB07VKpvDpuTBDgqF_BCGEgv6x4VWjaspea1Tordx.LJ0Xi00iK2tpV2He2ECxtg;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\"}" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="[2025-11-03T10:30:11.584Z] ✅ Login successful | User: load_user_4651 | Response Time: 301.017533 ms" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="{\"Content-Language\":\"en\",\"Content-Type\":\"text/html;charset=utf-8\",\"X-Robots-Tag\":\"none\",\"X-Xss-Protection\":\"1; mode=block\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"X-Content-Type-Options\":\"nosniff\",\"Referrer-Policy\":\"no-referrer\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"X-Frame-Options\":\"SAMEORIGIN\",\"Content-Length\":\"7191\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"Set-Cookie\":\"AUTH_SESSION_ID=a88dbdbb-afbe-45c6-8af8-06615836c38e;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..mKaqRCn_p3l0MI5mhvQeyg.mwTNo46dDEt4QDRv9sLJiEfCDDZ_3oJKNloXzTHRFVNsdNjGc4a5l-dFohiBymqus4nt6qwK1tL4U9wWENRReTEJIS4crOvcARpS7-n0zzphvCfyaBRcG_y_T1RJrGY9GTzC1Q8nZaNcfMtiKIaEEVqDYtn4JKWOINAc915sNo3sZzZ-UAuFQb1BtqbZt9YW-aXDNiKuk_j8GvSBDeLOpNrTdLjo_oEe52E9IuWy_qC6V8tXStMPop6CkWrbrzBoOf72LdRf5hLGku7S_efzbk3HL90pk9_6q9w9Rt8zCvVP7HZ-J35YltREKFsqzKIXfpaamOhwQwsd2d9fUn9HmeXsqvGo-dkaulyGAObmPtoeHJyNiO-wgyorGOBVcMniFUN3b1PVlSjbV-PiV_DT9f-CemSdUpIySmu8cc_1dpUAo996Gxqi63esu_no56biGyavIJEH7J_gUFL0ylPRle7ZlkTfH2UEwnKlUJciDZ21Y5OiTlz0QeoVMfAEmUflL6zzZTLJrHoy7E_LbCWs79Q0MFz7uPZxBUyFifRE5JpQJdA4AwYrWx9rDbTaYtMbqffATH22IoNVnAg7NY3J5LenYiZI8tnsAYsuEJ4xKEfDJYF0Ck7PP_26qSCburiEpkI7MtsQHiP6W2x00PpXrcIuNqYNv9cxzvI6IVpdFW_g4R39ASncnSmO2U8JLTicf--jvA6X27Cl_X0uF4seFEyF44dv4Ehx6OgYyZ8whkgPlmALrwAmaJBSnHIE7cX3TFSMmD96kQ_QX8h7mRC4krSy9GdaiFMSy4TZSvfrRoKwJ2kHjPi9HPOetJe-QTTOowtOazCGkZdZPZPozqT7BaJOgRv-o_31m1XsXEjVk7Aq9MFieCEikkUJdQCcSakC_DOxfJbLNNhWN7wJG9IeXLkAIHIsWokN3ZODmnFe0cy1U0JnBrToSIAJhrF2oXE87JLmP0CB5J2IyzUHVUgXoPnMUDwgvuSH4rY9LeZHcKJ39lqMNR7emNn0vjBG2J31c0iZgoUev-U61YRvbpPzfM_kgG-VSq7VJcNSh1ygUswq6H58-65xONPeVvfl6NCF.Xtw6g2_mwJ3Kv6KZPfs0Ag;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\",\"Date\":\"Mon, 03 Nov 2025 10:30:12 GMT\"}" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-03T16:00:12+05:30" level=info msg="[2025-11-03T10:30:11.584Z] ✅ Login successful | User: username | Response Time: 413.815799 ms" source=console
+time="2025-11-03T16:00:13+05:30" level=info msg="{\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"X-Robots-Tag\":\"none\",\"X-Xss-Protection\":\"1; mode=block\",\"Content-Length\":\"7191\",\"Date\":\"Mon, 03 Nov 2025 10:30:13 GMT\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"Content-Type\":\"text/html;charset=utf-8\",\"Referrer-Policy\":\"no-referrer\",\"X-Content-Type-Options\":\"nosniff\",\"X-Frame-Options\":\"SAMEORIGIN\",\"Content-Language\":\"en\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"Set-Cookie\":\"AUTH_SESSION_ID=ae0370b2-42a7-4f65-9205-6166dd30c704;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..9g5RlgYJVCJnP1E8aQLH_w.ATFKcf59hmozjEjrswXQzxfzMavkG52claCu89XAZNul9mA3y_Tevbmibe8CG8LY5a6_LQNoliU7cBtvRzwhX6Ol_L7ygxNdz7JtaQrFSaxUOdzTohOt4thrL5plMzhA5qUDdriZwsMFEX733sll9LIZxAzyENxltrr2U47DCRa9gltsuWmjpbRzUW70rOdizVB3SA0d4H6xuQmM7i3mo4_Xmvktr032N2dce3yi5Dr6htNVs5Vx-VU0gmoIxmPBOMx0pBzbKP1mOZsSvPhc1glWZM14Kl0_lz6hWC48yWJpM9y0qj9d0fuRH5zIzbqvSwh54STiYpZOeRGihLR_I2ZIVl3Yusr2LetzYDPXPstBjlsbHtnakDYpczD9noT2lAIrz9oKOzuM1y-LfrH7_cyO5sDJCHRwOUYQODhWTmJvdjPd-pGfrBwJ0w8JdQURsi9J-EzLSynoX6bw_x-CGAX7BKrgxFzvZ8FqbnT_knFj35CqpDjWA2lQNyszByVF9-s2T1Neprz6MIV0boMyq0EfNsvJ2NjUfXCaVqGuzp9bX2PEE5nmlWiNF3hne4k5vNhmCtFIqfSf_FqqTVtBmt9jNxIJoJOLm4v2959ZP1MlI_P-kTMt1GZtQZOK29lidtApr0QeGXpCSBazQy4Cqyl4tfVgZHJdZjQPPQRgECZ89fXg3JAqDv4J1rBswW9ADAknBUMISiyMwtKnjXYdAYzBzgOXfT2FDfBy1Wxoi_w64w2j4Zt0rP3lQirgd5jE4be3xgB6Iz6qLzNjAYRw2AegPAAEdhUspk7njqzsLYO3ZvdpsJKM27HeVN4_ol_o-rUw0oFlX02vWWa-z_l1iGgKyaLqliLjt2DiF5zzxbgBl60Oc6n_WIy2ke09ccfsbOHuXMrkG8gmA8d6TG83PwZIvn3hguuKWYqU5li_QR1LYwAvjbehfRMKhnNK9CEcIf5onjzdpjuvPLilLjTY1JMTVFBZ6fzYI8kMWCg5Ll7zPK0lZjSvLWVqfWDsXlMI7xmrWiIbKLQsDCzLOEapBtbhHQY9CheCDEqNEggv6ALYTcfe0iXkiqTxAFKpz7ty.Te8n0sqSa87GKPjyR14Ipw;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\"}" source=console
+time="2025-11-03T16:00:13+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-03T16:00:13+05:30" level=info msg="[2025-11-03T10:30:11.584Z] ✅ Login successful | User: load_user_5512 | Response Time: 210.473902 ms" source=console
+time="2025-11-03T16:00:13+05:30" level=info msg="{\"X-Robots-Tag\":\"none\",\"X-Xss-Protection\":\"1; mode=block\",\"Date\":\"Mon, 03 Nov 2025 10:30:13 GMT\",\"Content-Language\":\"en\",\"Content-Type\":\"text/html;charset=utf-8\",\"Referrer-Policy\":\"no-referrer\",\"X-Content-Type-Options\":\"nosniff\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"Set-Cookie\":\"AUTH_SESSION_ID=da417bbb-8101-40ae-b82d-c3be37fb15aa;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..ponuoH7_deqGPIsBUVVJVQ.-tNFS3zgnor92wPi8iIW8j-IpUKwox-P1gFoVdgX_Yl1ZBEtn8JyTsWFzf6lE2BcSrQK7MEIx8l0yZumzqShVTMDd6PRz9_xWkWrpkibddhlTqqCfocBLfZ9DWUyUTwwL45P2RrhorbYcRIIjmUPT47GVy5TTs45VJZVlXjuyOJkheC33hCwoCCa2qixrgq-6QzD1r0r8NhwR1GFIkXanv4KmeUMP6IZZYj5pvJPwFpxuf5D8Nh5xzIO8FKt_K_iiPRLeWcnhNK31NoxEEZlK1JR5pd0qTVhe3S5DMNAITVqaBDI2iDSQhRM2YiXkhYxGclYmX6awAevPyXJm5152H1YnqtJV9zmidkig2QREq2t3kUWdSlj29aPJGPlFJ-CXS6hf2ve_7oExnqtTYWsUOew3Ire867KPCkOL-A7XY1jaEO2iLvTnNXFXJnCaT0pPrq9cDg6bENA4rxY4Qy8UlEVoteWJOOn4gLvGwO7DytymiskCB6AipY0FQg4uNuj-UXyIyuO5f8OskKVP6pBRrzDpWhu7rvwQ-KtRoJBumpRtBr2u6IILckzsx70ZWkr5Po-Z_YlxppbSJwepBpyurNrNc9-Bb_y-Q3kTDel3l3gJQJey6UUBvsdump7oCBUQbjYInHBHq644lbIk4bhQvEYUqFMqmTXNbc0su3fwORJlW0aYcU8khGxJtAgH3eEcdQv_3SoXI8l2AaT2BIPRelPK7ot_YxAaVxDtZH9kWmCtX3s2t1Nx1hLLv85NQXc_IW4bhUuZlcJzMpW7ckyNfTus0Z__ZcF_NF6Dl2xuLQM65W3v7Tv4sUxA3KQzzD4VoxK0ib-xOkZfG0gwcZRzzlYlLe5gV1mLjuibevZAyrMvw9aRYezxCTauD8-6PlobrMnwCX0-4v5ReTzuH214XC6vIiql72ywFA6PmsfK_ogRrF-Z2AhbDqU-W_wrZhQURFw-SUzwsYzODMn2mKpCV-ZM7g1B1Z45mw9tWAQ7ctqvmRzJkiKuF_wk7z-Kyt7nUB56TnvV6ycyGYjjfwAXjKTC035G2HRtYJOXgqmPFa8V56Ph7IDrV_sMVn10VdJ.90J_dvdL6OokVxU6J5Kk7A;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"X-Frame-Options\":\"SAMEORIGIN\",\"Content-Length\":\"7191\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\"}" source=console
+time="2025-11-03T16:00:13+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-03T16:00:13+05:30" level=info msg="[2025-11-03T10:30:11.584Z] ✅ Login successful | User: load_user_4015 | Response Time: 312.12105 ms" source=console
+time="2025-11-03T16:00:13+05:30" level=info msg="{\"X-Robots-Tag\":\"none\",\"Set-Cookie\":\"AUTH_SESSION_ID=9958dfa5-a8f0-4c88-aeef-9d38fd413987;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0.._w3lniMnDiIJLV6IOOR4fg.PHAoK6thq_5KPuJ4Uduim0tr66YK8rP37WZLgPx8kxbB9aD5Q1o_lboNWCGlFTQmIlAe8jWqNrk3Sil9k1Pd2qNqvjOg5L6KYQnEtjy98c_1MLAK8jBueUYfn5Cy6rUn85jYPP1qCpU7zMudG8w33vJvnnl7DMGRPGaRIhzODWajbWhoP5c37lFc3cwnlhARN3IdVr_raXGSyDStEe6dQSX1wiISrfiXJG7f9odVw1xL4qT2AZmZGlTq8udAO-FEpuwbTjD0gkB01uglUBkjE4bOYl93nDgAxtekctgKHGyVbhHAxj6_OSpbraMTvj87falIjTSTrRyldTiU8BXVzKDBZkV3gMqKxwGkj74BdZOtlcaNKzu3rhnmPYUyE88O2pDIUHxPHYLiSsQoZdfBxlLixscm0GVtln6gj0hwi9-4UrNQbPKSrEfJIqKp2y-GEkuUQHEpjI8R7qIUEWNeulww6hmtxYe4k9TtLsIOYBxi9FvHuAVDCzNd3Z7OKuPHEiLGlPjbXsY_kzcofK6XhPz36caM131TB_1IM-KT2qoqU4v66_HnQzHC0964DcbdXutx7E4RTGLjgG8TpNaomHeW-ZFlq17C0efS-MsmJ9CZt26lODiduBbEBsKyVBQVDpdGyXK3tkKTIUuA3MxJoKY17igvvJxLhDDPqzXyQP0LhyL60wsmDDzkqWfXHi5LJ51uTbyPwwFLEIrbpB9qajphj_PN7bmesxo2ekD-ISwTznE2DE4ks8kmaL_RLI0yN6zyZmrZcpWBsE5facqNf4TfPD6EALgCUZpg6wwhCMwUYUX545vyOHpwxKXD0RPJG1LCCJ18PQjVlowYHMU6YlFUpJW1PNhDQibT-sZ4pHwPWBfrGK9SGV78wSRVHaUhC-4zPLAYpH93RJn3lzTYNCFMQb77rJPIBwFdT7d59VS8NBTaODMSk8ZANlH1MR-JKFwL7-xXldrDwt6ttXE5Q1lIoSfnSGlfkSbCItgQh0fJS9MhZ5hfRMLJ4q1sKwxFjGDPFdDhWtu7ahhaUU8mJ0FWSjv3wsPwpSGBcw6CJEa-LjmgdiYygeBwOtwVXpg-.0Ll8_fe2YDvFNkNXL_uYAA;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"X-Frame-Options\":\"SAMEORIGIN\",\"Content-Length\":\"7191\",\"Date\":\"Mon, 03 Nov 2025 10:30:13 GMT\",\"X-Content-Type-Options\":\"nosniff\",\"X-Xss-Protection\":\"1; mode=block\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"Content-Language\":\"en\",\"Content-Type\":\"text/html;charset=utf-8\",\"Referrer-Policy\":\"no-referrer\"}" source=console
+time="2025-11-03T16:00:13+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-03T16:00:13+05:30" level=info msg="[2025-11-03T10:30:11.584Z] ✅ Login successful | User: load_user_9820 | Response Time: 111.78646 ms" source=console
+time="2025-11-03T16:00:13+05:30" level=info msg="{\"Cache-Control\":\"no-store, must-revalidate, max-age=0\",\"Content-Security-Policy\":\"frame-src 'self'; frame-ancestors 'self'; object-src 'none';\",\"Content-Type\":\"text/html;charset=utf-8\",\"X-Xss-Protection\":\"1; mode=block\",\"Strict-Transport-Security\":\"max-age=31536000; includeSubDomains\",\"X-Content-Type-Options\":\"nosniff\",\"Content-Length\":\"7191\",\"Referrer-Policy\":\"no-referrer\",\"X-Frame-Options\":\"SAMEORIGIN\",\"X-Robots-Tag\":\"none\",\"Content-Language\":\"en\",\"Set-Cookie\":\"AUTH_SESSION_ID=e1ce84af-412e-4ec4-9359-5f7818cfed13;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None, KC_RESTART=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..TFFpmNR1UN-ADdz96r79XA.IKD5wiUOqc8jOsg4HyMr8SeRxM8p-3rzkRDQIuSO38EgH0qpgoDg5oIOVGM-hzD7ykhIX6XNhynoMiyeyN6CakIoJXtgnE4L_3DpFAiJioob7rQWAJEFfwq_wy4h2VUIczHubp_cGC0nTimOjKd4Y5bnQGNh8ietuZv1GXN_I1uR3bCoezXVpGFuzLjJAB-RFiK7pVnafF_sV4aV5n1bSpb-ggBRS06assDYRf4eSlAdHGZ7eWqVjPrW1KT0obnnxnpQaY_WAENDiug3q5tiHqUrTNH5VMjb4euYRHHbyTXNBrH9fMXaBmoqazQyoxRQBHvP_x7vFpTTCztDimpSbQsx1kZ8yYI2A26MyY6GgoQhhQ33JsXkLyFLiIBysE4JJkywIvkIKZS7ED3iaCdj7Bi-jbP59Mc6S08U_O7Izf33pQc2wlrGigPdMEgv5En6u-9IabkJMUL2P1krkDmkZLSlzosaa7o-bd-U6kDBOoYHNgofNlvrsDXlH_aELsJuUaSllL_bXKvAmLeLyGZDc6vfEcPNXrlVuuZFCdpB77DXIoWMVGsJW2k8qvBcI5LdSSslw0xg3UEPPevfswNbF9aVbjnxsGSO9kM__Aw-0nSsMGZLM5CbHcISZ3Ja5cz5-mdbC3_AghVoAndzXK-fWtV9hX7xVw-xxuyq7aDAxHrsDdPxf0R7UAtVBZeeoNi9tZtf5KQ1wRvK5uRSg0ucrI-y2zHd2PqgOJaBzUNje1mBcMgtE5NhhPVGNzqHpeUHfk7dirEl2YyAp8q8W7Qbj5n1Cs_asAEH3a3YtTENpXlENehhAotlIEjTRHFahvKJNwrzemC82TQGwQEKHfjbxVV0gHGzqenEIXPFnTb37N6A1S900zQ6euMzl9SQUrgbR9crR-1XZADfAF8vQJ7grOoGwU2eha-pzy8bs4M9GUYneEj1WY65JUqGAZiQhafsTbNAF0pmq5MP7WbB6ltyhxuz3gn6QM8zrCHSxOrUYOsFotCPqmC8-xMIs3rwZG8qXiIhJcFMt9BNiG5Nu7NQgZjx4zenUGhg-810AipuTs4hnNHlmCFm0taOepa2bzyd.qqdqhviSwhQGq0gbflkqcQ;Version=1;Path=/realms/vunet/;Secure;HttpOnly;SameSite=None\",\"Date\":\"Mon, 03 Nov 2025 10:30:13 GMT\"}" source=console
+time="2025-11-03T16:00:13+05:30" level=info msg="[K6-METRIC] status_code=200" source=console
+time="2025-11-03T16:00:13+05:30" level=info msg="[2025-11-03T10:30:11.584Z] ✅ Login successful | User: load_user_5858 | Response Time: 112.897193 ms" source=console
+time="2025-11-03T16:00:13+05:30" level=info msg="[{\"username\":\"username\",\"password\":\"password\"},{\"username\":\"load_user_5512\",\"password\":\"Password123!\"},{\"username\":\"load_user_1654\",\"password\":\"Password123!\"},{\"username\":\"load_user_9375\",\"password\":\"Password123!\"},{\"username\":\"load_user_777\",\"password\":\"Password123!\"},{\"username\":\"load_user_4651\",\"password\":\"Password123!\"},{\"username\":\"load_user_4015\",\"password\":\"Password123!\"},{\"username\":\"load_user_9820\",\"password\":\"Password123!\"},{\"username\":\"load_user_829\",\"password\":\"Password123!\"},{\"username\":\"load_user_9506\",\"password\":\"Password123!\"},{\"username\":\"load_user_5858\",\"password\":\"Password123!\"},{\"username\":\"load_user_4661\",\"password\":\"Password123!\"},{\"username\":\"load_user_2294\",\"password\":\"Password123!\"},{\"username\":\"load_user_7974\",\"password\":\"Password123!\"},{\"username\":\"load_user_9865\",\"password\":\"Password123!\"},{\"username\":\"load_user_1810\",\"password\":\"Password123!\"},{\"username\":\"load_user_6051\",\"password\":\"Password123!\"},{\"username\":\"load_user_4051\",\"password\":\"Password123!\"},{\"username\":\"load_user_8354\",\"password\":\"Password123!\"},{\"username\":\"load_user_380\",\"password\":\"Password123!\"},{\"username\":\"load_user_3211\",\"password\":\"Password123!\"},{\"username\":\"load_user_6966\",\"password\":\"Password123!\"},{\"username\":\"load_user_1734\",\"password\":\"Password123!\"},{\"username\":\"load_user_3140\",\"password\":\"Password123!\"},{\"username\":\"load_user_7058\",\"password\":\"Password123!\"},{\"username\":\"load_user_8108\",\"password\":\"Password123!\"},{\"username\":\"\"}]" source=console
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 11      7.077389/s
+    checks_succeeded...: 100.00% 11 out of 11
+    checks_failed......: 0.00%   0 out of 11
+
+    ✓ Login Success (load_user_777)
+    ✓ Login Success (load_user_1654)
+    ✓ Login Success (load_user_9506)
+    ✓ Login Success (load_user_9375)
+    ✓ Login Success (load_user_829)
+    ✓ Login Success (load_user_4651)
+    ✓ Login Success (username)
+    ✓ Login Success (load_user_5512)
+    ✓ Login Success (load_user_4015)
+    ✓ Login Success (load_user_9820)
+    ✓ Login Success (load_user_5858)
+
+    CUSTOM
+    login_response_time............: avg=296.672687 min=111.78646 med=301.017533 max=500.264927 p(90)=413.815799 p(95)=457.040363
+    login_success_rate.............: 100.00% 11 out of 11
+
+    HTTP
+    http_req_duration..............: avg=237.66ms   min=6.13ms    med=228.75ms   max=503.98ms   p(90)=411.31ms   p(95)=439.08ms  
+      { expected_response:true }...: avg=237.66ms   min=6.13ms    med=228.75ms   max=503.98ms   p(90)=411.31ms   p(95)=439.08ms  
+    http_req_failed................: 0.00%   0 out of 44
+    http_reqs......................: 44      28.309556/s
+
+    EXECUTION
+    iteration_duration.............: avg=1.22s      min=538.89ms  med=1.33s      max=1.55s      p(90)=1.55s      p(95)=1.55s     
+    iterations.....................: 11      7.077389/s
+    vus............................: 8       min=8        max=8 
+    vus_max........................: 11      min=11       max=11
+
+    NETWORK
+    data_received..................: 137 kB  88 kB/s
+    data_sent......................: 15 kB   9.5 kB/s
+
+
+
+
+running (00m01.6s), 00/11 VUs, 11 complete and 0 interrupted iterations
+default ✓ [ 100% ] 11 VUs  00m01.6s/10m0s  11/11 shared iters
+
+📊 Parsing login results...
+✅ load_user_777 | 199.144277ms
+✅ load_user_1654 | 500.264927ms
+✅ load_user_9506 | 297.645262ms
+✅ load_user_9375 | 405.475197ms
+✅ load_user_829 | 398.757961ms
+✅ load_user_4651 | 301.017533ms
+✅ username | 413.815799ms
+✅ load_user_5512 | 210.473902ms
+✅ load_user_4015 | 312.12105ms
+✅ load_user_9820 | 111.78646ms
+✅ load_user_5858 | 112.897193ms
+✅ Completed Login Test.
+📂 CSV Output: ./results_combined/login_metrics.csv
+
+🚀 Inserting login data into ClickHouse...
+Defaulted container "clickhouse" out of: clickhouse, hyperscale-archival, ch-local-monit
+✅ Login data inserted into ClickHouse.
+
+⏳ Waiting 5 seconds before dashboard tests...
+
+📊 STEP 2: Running DASHBOARD TEST...
+   Script: multi_dashboard_test.js
+   Time range: now-15m → now
+   VUs: 11 | Iterations: 11
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard/multi_dashboard_test.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 11 max VUs, 10m30s max duration (incl. graceful stop):
+              * default: 11 iterations shared among 11 VUs (maxDuration: 10m0s, gracefulStop: 30s)
+
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=221.28ms" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=229.60ms" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=232.87ms" source=console
+time="2025-11-03T16:00:18+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=319.02ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=317.43ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=316.08ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=320.29ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=184.35ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=182.19ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=413.31ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=415.98ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=418.66ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=289.25ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=195.42ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=196.30ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="DASHBOARD_DATA: name=Apache Overview | status=200 | response_time=516.01ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="🔹 Found 30 panels for Apache Overview" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=198.86ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=297.12ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=203.33ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=205.28ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=107.01ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=195.80ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=299.25ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=302.50ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=303.53ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=103.98ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=109.95ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=42 | panel_name=Untitled | status=200 | response_time=214.18ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=290.72ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=298.81ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=195.92ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=200.97ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=113.12ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=192.48ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=194.87ms" source=console
+
+running (00m01.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m01.0s/10m0s  00/11 shared iters
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=339.40ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=327.55ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=247.85ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=382.26ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=37 | panel_name=No. of Servers | status=200 | response_time=393.62ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=295.60ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=298.10ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=314.38ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=286.29ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=299.03ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=159.69ms" source=console
+time="2025-11-03T16:00:19+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=107.84ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=186.58ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=253.51ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=493.91ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=209.46ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=214.13ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=97.32ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=43 | panel_name=Total Requests | status=200 | response_time=268.43ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=121.31ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=225.14ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=201.42ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=209.83ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=119.46ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=112.65ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=193.76ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=206.43ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=48 | panel_name=HTTP Failure Percentage | status=200 | response_time=198.16ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=293.89ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=284.13ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=295.64ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=203.37ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=281.25ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=382.10ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=200.22ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=480.32ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=300.99ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=202.49ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=53 | panel_name=Alert Summary | status=200 | response_time=301.75ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=398.40ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=311.67ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=294.71ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=297.64ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=200.60ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=127.14ms" source=console
+
+running (00m02.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m02.0s/10m0s  00/11 shared iters
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=202.54ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=205.52ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=196.41ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=194.49ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=201.32ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=106.97ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=280.63ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=1 | panel_name=Current Idle Workers | status=200 | response_time=292.04ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=177.82ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=94.17ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=212.50ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=206.84ms" source=console
+time="2025-11-03T16:00:20+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=194.36ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=298.89ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=292.57ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=300.21ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=306.76ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=292.06ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=295.11ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=304.46ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=205.95ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=49 | panel_name=Worker Utilization % | status=200 | response_time=308.82ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=320.25ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=306.22ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=194.04ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=201.00ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=196.83ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=210.72ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=181.48ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=190.06ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=193.42ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=190.27ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=105.12ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=207.01ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=50 | panel_name=Current Busy Workers | status=200 | response_time=202.30ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=190.38ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=299.79ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=6 | panel_name=Keep Alive Connections | status=200 | response_time=182.97ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=191.32ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=290.36ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=298.33ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=400.18ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=211.12ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=302.45ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=207.49ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=299.55ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=316.07ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=118.00ms" source=console
+
+running (00m03.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m03.0s/10m0s  00/11 shared iters
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=391.69ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=206.14ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=8 | panel_name=Writing Connections | status=200 | response_time=213.17ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=100.39ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=195.35ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=197.60ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=188.41ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=199.92ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=201.88ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=100.08ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=21.30ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=33.56ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=92.66ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=290.01ms" source=console
+time="2025-11-03T16:00:21+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=294.00ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=7 | panel_name=Closing Connections | status=200 | response_time=284.41ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=315.75ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=284.93ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=393.82ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=280.27ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=196.91ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=279.89ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=311.73ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=211.48ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=86.10ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=292.57ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=5 | panel_name=Request/Sec | status=200 | response_time=206.17ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=398.29ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=104.63ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=107.44ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=200.40ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=199.76ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=189.24ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=3 | panel_name=Bytes/Sec | status=200 | response_time=105.48ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=198.14ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=210.80ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=292.02ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=207.55ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=186.77ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=295.72ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=281.34ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=199.12ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=298.97ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=306.97ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=295.07ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=200.46ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=304.98ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=205.99ms" source=console
+
+running (00m04.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m04.0s/10m0s  00/11 shared iters
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=17 | panel_name=Bytes Per Request | status=200 | response_time=405.13ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=197.11ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=207.69ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=208.08ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=103.20ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=106.87ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=114.65ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=185.63ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=402.39ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=200.50ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=196.08ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=109.08ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=45 | panel_name=Latency | status=200 | response_time=116.98ms" source=console
+time="2025-11-03T16:00:22+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=188.64ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=291.30ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=378.93ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=301.93ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=305.76ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=289.92ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=289.33ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=54 | panel_name=Latency Trend  For Top 5 Servers | status=200 | response_time=405.01ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=309.57ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=210.48ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=301.76ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=112.93ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=97.14ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=107.55ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=489.86ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=106.47ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=192.22ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=189.09ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=193.56ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=104.07ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=196.47ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=14 | panel_name=Active Alerts | status=200 | response_time=199.69ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=199.04ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=194.47ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=290.65ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=198.40ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=99.16ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=106.58ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=297.68ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=291.18ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=386.64ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=197.92ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=302.97ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=195.04ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=214.03ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=23 | panel_name=High Worker Utilization Trend For Top 5 Servers | status=200 | response_time=319.13ms" source=console
+
+running (00m05.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m05.0s/10m0s  00/11 shared iters
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=389.08ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=305.43ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=302.50ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=97.28ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=118.75ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=122.08ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=193.93ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=205.41ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=40 | panel_name=Worker Utilization Details | status=200 | response_time=209.19ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=216.84ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=142.49ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=198.13ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=299.10ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=193.55ms" source=console
+time="2025-11-03T16:00:23+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=208.56ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=193.99ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=253.85ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=374.65ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=58 | panel_name=Requests | status=200 | response_time=278.47ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=306.97ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=281.21ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=400.10ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=114.72ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=296.95ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=299.46ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=108.91ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=298.35ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=303.30ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=189.19ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=193.46ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=192.87ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=201.62ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=219.52ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=195.18ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=196.21ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=195.45ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=199.16ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=25 | panel_name=Request per Sec Trend For Top 5 Servers | status=200 | response_time=307.10ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=108.67ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=198.38ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=112.27ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=282.70ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=303.05ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=195.17ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=299.35ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=210.84ms" source=console
+
+running (00m06.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m06.0s/10m0s  00/11 shared iters
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=281.32ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=292.76ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=27 | panel_name=Bytes per Sec Trend For Top 5 Servers | status=200 | response_time=287.11ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=303.30ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=288.85ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=111.98ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=102.98ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=383.28ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=198.88ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=203.59ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=112.07ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=186.25ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=26 | panel_name=Bytes Served/Request Trend  For Top 5 Servers | status=200 | response_time=207.61ms" source=console
+time="2025-11-03T16:00:24+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=299.13ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=300.15ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=194.97ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=380.91ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=297.59ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=401.45ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=303.74ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=198.46ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=406.68ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=41 | panel_name=Request Information | status=200 | response_time=202.41ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=297.34ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=209.71ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=206.18ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=191.89ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=191.17ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=413.06ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=287.94ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=287.51ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=194.13ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=308.04ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=309.58ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=59 | panel_name=Connections | status=200 | response_time=309.13ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=300.30ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=206.74ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=194.06ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=203.38ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=111.12ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=101.55ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=181.85ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=298.68ms" source=console
+
+running (00m07.0s), 11/11 VUs, 0 complete and 0 interrupted iterations
+default   [   0% ] 11 VUs  00m07.0s/10m0s  00/11 shared iters
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=34 | panel_name=Bytes Transferred Trend For Top 5 Servers | status=200 | response_time=288.72ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=181.37ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=298.76ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=299.33ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=311.34ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=205.77ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=204.77ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=204.24ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=209.01ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=106.31ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=412.99ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=46 | panel_name=Async Connections Trend | status=200 | response_time=123.16ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=191.66ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=105.00ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=209.16ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=100.83ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=203.27ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=208.22ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=47 | panel_name=Scoreboard Connections Trend | status=200 | response_time=98.15ms" source=console
+time="2025-11-03T16:00:25+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=104.33ms" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=192.45ms" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=178.22ms" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=183.68ms" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=39 | panel_name=Connection Information | status=200 | response_time=190.75ms" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=198.95ms" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=25.43ms" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="[PANEL_DATA] dashboard=Apache Overview | panel_id=16 | panel_name=Apache Scoreboards | status=200 | response_time=33.63ms" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+
+running (00m08.0s), 10/11 VUs, 1 complete and 0 interrupted iterations
+default   [   9% ] 11 VUs  00m08.0s/10m0s  01/11 shared iters
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-03T16:00:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-03T16:00:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 11      1.300718/s
+    checks_succeeded...: 100.00% 11 out of 11
+    checks_failed......: 0.00%   0 out of 11
+
+    ✓ Dashboard loaded successfully
+
+    CUSTOM
+    dashboard_response_time........: avg=338.230689 min=221.2834  med=319.01831  max=516.006388 p(90)=418.664471 p(95)=467.33543
+    dashboard_success_count........: 11     1.300718/s
+    panel_response_time............: avg=230.214971 min=21.300477 med=206.175217 max=493.913466 p(90)=311.671788 p(95)=390.51424
+    panel_success_count............: 330    39.021538/s
+
+    HTTP
+    http_req_duration..............: avg=233.69ms   min=21.3ms    med=207.49ms   max=516ms      p(90)=319.01ms   p(95)=398.29ms 
+      { expected_response:true }...: avg=233.69ms   min=21.3ms    med=207.49ms   max=516ms      p(90)=319.01ms   p(95)=398.29ms 
+    http_req_failed................: 0.00%  0 out of 341
+    http_reqs......................: 341    40.322256/s
+
+    EXECUTION
+    iteration_duration.............: avg=8.25s      min=7.82s     med=8.23s      max=8.45s      p(90)=8.45s      p(95)=8.45s    
+    iterations.....................: 11     1.300718/s
+    vus............................: 10     min=10       max=11
+    vus_max........................: 11     min=11       max=11
+
+    NETWORK
+    data_received..................: 26 MB  3.1 MB/s
+    data_sent......................: 112 kB 13 kB/s
+
+
+
+
+running (00m08.5s), 00/11 VUs, 11 complete and 0 interrupted iterations
+default ✓ [ 100% ] 11 VUs  00m08.5s/10m0s  11/11 shared iters
+
+📊 Parsing dashboard results from: ./results_combined/multi_dashboard_test_15m_result.txt
+📊 Dashboard=Apache Overview | Status=200 | Time=221.28ms
+📊 Dashboard=Apache Overview | Status=200 | Time=229.60ms
+📊 Dashboard=Apache Overview | Status=200 | Time=232.87ms
+📊 Dashboard=Apache Overview | Status=200 | Time=319.02ms
+📊 Dashboard=Apache Overview | Status=200 | Time=317.43ms
+📊 Dashboard=Apache Overview | Status=200 | Time=316.08ms
+📊 Dashboard=Apache Overview | Status=200 | Time=320.29ms
+📊 Dashboard=Apache Overview | Status=200 | Time=413.31ms
+📊 Dashboard=Apache Overview | Status=200 | Time=415.98ms
+📊 Dashboard=Apache Overview | Status=200 | Time=418.66ms
+📊 Dashboard=Apache Overview | Status=200 | Time=516.01ms
+🧩 Panel=Untitled | Dashboard=Apache Overview | Time=184.35ms
+🧩 Panel=Untitled | Dashboard=Apache Overview | Time=182.19ms
+🧩 Panel=Untitled | Dashboard=Apache Overview | Time=289.25ms
+🧩 Panel=Untitled | Dashboard=Apache Overview | Time=195.42ms
+🧩 Panel=Untitled | Dashboard=Apache Overview | Time=196.30ms
+🧩 Panel=Untitled | Dashboard=Apache Overview | Time=198.86ms
+🧩 Panel=Untitled | Dashboard=Apache Overview | Time=297.12ms
+🧩 Panel=Untitled | Dashboard=Apache Overview | Time=203.33ms
+🧩 Panel=No. of Servers | Dashboard=Apache Overview | Time=205.28ms
+🧩 Panel=No. of Servers | Dashboard=Apache Overview | Time=107.01ms
+🧩 Panel=No. of Servers | Dashboard=Apache Overview | Time=195.80ms
+🧩 Panel=Untitled | Dashboard=Apache Overview | Time=299.25ms
+🧩 Panel=No. of Servers | Dashboard=Apache Overview | Time=302.50ms
+🧩 Panel=Untitled | Dashboard=Apache Overview | Time=303.53ms
+🧩 Panel=Total Requests | Dashboard=Apache Overview | Time=103.98ms
+🧩 Panel=No. of Servers | Dashboard=Apache Overview | Time=109.95ms
+🧩 Panel=Untitled | Dashboard=Apache Overview | Time=214.18ms
+🧩 Panel=No. of Servers | Dashboard=Apache Overview | Time=290.72ms
+🧩 Panel=No. of Servers | Dashboard=Apache Overview | Time=298.81ms
+🧩 Panel=Total Requests | Dashboard=Apache Overview | Time=195.92ms
+🧩 Panel=No. of Servers | Dashboard=Apache Overview | Time=200.97ms
+🧩 Panel=Total Requests | Dashboard=Apache Overview | Time=113.12ms
+🧩 Panel=No. of Servers | Dashboard=Apache Overview | Time=192.48ms
+🧩 Panel=Total Requests | Dashboard=Apache Overview | Time=194.87ms
+🧩 Panel=Total Requests | Dashboard=Apache Overview | Time=339.40ms
+🧩 Panel=No. of Servers | Dashboard=Apache Overview | Time=327.55ms
+🧩 Panel=Total Requests | Dashboard=Apache Overview | Time=247.85ms
+🧩 Panel=HTTP Failure Percentage | Dashboard=Apache Overview | Time=382.26ms
+🧩 Panel=No. of Servers | Dashboard=Apache Overview | Time=393.62ms
+🧩 Panel=HTTP Failure Percentage | Dashboard=Apache Overview | Time=295.60ms
+🧩 Panel=Total Requests | Dashboard=Apache Overview | Time=298.10ms
+🧩 Panel=Total Requests | Dashboard=Apache Overview | Time=314.38ms
+🧩 Panel=HTTP Failure Percentage | Dashboard=Apache Overview | Time=286.29ms
+🧩 Panel=Total Requests | Dashboard=Apache Overview | Time=299.03ms
+🧩 Panel=HTTP Failure Percentage | Dashboard=Apache Overview | Time=159.69ms
+🧩 Panel=HTTP Failure Percentage | Dashboard=Apache Overview | Time=107.84ms
+🧩 Panel=HTTP Failure Percentage | Dashboard=Apache Overview | Time=186.58ms
+🧩 Panel=HTTP Failure Percentage | Dashboard=Apache Overview | Time=253.51ms
+🧩 Panel=HTTP Failure Percentage | Dashboard=Apache Overview | Time=493.91ms
+🧩 Panel=Alert Summary | Dashboard=Apache Overview | Time=209.46ms
+🧩 Panel=Total Requests | Dashboard=Apache Overview | Time=214.13ms
+🧩 Panel=Alert Summary | Dashboard=Apache Overview | Time=97.32ms
+🧩 Panel=Total Requests | Dashboard=Apache Overview | Time=268.43ms
+🧩 Panel=Alert Summary | Dashboard=Apache Overview | Time=121.31ms
+🧩 Panel=Alert Summary | Dashboard=Apache Overview | Time=225.14ms
+🧩 Panel=HTTP Failure Percentage | Dashboard=Apache Overview | Time=201.42ms
+🧩 Panel=Alert Summary | Dashboard=Apache Overview | Time=209.83ms
+🧩 Panel=Alert Summary | Dashboard=Apache Overview | Time=119.46ms
+🧩 Panel=HTTP Failure Percentage | Dashboard=Apache Overview | Time=112.65ms
+🧩 Panel=Current Idle Workers | Dashboard=Apache Overview | Time=193.76ms
+🧩 Panel=Alert Summary | Dashboard=Apache Overview | Time=206.43ms
+🧩 Panel=HTTP Failure Percentage | Dashboard=Apache Overview | Time=198.16ms
+🧩 Panel=Alert Summary | Dashboard=Apache Overview | Time=293.89ms
+🧩 Panel=Current Idle Workers | Dashboard=Apache Overview | Time=284.13ms
+🧩 Panel=Current Idle Workers | Dashboard=Apache Overview | Time=295.64ms
+🧩 Panel=Alert Summary | Dashboard=Apache Overview | Time=203.37ms
+🧩 Panel=Alert Summary | Dashboard=Apache Overview | Time=281.25ms
+🧩 Panel=Current Idle Workers | Dashboard=Apache Overview | Time=382.10ms
+🧩 Panel=Current Idle Workers | Dashboard=Apache Overview | Time=200.22ms
+🧩 Panel=Current Idle Workers | Dashboard=Apache Overview | Time=480.32ms
+🧩 Panel=Current Idle Workers | Dashboard=Apache Overview | Time=300.99ms
+🧩 Panel=Current Idle Workers | Dashboard=Apache Overview | Time=202.49ms
+🧩 Panel=Alert Summary | Dashboard=Apache Overview | Time=301.75ms
+🧩 Panel=Current Idle Workers | Dashboard=Apache Overview | Time=398.40ms
+🧩 Panel=Worker Utilization % | Dashboard=Apache Overview | Time=311.67ms
+🧩 Panel=Worker Utilization % | Dashboard=Apache Overview | Time=294.71ms
+🧩 Panel=Worker Utilization % | Dashboard=Apache Overview | Time=297.64ms
+🧩 Panel=Current Idle Workers | Dashboard=Apache Overview | Time=200.60ms
+🧩 Panel=Worker Utilization % | Dashboard=Apache Overview | Time=127.14ms
+🧩 Panel=Worker Utilization % | Dashboard=Apache Overview | Time=202.54ms
+🧩 Panel=Worker Utilization % | Dashboard=Apache Overview | Time=205.52ms
+🧩 Panel=Worker Utilization % | Dashboard=Apache Overview | Time=196.41ms
+🧩 Panel=Current Busy Workers | Dashboard=Apache Overview | Time=194.49ms
+🧩 Panel=Worker Utilization % | Dashboard=Apache Overview | Time=201.32ms
+🧩 Panel=Worker Utilization % | Dashboard=Apache Overview | Time=106.97ms
+🧩 Panel=Worker Utilization % | Dashboard=Apache Overview | Time=280.63ms
+🧩 Panel=Current Idle Workers | Dashboard=Apache Overview | Time=292.04ms
+🧩 Panel=Current Busy Workers | Dashboard=Apache Overview | Time=177.82ms
+🧩 Panel=Current Busy Workers | Dashboard=Apache Overview | Time=94.17ms
+🧩 Panel=Current Busy Workers | Dashboard=Apache Overview | Time=212.50ms
+🧩 Panel=Current Busy Workers | Dashboard=Apache Overview | Time=206.84ms
+🧩 Panel=Current Busy Workers | Dashboard=Apache Overview | Time=194.36ms
+🧩 Panel=Current Busy Workers | Dashboard=Apache Overview | Time=298.89ms
+🧩 Panel=Keep Alive Connections | Dashboard=Apache Overview | Time=292.57ms
+🧩 Panel=Current Busy Workers | Dashboard=Apache Overview | Time=300.21ms
+🧩 Panel=Current Busy Workers | Dashboard=Apache Overview | Time=306.76ms
+🧩 Panel=Keep Alive Connections | Dashboard=Apache Overview | Time=292.06ms
+🧩 Panel=Keep Alive Connections | Dashboard=Apache Overview | Time=295.11ms
+🧩 Panel=Keep Alive Connections | Dashboard=Apache Overview | Time=304.46ms
+🧩 Panel=Keep Alive Connections | Dashboard=Apache Overview | Time=205.95ms
+🧩 Panel=Worker Utilization % | Dashboard=Apache Overview | Time=308.82ms
+🧩 Panel=Current Busy Workers | Dashboard=Apache Overview | Time=320.25ms
+🧩 Panel=Keep Alive Connections | Dashboard=Apache Overview | Time=306.22ms
+🧩 Panel=Keep Alive Connections | Dashboard=Apache Overview | Time=194.04ms
+🧩 Panel=Writing Connections | Dashboard=Apache Overview | Time=201.00ms
+🧩 Panel=Keep Alive Connections | Dashboard=Apache Overview | Time=196.83ms
+🧩 Panel=Keep Alive Connections | Dashboard=Apache Overview | Time=210.72ms
+🧩 Panel=Writing Connections | Dashboard=Apache Overview | Time=181.48ms
+🧩 Panel=Writing Connections | Dashboard=Apache Overview | Time=190.06ms
+🧩 Panel=Writing Connections | Dashboard=Apache Overview | Time=193.42ms
+🧩 Panel=Keep Alive Connections | Dashboard=Apache Overview | Time=190.27ms
+🧩 Panel=Writing Connections | Dashboard=Apache Overview | Time=105.12ms
+🧩 Panel=Writing Connections | Dashboard=Apache Overview | Time=207.01ms
+🧩 Panel=Current Busy Workers | Dashboard=Apache Overview | Time=202.30ms
+🧩 Panel=Closing Connections | Dashboard=Apache Overview | Time=190.38ms
+🧩 Panel=Writing Connections | Dashboard=Apache Overview | Time=299.79ms
+🧩 Panel=Keep Alive Connections | Dashboard=Apache Overview | Time=182.97ms
+🧩 Panel=Writing Connections | Dashboard=Apache Overview | Time=191.32ms
+🧩 Panel=Writing Connections | Dashboard=Apache Overview | Time=290.36ms
+🧩 Panel=Closing Connections | Dashboard=Apache Overview | Time=298.33ms
+🧩 Panel=Writing Connections | Dashboard=Apache Overview | Time=400.18ms
+🧩 Panel=Request/Sec | Dashboard=Apache Overview | Time=211.12ms
+🧩 Panel=Closing Connections | Dashboard=Apache Overview | Time=302.45ms
+🧩 Panel=Closing Connections | Dashboard=Apache Overview | Time=207.49ms
+🧩 Panel=Closing Connections | Dashboard=Apache Overview | Time=299.55ms
+🧩 Panel=Closing Connections | Dashboard=Apache Overview | Time=316.07ms
+🧩 Panel=Closing Connections | Dashboard=Apache Overview | Time=118.00ms
+🧩 Panel=Closing Connections | Dashboard=Apache Overview | Time=391.69ms
+🧩 Panel=Closing Connections | Dashboard=Apache Overview | Time=206.14ms
+🧩 Panel=Writing Connections | Dashboard=Apache Overview | Time=213.17ms
+🧩 Panel=Request/Sec | Dashboard=Apache Overview | Time=100.39ms
+🧩 Panel=Request/Sec | Dashboard=Apache Overview | Time=195.35ms
+🧩 Panel=Closing Connections | Dashboard=Apache Overview | Time=197.60ms
+🧩 Panel=Request/Sec | Dashboard=Apache Overview | Time=188.41ms
+🧩 Panel=Bytes/Sec | Dashboard=Apache Overview | Time=199.92ms
+🧩 Panel=Request/Sec | Dashboard=Apache Overview | Time=201.88ms
+🧩 Panel=Request/Sec | Dashboard=Apache Overview | Time=100.08ms
+🧩 Panel=Request/Sec | Dashboard=Apache Overview | Time=21.30ms
+🧩 Panel=Bytes/Sec | Dashboard=Apache Overview | Time=33.56ms
+🧩 Panel=Bytes/Sec | Dashboard=Apache Overview | Time=92.66ms
+🧩 Panel=Request/Sec | Dashboard=Apache Overview | Time=290.01ms
+🧩 Panel=Request/Sec | Dashboard=Apache Overview | Time=294.00ms
+🧩 Panel=Closing Connections | Dashboard=Apache Overview | Time=284.41ms
+🧩 Panel=Bytes/Sec | Dashboard=Apache Overview | Time=315.75ms
+🧩 Panel=Bytes/Sec | Dashboard=Apache Overview | Time=284.93ms
+🧩 Panel=Request/Sec | Dashboard=Apache Overview | Time=393.82ms
+🧩 Panel=Bytes/Sec | Dashboard=Apache Overview | Time=280.27ms
+🧩 Panel=Bytes/Sec | Dashboard=Apache Overview | Time=196.91ms
+🧩 Panel=Bytes Per Request | Dashboard=Apache Overview | Time=279.89ms
+🧩 Panel=Bytes/Sec | Dashboard=Apache Overview | Time=311.73ms
+🧩 Panel=Bytes Per Request | Dashboard=Apache Overview | Time=211.48ms
+🧩 Panel=Bytes Per Request | Dashboard=Apache Overview | Time=86.10ms
+🧩 Panel=Bytes/Sec | Dashboard=Apache Overview | Time=292.57ms
+🧩 Panel=Request/Sec | Dashboard=Apache Overview | Time=206.17ms
+🧩 Panel=Bytes Per Request | Dashboard=Apache Overview | Time=398.29ms
+🧩 Panel=Latency | Dashboard=Apache Overview | Time=104.63ms
+🧩 Panel=Bytes Per Request | Dashboard=Apache Overview | Time=107.44ms
+🧩 Panel=Bytes Per Request | Dashboard=Apache Overview | Time=200.40ms
+🧩 Panel=Bytes/Sec | Dashboard=Apache Overview | Time=199.76ms
+🧩 Panel=Latency | Dashboard=Apache Overview | Time=189.24ms
+🧩 Panel=Bytes/Sec | Dashboard=Apache Overview | Time=105.48ms
+🧩 Panel=Latency | Dashboard=Apache Overview | Time=198.14ms
+🧩 Panel=Bytes Per Request | Dashboard=Apache Overview | Time=210.80ms
+🧩 Panel=Bytes Per Request | Dashboard=Apache Overview | Time=292.02ms
+🧩 Panel=Bytes Per Request | Dashboard=Apache Overview | Time=207.55ms
+🧩 Panel=Latency | Dashboard=Apache Overview | Time=186.77ms
+🧩 Panel=Latency | Dashboard=Apache Overview | Time=295.72ms
+🧩 Panel=Latency Trend For Top 5 Servers | Dashboard=Apache Overview | Time=281.34ms
+🧩 Panel=Bytes Per Request | Dashboard=Apache Overview | Time=199.12ms
+🧩 Panel=Latency Trend For Top 5 Servers | Dashboard=Apache Overview | Time=298.97ms
+🧩 Panel=Latency | Dashboard=Apache Overview | Time=306.97ms
+🧩 Panel=Latency | Dashboard=Apache Overview | Time=295.07ms
+🧩 Panel=Latency Trend For Top 5 Servers | Dashboard=Apache Overview | Time=200.46ms
+🧩 Panel=Latency Trend For Top 5 Servers | Dashboard=Apache Overview | Time=304.98ms
+🧩 Panel=Latency | Dashboard=Apache Overview | Time=205.99ms
+🧩 Panel=Bytes Per Request | Dashboard=Apache Overview | Time=405.13ms
+🧩 Panel=Latency | Dashboard=Apache Overview | Time=197.11ms
+🧩 Panel=Latency Trend For Top 5 Servers | Dashboard=Apache Overview | Time=207.69ms
+🧩 Panel=Active Alerts | Dashboard=Apache Overview | Time=208.08ms
+🧩 Panel=Active Alerts | Dashboard=Apache Overview | Time=103.20ms
+🧩 Panel=Latency Trend For Top 5 Servers | Dashboard=Apache Overview | Time=106.87ms
+🧩 Panel=Active Alerts | Dashboard=Apache Overview | Time=114.65ms
+🧩 Panel=Latency Trend For Top 5 Servers | Dashboard=Apache Overview | Time=185.63ms
+🧩 Panel=Latency | Dashboard=Apache Overview | Time=402.39ms
+🧩 Panel=Latency Trend For Top 5 Servers | Dashboard=Apache Overview | Time=200.50ms
+🧩 Panel=Active Alerts | Dashboard=Apache Overview | Time=196.08ms
+🧩 Panel=High Worker Utilization Trend For Top 5 Servers | Dashboard=Apache Overview | Time=109.08ms
+🧩 Panel=Latency | Dashboard=Apache Overview | Time=116.98ms
+🧩 Panel=High Worker Utilization Trend For Top 5 Servers | Dashboard=Apache Overview | Time=188.64ms
+🧩 Panel=Active Alerts | Dashboard=Apache Overview | Time=291.30ms
+🧩 Panel=High Worker Utilization Trend For Top 5 Servers | Dashboard=Apache Overview | Time=378.93ms
+🧩 Panel=Active Alerts | Dashboard=Apache Overview | Time=301.93ms
+🧩 Panel=Latency Trend For Top 5 Servers | Dashboard=Apache Overview | Time=305.76ms
+🧩 Panel=Worker Utilization Details | Dashboard=Apache Overview | Time=289.92ms
+🧩 Panel=Latency Trend For Top 5 Servers | Dashboard=Apache Overview | Time=289.33ms
+🧩 Panel=Latency Trend For Top 5 Servers | Dashboard=Apache Overview | Time=405.01ms
+🧩 Panel=Active Alerts | Dashboard=Apache Overview | Time=309.57ms
+🧩 Panel=Worker Utilization Details | Dashboard=Apache Overview | Time=210.48ms
+🧩 Panel=High Worker Utilization Trend For Top 5 Servers | Dashboard=Apache Overview | Time=301.76ms
+🧩 Panel=High Worker Utilization Trend For Top 5 Servers | Dashboard=Apache Overview | Time=112.93ms
+🧩 Panel=High Worker Utilization Trend For Top 5 Servers | Dashboard=Apache Overview | Time=97.14ms
+🧩 Panel=Worker Utilization Details | Dashboard=Apache Overview | Time=107.55ms
+🧩 Panel=Active Alerts | Dashboard=Apache Overview | Time=489.86ms
+🧩 Panel=Active Alerts | Dashboard=Apache Overview | Time=106.47ms
+🧩 Panel=Active Alerts | Dashboard=Apache Overview | Time=192.22ms
+🧩 Panel=Requests | Dashboard=Apache Overview | Time=189.09ms
+🧩 Panel=Worker Utilization Details | Dashboard=Apache Overview | Time=193.56ms
+🧩 Panel=Worker Utilization Details | Dashboard=Apache Overview | Time=104.07ms
+🧩 Panel=Worker Utilization Details | Dashboard=Apache Overview | Time=196.47ms
+🧩 Panel=Active Alerts | Dashboard=Apache Overview | Time=199.69ms
+🧩 Panel=High Worker Utilization Trend For Top 5 Servers | Dashboard=Apache Overview | Time=199.04ms
+🧩 Panel=Requests | Dashboard=Apache Overview | Time=194.47ms
+🧩 Panel=Requests | Dashboard=Apache Overview | Time=290.65ms
+🧩 Panel=High Worker Utilization Trend For Top 5 Servers | Dashboard=Apache Overview | Time=198.40ms
+🧩 Panel=Worker Utilization Details | Dashboard=Apache Overview | Time=99.16ms
+🧩 Panel=High Worker Utilization Trend For Top 5 Servers | Dashboard=Apache Overview | Time=106.58ms
+🧩 Panel=Request per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=297.68ms
+🧩 Panel=Requests | Dashboard=Apache Overview | Time=291.18ms
+🧩 Panel=High Worker Utilization Trend For Top 5 Servers | Dashboard=Apache Overview | Time=386.64ms
+🧩 Panel=Requests | Dashboard=Apache Overview | Time=197.92ms
+🧩 Panel=Requests | Dashboard=Apache Overview | Time=302.97ms
+🧩 Panel=Worker Utilization Details | Dashboard=Apache Overview | Time=195.04ms
+🧩 Panel=Request per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=214.03ms
+🧩 Panel=High Worker Utilization Trend For Top 5 Servers | Dashboard=Apache Overview | Time=319.13ms
+🧩 Panel=Requests | Dashboard=Apache Overview | Time=389.08ms
+🧩 Panel=Request per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=305.43ms
+🧩 Panel=Worker Utilization Details | Dashboard=Apache Overview | Time=302.50ms
+🧩 Panel=Bytes per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=97.28ms
+🧩 Panel=Request per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=118.75ms
+🧩 Panel=Worker Utilization Details | Dashboard=Apache Overview | Time=122.08ms
+🧩 Panel=Request per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=193.93ms
+🧩 Panel=Bytes per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=205.41ms
+🧩 Panel=Worker Utilization Details | Dashboard=Apache Overview | Time=209.19ms
+🧩 Panel=Requests | Dashboard=Apache Overview | Time=216.84ms
+🧩 Panel=Request per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=142.49ms
+🧩 Panel=Requests | Dashboard=Apache Overview | Time=198.13ms
+🧩 Panel=Request per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=299.10ms
+🧩 Panel=Bytes per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=193.55ms
+🧩 Panel=Bytes per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=208.56ms
+🧩 Panel=Bytes Served/Request Trend For Top 5 Servers | Dashboard=Apache Overview | Time=193.99ms
+🧩 Panel=Bytes per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=253.85ms
+🧩 Panel=Requests | Dashboard=Apache Overview | Time=374.65ms
+🧩 Panel=Requests | Dashboard=Apache Overview | Time=278.47ms
+🧩 Panel=Bytes per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=306.97ms
+🧩 Panel=Request per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=281.21ms
+🧩 Panel=Bytes Served/Request Trend For Top 5 Servers | Dashboard=Apache Overview | Time=400.10ms
+🧩 Panel=Request Information | Dashboard=Apache Overview | Time=114.72ms
+🧩 Panel=Bytes per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=296.95ms
+🧩 Panel=Request per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=299.46ms
+🧩 Panel=Request per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=108.91ms
+🧩 Panel=Bytes Served/Request Trend For Top 5 Servers | Dashboard=Apache Overview | Time=298.35ms
+🧩 Panel=Bytes Served/Request Trend For Top 5 Servers | Dashboard=Apache Overview | Time=303.30ms
+🧩 Panel=Bytes per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=189.19ms
+🧩 Panel=Request Information | Dashboard=Apache Overview | Time=193.46ms
+🧩 Panel=Connections | Dashboard=Apache Overview | Time=192.87ms
+🧩 Panel=Bytes Served/Request Trend For Top 5 Servers | Dashboard=Apache Overview | Time=201.62ms
+🧩 Panel=Bytes Served/Request Trend For Top 5 Servers | Dashboard=Apache Overview | Time=219.52ms
+🧩 Panel=Bytes per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=195.18ms
+🧩 Panel=Bytes Served/Request Trend For Top 5 Servers | Dashboard=Apache Overview | Time=196.21ms
+🧩 Panel=Bytes per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=195.45ms
+🧩 Panel=Request Information | Dashboard=Apache Overview | Time=199.16ms
+🧩 Panel=Request per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=307.10ms
+🧩 Panel=Bytes Transferred Trend For Top 5 Servers | Dashboard=Apache Overview | Time=108.67ms
+🧩 Panel=Request Information | Dashboard=Apache Overview | Time=198.38ms
+🧩 Panel=Connections | Dashboard=Apache Overview | Time=112.27ms
+🧩 Panel=Request Information | Dashboard=Apache Overview | Time=282.70ms
+🧩 Panel=Bytes Served/Request Trend For Top 5 Servers | Dashboard=Apache Overview | Time=303.05ms
+🧩 Panel=Connections | Dashboard=Apache Overview | Time=195.17ms
+🧩 Panel=Request Information | Dashboard=Apache Overview | Time=299.35ms
+🧩 Panel=Request Information | Dashboard=Apache Overview | Time=210.84ms
+🧩 Panel=Connections | Dashboard=Apache Overview | Time=281.32ms
+🧩 Panel=Bytes Served/Request Trend For Top 5 Servers | Dashboard=Apache Overview | Time=292.76ms
+🧩 Panel=Bytes per Sec Trend For Top 5 Servers | Dashboard=Apache Overview | Time=287.11ms
+🧩 Panel=Bytes Served/Request Trend For Top 5 Servers | Dashboard=Apache Overview | Time=303.30ms
+🧩 Panel=Async Connections Trend | Dashboard=Apache Overview | Time=288.85ms
+🧩 Panel=Connections | Dashboard=Apache Overview | Time=111.98ms
+🧩 Panel=Connections | Dashboard=Apache Overview | Time=102.98ms
+🧩 Panel=Bytes Transferred Trend For Top 5 Servers | Dashboard=Apache Overview | Time=383.28ms
+🧩 Panel=Bytes Transferred Trend For Top 5 Servers | Dashboard=Apache Overview | Time=198.88ms
+🧩 Panel=Request Information | Dashboard=Apache Overview | Time=203.59ms
+🧩 Panel=Request Information | Dashboard=Apache Overview | Time=112.07ms
+🧩 Panel=Bytes Transferred Trend For Top 5 Servers | Dashboard=Apache Overview | Time=186.25ms
+🧩 Panel=Bytes Served/Request Trend For Top 5 Servers | Dashboard=Apache Overview | Time=207.61ms
+🧩 Panel=Connections | Dashboard=Apache Overview | Time=299.13ms
+🧩 Panel=Bytes Transferred Trend For Top 5 Servers | Dashboard=Apache Overview | Time=300.15ms
+🧩 Panel=Connections | Dashboard=Apache Overview | Time=194.97ms
+🧩 Panel=Bytes Transferred Trend For Top 5 Servers | Dashboard=Apache Overview | Time=380.91ms
+🧩 Panel=Async Connections Trend | Dashboard=Apache Overview | Time=297.59ms
+🧩 Panel=Request Information | Dashboard=Apache Overview | Time=401.45ms
+🧩 Panel=Async Connections Trend | Dashboard=Apache Overview | Time=303.74ms
+🧩 Panel=Bytes Transferred Trend For Top 5 Servers | Dashboard=Apache Overview | Time=198.46ms
+🧩 Panel=Scoreboard Connections Trend | Dashboard=Apache Overview | Time=406.68ms
+🧩 Panel=Request Information | Dashboard=Apache Overview | Time=202.41ms
+🧩 Panel=Connections | Dashboard=Apache Overview | Time=297.34ms
+🧩 Panel=Async Connections Trend | Dashboard=Apache Overview | Time=209.71ms
+🧩 Panel=Bytes Transferred Trend For Top 5 Servers | Dashboard=Apache Overview | Time=206.18ms
+🧩 Panel=Connection Information | Dashboard=Apache Overview | Time=191.89ms
+🧩 Panel=Connections | Dashboard=Apache Overview | Time=191.17ms
+🧩 Panel=Async Connections Trend | Dashboard=Apache Overview | Time=413.06ms
+🧩 Panel=Scoreboard Connections Trend | Dashboard=Apache Overview | Time=287.94ms
+🧩 Panel=Async Connections Trend | Dashboard=Apache Overview | Time=287.51ms
+🧩 Panel=Async Connections Trend | Dashboard=Apache Overview | Time=194.13ms
+🧩 Panel=Async Connections Trend | Dashboard=Apache Overview | Time=308.04ms
+🧩 Panel=Scoreboard Connections Trend | Dashboard=Apache Overview | Time=309.58ms
+🧩 Panel=Connections | Dashboard=Apache Overview | Time=309.13ms
+🧩 Panel=Bytes Transferred Trend For Top 5 Servers | Dashboard=Apache Overview | Time=300.30ms
+🧩 Panel=Scoreboard Connections Trend | Dashboard=Apache Overview | Time=206.74ms
+🧩 Panel=Scoreboard Connections Trend | Dashboard=Apache Overview | Time=194.06ms
+🧩 Panel=Apache Scoreboards | Dashboard=Apache Overview | Time=203.38ms
+🧩 Panel=Scoreboard Connections Trend | Dashboard=Apache Overview | Time=111.12ms
+🧩 Panel=Connection Information | Dashboard=Apache Overview | Time=101.55ms
+🧩 Panel=Async Connections Trend | Dashboard=Apache Overview | Time=181.85ms
+🧩 Panel=Bytes Transferred Trend For Top 5 Servers | Dashboard=Apache Overview | Time=298.68ms
+🧩 Panel=Bytes Transferred Trend For Top 5 Servers | Dashboard=Apache Overview | Time=288.72ms
+🧩 Panel=Apache Scoreboards | Dashboard=Apache Overview | Time=181.37ms
+🧩 Panel=Scoreboard Connections Trend | Dashboard=Apache Overview | Time=298.76ms
+🧩 Panel=Connection Information | Dashboard=Apache Overview | Time=299.33ms
+🧩 Panel=Connection Information | Dashboard=Apache Overview | Time=311.34ms
+🧩 Panel=Connection Information | Dashboard=Apache Overview | Time=205.77ms
+🧩 Panel=Connection Information | Dashboard=Apache Overview | Time=204.77ms
+🧩 Panel=Scoreboard Connections Trend | Dashboard=Apache Overview | Time=204.24ms
+🧩 Panel=Async Connections Trend | Dashboard=Apache Overview | Time=209.01ms
+🧩 Panel=Apache Scoreboards | Dashboard=Apache Overview | Time=106.31ms
+🧩 Panel=Scoreboard Connections Trend | Dashboard=Apache Overview | Time=412.99ms
+🧩 Panel=Async Connections Trend | Dashboard=Apache Overview | Time=123.16ms
+🧩 Panel=Apache Scoreboards | Dashboard=Apache Overview | Time=191.66ms
+🧩 Panel=Connection Information | Dashboard=Apache Overview | Time=105.00ms
+🧩 Panel=Connection Information | Dashboard=Apache Overview | Time=209.16ms
+🧩 Panel=Scoreboard Connections Trend | Dashboard=Apache Overview | Time=100.83ms
+🧩 Panel=Apache Scoreboards | Dashboard=Apache Overview | Time=203.27ms
+🧩 Panel=Apache Scoreboards | Dashboard=Apache Overview | Time=208.22ms
+🧩 Panel=Scoreboard Connections Trend | Dashboard=Apache Overview | Time=98.15ms
+🧩 Panel=Connection Information | Dashboard=Apache Overview | Time=104.33ms
+🧩 Panel=Apache Scoreboards | Dashboard=Apache Overview | Time=192.45ms
+🧩 Panel=Apache Scoreboards | Dashboard=Apache Overview | Time=178.22ms
+🧩 Panel=Connection Information | Dashboard=Apache Overview | Time=183.68ms
+🧩 Panel=Connection Information | Dashboard=Apache Overview | Time=190.75ms
+🧩 Panel=Apache Scoreboards | Dashboard=Apache Overview | Time=198.95ms
+🧩 Panel=Apache Scoreboards | Dashboard=Apache Overview | Time=25.43ms
+🧩 Panel=Apache Scoreboards | Dashboard=Apache Overview | Time=33.63ms
+✅ Completed Dashboard Test.
+📂 CSV Output: ./results_combined/dashboard_panel_metrics.csv
+
+🚀 Inserting dashboard data into ClickHouse...
+Defaulted container "clickhouse" out of: clickhouse, hyperscale-archival, ch-local-monit
+✅ Dashboard data inserted into ClickHouse.
+📂 Results available in: ./results_combined
