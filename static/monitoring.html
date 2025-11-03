@@ -783,27 +783,48 @@
                             <table class="w-full min-w-max text-left">
                                 <thead class="border-b border-slate-200">
                                     <tr>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            Timestamp</th>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            Virtual Users</th>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            Time Filter</th>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            Panel Name</th>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            Dashboard</th>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            Panel Status</th>
-                                        <th
-                                            class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                            P95 Response Time (ms)</th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="timestamp" data-table="panel">
+                                                <span>Timestamp</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="no_of_users" data-table="panel">
+                                                <span>Virtual Users</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="time_filter" data-table="panel">
+                                                <span>Time Filter</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="panel_name" data-table="panel">
+                                                <span>Panel Name</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="dashboard_name" data-table="panel">
+                                                <span>Dashboard</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="panel_status" data-table="panel">
+                                                <span>Panel Status</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="p95_response_time" data-table="panel">
+                                                <span>P95 Response Time (ms)</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody id="k6-results-body" class="divide-y divide-slate-200 text-slate-700">
@@ -882,24 +903,42 @@
                                 <table class="w-full min-w-max text-left">
                                     <thead class="border-b border-slate-200">
                                         <tr>
-                                            <th
-                                                class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                                Timestamp</th>
-                                            <th
-                                                class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                                Virtual Users</th>
-                                            <th
-                                                class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                                Time Filter</th>
-                                            <th
-                                                class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                                Dashboard Status</th>
-                                            <th
-                                                class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                                Dashboard Name</th>
-                                            <th
-                                                class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                                P95 Response Time (ms)</th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                                <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="timestamp" data-table="dashboard">
+                                                    <span>Timestamp</span>
+                                                    <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                                </button>
+                                            </th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                                <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="no_of_users" data-table="dashboard">
+                                                    <span>Virtual Users</span>
+                                                    <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                                </button>
+                                            </th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                                <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="time_filter" data-table="dashboard">
+                                                    <span>Time Filter</span>
+                                                    <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                                </button>
+                                            </th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                                <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="dashboard_status" data-table="dashboard">
+                                                    <span>Dashboard Status</span>
+                                                    <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                                </button>
+                                            </th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                                <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="dashboard_name" data-table="dashboard">
+                                                    <span>Dashboard Name</span>
+                                                    <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                                </button>
+                                            </th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                                <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="p95_response_time" data-table="dashboard">
+                                                    <span>P95 Response Time (ms)</span>
+                                                    <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                                </button>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody id="k6-dashboard-results-body"
@@ -950,18 +989,30 @@
                                 <table class="w-full min-w-max text-left">
                                     <thead class="border-b border-slate-200">
                                         <tr>
-                                            <th
-                                                class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                                Timestamp</th>
-                                            <th
-                                                class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                                Virtual Users</th>
-                                            <th
-                                                class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                                Test Name</th>
-                                            <th
-                                                class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
-                                                P95 Response Time (ms)</th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                                <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="timestamp" data-table="login">
+                                                    <span>Timestamp</span>
+                                                    <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                                </button>
+                                            </th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                                <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="no_of_users" data-table="login">
+                                                    <span>Virtual Users</span>
+                                                    <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                                </button>
+                                            </th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                                <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="test_name" data-table="login">
+                                                    <span>Test Name</span>
+                                                    <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                                </button>
+                                            </th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                                <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="p95_response_time" data-table="login">
+                                                    <span>P95 Response Time (ms)</span>
+                                                    <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                                </button>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody id="k6-login-results-body" class="divide-y divide-slate-200 text-slate-700">
