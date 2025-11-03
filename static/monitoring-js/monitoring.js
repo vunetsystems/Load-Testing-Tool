@@ -3,6 +3,7 @@
 // Global managers
 let realtimeManager = null;
 let podMonitoringManager = null;
+let kafkaPodMemoryManager = null;
 let k6MonitoringManager = null;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -21,6 +22,12 @@ async function initializeMonitoring() {
 
     // Initialize the real-time updates manager
     console.log('initializeMonitoring: Creating RealtimeUpdatesManager...');
+// Initialize Kafka network manager
+console.log('initializeMonitoring: Creating KafkaNetworkManager...');
+kafkaNetworkManager = new KafkaNetworkManager();
+console.log('initializeMonitoring: KafkaNetworkManager created, calling initialize...');
+await kafkaNetworkManager.initialize();
+console.log('initializeMonitoring: KafkaNetworkManager initialized');
     realtimeManager = new RealtimeUpdatesManager();
     console.log('initializeMonitoring: RealtimeUpdatesManager created, calling initialize...');
     await realtimeManager.initialize();
@@ -37,6 +44,12 @@ async function initializeMonitoring() {
     console.log('initializeMonitoring: Creating K6MonitoringManager...');
     k6MonitoringManager = new K6MonitoringManager();
     console.log('initializeMonitoring: K6MonitoringManager created, calling initialize...');
+    // Initialize Kafka pod memory manager
+    console.log('initializeMonitoring: Creating KafkaPodMemoryManager...');
+    kafkaPodMemoryManager = new KafkaPodMemoryManager();
+    console.log('initializeMonitoring: KafkaPodMemoryManager created, calling initialize...');
+    await kafkaPodMemoryManager.initialize();
+    console.log('initializeMonitoring: KafkaPodMemoryManager initialized');
     await k6MonitoringManager.initialize();
     console.log('initializeMonitoring: K6MonitoringManager initialized');
 
@@ -115,6 +128,12 @@ function setupSectionNavigation() {
 
             // Handle k6 monitoring section
             if (section === 'k6-monitoring') {
+            // Handle performance section (Kafka metrics)
+            if (section === 'performance') {
+                if (kafkaPodMemoryManager) {
+                    kafkaPodMemoryManager.refresh();
+                }
+            }
                 if (k6MonitoringManager) {
                     k6MonitoringManager.refresh();
                 } else {

@@ -144,6 +144,8 @@ func main() {
 	api.HandleFunc("/clickhouse/k6-dashboard-results", handlers.HandleAPIGetK6DashboardResults).Methods("GET")
 	api.HandleFunc("/clickhouse/k6-results", handlers.HandleAPIGetK6Results).Methods("GET")
 	api.HandleFunc("/clickhouse/pod-events", handlers.HandleAPIGetPodEvents).Methods("GET")
+	api.HandleFunc("/clickhouse/kafka-pod-memory", handlers.HandleAPIGetKafkaPodMemory).Methods("GET")
+	api.HandleFunc("/clickhouse/kafka-network", handlers.HandleAPIGetKafkaNetwork).Methods("GET")
 	api.HandleFunc("/clickhouse/pod-monitoring", handlers.HandleAPIGetPodMonitoring).Methods("GET")
 	// Removed pod-metrics endpoint
 
