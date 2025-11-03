@@ -27,7 +27,7 @@ class LogsManager {
                         log = logItem;
                     }
                     return {
-                        time: log.time,
+                        time: log.timestamp,
                         node: log.node,
                         module: log.module,
                         message: log.message,

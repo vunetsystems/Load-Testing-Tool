@@ -18,6 +18,61 @@ type PodEventEntry struct {
 	PodName       string    `json:"pod_name"`
 }
 
+func GetPodEventsForPod(ctx context.Context, namespace string, podName string) ([]PodEventEntry, error) {
+	if monitoringDBClient == nil {
+		return nil, fmt.Errorf("Monitoring ClickHouse client not initialized")
+	}
+
+	query := `
+		SELECT
+		    timestamp,
+		    inc_unix_time,
+		    event_type,
+		    reason,
+		    message,
+		    host,
+		    namespace_name,
+		    pod_name
+		FROM monitoring.vlogs_platform_k8s_events
+		WHERE namespace_name = ?
+		  AND pod_name = ?
+		  AND timestamp >= now() - toIntervalHour(24)
+		ORDER BY
+		    timestamp DESC
+		LIMIT 100;
+		`
+
+	rows, err := monitoringDBClient.Client.Query(ctx, query, namespace, podName)
+	if err != nil {
+		logger.LogError("System", "ClickHouse", fmt.Sprintf("Failed to query pod events: %v", err))
+		return nil, fmt.Errorf("failed to query pod events: %v", err)
+	}
+	defer rows.Close()
+
+	var events []PodEventEntry
+	for rows.Next() {
+		var event PodEventEntry
+		err := rows.Scan(
+			&event.Timestamp,
+			&event.IncUnixTime,
+			&event.EventType,
+			&event.Reason,
+			&event.Message,
+			&event.Host,
+			&event.NamespaceName,
+			&event.PodName,
+		)
+		if err != nil {
+			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan pod event row: %v", err))
+			continue
+		}
+		events = append(events, event)
+	}
+
+	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Fetched %d pod event entries for pod %s in namespace %s", len(events), podName, namespace), "info")
+	return events, nil
+}
+
 func GetPodEvents(ctx context.Context, namespace string) ([]PodEventEntry, error) {
 	if monitoringDBClient == nil {
 		return nil, fmt.Errorf("Monitoring ClickHouse client not initialized")
@@ -34,7 +89,7 @@ func GetPodEvents(ctx context.Context, namespace string) ([]PodEventEntry, error
 		    namespace_name,
 		    pod_name
 		FROM monitoring.vlogs_platform_k8s_events
-		WHERE namespace_name = 'vsmaps'
+		WHERE namespace_name = ?
 		  AND timestamp >= now() - toIntervalHour(24)
 		ORDER BY
 		    pod_name ASC,
@@ -42,7 +97,7 @@ func GetPodEvents(ctx context.Context, namespace string) ([]PodEventEntry, error
 		LIMIT 100 BY pod_name;
 		`
 
-	rows, err := monitoringDBClient.Client.Query(ctx, query)
+	rows, err := monitoringDBClient.Client.Query(ctx, query, namespace)
 	if err != nil {
 		logger.LogError("System", "ClickHouse", fmt.Sprintf("Failed to query pod events: %v", err))
 		return nil, fmt.Errorf("failed to query pod events: %v", err)

@@ -207,11 +207,23 @@ func HandleAPIGetPodLogs(w http.ResponseWriter, r *http.Request) {
 // HandleAPIGetPodEvents handles GET /api/clickhouse/pod-events
 func HandleAPIGetPodEvents(w http.ResponseWriter, r *http.Request) {
 	namespace := r.URL.Query().Get("namespace")
+	podName := r.URL.Query().Get("pod")
+
 	if namespace == "" {
 		namespace = "vsmaps" // default namespace
 	}
 
-	events, err := clickhouse.GetPodEvents(r.Context(), namespace)
+	var events []clickhouse.PodEventEntry
+	var err error
+
+	if podName != "" {
+		// Get events for specific pod
+		events, err = clickhouse.GetPodEventsForPod(r.Context(), namespace, podName)
+	} else {
+		// Get events for all pods in namespace
+		events, err = clickhouse.GetPodEvents(r.Context(), namespace)
+	}
+
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,

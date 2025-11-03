@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -36,6 +37,7 @@ type K6Status struct {
 	CompletedScripts  []string  `json:"completedScripts"`
 	FailedScripts     []string  `json:"failedScripts"`
 	LastError         string    `json:"lastError,omitempty"`
+	LastUpdated       time.Time `json:"lastUpdated,omitempty"`
 }
 
 // ModuleDashboardMapping represents the mapping between modules and dashboards
@@ -58,6 +60,14 @@ type K6DashboardConfig struct {
 		Slug     string `yaml:"slug"`
 		Enabled  bool   `yaml:"enabled"`
 	} `yaml:"dashboards"`
+}
+
+// K6ScriptParams represents parameters for K6 script execution
+type K6ScriptParams struct {
+	TimeRange  string `json:"timeRange"`
+	VUs        int    `json:"vus"`
+	Iterations int    `json:"iterations"`
+	Interval   int    `json:"interval"`
 }
 
 // K6Handler manages K6 load testing operations
@@ -458,105 +468,78 @@ func (h *K6Handler) ResetK6Config(w http.ResponseWriter, r *http.Request) {
 }
 
 // RunCombinedScript handles POST /api/k6/run-combined
+// RunCombinedScript handles API requests to start the K6 combined script
 func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
-	h.mutex.Lock()
-	defer h.mutex.Unlock()
+    logger := logger.Logger.With().Str("module", "k6_run").Logger()
 
-	// Check if status indicates running and verify if process is actually running
-	if h.status.IsRunning {
-		// Check if the process is actually still running
-		if h.cmd != nil && h.cmd.Process != nil {
-			if err := h.cmd.Process.Signal(syscall.Signal(0)); err == nil {
-				// Process is still running
-				SendJSONResponse(w, http.StatusConflict, APIResponse{
-					Success: false,
-					Message: "K6 test is already running",
-				})
-				return
-			}
-		}
-		// Process is not running, reset status
-		h.status.IsRunning = false
-		h.status.LastError = ""
-		logger.Warn().Str("module", "k6").Msg("Detected stale running status, resetting")
-	}
+    // Decode request
+    var params K6ScriptParams
+    if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+        SendJSONResponse(w, http.StatusBadRequest, APIResponse{
+            Success: false,
+            Message: fmt.Sprintf("Invalid request body: %v", err),
+        })
+        return
+    }
 
-	// Check for stuck execution (running for more than 2 hours)
-	if h.status.IsRunning && time.Since(h.status.StartTime) > 2*time.Hour {
-		logger.Warn().Str("module", "k6").Msg("Detected stuck execution, resetting status")
-		h.status.IsRunning = false
-		h.status.LastError = "Execution was stuck and has been reset"
-		if h.cmd != nil && h.cmd.Process != nil {
-			h.cmd.Process.Kill()
-		}
-		h.cmd = nil
-	}
+    // Normalize values
+    if params.VUs <= 0 {
+        params.VUs = 1
+    }
+    if params.Iterations <= 0 {
+        params.Iterations = 1
+    }
+    if params.Interval <= 0 {
+        params.Interval = 1
+    }
 
-	// Parse request body for parameters
-	var params struct {
-		TimeRange  string `json:"timeRange"`
-		VUs        int    `json:"vus"`
-		Iterations int    `json:"iterations"`
-		Interval   int    `json:"interval"`
-	}
+    // Lock only to check/set shared state
+    h.mutex.Lock()
+    if h.status.IsRunning {
+        // Double-check if old process still valid
+        processRunning := false
+        if h.cmd != nil && h.cmd.Process != nil {
+            if err := h.cmd.Process.Signal(syscall.Signal(0)); err == nil {
+                processRunning = true
+            }
+        }
 
-	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		SendJSONResponse(w, http.StatusBadRequest, APIResponse{
-			Success: false,
-			Message: "Invalid JSON payload",
-		})
-		return
-	}
+        if processRunning {
+            h.mutex.Unlock()
+            SendJSONResponse(w, http.StatusConflict, APIResponse{
+                Success: false,
+                Message: "K6 test is already running",
+            })
+            return
+        }
 
-	// Validate parameters
-	if params.TimeRange == "" {
-		params.TimeRange = "15m"
-	}
-	if params.VUs <= 0 {
-		params.VUs = 10
-	}
-	if params.Iterations <= 0 {
-		params.Iterations = 5
-	}
-	if params.Interval <= 0 {
-		params.Interval = 5
-	}
+        // Cleanup stale process info
+        if h.cmd != nil && h.cmd.Process != nil {
+            _ = h.cmd.Process.Kill()
+            _, _ = h.cmd.Process.Wait()
+        }
+        h.cmd = nil
+        h.status.IsRunning = false
+        h.status.CurrentScript = ""
+    }
 
-	// Read module configuration and update dashboard config synchronously
-	enabledModules, err := h.readModuleConfig()
-	if err != nil {
-		logger.Error().Err(err).Str("module", "k6").Msg("Failed to read module configuration")
-		// Continue with execution even if config read fails
-	} else {
-		logger.Info().Str("module", "k6").Int("enabled_modules", len(enabledModules)).Msg("Module configuration read successfully")
-	}
+    // Mark test as running
+    h.status.IsRunning = true
+    h.status.CurrentScript = "combined.sh"
+    h.status.LastUpdated = time.Now()
+    h.mutex.Unlock()
 
-	if enabledModules != nil {
-		err = h.updateDashboardConfig(enabledModules)
-		if err != nil {
-			logger.Error().Err(err).Str("module", "k6").Msg("Failed to update dashboard configuration")
-			// Continue with execution even if update fails
-		} else {
-			logger.Info().Str("module", "k6").Msg("Dashboard configuration updated successfully")
-		}
-	}
+    logger.Info().Str("module", "k6_run").
+        Msgf("Starting combined script with VUs=%d, Iterations=%d, Interval=%d, TimeRange=%s",
+            params.VUs, params.Iterations, params.Interval, params.TimeRange)
 
-	// Start execution in background
-	go h.executeCombinedScript(params.TimeRange, params.VUs, params.Iterations, params.Interval)
+    // Run asynchronously
+    go h.executeCombinedScript(params.TimeRange, params.VUs, params.Iterations, params.Interval)
 
-	SendJSONResponse(w, http.StatusOK, APIResponse{
-		Success: true,
-		Message: "K6 combined script started successfully",
-		Data: map[string]interface{}{
-			"timeRange":  params.TimeRange,
-			"vus":        params.VUs,
-			"iterations": params.Iterations,
-			"interval":   params.Interval,
-		},
-	})
-
-	logger.LogWithNode("System", "k6", fmt.Sprintf("K6 combined script started: timeRange=%s, vus=%d, iterations=%d, interval=%d",
-		params.TimeRange, params.VUs, params.Iterations, params.Interval), "info")
+    SendJSONResponse(w, http.StatusOK, APIResponse{
+        Success: true,
+        Message: fmt.Sprintf("K6 test started successfully at %s", time.Now().Format(time.RFC3339)),
+    })
 }
 
 // updateStatus sends real-time status updates via WebSocket
@@ -645,89 +628,65 @@ func (h *K6Handler) checkAndCreateUsers(vus int) string {
 
 // executeCombinedScript executes the combined.sh script with given parameters
 func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, interval int) {
-	h.mutex.Lock()
-	h.status.IsRunning = true
-	h.status.StartTime = time.Now()
-	h.status.CurrentScript = "Initializing..."
-	h.status.LastError = ""
-	h.cmd = nil
-	h.mutex.Unlock()
+    logger := logger.Logger.With().Str("module", "k6_exec").Logger()
 
-	// Broadcast initial status
-	go AppState.BroadcastUpdate()
+    // Context with timeout
+    ctx, cancel := context.WithTimeout(context.Background(), 2*time.Hour)
+    defer cancel()
 
-	defer func() {
-		if r := recover(); r != nil {
-			h.mutex.Lock()
-			h.status.IsRunning = false
-			h.status.LastError = fmt.Sprintf("Panic recovered: %v", r)
-			h.status.CurrentScript = ""
-			h.mutex.Unlock()
-			logger.Error().Interface("panic", r).Str("module", "k6").Msg("Panic recovered in executeCombinedScript")
-			go AppState.BroadcastUpdate()
-		} else {
-			h.mutex.Lock()
-			h.status.IsRunning = false
-			h.status.CurrentScript = ""
-			h.mutex.Unlock()
-			// Broadcast final status
-			go AppState.BroadcastUpdate()
-		}
-	}()
+    // Prepare the command (kill entire group on cancel)
+    cmd := exec.CommandContext(ctx, "bash", "-c",
+        fmt.Sprintf("exec ./combined.sh %s %d %d %d", timeRange, vus, iterations, interval))
+    cmd.Dir = "/home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard"
+    cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true} // ensure we can kill all children
+    h.cmd = cmd
 
-	// STEP 1: User Validation and Creation
-	h.updateStatus("🔍 Checking user validity and count...")
-	userCheckResult := h.checkAndCreateUsers(vus)
-	logger.LogWithNode("System", "k6", fmt.Sprintf("User validation completed: %s", userCheckResult), "info")
-	h.updateStatus(fmt.Sprintf("✅ User check completed: %s", userCheckResult))
+    logger.Info().Msg("About to execute combined.sh ...")
 
-	// STEP 2: Execute Combined Script
-	h.updateStatus("🚀 Starting combined K6 test execution...")
+    start := time.Now()
+    output, err := cmd.CombinedOutput()
+    duration := time.Since(start)
 
-	// Create context with timeout (2 hours)
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Hour)
-	defer cancel()
+    logger.Info().Str("module", "k6_exec").
+        Msgf("combined.sh finished in %s", duration.String())
 
-	cmd := exec.CommandContext(ctx, "./combined.sh", timeRange, fmt.Sprintf("%d", vus), fmt.Sprintf("%d", iterations), fmt.Sprintf("%d", interval))
-	cmd.Dir = "k6_final/k6_dashboard_name/linux-mssql-dashboard" // Working directory
+    if ctx.Err() == context.DeadlineExceeded {
+        // kill process group if context timed out
+        if cmd.Process != nil {
+            _ = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+            logger.Error().Str("module", "k6_exec").Msg("Killed combined.sh due to timeout")
+        }
+    }
 
-	// Set up process for potential cancellation
-	h.mutex.Lock()
-	h.cmd = cmd
-	h.mutex.Unlock()
+    // Prepare log file path
+    logDir := "/home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/logs"
+    logPath := filepath.Join(logDir, fmt.Sprintf("combined_output_%d.log", time.Now().Unix()))
+    if err := os.MkdirAll(logDir, 0755); err == nil {
+        if writeErr := os.WriteFile(logPath, output, 0644); writeErr == nil {
+            logger.Info().Str("module", "k6_exec").Msgf("K6 combined script output saved to %s", logPath)
+        } else {
+            logger.Error().Err(writeErr).Msg("Failed to write combined output")
+        }
+    } else {
+        logger.Error().Err(err).Msg("Failed to create logs directory")
+    }
 
-	output, err := cmd.CombinedOutput()
+    if err != nil {
+        logger.Error().Err(err).Msg("K6 combined script execution failed")
+    }
 
-	// Check if context was cancelled due to timeout
-	if ctx.Err() == context.DeadlineExceeded {
-		err = fmt.Errorf("script execution timed out after 2 hours")
-		logger.Error().Str("module", "k6").Msg("Combined script execution timed out")
-	}
+    // Update status safely after run
+    h.mutex.Lock()
+    h.status.IsRunning = false
+    h.status.CurrentScript = ""
+    h.status.LastUpdated = time.Now()
+    h.cmd = nil
+    h.mutex.Unlock()
 
-	h.mutex.Lock()
-	if err != nil {
-		h.status.LastError = err.Error()
-		logger.Error().Err(err).Str("module", "k6").Msg("Combined script execution failed")
-		h.updateStatus("❌ K6 test execution failed")
-	} else {
-		// Check if script completed successfully
-		outputStr := string(output)
-		if strings.Contains(outputStr, "✅ Dashboard data inserted into ClickHouse.") &&
-		   strings.Contains(outputStr, "✅ Login data inserted into ClickHouse.") {
-			logger.LogWithNode("System", "k6", "Combined script execution completed successfully", "success")
-			h.updateStatus("✅ K6 test execution completed successfully")
-		} else {
-			logger.LogWithNode("System", "k6", "Combined script execution completed with potential issues", "warning")
-			h.updateStatus("⚠️ K6 test execution completed with warnings")
-		}
-	}
-
-	// Log output for debugging
-	if len(output) > 0 {
-		logger.LogWithNode("System", "k6", fmt.Sprintf("Combined script output: %s", string(output)), "info")
-	}
-	h.mutex.Unlock()
+    logger.Info().Str("module", "k6_exec").
+        Msg("K6 combined script execution completed and state reset.")
 }
+
 
 // readModuleConfig reads the enabled modules from conf.yml
 func (h *K6Handler) readModuleConfig() ([]string, error) {
