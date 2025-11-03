@@ -510,6 +510,9 @@ renderPodTable(pods) {
         // Populate logs for this pod
         this.populatePodLogs(podName);
 
+        // Populate events for this pod
+        this.populatePodEvents(podName, pod.namespace);
+
         // Fetch YAML for this pod
         if (this.yamlManager) {
             this.yamlManager.fetchPodYAML(pod.namespace, podName).catch(error => {
@@ -536,6 +539,90 @@ renderPodTable(pods) {
 
         // Auto-scroll to bottom
         logsContent.scrollTop = logsContent.scrollHeight;
+    }
+
+    // Fetch pod events for a specific pod
+    async fetchPodEvents(podName, namespace) {
+        try {
+            const response = await fetch(`/api/clickhouse/pod-events?namespace=${namespace}&pod=${podName}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.success && result.data) {
+                // Return events for this specific pod (API now filters server-side)
+                return result.data;
+            } else {
+                console.error('Failed to fetch pod events:', result.message);
+                return [];
+            }
+        } catch (error) {
+            console.error('Error fetching pod events:', error);
+            return [];
+        }
+    }
+
+    // Populate pod events in the events tab
+    populatePodEvents(podName, namespace) {
+        const eventsContent = document.getElementById('pod-events-content');
+        if (!eventsContent) return;
+
+        // Show loading state
+        eventsContent.innerHTML = '<div class="text-center py-8 text-slate-500"><div class="inline-flex items-center gap-3"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div><span>Loading events...</span></div></div>';
+
+        // Fetch and display events
+        this.fetchPodEvents(podName, namespace).then(events => {
+            if (events.length === 0) {
+                eventsContent.innerHTML = '<div class="text-gray-400 text-center py-8">No events available for this pod</div>';
+                return;
+            }
+
+            // Format and display events
+            const formattedEvents = events.map(event => this.formatEventLine(event)).join('');
+            eventsContent.innerHTML = formattedEvents;
+        }).catch(error => {
+            console.error('Error populating pod events:', error);
+            eventsContent.innerHTML = '<div class="text-red-400 text-center py-8">Error loading events</div>';
+        });
+    }
+
+    // Format a single event line
+    formatEventLine(event) {
+        const timestamp = new Date(event.timestamp).toLocaleString();
+        const eventTypeColor = this.getEventTypeColor(event.event_type);
+        const reasonColor = 'text-yellow-400';
+        const messageColor = 'text-gray-300';
+
+        return `
+            <div class="event-line font-mono text-sm mb-2 p-3 bg-slate-800 rounded border-l-4 ${this.getEventBorderColor(event.event_type)}">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-gray-500">${timestamp}</span>
+                    <span class="${eventTypeColor} font-bold px-2 py-1 rounded text-xs">${event.event_type}</span>
+                    <span class="${reasonColor} font-semibold">${event.reason}</span>
+                </div>
+                <div class="${messageColor}">${event.message}</div>
+                <div class="text-xs text-gray-500 mt-1">Host: ${event.host} | Namespace: ${event.namespace_name}</div>
+            </div>
+        `;
+    }
+
+    // Get color class for event type
+    getEventTypeColor(eventType) {
+        switch(eventType?.toLowerCase()) {
+            case 'normal': return 'bg-green-600 text-white';
+            case 'warning': return 'bg-yellow-600 text-white';
+            default: return 'bg-gray-600 text-white';
+        }
+    }
+
+    // Get border color for event type
+    getEventBorderColor(eventType) {
+        switch(eventType?.toLowerCase()) {
+            case 'normal': return 'border-green-500';
+            case 'warning': return 'border-yellow-500';
+            default: return 'border-gray-500';
+        }
     }
 
     // Format a single log line with colors
