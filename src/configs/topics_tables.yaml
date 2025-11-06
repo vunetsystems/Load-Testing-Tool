@@ -77,3 +77,10 @@ sources:
       - "vmetrics_linux_monitor_process_metrics_data"
       - "vmetrics_linux_monitor_resource_metrics_data"
       - "vmetrics_linux_monitor_storage_metrics_data"
+
+  - name: "Traces"
+    inputTopic:
+      - name: "traces-input"
+    outputTopic:
+    clickhouseTables:
+      - 

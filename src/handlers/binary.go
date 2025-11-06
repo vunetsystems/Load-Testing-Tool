@@ -125,7 +125,7 @@ func StartBinaryInternal(bc *bin_control.BinaryControl, nodeName string, timeout
 // HandleAPIStartAllBinaries handles POST /api/binary/start-all
 func HandleAPIStartAllBinaries(w http.ResponseWriter, r *http.Request) {
 	// Parse timeout from query parameters (default: 30 minutes)
-	timeout := 30
+	timeout := 0
 	if timeoutStr := r.URL.Query().Get("timeout"); timeoutStr != "" {
 		if parsed, err := strconv.Atoi(timeoutStr); err == nil && parsed > 0 {
 			timeout = parsed

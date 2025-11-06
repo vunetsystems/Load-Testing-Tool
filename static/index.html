@@ -148,31 +148,51 @@
                             </div>
 
                             <div>
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="material-symbols-outlined text-indigo-600">speed</span>
-                                    <span class="font-medium text-slate-700">EPS Configuration</span>
+                                <!-- EPS Header + Mode Switcher -->
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-indigo-600">speed</span>
+                                        <span class="font-medium text-slate-700">EPS Configuration</span>
+                                    </div>
+
+                                    <div class="relative">
+                                        <select id="eps-mode"
+                                            class="text-sm rounded-md border-slate-300 bg-white text-slate-900 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                                            <option value="preset">Preset</option>
+                                            <option value="custom">Custom</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="relative">
-                                    <select id="eps-select" class="w-full rounded-lg border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
-                                        <option value="">Select EPS target...</option>
-                                        <option value="25000">25,000 EPS</option>
-                                        <option value="50000">50,000 EPS</option>
-                                        <option value="100000">100,000 EPS</option>
-                                        <option value="150000">150,000 EPS</option>
-                                        <option value="200000">200,000 EPS</option>
-                                    </select>
-                                </div>
+
+                                <!-- Preset EPS Select -->
+                                <select id="eps-select"
+                                    class="w-full rounded-lg border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2">
+                                    <option value="">Select preset EPS...</option>
+                                    <option value="5000">5,000 EPS</option>
+                                    <option value="10000">10,000 EPS</option>
+                                    <option value="25000">25,000 EPS</option>
+                                    <option value="50000">50,000 EPS</option>
+                                    <option value="100000">100,000 EPS</option>
+                                    <option value="150000">150,000 EPS</option>
+                                    <option value="200000">200,000 EPS</option>
+                                </select>
+
+                                <!-- Custom EPS Input (Hidden by Default) -->
+                                <input id="eps-custom-input" type="number"
+                                    class="hidden w-full mt-2 rounded-lg border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2"
+                                    placeholder="Enter EPS value e.g., 50000">
                             </div>
+
 
                             <div>
                                 <div class="flex items-center gap-2 mb-2">
                                     <span class="material-symbols-outlined text-indigo-600">timer</span>
-                                    <span class="font-medium text-slate-700">Timeout (Optional)</span>
+                                    <span class="font-medium text-slate-700">Timeout</span>
                                 </div>
                                 <div class="relative">
-                                    <input id="timeout-input" type="text" class="w-full rounded-lg border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2" placeholder="e.g., 60s, 5m, 3h">
+                                    <input id="timeout-input" type="text" class="w-full rounded-lg border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2" placeholder="e.g., 60s, 5m, 3h" required>
                                 </div>
-                                <p class="text-xs text-slate-500 mt-1">Optional timeout for vuDataSim execution (e.g., 60s, 5m, 3h)</p>
+                                <p class="text-xs text-slate-500 mt-1">Required timeout for vuDataSim execution (e.g., 60s, 5m, 3h)</p>
                             </div>
 
                             <div>
