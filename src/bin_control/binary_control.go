@@ -139,6 +139,12 @@ func (bc *BinaryControl) StartBinary(nodeName string, timeout int) (*BinaryContr
 	log := logger.Logger.With().Str("node", nodeName).Logger()
 	log.Info().Msg("Starting binary")
 
+	// ✅ Validate timeout is mandatory and positive
+	if timeout <= 0 {
+		log.Error().Int("timeout", timeout).Msg("Timeout must be greater than 0")
+		return response(false, "Timeout must be greater than 0"), fmt.Errorf("invalid timeout: %d", timeout)
+	}
+
 	// ✅ Load config once per call (cheap)
 	if err := bc.LoadNodesConfig(); err != nil {
 		log.Error().Err(err).Msg("Failed to reload config")

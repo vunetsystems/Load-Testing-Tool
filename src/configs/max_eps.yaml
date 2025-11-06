@@ -17,10 +17,10 @@ max_eps_config:
 #  ServiceMonitor: 67000
 #  SyntheticBrowserMonitoring: 53000
 #  Tomcat: 65000
-#  Traces: 56000
+  Traces: 56000
 #  WebLogic: 35000
 #  Nginx: 42000
-#  K8s: 48000
+  K8s: 48000
 #  exampleLogs: 15000
 #  ibm_was: 35000
 #  Azure_App_Gateway: 58000

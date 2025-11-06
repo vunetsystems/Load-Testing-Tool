@@ -115,6 +115,9 @@ class VuDataSimManager {
             step6Title: document.getElementById('step6-title'),
             step6Container: document.getElementById('step6-container'),
             step6Box: document.getElementById('step6-box'),
+            epsMode: document.getElementById('eps-mode'),
+            epsCustomInput: document.getElementById('eps-custom-input'),
+
 
             // Node management elements
             nodeManagementBtn: document.getElementById('node-management-btn'),
@@ -226,6 +229,20 @@ class VuDataSimManager {
         this.elements.o11ySourcesSearch?.addEventListener('input', (e) => this.o11ySources.filterO11ySources(e.target.value));
         this.elements.o11ySourcesSelectAll?.addEventListener('click', () => this.o11ySources.selectAllO11ySources());
         this.elements.o11ySourcesClearAll?.addEventListener('click', () => this.o11ySources.clearAllO11ySources());
+
+        // EPS Mode switching
+        this.elements.epsMode?.addEventListener('change', () => {
+            if (this.elements.epsMode.value === 'custom') {
+                this.elements.epsSelect.classList.add('hidden');
+                this.elements.epsCustomInput.classList.remove('hidden');
+                this.elements.epsCustomInput.focus();
+            } else {
+                this.elements.epsSelect.classList.remove('hidden');
+                this.elements.epsCustomInput.classList.add('hidden');
+                this.elements.epsCustomInput.value = '';
+            }
+        });
+
 
         // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
@@ -656,27 +673,41 @@ class VuDataSimManager {
         try {
             // Get values from input fields
             const selectedSources = [...this.o11ySources.selectedO11ySources];
-            const selectedEPS = parseInt(this.elements.epsSelect.value);
-            const timeoutInput = this.elements.timeoutInput?.value?.trim();
-            const skipChTruncate = this.elements.skipChTruncate?.checked || false;
-            let timeoutSeconds = 0;
-
-            // Parse timeout if provided
-            if (timeoutInput) {
-                timeoutSeconds = this.parseTimeoutToSeconds(timeoutInput);
-                if (timeoutSeconds === null) {
-                    this.showNotification('Invalid timeout format. Use format like 60s, 5m, 3h or 1d ', 'error');
-                    return;
-                }
-            }
-
-            // Validate inputs
+            // const selectedEPS = parseInt(this.elements.epsSelect.value);
             if (selectedSources.length === 0) {
                 this.showNotification('Please select at least one o11y source', 'warning');
                 return;
             }
 
+            let selectedEPS;
+            if (this.elements.epsMode.value === 'custom') {
+                selectedEPS = parseInt(this.elements.epsCustomInput.value);
+            } else{
+                selectedEPS = parseInt(this.elements.epsSelect.value);
+            }
+
+            const timeoutInput = this.elements.timeoutInput?.value?.trim();
+            const skipChTruncate = this.elements.skipChTruncate?.checked || false;
+            let timeoutSeconds = 0;
+
+            // Validate required timeout field
+            if (!timeoutInput) {
+                this.showNotification('Timeout is required', 'warning');
+                return;
+            }
+
+            // Parse timeout
+            timeoutSeconds = this.parseTimeoutToSeconds(timeoutInput);
+            if (timeoutSeconds === null) {
+                this.showNotification('Invalid timeout format. Use format like 60s, 5m, 3h or 1d ', 'error');
+                return;
+            }
+
+            // Validate inputs
+
+
             if (!selectedEPS || selectedEPS <= 0) {
+                console.log('Invalid EPS selected:', selectedEPS);
                 this.showNotification('Please select a valid EPS target greater than 0', 'warning');
                 return;
             }

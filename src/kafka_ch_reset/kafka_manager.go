@@ -62,6 +62,7 @@ var sourceNameTranslation = map[string]string{
 	"Apache":            "Apache",
 	"Azure_Firewall":    "Azure Firewall",
 	"Azure_Redis_Cache": "Azure Redis Cache",
+	"Traces" :  "Traces",	
 }
 
 // translateSourceName translates source names between conf.yml and topics_tables.yaml naming conventions

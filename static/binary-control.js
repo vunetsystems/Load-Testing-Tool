@@ -290,10 +290,15 @@ class BinaryControl {
 
     async startBinary() {
         const selectedNode = this.manager.elements.binaryNodeSelect.value;
-        const timeout = parseInt(this.manager.elements.binaryTimeoutInput.value) || 30;
+        const timeout = parseInt(this.manager.elements.binaryTimeoutInput.value);
 
         if (!selectedNode) {
             this.manager.showNotification('Please select a node first', 'warning');
+            return;
+        }
+
+        if (!timeout || timeout <= 0) {
+            this.manager.showNotification('Timeout must be a positive number', 'error');
             return;
         }
 
