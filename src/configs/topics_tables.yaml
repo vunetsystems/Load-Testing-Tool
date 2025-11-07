@@ -14,6 +14,8 @@ sources:
       - "vmetrics_mongo_shard_stats_performance_metrics_data"
       - "vmetrics_mongo_col_stats_performance_metrics_data"
       - "vmetrics_mongo_db_stats_performance_metrics_data"
+    pipeline:
+      - "mongo-monitor"
 
   - name: "MSSQL"
     inputTopic:
@@ -52,6 +54,8 @@ sources:
       - "vmetrics_mssql_monitor_server_waitstats_data"
       - "vmetrics_mssql_monitor_cluster_data"
       - "vmetrics_mssql_monitor_server_recent_backup_data"
+    pipeline:
+      - "mssql-telegraf-pipeline"
 
   - name: "Apache"
     inputTopic:
@@ -63,6 +67,8 @@ sources:
     clickhouseTables:
       - "vlogs_apachelogs_data"
       - "vmetrics_apachemetrics_data"
+    pipeline:
+      - "apache-metrics"
 
   - name: "Linux Monitor"
     inputTopic:
@@ -77,10 +83,34 @@ sources:
       - "vmetrics_linux_monitor_process_metrics_data"
       - "vmetrics_linux_monitor_resource_metrics_data"
       - "vmetrics_linux_monitor_storage_metrics_data"
+    pipeline:
+      - "linuxmonitor"
 
   - name: "Traces"
     inputTopic:
       - name: "traces-input"
     outputTopic:
     clickhouseTables:
-      - 
+    pipeline:
+
+  - name: "Kubernetes"
+    inputTopic:
+      - name: "kubernetes-metrics-input"
+    outputTopic:
+      - name: "kubernetes-kubelet-metrics"
+      - name: "kubernetes-kube-state-metrics"
+      - name: "kubernetes-etcd-metrics"
+      - name: "kubernetes-apiserver-metrics"
+      - name: "kubernetes-controllermanager-metrics"
+      - name: "kubernetes-scheduler-metrics"
+      - name: "kubernetes-proxy-metrics"
+    clickhouseTables:
+      - "vmetrics_kubernetes_kubelet_metrics"
+      - "vmetrics_kubernetes_kube_state_metrics"
+      - "vmetrics_kubernetes_etcd_metrics"
+      - "vmetrics_kubernetes_apiserver_metrics"
+      - "vmetrics_kubernetes_controllermanager_metrics"
+      - "vmetrics_kubernetes_scheduler_metrics"
+      - "vmetrics_kubernetes_proxy_metrics"
+    pipeline:
+      - "kubernetes-metrics"

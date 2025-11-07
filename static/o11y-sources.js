@@ -124,9 +124,9 @@ class O11ySources {
         console.log(`Successfully populated ${sources.length} o11y sources`);
     }
 
-    syncConfigs(timeoutSeconds = null, skipChTruncate = false) {
+    syncConfigs(timeoutSeconds = null, selectedEPS,skipChTruncate = false) {
         const selectedSources = [...this.selectedO11ySources];
-        const selectedEPS = parseInt(this.manager.elements.epsSelect.value);
+        
 
         // Validate inputs before making API calls
         if (selectedSources.length === 0) {
@@ -134,10 +134,7 @@ class O11ySources {
             return;
         }
 
-        if (!selectedEPS || selectedEPS <= 0) {
-            this.manager.showNotification('Please select a valid EPS target greater than 0', 'warning');
-            return;
-        }
+        
 
         if (selectedEPS > 1000000) {
             this.manager.showNotification('EPS target seems too high. Please verify the value.', 'warning');

@@ -3,6 +3,7 @@ package kafka_ch_reset
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -26,6 +27,7 @@ type TopicConfig struct {
 	InputTopic       []TopicName `yaml:"inputTopic"`
 	OutputTopic      []TopicName `yaml:"outputTopic"`
 	ClickhouseTables []string    `yaml:"clickhouseTables"`
+	Pipeline         []string    `yaml:"pipeline"`
 }
 
 
@@ -63,6 +65,7 @@ var sourceNameTranslation = map[string]string{
 	"Azure_Firewall":    "Azure Firewall",
 	"Azure_Redis_Cache": "Azure Redis Cache",
 	"Traces" :  "Traces",	
+	"K8s": "Kubernetes",
 }
 
 // translateSourceName translates source names between conf.yml and topics_tables.yaml naming conventions
@@ -841,6 +844,118 @@ func (km *KafkaManager) TruncateTablesForEnabledSources(confPath string) error {
 	}
 
 	logger.Info().Int("tables", len(tables)).Msg("Successfully truncated all ClickHouse tables for enabled o11y sources")
+	return nil
+}
+
+// SchedulePodDeletion schedules the deletion of pods for given o11y sources after a specified timeout using a bash script and 'at'
+func (km *KafkaManager) SchedulePodDeletion(timeoutSeconds int, o11ySources []string) (time.Time, error) {
+	// Step 1: Load topics_tables.yaml to get pipeline info (unchanged)
+	if err := km.LoadConfig(); err != nil {
+		logger.Error().Err(err).Msg("Failed to load topics config")
+		return time.Time{}, fmt.Errorf("failed to load topics config: %v", err)
+	}
+
+	// Step 2: Translate o11y sources and collect unique pipeline names (unchanged)
+	pipelineNames := make(map[string]bool)
+	for _, source := range o11ySources {
+		translatedName := km.translateSourceName(source)
+		for _, topicGroup := range km.topics {
+			if topicGroup.Name == translatedName {
+				for _, pipeline := range topicGroup.Pipeline {
+					pipelineNames[pipeline] = true
+				}
+				break
+			}
+		}
+	}
+	if len(pipelineNames) == 0 {
+		return time.Time{}, fmt.Errorf("no pipelines found for provided o11y sources")
+	}
+
+	// Calculate the scheduled time
+	scheduledTime := time.Now().Add(time.Duration(timeoutSeconds) * time.Second)
+
+	// Step 3: Generate a bash script for pod deletion
+	scriptContent := km.generatePodDeletionScript(pipelineNames)
+	scriptPath, err := km.writeTempScript(scriptContent)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("failed to create script: %v", err)
+	}
+
+	// Step 4: Schedule the script using 'at' command
+	if err := km.scheduleWithAt(scriptPath, timeoutSeconds); err != nil {
+		os.Remove(scriptPath)  // Clean up on failure
+		return time.Time{}, fmt.Errorf("failed to schedule script: %v", err)
+	}
+
+	logger.Info().Int("timeout_seconds", timeoutSeconds).Strs("o11y_sources", o11ySources).Str("script_path", scriptPath).Time("scheduled_time", scheduledTime).Msg("Pod deletion script scheduled with 'at'")
+	return scheduledTime, nil
+}
+
+// generatePodDeletionScript creates the bash script content for retrieving and deleting pods
+func (km *KafkaManager) generatePodDeletionScript(pipelineNames map[string]bool) string {
+	// Build grep pattern for pod names (e.g., "pipeline1-\|pipeline2-\")
+	var patterns []string
+	for pipeline := range pipelineNames {
+		patterns = append(patterns, fmt.Sprintf("%s-", pipeline))
+	}
+	grepPattern := strings.Join(patterns, "\\|")
+
+	// Script: Get pods, filter by pattern, delete if any found
+	script := fmt.Sprintf(`#!/bin/bash
+NAMESPACE="vsmaps"
+POD_PATTERN="%s"
+
+# Get pod names matching the pattern
+PODS=$(kubectl get pods -n $NAMESPACE --no-headers -o custom-columns=NAME:.metadata.name | grep -E "$POD_PATTERN")
+
+if [ -z "$PODS" ]; then
+	   echo "No pods found for deletion"
+	   exit 0
+fi
+
+# Delete all matching pods in one command
+kubectl delete pod $PODS -n $NAMESPACE
+echo "Deleted pods: $PODS"
+`, grepPattern)
+
+	return script
+}
+
+// writeTempScript writes the script to a temporary file and makes it executable
+func (km *KafkaManager) writeTempScript(content string) (string, error) {
+	tmpDir := "/tmp"  // Or use os.TempDir()
+	file, err := os.CreateTemp(tmpDir, "pod_deletion_*.sh")
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	if _, err := file.WriteString(content); err != nil {
+		return "", err
+	}
+
+	scriptPath := file.Name()
+	if err := os.Chmod(scriptPath, 0755); err != nil {  // Make executable
+		return "", err
+	}
+
+	return scriptPath, nil
+}
+
+// scheduleWithAt schedules the script using the 'at' command
+func (km *KafkaManager) scheduleWithAt(scriptPath string, timeoutSeconds int) error {
+	// Calculate future time: current time + timeout
+	timeoutSeconds=timeoutSeconds+60 // add buffer to avoid early execution
+	futureTime := time.Now().Add(time.Duration(timeoutSeconds) * time.Second)
+	timeStr := futureTime.Format("15:04 2006-01-02")  // 'at' format: HH:MM YYYY-MM-DD
+
+	// Schedule with 'at': echo "/path/to/script.sh" | at <time>
+	cmd := exec.Command("bash", "-c", fmt.Sprintf("echo '%s' | at '%s'", scriptPath, timeStr))
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to schedule with 'at': %v", err)
+	}
+
 	return nil
 }
 

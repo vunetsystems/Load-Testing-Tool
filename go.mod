@@ -3,8 +3,10 @@ module vuDataSim
 go 1.24.0
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
+	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/rs/cors v1.10.1
 	github.com/segmentio/kafka-go v0.4.47
 )
@@ -21,7 +23,6 @@ require (
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.7.1 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect

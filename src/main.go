@@ -11,6 +11,7 @@ import (
 
 	"vuDataSim/src/bin_control"
 	"vuDataSim/src/clickhouse"
+	"vuDataSim/src/database"
 	"vuDataSim/src/handlers"
 	"vuDataSim/src/logger"
 	"vuDataSim/src/node_control"
@@ -19,6 +20,44 @@ import (
 )
 
 var kafkaHandler, _ = handlers.NewKafkaHandler()
+
+// startTestRunCompletionChecker starts a background goroutine that periodically
+// checks for and completes timed-out test runs
+func startTestRunCompletionChecker() {
+	logger.Info().Msg("Starting test run completion checker")
+
+	ticker := time.NewTicker(10 * time.Second) // Check every 30 seconds
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			if err := database.CompleteTimedOutTestRuns(); err != nil {
+				logger.Error().Err(err).Msg("Failed to complete timed out test runs")
+			} else {
+				logger.Debug().Msg("Checked for timed out test runs")
+			}
+		}
+	}
+}
+
+// initDatabase initializes the SQLite database for test run tracking
+func initDatabase() error {
+	// For now, use a hardcoded path - in production this should come from config
+	dbPath := "./data/vudatasim.db"
+
+	// Initialize database connection
+	if err := database.InitDB(dbPath); err != nil {
+		return err
+	}
+
+	// Run migrations
+	if err := database.RunMigrations(); err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func init() {
 	// Initialize node data using the node_control package
@@ -162,6 +201,9 @@ func main() {
 	api.HandleFunc("/kafka/recreate-enabled-client", kafkaHandler.RecreateEnabledTopicsUsingClient).Methods("POST")
 	api.HandleFunc("/clickhouse/truncate-enabled-tables", kafkaHandler.TruncateEnabledTables).Methods("POST")
 
+	// Pod deletion scheduling API endpoint
+	api.HandleFunc("/schedule-pod-deletion", handlers.SchedulePodDeletionHandler).Methods("POST")
+
 	// K6 Load Testing API endpoints
 	api.HandleFunc("/k6/config", handlers.HandleAPIGetK6Config).Methods("GET")
 	api.HandleFunc("/k6/config", handlers.HandleAPIUpdateK6Config).Methods("PUT")
@@ -171,6 +213,13 @@ func main() {
 	api.HandleFunc("/k6/stop", handlers.HandleAPIStopK6Test).Methods("POST")
 	api.HandleFunc("/k6/logs", handlers.HandleAPIGetK6Logs).Methods("GET")
 	api.HandleFunc("/k6/run-combined", handlers.HandleAPIRunCombinedScript).Methods("POST")
+
+	// Test Run Tracking API endpoints
+	api.HandleFunc("/test-runs/start", handlers.HandleAPIStartTestRun).Methods("POST")
+	api.HandleFunc("/test-runs/{id}/stop", handlers.HandleAPIStopTestRun).Methods("PUT")
+	api.HandleFunc("/test-runs", handlers.HandleAPIGetTestRuns).Methods("GET")
+	api.HandleFunc("/test-runs/{id}", handlers.HandleAPIGetTestRun).Methods("GET")
+	api.HandleFunc("/test-runs/next-id", handlers.HandleAPIGetNextTestID).Methods("GET")
 
 	// Proxy endpoint for node metrics API - now includes both system and process metrics
 	api.HandleFunc("/proxy/metrics/{name}", handlers.HandleProxyMetrics).Methods("GET")
@@ -183,6 +232,16 @@ func main() {
 		logger.Warn().Err(err).Msg("Failed to initialize ClickHouse client - metrics will not be available")
 	} else {
 		logger.Info().Msg("ClickHouse client initialized successfully")
+	}
+
+	// Initialize SQLite database for test run tracking
+	if err := initDatabase(); err != nil {
+		logger.Warn().Err(err).Msg("Failed to initialize database - test run tracking will not be available")
+	} else {
+		logger.Info().Msg("Database initialized successfully")
+
+		// Start background test run completion checker
+		go startTestRunCompletionChecker()
 	}
 
 	// Start background real metrics collection
