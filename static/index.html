@@ -71,6 +71,16 @@
                         <h3 class="text-lg font-semibold text-slate-900 p-6 border-b border-slate-200">Simulation Configuration</h3>
                         <div class="p-6 space-y-6">
                             <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="material-symbols-outlined text-indigo-600">tag</span>
+                                    <span class="font-medium text-slate-700">Test ID</span>
+                                </div>
+                                <div class="relative">
+                                    <input id="test-id-display" type="text" class="w-full rounded-lg border-slate-300 bg-slate-100 text-slate-700 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2" readonly>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">Current test run identifier (auto-generated)</p>
+                            </div>
+                            <div>
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-2">
                                         <span class="material-symbols-outlined text-indigo-600">source</span>
@@ -183,6 +193,8 @@
                                     placeholder="Enter EPS value e.g., 50000">
                             </div>
 
+
+                            
 
                             <div>
                                 <div class="flex items-center gap-2 mb-2">

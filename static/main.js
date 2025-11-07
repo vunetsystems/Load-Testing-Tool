@@ -35,6 +35,9 @@ class VuDataSimManager {
                 this.o11ySources.loadO11ySources(); // Load available o11y sources
             }, 100);
         }
+
+        // Load next test ID for display
+        this.loadNextTestID();
         console.log('VuDataSimManager initialization complete');
     }
 
@@ -117,6 +120,7 @@ class VuDataSimManager {
             step6Box: document.getElementById('step6-box'),
             epsMode: document.getElementById('eps-mode'),
             epsCustomInput: document.getElementById('eps-custom-input'),
+            testIdDisplay: document.getElementById('test-id-display'),
 
 
             // Node management elements
@@ -722,14 +726,62 @@ class VuDataSimManager {
 
             console.log('Starting vuDataSim with sources:', selectedSources, 'EPS:', selectedEPS, 'Timeout:', timeoutSeconds, 'Skip CH Truncate:', skipChTruncate);
 
-            // Call the syncConfigs function (which now includes binary start)
-            await this.o11ySources.syncConfigs(timeoutSeconds, skipChTruncate);
+            // Create test run record first - belongs to the test run tracking process
+            console.log('Creating test run record...');
+            const testRunData = {
+                target_eps: selectedEPS,
+                o11y_sources: selectedSources,
+                timeout_seconds: timeoutSeconds
+            };
 
-            // Show success notification only if syncConfigs completed without throwing an error
-            this.showNotification('vuDataSim started successfully!', 'success');
+            const testRunResponse = await this.callAPI('/api/test-runs/start', 'POST', testRunData);
+            if (!testRunResponse.success) {
+                throw new Error(`Failed to create test run record: ${testRunResponse.message || 'Unknown error'}`);
+            }
+
+            const testId = testRunResponse.data.test_id;
+            console.log('Test run created with ID:', testId);
+
+            // Update the test ID display
+            if (this.elements.testIdDisplay) {
+                this.elements.testIdDisplay.value = testId;
+            }
+
+            // Store current test ID for stop operation
+            this.currentTestId = testId;
+
+            // Call the syncConfigs function (which now includes binary start)
+            await this.o11ySources.syncConfigs(timeoutSeconds,selectedEPS, skipChTruncate);
+
+            // Schedule pod deletion
+            try {
+                const podDeletionResponse = await this.callAPI('/api/schedule-pod-deletion', 'POST', {
+                    timeout_seconds: timeoutSeconds,
+                    o11y_sources: selectedSources
+                });
+                console.log('Pod deletion scheduled:', podDeletionResponse);
+            } catch (error) {
+                console.error('Error scheduling pod deletion:', error);
+            }
+
+
+            // // Show success notification only if syncConfigs completed without throwing an error
+            // this.showNotification('vuDataSim started successfully!', 'success');
 
         } catch (error) {
             console.error('Error starting vuDataSim:', error);
+
+            // If we created a test run record but sync failed, update status to failed - belongs to the test run tracking process
+            if (this.currentTestId) {
+                try {
+                    console.log('Updating test run status to failed for ID:', this.currentTestId);
+                    // Note: We'll need to add an API endpoint to update test run status
+                    // For now, we'll just log it
+                } catch (statusError) {
+                    console.error('Error updating test run status:', statusError);
+                }
+            }
+
             this.showNotification(`Failed to start vuDataSim: ${error.message}`, 'error');
 
             // Re-enable buttons on error
@@ -761,6 +813,28 @@ class VuDataSimManager {
             }
 
             console.log('vuDataSim stopped successfully:', response);
+
+            // Stop the test run record if we have a current test ID - belongs to the test run tracking process
+            if (this.currentTestId) {
+                console.log('Stopping test run record for ID:', this.currentTestId);
+                try {
+                    const stopTestRunResponse = await this.callAPI(`/api/test-runs/${this.currentTestId}/stop`, 'PUT');
+                    if (stopTestRunResponse.success) {
+                        console.log('Test run stopped successfully:', stopTestRunResponse.data);
+                    } else {
+                        console.warn('Failed to stop test run record:', stopTestRunResponse.message);
+                    }
+                } catch (stopError) {
+                    console.error('Error stopping test run record:', stopError);
+                    // Don't fail the entire operation for this
+                }
+
+                // Clear current test ID
+                this.currentTestId = null;
+
+                // Reload next test ID for display
+                this.loadNextTestID();
+            }
 
             // Update button states based on actual status from backend
             await this.dashboard.updateVuDataSimButtonState();
@@ -966,6 +1040,43 @@ class VuDataSimManager {
 
         // Auto-scroll to bottom
         logsContainer.scrollTop = logsContainer.scrollHeight;
+    }
+
+    // Test run tracking functions - belongs to the test run tracking process
+    async loadNextTestID() {
+        try {
+            console.log('Loading next test ID...');
+            const response = await this.callAPI('/api/test-runs/next-id', 'GET');
+
+            if (response.success && response.data && response.data.next_test_id) {
+                if (this.elements.testIdDisplay) {
+                    this.elements.testIdDisplay.value = response.data.next_test_id;
+                }
+                console.log('Next test ID loaded:', response.data.next_test_id);
+            } else {
+                console.warn('Failed to load next test ID:', response);
+                // Generate a fallback UUID
+                const fallbackUUID = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    const r = Math.random() * 16 | 0;
+                    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+                if (this.elements.testIdDisplay) {
+                    this.elements.testIdDisplay.value = fallbackUUID;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading next test ID:', error);
+            // Generate a fallback UUID on error
+            const fallbackUUID = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            if (this.elements.testIdDisplay) {
+                this.elements.testIdDisplay.value = fallbackUUID;
+            }
+        }
     }
 }
 

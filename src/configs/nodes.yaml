@@ -49,7 +49,7 @@ nodes:
         binary_dir: /home/vunet/OCT_29_DELETE_THIS/bin
         metrics_port: 0
         description: <none>
-        enabled: true
+        enabled: false
     e2e-83-212:
         host: 164.52.214.212
         user: vunet
@@ -58,4 +58,4 @@ nodes:
         binary_dir: /home/vunet/OCT_29_DELETE_THIS/bin
         metrics_port: 0
         description: <none>
-        enabled: true
+        enabled: false

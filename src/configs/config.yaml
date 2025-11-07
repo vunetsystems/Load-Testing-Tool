@@ -64,3 +64,6 @@ truncate_db:
 #   - "164.52.213.181"
 #   - "164.52.213.158"
 #   - "216.48.191.10"
+database:
+  path: "./data/vudatasim.db"
+  max_connections: 10
