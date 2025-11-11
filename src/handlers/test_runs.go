@@ -212,6 +212,55 @@ func HandleAPIGetNextTestID(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// HandleAPIGetTestRunsForDropdown handles GET /api/test-runs/dropdown
+// This endpoint returns simplified test run data for dropdown selection (only completed tests)
+func HandleAPIGetTestRunsForDropdown(w http.ResponseWriter, r *http.Request) {
+	testRuns, err := database.GetAllTestRuns()
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to retrieve test runs: %v", err),
+		})
+		return
+	}
+
+	// Filter to only completed test runs and create simplified response
+	type TestRunOption struct {
+		TestID    string `json:"test_id"`
+		TestName  string `json:"test_name,omitempty"`
+		StartTime string `json:"start_time"`
+		EndTime   string `json:"end_time,omitempty"`
+		Duration  string `json:"duration,omitempty"`
+	}
+
+	var options []TestRunOption
+	for _, testRun := range testRuns {
+		// Only include completed test runs (those with end_time)
+		if testRun.EndTime != nil {
+			option := TestRunOption{
+				TestID:   testRun.TestID,
+				TestName: testRun.TestName,
+			}
+
+			// Format times as RFC3339 strings
+			option.StartTime = testRun.StartTime.Format("2006-01-02T15:04:05Z07:00")
+			option.EndTime = testRun.EndTime.Format("2006-01-02T15:04:05Z07:00")
+
+			// Calculate duration
+			duration := testRun.EndTime.Sub(testRun.StartTime)
+			option.Duration = duration.String()
+
+			options = append(options, option)
+		}
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: fmt.Sprintf("Retrieved %d completed test runs", len(options)),
+		Data:    options,
+	})
+}
+
 // HandleAPITriggerKafkaSummarization handles POST /api/test-runs/{id}/kafka-summary
 // This endpoint triggers Kafka summarization for a specific test run
 // This is an update for Kafka summarization functionality

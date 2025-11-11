@@ -253,6 +253,7 @@ func main() {
 	api.HandleFunc("/test-runs/start", handlers.HandleAPIStartTestRun).Methods("POST")
 	api.HandleFunc("/test-runs/{id}/stop", handlers.HandleAPIStopTestRun).Methods("PUT")
 	api.HandleFunc("/test-runs", handlers.HandleAPIGetTestRuns).Methods("GET")
+	api.HandleFunc("/test-runs/dropdown", handlers.HandleAPIGetTestRunsForDropdown).Methods("GET")
 	api.HandleFunc("/test-runs/{id}", handlers.HandleAPIGetTestRun).Methods("GET")
 	api.HandleFunc("/test-runs/next-id", handlers.HandleAPIGetNextTestID).Methods("GET")
 	// Kafka summarization API endpoint - this is an update for Kafka summarization functionality
