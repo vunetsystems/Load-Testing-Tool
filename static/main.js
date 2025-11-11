@@ -642,18 +642,18 @@ class VuDataSimManager {
             // Disable the button and show loading state
             const button = this.elements.startK6TestBtn;
             const originalText = button.innerHTML;
-            button.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Starting...</span>';
+            button.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Running...</span>';
             button.disabled = true;
 
             console.log('Starting K6 test with parameters:', { timeRange, vus, iterations, interval });
 
-            // Call the API to start K6 test
+            // Call the API to start K6 test (no timeout)
             const response = await this.callAPI('/api/k6/run-combined', 'POST', {
                 timeRange,
                 vus,
                 iterations,
                 interval
-            });
+            }, 0);
 
             if (!response.success) {
                 throw new Error(response.message || 'Failed to start K6 test');
@@ -670,7 +670,7 @@ class VuDataSimManager {
             this.loadNextK6TestID();
 
             // Show success notification
-            this.showNotification('K6 test started successfully! Check logs for progress.', 'success');
+            this.showNotification('K6 test was executed successfully!', 'success');
 
         } catch (error) {
             console.error('Error starting K6 test:', error);

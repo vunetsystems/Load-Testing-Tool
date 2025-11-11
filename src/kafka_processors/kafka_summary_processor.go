@@ -12,6 +12,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"strings"
 	"time"
 
 	"vuDataSim/src/clickhouse"
@@ -24,10 +25,25 @@ import (
 // KafkaStat represents a single Kafka metric data point from ClickHouse
 // This is an update for Kafka summarization functionality
 type KafkaStat struct {
-	Timestamp   time.Time
-	Topic       string
-	MsgsPerSec  float64
+	Timestamp     time.Time
+	Topic         string
+	OneMinuteRate float64
+	Count         float64 // changed from int64 -> float64 to match ClickHouse
 }
+
+// type TopicEntry struct {
+// 	Name string `yaml:"name"`
+// }
+// type TopicConfig struct {
+// 	Name             string       `yaml:"name"`
+// 	InputTopic       []TopicEntry `yaml:"inputTopic"`
+// 	OutputTopic      []TopicEntry `yaml:"outputTopic"`
+// 	ClickHouseTables []string     `yaml:"clickhouseTables"`
+// 	Pipeline         []string     `yaml:"pipeline"`
+// }
+// type TopicsConfig struct {
+// 	Sources []TopicConfig `yaml:"sources"`
+// }
 
 // ProcessKafkaSummaries processes all completed test runs that haven't been summarized yet
 // This is the main entry point for the new Kafka summarization functionality
@@ -77,11 +93,16 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 
 	for _, src := range o11ySources {
 		for _, s := range cfg.Sources {
-			if s.Name == src {
-				inputTopic := s.InputTopic[0]
+			if strings.ToLower(strings.ReplaceAll(s.Name, " ", "")) == strings.ToLower(strings.ReplaceAll(src, " ", "")) {
+				// guard for empty inputTopic
+				if len(s.InputTopic) == 0 {
+					logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("No inputTopic for source %s", s.Name))
+					continue
+				}
+				inputTopic := s.InputTopic[0].Name
 				var outputTopics []string
 				for _, ot := range s.OutputTopic {
-					outputTopics = append(outputTopics, ot)
+					outputTopics = append(outputTopics, ot.Name)
 				}
 
 				// Fetch input metrics
@@ -139,7 +160,8 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 				if inputData["min_msgs_per_sec"].(float64) < minInputRate {
 					minInputRate = inputData["min_msgs_per_sec"].(float64)
 				}
-				anomalyScore += inputData["anomaly_spikes"].(float64)
+				// anomaly_spikes may be int or float depending on how map values were created -> normalize
+				anomalyScore += ifaceToFloat64(inputData["anomaly_spikes"])
 			}
 			if outputData, ok := srcData["output"].(map[string]interface{}); ok {
 				totalOutput += int64(outputData["total_messages"].(float64))
@@ -150,9 +172,17 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 				if outputData["min_msgs_per_sec"].(float64) < minOutputRate {
 					minOutputRate = outputData["min_msgs_per_sec"].(float64)
 				}
-				anomalyScore += outputData["anomaly_spikes"].(float64)
+				anomalyScore += ifaceToFloat64(outputData["anomaly_spikes"])
 			}
 		}
+	}
+
+	// If min rates stayed at MaxFloat64 (no data), set to 0
+	if minInputRate == math.MaxFloat64 {
+		minInputRate = 0.0
+	}
+	if minOutputRate == math.MaxFloat64 {
+		minOutputRate = 0.0
 	}
 
 	// Calculate data loss percentage
@@ -174,9 +204,9 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		    anomaly_details = ?, o11y_sources_summary = ?, kafka_summary_generated = 1
 		WHERE test_id = ?;
 	`, totalInput, totalOutput, avgInputRate, avgOutputRate,
-	   peakInputRate, peakOutputRate, minInputRate, minOutputRate,
-	   dataLossPct, anomalyDetected, anomalyScore,
-	   "Anomaly detection based on message rate spikes", string(o11ySummaryJSON), testID)
+		peakInputRate, peakOutputRate, minInputRate, minOutputRate,
+		dataLossPct, anomalyDetected, anomalyScore,
+		"Anomaly detection based on message rate spikes", string(o11ySummaryJSON), testID)
 	if err != nil {
 		return fmt.Errorf("failed to update test run with summary: %w", err)
 	}
@@ -186,39 +216,69 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 }
 
 // fetchKafkaMetrics fetches Kafka metrics from ClickHouse for given topics and time range
-// This is an update for Kafka summarization functionality
+// This fixed version correctly expands the IN clause (ClickHouse drivers don’t auto-expand slices).
 func fetchKafkaMetrics(chClient *clickhouse.ClickHouseClient, topics []string, start, end time.Time) ([]KafkaStat, error) {
 	if len(topics) == 0 {
 		return nil, fmt.Errorf("no topics provided")
 	}
 
-	query := `
-		SELECT timestamp, topic, messages_per_sec
-		FROM kafka_Broker_Topic_Metrics
-		WHERE topic IN (?) AND timestamp >= ? AND timestamp <= ?
-		ORDER BY timestamp ASC
-	`
+	// Build the IN clause dynamically for the topics slice
+	topicList := make([]string, len(topics))
+	for i, t := range topics {
+		topicList[i] = fmt.Sprintf("'%s'", t)
+	}
+	topicStr := strings.Join(topicList, ",")
 
-	ctx := context.Background()
-	rows, err := chClient.Client.Query(ctx, query, topics, start, end)
+	query := fmt.Sprintf(`
+		SELECT 
+			timestamp,
+			topic,
+			OneMinuteRate,
+			Count
+		FROM monitoring.kafka_Broker_Topic_Metrics
+		WHERE topic IN (%s)
+		  AND name = 'MessagesInPerSec'
+		  AND timestamp >= toDateTime('%s')
+		  AND timestamp <= toDateTime('%s')
+		ORDER BY timestamp ASC
+	`, topicStr, start.Format("2006-01-02 15:04:05"), end.Format("2006-01-02 15:04:05"))
+
+	// debug log to confirm the query and topic list
+	logger.LogWithNode("System", "KafkaFetcher", fmt.Sprintf("Running ClickHouse query:\n%s", query), "debug")
+
+	// NOTE: use the field exposed by your clickhouse wrapper. In this project the wrapper exposes Client.
+	rows, err := chClient.Client.Query(context.Background(), query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query Kafka metrics: %w", err)
+		return nil, fmt.Errorf("query execution failed: %w", err)
 	}
 	defer rows.Close()
 
 	var stats []KafkaStat
+
 	for rows.Next() {
-		var s KafkaStat
-		err := rows.Scan(&s.Timestamp, &s.Topic, &s.MsgsPerSec)
-		if err != nil {
+		var stat KafkaStat
+		// Important: Count and OneMinuteRate are Float64 in ClickHouse!
+		var count, oneMinuteRate float64
+
+		if err := rows.Scan(&stat.Timestamp, &stat.Topic, &oneMinuteRate, &count); err != nil {
+			// log and continue so a single bad row doesn't stop processing
 			logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to scan metric row: %v", err))
 			continue
 		}
-		stats = append(stats, s)
+
+		stat.OneMinuteRate = oneMinuteRate
+		stat.Count = count
+		stats = append(stats, stat)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error reading metric rows: %w", err)
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	if len(stats) == 0 {
+		logger.LogWithNode("System", "KafkaFetcher", "No Kafka metrics found for given topics/time range", "warn")
+	} else {
+		logger.LogSuccess("System", "KafkaFetcher", fmt.Sprintf("Fetched %d Kafka metric rows", len(stats)))
 	}
 
 	return stats, nil
@@ -241,17 +301,21 @@ func computeKafkaStats(stats []KafkaStat, topicName string) map[string]interface
 
 	var sum, min, max float64
 	min = math.MaxFloat64
+	var maxCount float64
 	values := make([]float64, len(stats))
 
 	for i, stat := range stats {
-		sum += stat.MsgsPerSec
-		if stat.MsgsPerSec < min {
-			min = stat.MsgsPerSec
+		sum += stat.OneMinuteRate
+		if stat.OneMinuteRate < min {
+			min = stat.OneMinuteRate
 		}
-		if stat.MsgsPerSec > max {
-			max = stat.MsgsPerSec
+		if stat.OneMinuteRate > max {
+			max = stat.OneMinuteRate
 		}
-		values[i] = stat.MsgsPerSec
+		if stat.Count > maxCount {
+			maxCount = stat.Count
+		}
+		values[i] = stat.OneMinuteRate
 	}
 
 	mean := sum / float64(len(stats))
@@ -271,8 +335,8 @@ func computeKafkaStats(stats []KafkaStat, topicName string) map[string]interface
 		}
 	}
 
-	// Total messages (assuming 1-second intervals)
-	totalMessages := sum
+	// Total messages is the maximum Count value (cumulative)
+	totalMessages := maxCount
 
 	return map[string]interface{}{
 		"topic":               topicName,
@@ -290,61 +354,141 @@ func computeKafkaStats(stats []KafkaStat, topicName string) map[string]interface
 func computeKafkaStatsMulti(stats []KafkaStat, topicNames []string) map[string]interface{} {
 	if len(stats) == 0 {
 		return map[string]interface{}{
-			"total_topics":        len(topicNames),
-			"avg_msgs_per_sec":    0.0,
-			"max_msgs_per_sec":    0.0,
-			"min_msgs_per_sec":    0.0,
-			"stdev_msgs_per_sec":  0.0,
-			"anomaly_spikes":      0,
-			"total_messages":      0.0,
+			"total_topics":          len(topicNames),
+			"avg_msgs_per_sec":      0.0,
+			"max_msgs_per_sec":      0.0,
+			"min_msgs_per_sec":      0.0,
+			"stdev_msgs_per_sec":    0.0,
+			"anomaly_spikes":        0,
+			"total_messages":        0.0,
 			"output_efficiency_pct": 0.0,
 		}
 	}
 
-	var sum, min, max float64
-	min = math.MaxFloat64
-	values := make([]float64, len(stats))
-
-	for i, stat := range stats {
-		sum += stat.MsgsPerSec
-		if stat.MsgsPerSec < min {
-			min = stat.MsgsPerSec
-		}
-		if stat.MsgsPerSec > max {
-			max = stat.MsgsPerSec
-		}
-		values[i] = stat.MsgsPerSec
+	// Group stats by topic
+	grouped := make(map[string][]KafkaStat)
+	for _, stat := range stats {
+		grouped[stat.Topic] = append(grouped[stat.Topic], stat)
 	}
 
-	mean := sum / float64(len(stats))
+	var totalMessages float64
+	var totalAvgRate float64
+	var maxRate, minRate float64
+	minRate = math.MaxFloat64
+	var allRates []float64
 
-	// Standard deviation
-	var variance float64
-	for _, v := range values {
-		variance += (v - mean) * (v - mean)
+	// Compute per-topic averages and sum them
+	for _, tstats := range grouped {
+		if len(tstats) == 0 {
+			continue
+		}
+
+		var topicSum float64
+		var topicMaxRate float64
+		var topicMinRate float64 = math.MaxFloat64
+		var topicMaxCount float64
+
+		for _, stat := range tstats {
+			topicSum += stat.OneMinuteRate
+			allRates = append(allRates, stat.OneMinuteRate)
+
+			if stat.OneMinuteRate > topicMaxRate {
+				topicMaxRate = stat.OneMinuteRate
+			}
+			if stat.OneMinuteRate < topicMinRate {
+				topicMinRate = stat.OneMinuteRate
+			}
+			if float64(stat.Count) > topicMaxCount {
+				topicMaxCount = float64(stat.Count)
+			}
+		}
+
+		// Per-topic avg (mean for this topic)
+		topicAvg := topicSum / float64(len(tstats))
+
+		// Sum all topic averages (instead of taking overall mean)
+		totalAvgRate += topicAvg
+
+		// Update global min/max
+		if topicMaxRate > maxRate {
+			maxRate = topicMaxRate
+		}
+		if topicMinRate < minRate {
+			minRate = topicMinRate
+		}
+
+		// Add topic total messages
+		totalMessages += topicMaxCount
 	}
-	stdev := math.Sqrt(variance / float64(len(values)))
+
+	// Calculate overall stdev (for info only)
+	var stdev float64
+	if len(allRates) > 0 {
+		var sum float64
+		for _, v := range allRates {
+			sum += v
+		}
+		mean := sum / float64(len(allRates))
+
+		var variance float64
+		for _, v := range allRates {
+			variance += (v - mean) * (v - mean)
+		}
+		stdev = math.Sqrt(variance / float64(len(allRates)))
+	}
 
 	// Count anomalies (beyond ±2σ)
 	anomalies := 0
-	for _, v := range values {
-		if math.Abs(v-mean) > 2*stdev {
-			anomalies++
+	if len(allRates) > 0 {
+		var sum float64
+		for _, v := range allRates {
+			sum += v
+		}
+		mean := sum / float64(len(allRates))
+		for _, v := range allRates {
+			if math.Abs(v-mean) > 2*stdev {
+				anomalies++
+			}
 		}
 	}
 
-	// Total messages (assuming 1-second intervals)
-	totalMessages := sum
-
 	return map[string]interface{}{
-		"total_topics":        len(topicNames),
-		"avg_msgs_per_sec":    mean,
-		"max_msgs_per_sec":    max,
-		"min_msgs_per_sec":    min,
-		"stdev_msgs_per_sec":  stdev,
-		"anomaly_spikes":      anomalies,
-		"total_messages":      totalMessages,
-		"output_efficiency_pct": 0.0, // Will be calculated by caller
+		"total_topics":          len(grouped),
+		"avg_msgs_per_sec":      totalAvgRate, // ✅ sum of all topic averages
+		"max_msgs_per_sec":      maxRate,
+		"min_msgs_per_sec":      minRate,
+		"stdev_msgs_per_sec":    stdev,
+		"anomaly_spikes":        anomalies,
+		"total_messages":        totalMessages,
+		"output_efficiency_pct": 0.0, // will be computed by caller
+	}
+}
+
+
+// ifaceToFloat64 safely converts a variety of numeric interface{} values to float64
+func ifaceToFloat64(v interface{}) float64 {
+	switch t := v.(type) {
+	case nil:
+		return 0
+	case float64:
+		return t
+	case float32:
+		return float64(t)
+	case int:
+		return float64(t)
+	case int64:
+		return float64(t)
+	case uint:
+		return float64(t)
+	case uint64:
+		return float64(t)
+	case json.Number:
+		if f, err := t.Float64(); err == nil {
+			return f
+		}
+		return 0
+	default:
+		return 0
 	}
 }
 

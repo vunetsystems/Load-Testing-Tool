@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 	"vuDataSim/src/clickhouse"
+	"vuDataSim/src/database"
 	"vuDataSim/src/logger"
 )
 
@@ -83,6 +84,7 @@ func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 	// Get time range from query parameters
 	startStr := r.URL.Query().Get("start")
 	endStr := r.URL.Query().Get("end")
+	testIDStr := r.URL.Query().Get("test_id")
 
 	var timeRange clickhouse.TimeRange
 	if startStr == "" || endStr == "" {
@@ -109,15 +111,90 @@ func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Define Kafka topics to monitor
+	// Define Kafka topics to monitor - default to all topics (input + output)
 	topics := []string{
-		"apache-metrics-input",
-		"azure-firewall-input",
-		"azure-redis-cache-input",
-		"vuazure-storage-blob-input",
-		"linux-monitor-input",
-		"mongo-metrics-input",
-		"mssql-telegraf",
+		// Input topics
+		"apache-metrics-input", "apache-logs-input",
+		"azure-firewall-input", "azure-redis-cache-input", "vuazure-storage-blob-input",
+		"linux-monitor-input", "mongo-metrics-input", "mssql-telegraf",
+
+		// Output topics
+		"apache-logs", "apache-metrics",
+		"mongo-metrics", "mongo-top-stats", "mongo-shard-stats", "mongo-col-stats", "mongo-db-stats",
+		"mssql-memory-clerks", "mssql-database-io", "mssql-net-response", "mssql-hadr-replica",
+		"mssql-schedulers", "mssql-requests", "mssql-server-properties", "mssql-performance",
+		"mssql-hadr-dbreplica", "mssql-session", "mssql-telegraf-health", "mssql-volume-space",
+		"mssql-cpu", "mssql-waitstats", "mssql-cluster", "mssql-recentbackup",
+		"linux-monitor-additional-metrics", "linux-monitor-process-metrics",
+		"linux-monitor-resource-metrics", "linux-monitor-storage-metrics",
+	}
+
+	// If test_id is provided, filter topics based on the test run's O11y sources
+	if testIDStr != "" {
+		testRun, err := database.GetTestRun(testIDStr)
+		if err != nil {
+			SendJSONResponse(w, http.StatusBadRequest, APIResponse{
+				Success: false,
+				Message: fmt.Sprintf("Invalid test_id or test run not found: %v", err),
+			})
+			return
+		}
+
+		// Map O11y source names to their input and output topics (keys must match categories.yaml exactly)
+		o11yToTopics := map[string][]string{
+			"MongoDB": {
+				"mongo-metrics-input",           // input
+				"mongo-metrics", "mongo-top-stats", "mongo-shard-stats", "mongo-col-stats", "mongo-db-stats", // outputs
+			},
+			"Mssql": {  // ✅ Fixed: matches categories.yaml "Mssql"
+				"mssql-telegraf",               // input
+				"mssql-memory-clerks", "mssql-database-io", "mssql-net-response", "mssql-hadr-replica",
+				"mssql-schedulers", "mssql-requests", "mssql-server-properties", "mssql-performance",
+				"mssql-hadr-dbreplica", "mssql-session", "mssql-telegraf-health", "mssql-volume-space",
+				"mssql-cpu", "mssql-waitstats", "mssql-cluster", "mssql-recentbackup", // outputs
+			},
+			"Apache": {
+				"apache-metrics-input", "apache-logs-input", // inputs
+				"apache-logs", "apache-metrics",             // outputs
+			},
+			"LinuxMonitor": {  // ✅ Fixed: matches categories.yaml "LinuxMonitor"
+				"linux-monitor-input", // input
+				"linux-monitor-additional-metrics", "linux-monitor-process-metrics",
+				"linux-monitor-resource-metrics", "linux-monitor-storage-metrics", // outputs
+			},
+			"Azure_Firewall": {
+				"azure-firewall-input", // input
+				// Add output topics if they exist
+			},
+			"Azure_Redis_Cache": {
+				"azure-redis-cache-input", // input
+				// Add output topics if they exist
+			},
+			"AzureStorageBlob": {
+				"vuazure-storage-blob-input", // input
+				// Add output topics if they exist
+			},
+		}
+
+		// Filter topics to only include those enabled for this test run
+		filteredTopics := []string{}
+		for _, source := range testRun.O11ySources {
+			if topics, exists := o11yToTopics[source]; exists {
+				filteredTopics = append(filteredTopics, topics...)
+			}
+		}
+
+		// If no matching topics found, return empty result
+		if len(filteredTopics) == 0 {
+			SendJSONResponse(w, http.StatusOK, APIResponse{
+				Success: true,
+				Message: "No Kafka topics found for the selected test run's O11y sources",
+				Data:    []clickhouse.KafkaTopicMetric{},
+			})
+			return
+		}
+
+		topics = filteredTopics
 	}
 
 	kafkaMetrics, err := clickhouse.GetKafkaTopicMetrics(r.Context(), topics, timeRange)

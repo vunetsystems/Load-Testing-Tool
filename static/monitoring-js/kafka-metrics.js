@@ -14,14 +14,16 @@ class KafkaMetricsManager {
 
         // ECharts instances
         this.charts = {
-            trend: null,
+            inputTrend: null,
+            outputTrend: null,
             comparison: null,
             distribution: null
         };
 
         // Chart configuration
         this.chartConfig = {
-            trend: { type: 'line' },
+            inputTrend: { type: 'line' },
+            outputTrend: { type: 'line' },
             comparison: { type: 'bar' },
             distribution: { type: 'pie' }
         };
@@ -35,6 +37,14 @@ class KafkaMetricsManager {
         // Loading states
         this.isInitialized = false;
         this.chartsInitialized = false;
+
+        // Test run filtering
+        this.testRuns = [];
+        this.selectedTestRun = null;
+        this.isTestFiltered = false;
+
+        // Auto-update tracking
+        this.updateIntervalId = null;
     }
 
     // Initialize Kafka metrics
@@ -42,8 +52,12 @@ class KafkaMetricsManager {
         console.log('Initializing Kafka metrics...');
         this.isInitialized = true;
 
+        // Load test runs for dropdown
+        await this.fetchTestRuns();
+
         // Don't initialize charts immediately - wait for section to be visible
         this.attachChartEventListeners();
+        this.attachTestRunEventListeners();
 
         // Add resize listener for responsive charts
         window.addEventListener('resize', this.handleResize.bind(this));
@@ -61,13 +75,22 @@ class KafkaMetricsManager {
             const isDark = document.documentElement.classList.contains('dark');
             const colors = isDark ? this.chartColors.dark : this.chartColors.light;
 
-            // Initialize trend chart (line/area chart)
-            const trendChartDom = document.getElementById('kafka-trend-chart');
-            if (trendChartDom) {
-                this.charts.trend = echarts.init(trendChartDom);
-                console.log('Trend chart initialized');
+            // Initialize input trend chart (line/area chart)
+            const inputTrendChartDom = document.getElementById('kafka-input-trend-chart');
+            if (inputTrendChartDom) {
+                this.charts.inputTrend = echarts.init(inputTrendChartDom);
+                console.log('Input trend chart initialized');
             } else {
-                console.warn('Trend chart DOM element not found');
+                console.warn('Input trend chart DOM element not found');
+            }
+
+            // Initialize output trend chart (line/area chart)
+            const outputTrendChartDom = document.getElementById('kafka-output-trend-chart');
+            if (outputTrendChartDom) {
+                this.charts.outputTrend = echarts.init(outputTrendChartDom);
+                console.log('Output trend chart initialized');
+            } else {
+                console.warn('Output trend chart DOM element not found');
             }
 
             // Initialize comparison chart (bar/horizontal bar chart)
@@ -150,6 +173,127 @@ class KafkaMetricsManager {
         });
     }
 
+    // Attach event listeners for test run dropdown
+    attachTestRunEventListeners() {
+        const dropdown = document.getElementById('test-run-dropdown');
+        const clearBtn = document.getElementById('clear-test-filter');
+
+        if (dropdown) {
+            dropdown.addEventListener('change', (event) => {
+                this.onTestRunChange(event.target.value);
+            });
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                this.clearTestFilter();
+            });
+        }
+    }
+
+    // Fetch test runs for dropdown
+    async fetchTestRuns() {
+        try {
+            const response = await fetch('http://216.48.191.10:8086/api/test-runs/dropdown');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.success && result.data) {
+                this.testRuns = result.data;
+                this.populateTestRunDropdown();
+                console.log('Test runs loaded:', this.testRuns.length);
+            } else {
+                console.error('Failed to fetch test runs:', result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching test runs:', error);
+        }
+    }
+
+    // Populate dropdown with test runs
+    populateTestRunDropdown() {
+        const dropdown = document.getElementById('test-run-dropdown');
+        if (!dropdown) return;
+
+        // Clear existing options except the first one
+        dropdown.innerHTML = '<option value="">Select a test run...</option>';
+
+        // Add test run options
+        this.testRuns.forEach(testRun => {
+            const option = document.createElement('option');
+            option.value = testRun.test_id;
+            option.textContent = `${testRun.test_id.substring(0, 8)}... - ${testRun.test_name || 'Unnamed Test'} (${testRun.duration})`;
+            dropdown.appendChild(option);
+        });
+    }
+
+    // Handle test run selection
+    onTestRunChange(testId) {
+        if (!testId) {
+            this.clearTestFilter();
+            return;
+        }
+
+        const selectedTest = this.testRuns.find(test => test.test_id === testId);
+        if (selectedTest) {
+            this.selectedTestRun = selectedTest;
+            this.isTestFiltered = true;
+
+            // Clear real-time buffer to avoid mixing with historical data
+            this.dataBuffer.clear();
+
+            // Update UI
+            this.updateSelectedTestInfo();
+
+            // Refresh data with time filter
+            this.fetchKafkaMetrics();
+
+            console.log('Test run selected:', selectedTest);
+        }
+    }
+
+    // Clear test filter
+    clearTestFilter() {
+        this.selectedTestRun = null;
+        this.isTestFiltered = false;
+
+        // Reset dropdown
+        const dropdown = document.getElementById('test-run-dropdown');
+        if (dropdown) {
+            dropdown.value = '';
+        }
+
+        // Hide test info
+        const infoDiv = document.getElementById('selected-test-info');
+        if (infoDiv) {
+            infoDiv.classList.add('hidden');
+        }
+
+        // Refresh data without filter and restart auto-update
+        this.fetchKafkaMetrics();
+        this.startAutoUpdate();
+
+        console.log('Test filter cleared');
+    }
+
+    // Update selected test info display
+    updateSelectedTestInfo() {
+        const infoDiv = document.getElementById('selected-test-info');
+        const nameSpan = document.getElementById('selected-test-name');
+        const rangeSpan = document.getElementById('selected-test-range');
+        const durationSpan = document.getElementById('selected-test-duration');
+
+        if (!infoDiv || !this.selectedTestRun) return;
+
+        nameSpan.textContent = this.selectedTestRun.test_name || 'Unnamed Test';
+        rangeSpan.textContent = `${new Date(this.selectedTestRun.start_time).toLocaleString()} - ${new Date(this.selectedTestRun.end_time).toLocaleString()}`;
+        durationSpan.textContent = this.selectedTestRun.duration;
+
+        infoDiv.classList.remove('hidden');
+    }
+
     // Change chart type
     changeChartType(chartName, type) {
         this.chartConfig[chartName].type = type;
@@ -168,7 +312,16 @@ class KafkaMetricsManager {
         }
 
         try {
-            const response = await fetch('http://216.48.191.10:8086/api/clickhouse/kafka-topics');
+            // Build API URL with optional time range and test_id parameters
+            let apiUrl = 'http://216.48.191.10:8086/api/clickhouse/kafka-topics';
+
+            if (this.isTestFiltered && this.selectedTestRun) {
+                const startTime = new Date(this.selectedTestRun.start_time).toISOString();
+                const endTime = new Date(this.selectedTestRun.end_time).toISOString();
+                apiUrl += `?start=${encodeURIComponent(startTime)}&end=${encodeURIComponent(endTime)}&test_id=${encodeURIComponent(this.selectedTestRun.test_id)}`;
+            }
+
+            const response = await fetch(apiUrl);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -495,7 +648,8 @@ class KafkaMetricsManager {
         }
 
         try {
-            this.updateTrendChart();
+            this.updateInputTrendChart();
+            this.updateOutputTrendChart();
             this.updateComparisonChart();
             this.updateDistributionChart();
             this.updateLegend();
@@ -569,54 +723,116 @@ class KafkaMetricsManager {
         });
     }
 
-    // Update trend chart (line/area chart for message rates over time)
-    updateTrendChart() {
-        if (!this.charts.trend) return;
+    // Update input trend chart (line/area chart for input topic message rates over time)
+    updateInputTrendChart() {
+        if (!this.charts.inputTrend) return;
 
-        // Use historical data from buffer for better trend visualization
-        const topicData = {};
-        const now = Date.now();
+        let inputTopicData = {};
 
-        // Get data from buffer for all topics
-        for (const [topic, dataPoints] of this.dataBuffer.entries()) {
-            topicData[topic] = dataPoints.map(point => ({
-                timestamp: point.timestamp,
-                rate: point.oneMinuteRate
-            }));
-        }
-
-        // If no buffer data, fall back to current data
-        if (Object.keys(topicData).length === 0 && this.kafkaData) {
+        if (this.isTestFiltered && this.selectedTestRun && this.kafkaData) {
+            // Use API response data for filtered test view (historical data)
             this.kafkaData.forEach(metric => {
-                if (!topicData[metric.topic]) {
-                    topicData[metric.topic] = [];
+                if (metric.topic.includes('-input') || metric.topic === 'mssql-telegraf') {
+                    if (!inputTopicData[metric.topic]) {
+                        inputTopicData[metric.topic] = [];
+                    }
+                    inputTopicData[metric.topic].push({
+                        timestamp: new Date(metric.timestamp).getTime(),
+                        rate: metric.oneMinuteRate
+                    });
                 }
-                topicData[metric.topic].push({
-                    timestamp: new Date(metric.timestamp).getTime(),
-                    rate: metric.oneMinuteRate
-                });
             });
+        } else {
+            // Use real-time buffer data for live monitoring
+            const now = Date.now();
+
+            // Get data from buffer for input topics only
+            for (const [topic, dataPoints] of this.dataBuffer.entries()) {
+                if (topic.includes('-input') || topic === 'mssql-telegraf') {
+                    inputTopicData[topic] = dataPoints.map(point => ({
+                        timestamp: point.timestamp,
+                        rate: point.oneMinuteRate
+                    }));
+                }
+            }
+
+            // If no buffer data, fall back to current data
+            if (Object.keys(inputTopicData).length === 0 && this.kafkaData) {
+                this.kafkaData.forEach(metric => {
+                    if (metric.topic.includes('-input') || metric.topic === 'mssql-telegraf') {
+                        if (!inputTopicData[metric.topic]) {
+                            inputTopicData[metric.topic] = [];
+                        }
+                        inputTopicData[metric.topic].push({
+                            timestamp: new Date(metric.timestamp).getTime(),
+                            rate: metric.oneMinuteRate
+                        });
+                    }
+                });
+            }
         }
 
         // Get theme colors
         const isDark = document.documentElement.classList.contains('dark');
         const colors = isDark ? this.chartColors.dark : this.chartColors.light;
 
-        // Prepare series data
-        const series = Object.entries(topicData).map(([topic, data], index) => {
+        // Prepare series data for input topics
+        const series = Object.entries(inputTopicData).map(([topic, data], index) => {
             // Sort data by timestamp
             data.sort((a, b) => a.timestamp - b.timestamp);
 
             return {
-                name: topic,
+                name: `📥 ${topic}`,
                 type: 'line',
-                areaStyle: this.chartConfig.trend.type === 'area' ? {} : undefined,
+                areaStyle: this.chartConfig.inputTrend.type === 'area' ? {} : undefined,
                 data: data.map(d => [d.timestamp, d.rate]),
                 itemStyle: { color: colors[index % colors.length] },
+                lineStyle: { width: 2 }, // Solid lines for input topics
                 smooth: true,
                 showSymbol: false // Hide symbols for better performance
             };
         });
+
+        // Configure X-axis based on data mode
+        let xAxisConfig = {
+            type: 'time',
+            boundaryGap: false,
+            name: 'Time',
+            nameLocation: 'middle',
+            nameGap: 30
+        };
+
+        // For filtered test data, set proper time range and granularity
+        if (this.isTestFiltered && this.selectedTestRun) {
+            const testStart = new Date(this.selectedTestRun.start_time).getTime();
+            const testEnd = new Date(this.selectedTestRun.end_time).getTime();
+
+            xAxisConfig.min = testStart;
+            xAxisConfig.max = testEnd;
+
+            xAxisConfig.axisLabel = {
+                formatter: (value) => {
+                    const date = new Date(value);
+                    const testDuration = testEnd - testStart;
+
+                    // For short tests (< 1 hour), show HH:MM:SS
+                    if (testDuration < 60 * 60 * 1000) {
+                        return date.toLocaleTimeString('en-US', {
+                            hour12: false,
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                        });
+                    }
+                    // For longer tests, show HH:MM
+                    return date.toLocaleTimeString('en-US', {
+                        hour12: false,
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+            };
+        }
 
         const option = {
             tooltip: {
@@ -626,14 +842,16 @@ class KafkaMetricsManager {
                     const date = new Date(params[0].value[0]);
                     let result = date.toLocaleTimeString() + '<br/>';
                     params.forEach(param => {
-                        result += `${param.seriesName}: ${param.value[1].toFixed(2)} msg/sec<br/>`;
+                        const cleanName = param.seriesName.replace(/^📥\s*/, '');
+                        result += `Input: ${cleanName}<br/>${param.value[1].toFixed(2)} msg/sec<br/>`;
                     });
                     return result;
                 }
             },
             legend: {
-                data: Object.keys(topicData),
-                bottom: 0
+                data: series.map(s => s.name),
+                bottom: 0,
+                type: 'scroll'
             },
             grid: {
                 left: '3%',
@@ -642,13 +860,7 @@ class KafkaMetricsManager {
                 top: '10%',
                 containLabel: true
             },
-            xAxis: {
-                type: 'time',
-                boundaryGap: false,
-                name: 'Time',
-                nameLocation: 'middle',
-                nameGap: 30
-            },
+            xAxis: xAxisConfig,
             yAxis: {
                 type: 'value',
                 name: 'Messages/sec',
@@ -658,7 +870,157 @@ class KafkaMetricsManager {
             series: series
         };
 
-        this.charts.trend.setOption(option, true);
+        this.charts.inputTrend.setOption(option, true);
+    }
+
+    // Update output trend chart (line/area chart for output topic message rates over time)
+    updateOutputTrendChart() {
+        if (!this.charts.outputTrend) return;
+
+        let outputTopicData = {};
+
+        if (this.isTestFiltered && this.selectedTestRun && this.kafkaData) {
+            // Use API response data for filtered test view (historical data)
+            this.kafkaData.forEach(metric => {
+                if (!metric.topic.includes('-input') && metric.topic !== 'mssql-telegraf') {
+                    if (!outputTopicData[metric.topic]) {
+                        outputTopicData[metric.topic] = [];
+                    }
+                    outputTopicData[metric.topic].push({
+                        timestamp: new Date(metric.timestamp).getTime(),
+                        rate: metric.oneMinuteRate
+                    });
+                }
+            });
+        } else {
+            // Use real-time buffer data for live monitoring
+            const now = Date.now();
+
+            // Get data from buffer for output topics only
+            for (const [topic, dataPoints] of this.dataBuffer.entries()) {
+                if (!topic.includes('-input') && topic !== 'mssql-telegraf') {
+                    outputTopicData[topic] = dataPoints.map(point => ({
+                        timestamp: point.timestamp,
+                        rate: point.oneMinuteRate
+                    }));
+                }
+            }
+
+            // If no buffer data, fall back to current data
+            if (Object.keys(outputTopicData).length === 0 && this.kafkaData) {
+                this.kafkaData.forEach(metric => {
+                    if (!metric.topic.includes('-input') && metric.topic !== 'mssql-telegraf') {
+                        if (!outputTopicData[metric.topic]) {
+                            outputTopicData[metric.topic] = [];
+                        }
+                        outputTopicData[metric.topic].push({
+                            timestamp: new Date(metric.timestamp).getTime(),
+                            rate: metric.oneMinuteRate
+                        });
+                    }
+                });
+            }
+        }
+
+        // Get theme colors
+        const isDark = document.documentElement.classList.contains('dark');
+        const colors = isDark ? this.chartColors.dark : this.chartColors.light;
+
+        // Prepare series data for output topics
+        const series = Object.entries(outputTopicData).map(([topic, data], index) => {
+            // Sort data by timestamp
+            data.sort((a, b) => a.timestamp - b.timestamp);
+
+            return {
+                name: `📤 ${topic}`,
+                type: 'line',
+                areaStyle: this.chartConfig.outputTrend.type === 'area' ? {} : undefined,
+                data: data.map(d => [d.timestamp, d.rate]),
+                itemStyle: { color: colors[index % colors.length] },
+                lineStyle: { width: 1.5, type: 'dashed' }, // Dashed lines for output topics
+                smooth: true,
+                showSymbol: false // Hide symbols for better performance
+            };
+        });
+
+        // Configure X-axis based on data mode
+        let xAxisConfig = {
+            type: 'time',
+            boundaryGap: false,
+            name: 'Time',
+            nameLocation: 'middle',
+            nameGap: 30
+        };
+
+        // For filtered test data, set proper time range and granularity
+        if (this.isTestFiltered && this.selectedTestRun) {
+            const testStart = new Date(this.selectedTestRun.start_time).getTime();
+            const testEnd = new Date(this.selectedTestRun.end_time).getTime();
+
+            xAxisConfig.min = testStart;
+            xAxisConfig.max = testEnd;
+
+            xAxisConfig.axisLabel = {
+                formatter: (value) => {
+                    const date = new Date(value);
+                    const testDuration = testEnd - testStart;
+
+                    // For short tests (< 1 hour), show HH:MM:SS
+                    if (testDuration < 60 * 60 * 1000) {
+                        return date.toLocaleTimeString('en-US', {
+                            hour12: false,
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                        });
+                    }
+                    // For longer tests, show HH:MM
+                    return date.toLocaleTimeString('en-US', {
+                        hour12: false,
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+            };
+        }
+
+        const option = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: { type: 'cross' },
+                formatter: (params) => {
+                    const date = new Date(params[0].value[0]);
+                    let result = date.toLocaleTimeString() + '<br/>';
+                    params.forEach(param => {
+                        const cleanName = param.seriesName.replace(/^📤\s*/, '');
+                        result += `Output: ${cleanName}<br/>${param.value[1].toFixed(2)} msg/sec<br/>`;
+                    });
+                    return result;
+                }
+            },
+            legend: {
+                data: series.map(s => s.name),
+                bottom: 0,
+                type: 'scroll'
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '15%',
+                top: '10%',
+                containLabel: true
+            },
+            xAxis: xAxisConfig,
+            yAxis: {
+                type: 'value',
+                name: 'Messages/sec',
+                nameLocation: 'middle',
+                nameGap: 30
+            },
+            series: series
+        };
+
+        this.charts.outputTrend.setOption(option, true);
     }
 
     // Update comparison chart (bar/horizontal bar chart)
@@ -827,9 +1189,17 @@ class KafkaMetricsManager {
 
     // Start automatic updates
     startAutoUpdate() {
-        setInterval(() => {
-            this.fetchKafkaMetrics();
-        }, this.updateInterval);
+        // Clear any existing interval
+        if (this.updateIntervalId) {
+            clearInterval(this.updateIntervalId);
+        }
+
+        // Only start auto-update if not in test filter mode
+        if (!this.isTestFiltered) {
+            this.updateIntervalId = setInterval(() => {
+                this.fetchKafkaMetrics();
+            }, this.updateInterval);
+        }
     }
 
     // Manual refresh

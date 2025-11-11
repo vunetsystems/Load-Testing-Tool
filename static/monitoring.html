@@ -249,22 +249,66 @@
                         <div class="kafka-topics-overview grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                         </div>
 
-                        <div class="kafka-charts-section grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-lg font-semibold text-slate-900">Message Rate Trends</h3>
-                                    <div class="flex gap-2">
-                                        <button
-                                            class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-indigo-100 text-indigo-700 font-medium"
-                                            data-chart="trend" data-type="line">Line</button>
-                                        <button
-                                            class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                            data-chart="trend" data-type="area">Area</button>
-                                    </div>
+                        <!-- Test Run Filter Section -->
+                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-slate-900">Test Run Filter</h3>
+                                <div class="flex items-center gap-4">
+                                    <select id="test-run-dropdown" class="h-10 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                                        <option value="">Select a test run...</option>
+                                        <!-- Options will be populated by JavaScript -->
+                                    </select>
+                                    <button id="clear-test-filter" class="px-4 py-2 text-sm rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+                                        Clear Filter
+                                    </button>
                                 </div>
-                                <div id="kafka-trend-chart" class="h-64"></div>
                             </div>
+                            <div id="selected-test-info" class="hidden text-sm text-slate-600">
+                                <strong>Selected Test:</strong> <span id="selected-test-name">-</span><br>
+                                <strong>Time Range:</strong> <span id="selected-test-range">-</span><br>
+                                <strong>Duration:</strong> <span id="selected-test-duration">-</span>
+                            </div>
+                        </div>
 
+                        <!-- Input Topics Trend Chart -->
+                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-slate-900">
+                                    <span class="material-symbols-outlined text-blue-600 mr-2">input</span>
+                                    Input Topics - Message Rate Trends
+                                </h3>
+                                <div class="flex gap-2">
+                                    <button
+                                        class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-indigo-100 text-indigo-700 font-medium"
+                                        data-chart="input-trend" data-type="line">Line</button>
+                                    <button
+                                        class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                        data-chart="input-trend" data-type="area">Area</button>
+                                </div>
+                            </div>
+                            <div id="kafka-input-trend-chart" class="h-64"></div>
+                        </div>
+
+                        <!-- Output Topics Trend Chart -->
+                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-slate-900">
+                                    <span class="material-symbols-outlined text-green-600 mr-2">output</span>
+                                    Output Topics - Message Rate Trends
+                                </h3>
+                                <div class="flex gap-2">
+                                    <button
+                                        class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-indigo-100 text-indigo-700 font-medium"
+                                        data-chart="output-trend" data-type="line">Line</button>
+                                    <button
+                                        class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                        data-chart="output-trend" data-type="area">Area</button>
+                                </div>
+                            </div>
+                            <div id="kafka-output-trend-chart" class="h-64"></div>
+                        </div>
+
+                        <div class="kafka-charts-section grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                             <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                                 <div class="flex items-center justify-between mb-4">
                                     <h3 class="text-lg font-semibold text-slate-900">Topic Comparison</h3>
@@ -279,26 +323,28 @@
                                 </div>
                                 <div id="kafka-comparison-chart" class="h-64"></div>
                             </div>
+
+                            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-semibold text-slate-900">Topic Distribution</h3>
+                                    <div class="flex gap-2">
+                                        <button
+                                            class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-indigo-100 text-indigo-700 font-medium"
+                                            data-chart="distribution" data-type="pie">Pie</button>
+                                        <button
+                                            class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                            data-chart="distribution" data-type="doughnut">Doughnut</button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div id="kafka-distribution-chart" class="h-64"></div>
+                                    <div class="kafka-topics-legend flex flex-col justify-center">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mb-8">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-semibold text-slate-900">Topic Distribution</h3>
-                                <div class="flex gap-2">
-                                    <button
-                                        class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-indigo-100 text-indigo-700 font-medium"
-                                        data-chart="distribution" data-type="pie">Pie</button>
-                                    <button
-                                        class="kafka-chart-type-btn px-3 py-1 text-xs rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                        data-chart="distribution" data-type="doughnut">Doughnut</button>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <div id="kafka-distribution-chart" class="h-64"></div>
-                                <div class="kafka-topics-legend flex flex-col justify-center">
-                                </div>
-                            </div>
-                        </div>
+                        
 
                         <!-- Kafka Pod Memory Usage Chart -->
                         <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm mb-8">

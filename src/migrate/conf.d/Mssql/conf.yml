@@ -4,7 +4,7 @@ uniquekey:
   DataType: IPv4
   ValueType: "RandomFixed"
   Value: "10.10.10.1"
-  NumUniqKey: 84
+  NumUniqKey: 54
 period: 1s
 
 output.kafka:

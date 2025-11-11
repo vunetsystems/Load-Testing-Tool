@@ -575,7 +575,7 @@ func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
     logger.LogWithNode("System", "k6", fmt.Sprintf("User check result: %s", userCheckResult), "info")
 
     // Run asynchronously with K6 run tracking
-    go h.executeCombinedScriptWithTracking(params.TimeRange, params.VUs, params.Iterations, params.Interval, k6Run)
+    h.executeCombinedScriptWithTracking(params.TimeRange, params.VUs, params.Iterations, params.Interval, k6Run)
 
     SendJSONResponse(w, http.StatusOK, APIResponse{
         Success: true,
