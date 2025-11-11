@@ -102,16 +102,16 @@ group:
     Value: 0-100
   - name: kubernetes,container,memory,total,bytes
     DataType: Uint64
-    ValueType: RandomFixed
+    ValueType: Constant
     Value: 40606437880    
-  - name: kubernetes,container,memory,available,bytes
-    DataType: Uint64
-    ValueType: EvaluatedValue
-    Value: "kubernetes,container,memory,total,bytes - kubernetes,container,memory,usage,bytes"
   - name: kubernetes,container,memory,usage,bytes
     DataType: Uint64
     ValueType: RandomRange
     Value: 11795251-117952510
+  - name: kubernetes,container,memory,available,bytes
+    DataType: Uint64
+    ValueType: EvaluatedValue
+    Value: "kubernetes,container,memory,total,bytes - kubernetes,container,memory,usage,bytes"
   - name: kubernetes,container,memory,usage,node,pct
     DataType: Float32
     ValueType: RandomRange
@@ -186,19 +186,19 @@ group:
     Value: 343978203500-3439782035000
   - name: kubernetes,node,labels,reporter
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,zookeeper
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,TelegrafSNMPTrap
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,kurl_sh/cluster
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'true'
   - name: kubernetes,node,labels,beta_kubernetes_io/arch
     DataType: String
@@ -210,31 +210,31 @@ group:
     Value: amd64
   - name: kubernetes,node,labels,alert
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,clickhouse
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,snmptrap
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,worker
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,vuHTTPPoller
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,broker
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,vublockstore
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,kubernetes_io/hostname
     DataType: String
@@ -242,15 +242,15 @@ group:
     Value: e2e-72-47
   - name: kubernetes,node,labels,TelegrafHTTPPoller
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,webserver
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,nairobi
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,node_longhorn_io/create-default-disk
     DataType: String
@@ -258,7 +258,7 @@ group:
     Value: config
   - name: kubernetes,node,labels,snmpheartbeat
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,kubernetes_io/os
     DataType: String
@@ -266,15 +266,15 @@ group:
     Value: linux
   - name: kubernetes,node,labels,scheduler
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,renderer
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,timescaledb
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,beta_kubernetes_io/os
     DataType: String
@@ -282,7 +282,7 @@ group:
     Value: linux
   - name: kubernetes,node,labels,mlflow
     DataType: String
-    ValueType: Enumeration
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,hostname
     DataType: String

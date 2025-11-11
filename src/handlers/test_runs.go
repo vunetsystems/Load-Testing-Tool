@@ -6,9 +6,16 @@ import (
 	"fmt"
 	"net/http"
 
+	"vuDataSim/src/clickhouse"
 	"vuDataSim/src/database"
 	"vuDataSim/src/models"
 	"github.com/gorilla/mux"
+)
+
+// Import kafka_summary_processor for new summarization functionality
+// This is an update for Kafka summarization functionality
+import (
+	"vuDataSim/src/kafka_processors"
 )
 
 // HandleAPIStartTestRun handles POST /api/test-runs/start
@@ -202,5 +209,47 @@ func HandleAPIGetNextTestID(w http.ResponseWriter, r *http.Request) {
 	SendJSONResponse(w, http.StatusOK, APIResponse{
 		Success: true,
 		Data:    response.Data,
+	})
+}
+
+// HandleAPITriggerKafkaSummarization handles POST /api/test-runs/{id}/kafka-summary
+// This endpoint triggers Kafka summarization for a specific test run
+// This is an update for Kafka summarization functionality
+func HandleAPITriggerKafkaSummarization(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	testID := vars["id"]
+
+	// Validate UUID format (basic validation)
+	if len(testID) != 36 {
+		SendJSONResponse(w, http.StatusBadRequest, APIResponse{
+			Success: false,
+			Message: "Invalid test ID format",
+		})
+		return
+	}
+
+	// Get ClickHouse client from the initialized client
+	chClient := clickhouse.GetClickHouseClient()
+	if chClient == nil {
+		SendJSONResponse(w, http.StatusServiceUnavailable, APIResponse{
+			Success: false,
+			Message: "ClickHouse client not available",
+		})
+		return
+	}
+
+	// Trigger Kafka summarization for the specific test run using new processor
+	err := kafka_processors.ProcessKafkaSummaries(database.DB, chClient)
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to process Kafka summary: %v", err),
+		})
+		return
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "Kafka summary generated successfully",
 	})
 }

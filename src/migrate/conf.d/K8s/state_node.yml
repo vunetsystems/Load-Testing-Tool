@@ -82,7 +82,7 @@ group:
     Value: 11-110
   - name: kubernetes,node,status,ready
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'true'
   - name: kubernetes,node,status,unschedulable
     DataType: Uint64
@@ -90,15 +90,15 @@ group:
     Value: 0-100
   - name: kubernetes,node,status,memory_pressure
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'false'
   - name: kubernetes,node,status,disk_pressure
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'false'
   - name: kubernetes,node,status,pid_pressure
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'false'
   - name: kubernetes,node,name
     DataType: String
@@ -126,11 +126,11 @@ group:
     Value: 9428580352-94285803520    
   - name: kubernetes,labels,worker
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,rabbitmq
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,kubernetes_io/hostname
     DataType: String
@@ -142,11 +142,11 @@ group:
     Value: e2e-72-51    
   - name: kubernetes,labels,TelegrafSNMP
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,mlflow
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,kubernetes_io/os
     DataType: String
@@ -158,15 +158,15 @@ group:
     Value: config
   - name: kubernetes,labels,TelegrafHTTPListener
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,zookeeper
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,broker
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,kubernetes_io/arch
     DataType: String
@@ -178,19 +178,19 @@ group:
     Value: amd64
   - name: kubernetes,labels,vuHTTPReceiver
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,clickhouse
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,scheduler
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,traefik
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,beta_kubernetes_io/os
     DataType: String
@@ -198,31 +198,31 @@ group:
     Value: linux
   - name: kubernetes,labels,timescaledb
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,vuinterface
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,snmppolling
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,kurl_sh/cluster
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'true'
   - name: kubernetes,labels,dao
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,vuTelegrafMSSQL
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,webserver
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: agent,name
     DataType: String

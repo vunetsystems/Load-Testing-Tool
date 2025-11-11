@@ -126,15 +126,15 @@ group:
     Value: aa1b1356-70ec-4b71-949d-dce756bc4608
   - name: kubernetes,node,labels,TelegrafSNMPTrap
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,kurl_sh/cluster
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'true'
   - name: kubernetes,node,labels,scheduler
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,kubernetes_io/hostname
     DataType: String
@@ -142,7 +142,7 @@ group:
     Value: e2e-72-47
   - name: kubernetes,node,labels,snmpheartbeat
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,node_longhorn_io/create-default-disk
     DataType: String
@@ -150,11 +150,11 @@ group:
     Value: config
   - name: kubernetes,node,labels,mlflow
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,vuHTTPPoller
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,kubernetes_io/arch
     DataType: String
@@ -162,11 +162,11 @@ group:
     Value: amd64
   - name: kubernetes,node,labels,snmptrap
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,worker
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,beta_kubernetes_io/os
     DataType: String
@@ -174,27 +174,27 @@ group:
     Value: linux
   - name: kubernetes,node,labels,webserver
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,TelegrafHTTPPoller
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,zookeeper
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,timescaledb
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,renderer
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,broker
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,beta_kubernetes_io/arch
     DataType: String
@@ -202,23 +202,23 @@ group:
     Value: amd64
   - name: kubernetes,node,labels,vublockstore
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,alert
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,reporter
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,nairobi
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,clickhouse
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,node,labels,kubernetes_io/os
     DataType: String

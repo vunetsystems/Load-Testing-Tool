@@ -83,7 +83,7 @@ group:
     Value: kubernetes
   - name: kubernetes,job,status,complete
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'true'
   - name: kubernetes,job,name
     DataType: String

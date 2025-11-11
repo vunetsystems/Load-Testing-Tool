@@ -71,16 +71,16 @@ group:
     Value: 3089-30890
   - name: kubernetes,node,memory,total,bytes
     DataType: Uint64
-    ValueType: RandomFixed
-    Value: 74364903420    
+    ValueType: Constant
+    Value: 74364903420
+  - name: kubernetes,node,memory,usage,bytes
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 7089993318-70899933180    
   - name: kubernetes,node,memory,available,bytes
     DataType: Uint64
     ValueType: EvaluatedValue
     Value: "kubernetes,node,memory,total,bytes - kubernetes,node,memory,usage,bytes"
-  - name: kubernetes,node,memory,usage,bytes
-    DataType: Uint64
-    ValueType: RandomRange
-    Value: 7089993318-70899933180
   - name: kubernetes,node,memory,workingset,bytes
     DataType: Uint64
     ValueType: RandomRange
@@ -151,7 +151,7 @@ group:
     Value: 0-100
   - name: kubernetes,labels,kurl_sh/cluster
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'true'
   - name: kubernetes,labels,node_longhorn_io/create-default-disk
     DataType: String
@@ -159,11 +159,11 @@ group:
     Value: config
   - name: kubernetes,labels,kafka-connect
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,minio-tenant
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,node-role_kubernetes_io/master
     DataType: String
@@ -187,27 +187,27 @@ group:
     Value: linux
   - name: kubernetes,labels,mlflow
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,notification
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,worker
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,scheduler
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,keycloak
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,syslog
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,node_kubernetes_io/exclude-from-external-load-balancers
     DataType: String
@@ -215,23 +215,23 @@ group:
     Value: ''
   - name: kubernetes,labels,vublock-o
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,vublock
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,generic
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,redis
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,TelegrafHeartbeat
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,beta_kubernetes_io/arch
     DataType: String
@@ -239,7 +239,7 @@ group:
     Value: amd64
   - name: kubernetes,labels,netflow
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,kubernetes_io/arch
     DataType: String
@@ -247,15 +247,15 @@ group:
     Value: amd64
   - name: kubernetes,labels,TelegrafSyslog
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,webserver
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: kubernetes,labels,clickhouse
     DataType: String
-    ValueType: Boolean
+    ValueType: Constant
     Value: 'True'
   - name: cluster_identifiers
     DataType: String

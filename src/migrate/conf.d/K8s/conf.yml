@@ -13,6 +13,12 @@ timestamp:
 output.kafka:
   enabled: true
   topic: "kubernetes-metrics-input"
+output.file:
+  enabled: false
+  path: /home/vunet/vuDataSim/vuDataSim/logs/
+  filename: kube.log
+  rotate_every_mb: 1
+  max_files: 5 
 Include_sub_modules:
   [
     etcd,
