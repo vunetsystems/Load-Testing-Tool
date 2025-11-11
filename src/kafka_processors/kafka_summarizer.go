@@ -41,13 +41,18 @@ type KafkaSourceSummary struct {
 	PeakMessageRate  float64   `json:"peak_message_rate"`
 }
 
+// TopicEntry represents a single topic entry in the YAML
+type TopicEntry struct {
+	Name string `yaml:"name"`
+}
+
 // TopicConfig represents the configuration for a single o11y source
 type TopicConfig struct {
-	Name         string   `yaml:"name"`
-	InputTopic   []string `yaml:"inputTopic"`
-	OutputTopic  []string `yaml:"outputTopic"`
-	ClickHouseTables []string `yaml:"clickhouseTables"`
-	Pipeline     []string `yaml:"pipeline"`
+	Name            string       `yaml:"name"`
+	InputTopic      []TopicEntry `yaml:"inputTopic"`
+	OutputTopic     []TopicEntry `yaml:"outputTopic"`
+	ClickHouseTables []string     `yaml:"clickhouseTables"`
+	Pipeline        []string     `yaml:"pipeline"`
 }
 
 // TopicsConfig represents the complete topics configuration
@@ -120,8 +125,12 @@ func GetTopicsForSources(config *TopicsConfig, sources []string) []string {
 
 	for _, source := range config.Sources {
 		if sourceMap[source.Name] {
-			topics = append(topics, source.InputTopic...)
-			topics = append(topics, source.OutputTopic...)
+			for _, inputTopic := range source.InputTopic {
+				topics = append(topics, inputTopic.Name)
+			}
+			for _, outputTopic := range source.OutputTopic {
+				topics = append(topics, outputTopic.Name)
+			}
 		}
 	}
 
@@ -203,7 +212,13 @@ func ComputeKafkaSummary(testID string, startTime, endTime time.Time, metrics []
 	// Map topics to sources
 	for _, source := range config.Sources {
 		if contains(sources, source.Name) {
-			allTopics := append(source.InputTopic, source.OutputTopic...)
+			var allTopics []string
+			for _, inputTopic := range source.InputTopic {
+				allTopics = append(allTopics, inputTopic.Name)
+			}
+			for _, outputTopic := range source.OutputTopic {
+				allTopics = append(allTopics, outputTopic.Name)
+			}
 			sourceTopics[source.Name] = allTopics
 		}
 	}

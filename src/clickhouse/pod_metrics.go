@@ -330,36 +330,70 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 		return nil, fmt.Errorf("no topics provided")
 	}
 
-	query := `
-	SELECT
-		t.topic AS metric,
-		t.timestamp AS timestamp,
-		sum(t.OneMinuteRate) AS OneMinuteRate
-	FROM kafka_Broker_Topic_Metrics AS t
-	INNER JOIN (
+	// Calculate time range duration to determine query type
+	timeRangeDuration := timeRange.To.Sub(timeRange.From)
+
+	// Check if this is the default 5-minute real-time window
+	isDefaultRealtimeWindow := timeRangeDuration >= 4*time.Minute && timeRangeDuration <= 6*time.Minute
+
+	// For historical trends (custom time ranges, typically from test filters), return time-series data
+	// For real-time monitoring (default 5-minute window), return latest data points only
+	isHistoricalQuery := !isDefaultRealtimeWindow
+
+	var query string
+	var args []interface{}
+
+	if isHistoricalQuery {
+		// Return ALL data points within the time range for trend visualization
+		query = `
 		SELECT
 			topic,
-			max(timestamp) AS latest_ts
+			timestamp,
+			OneMinuteRate
 		FROM kafka_Broker_Topic_Metrics
 		WHERE
 			name = 'MessagesInPerSec'
 			AND timestamp >= ?
 			AND timestamp <= ?
-		GROUP BY topic
-	) AS latest
-	ON t.topic = latest.topic AND t.timestamp = latest.latest_ts
-	WHERE
-		t.name = 'MessagesInPerSec'
-		AND t.topic IN ?
-	GROUP BY
-		t.topic,
-		t.timestamp
-	ORDER BY
-		t.timestamp DESC
-`
+			AND topic IN ?
+		ORDER BY
+			topic,
+			timestamp ASC
+		`
+		args = []interface{}{timeRange.From, timeRange.To, topics}
+	} else {
+		// Return only latest data points per topic for real-time monitoring
+		query = `
+		SELECT
+			t.topic AS metric,
+			t.timestamp AS timestamp,
+			sum(t.OneMinuteRate) AS OneMinuteRate
+		FROM kafka_Broker_Topic_Metrics AS t
+		INNER JOIN (
+			SELECT
+				topic,
+				max(timestamp) AS latest_ts
+			FROM kafka_Broker_Topic_Metrics
+			WHERE
+				name = 'MessagesInPerSec'
+				AND timestamp >= ?
+				AND timestamp <= ?
+			GROUP BY topic
+		) AS latest
+		ON t.topic = latest.topic AND t.timestamp = latest.latest_ts
+		WHERE
+			t.name = 'MessagesInPerSec'
+			AND t.topic IN ?
+		GROUP BY
+			t.topic,
+			t.timestamp
+		ORDER BY
+			t.timestamp DESC
+		`
+		args = []interface{}{timeRange.From, timeRange.To, topics}
+	}
 
-	// Pass the time range and topics as parameters
-	rows, err := monitoringDBClient.Client.Query(ctx, query, timeRange.From, timeRange.To, topics)
+	rows, err := monitoringDBClient.Client.Query(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error querying Kafka topic metrics: %v", err)
 	}
