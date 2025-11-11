@@ -248,6 +248,7 @@ func main() {
 	api.HandleFunc("/k6/stop", handlers.HandleAPIStopK6Test).Methods("POST")
 	api.HandleFunc("/k6/logs", handlers.HandleAPIGetK6Logs).Methods("GET")
 	api.HandleFunc("/k6/run-combined", handlers.HandleAPIRunCombinedScript).Methods("POST")
+	api.HandleFunc("/k6/next-test-id", handlers.HandleAPIGetNextK6TestID).Methods("GET")
 
 	// Test Run Tracking API endpoints
 	api.HandleFunc("/test-runs/start", handlers.HandleAPIStartTestRun).Methods("POST")

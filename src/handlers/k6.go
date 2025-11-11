@@ -15,7 +15,9 @@ import (
 	"time"
 
 	"gopkg.in/yaml.v3"
+	"vuDataSim/src/database"
 	"vuDataSim/src/logger"
+	"vuDataSim/src/models"
 )
 
 // K6Config represents the K6 load testing configuration
@@ -541,12 +543,24 @@ func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
     h.status.LastUpdated = time.Now()
     h.mutex.Unlock()
 
-    // Add config sync before execution
+    // Read enabled modules for K6 run tracking
     enabledModules, err := h.readModuleConfig()
     if err != nil {
         logger.LogError("System", "k6", fmt.Sprintf("Failed to read module config: %v", err))
-        // Handle error appropriately
+        // Continue execution even if module config fails
+    }
+
+    // Create K6 run record
+    k6Run, err := database.CreateK6Run(params.TimeRange, params.VUs, params.Iterations, params.Interval, enabledModules)
+    if err != nil {
+        logger.LogError("System", "k6", fmt.Sprintf("Failed to create K6 run record: %v", err))
+        // Continue execution even if database operation fails
     } else {
+        logger.LogWithNode("System", "k6", fmt.Sprintf("Created K6 run record with ID: %s", k6Run.TestID), "info")
+    }
+
+    // Add config sync before execution
+    if enabledModules != nil {
         err = h.updateDashboardConfig(enabledModules)
         if err != nil {
             logger.LogError("System", "k6", fmt.Sprintf("Failed to update dashboard config: %v", err))
@@ -556,12 +570,19 @@ func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
 
     logger.LogWithNode("System", "k6", fmt.Sprintf("Starting combined script with VUs=%d, Iterations=%d, Interval=%d, TimeRange=%s", params.VUs, params.Iterations, params.Interval, params.TimeRange), "info")
 
-    // Run asynchronously
-    go h.executeCombinedScript(params.TimeRange, params.VUs, params.Iterations, params.Interval)
+    // Check and create users if needed
+    userCheckResult := h.checkAndCreateUsers(params.VUs)
+    logger.LogWithNode("System", "k6", fmt.Sprintf("User check result: %s", userCheckResult), "info")
+
+    // Run asynchronously with K6 run tracking
+    go h.executeCombinedScriptWithTracking(params.TimeRange, params.VUs, params.Iterations, params.Interval, k6Run)
 
     SendJSONResponse(w, http.StatusOK, APIResponse{
         Success: true,
         Message: fmt.Sprintf("K6 test started successfully at %s", time.Now().Format(time.RFC3339)),
+        Data: map[string]interface{}{
+            "test_id": k6Run.TestID,
+        },
     })
 }
 
@@ -649,8 +670,8 @@ func (h *K6Handler) checkAndCreateUsers(vus int) string {
 	return fmt.Sprintf("User creation completed (verification inconclusive)")
 }
 
-// executeCombinedScript executes the combined.sh script with given parameters
-func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, interval int) {
+// executeCombinedScriptWithTracking executes the combined.sh script with given parameters and tracks the K6 run
+func (h *K6Handler) executeCombinedScriptWithTracking(timeRange string, vus, iterations, interval int, k6Run *models.K6Run) {
     // Context with timeout
     ctx, cancel := context.WithTimeout(context.Background(), 2*time.Hour)
     defer cancel()
@@ -689,6 +710,23 @@ func (h *K6Handler) executeCombinedScript(timeRange string, vus, iterations, int
         }
     } else {
         logger.Error().Err(err).Msg("Failed to create logs directory")
+    }
+
+    // Update K6 run status based on execution result
+    if k6Run != nil {
+        if err != nil {
+            // Mark as failed if there was an error
+            if updateErr := database.UpdateK6RunStatus(k6Run.TestID, "failed"); updateErr != nil {
+                logger.LogError("System", "k6", fmt.Sprintf("Failed to update K6 run status to failed: %v", updateErr))
+            }
+        } else {
+            // Mark as completed if successful
+            if completeErr := database.CompleteK6Run(k6Run.TestID); completeErr != nil {
+                logger.LogError("System", "k6", fmt.Sprintf("Failed to complete K6 run: %v", completeErr))
+            } else {
+                logger.LogSuccess("System", "k6", fmt.Sprintf("K6 run %s completed successfully", k6Run.TestID))
+            }
+        }
     }
 
     if err != nil {
@@ -861,4 +899,24 @@ func HandleAPIGetK6Logs(w http.ResponseWriter, r *http.Request) {
 
 func HandleAPIRunCombinedScript(w http.ResponseWriter, r *http.Request) {
 	K6Manager.RunCombinedScript(w, r)
+}
+
+// HandleAPIGetNextK6TestID handles GET /api/k6/next-test-id
+func HandleAPIGetNextK6TestID(w http.ResponseWriter, r *http.Request) {
+	nextID, err := database.GetNextK6TestID()
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to generate next K6 test ID: %v", err),
+		})
+		return
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Data: map[string]string{
+			"next_test_id": nextID,
+		},
+		Message: "Next K6 test ID generated successfully",
+	})
 }

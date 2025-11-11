@@ -38,6 +38,8 @@ class VuDataSimManager {
 
         // Load next test ID for display
         this.loadNextTestID();
+        // Load next K6 test ID for display
+        this.loadNextK6TestID();
         console.log('VuDataSimManager initialization complete');
     }
 
@@ -56,6 +58,7 @@ class VuDataSimManager {
             k6Vus: document.getElementById('k6-vus'),
             k6Iterations: document.getElementById('k6-iterations'),
             k6Interval: document.getElementById('k6-interval'),
+            k6TestIdDisplay: document.getElementById('k6-test-id-display'),
             startK6TestBtn: document.getElementById('start-k6-test-btn'),
             logNodeFilter: document.getElementById('log-node'),
             logModuleFilter: document.getElementById('log-module'),
@@ -658,6 +661,14 @@ class VuDataSimManager {
 
             console.log('K6 test started successfully:', response);
 
+            // Update the K6 test ID display with the returned test ID
+            if (response.data && response.data.test_id && this.elements.k6TestIdDisplay) {
+                this.elements.k6TestIdDisplay.value = response.data.test_id;
+            }
+
+            // Load next K6 test ID for future use
+            this.loadNextK6TestID();
+
             // Show success notification
             this.showNotification('K6 test started successfully! Check logs for progress.', 'success');
 
@@ -1090,6 +1101,43 @@ class VuDataSimManager {
             });
             if (this.elements.testIdDisplay) {
                 this.elements.testIdDisplay.value = fallbackUUID;
+            }
+        }
+    }
+
+    // K6 test run tracking functions
+    async loadNextK6TestID() {
+        try {
+            console.log('Loading next K6 test ID...');
+            const response = await this.callAPI('/api/k6/next-test-id', 'GET');
+
+            if (response.success && response.data && response.data.next_test_id) {
+                if (this.elements.k6TestIdDisplay) {
+                    this.elements.k6TestIdDisplay.value = response.data.next_test_id;
+                }
+                console.log('Next K6 test ID loaded:', response.data.next_test_id);
+            } else {
+                console.warn('Failed to load next K6 test ID:', response);
+                // Generate a fallback UUID
+                const fallbackUUID = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    const r = Math.random() * 16 | 0;
+                    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+                if (this.elements.k6TestIdDisplay) {
+                    this.elements.k6TestIdDisplay.value = fallbackUUID;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading next K6 test ID:', error);
+            // Generate a fallback UUID on error
+            const fallbackUUID = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            if (this.elements.k6TestIdDisplay) {
+                this.elements.k6TestIdDisplay.value = fallbackUUID;
             }
         }
     }
