@@ -61,6 +61,39 @@ func RunMigrations() error {
 		return fmt.Errorf("failed to create start_time index: %w", err)
 	}
 
+	// Create k6_runs table
+	createK6RunsTableSQL := `
+	CREATE TABLE IF NOT EXISTS k6_runs (
+		test_id TEXT PRIMARY KEY,
+		start_time DATETIME NOT NULL,
+		end_time DATETIME NULL,
+		time_range TEXT NOT NULL,
+		vus INTEGER NOT NULL,
+		iterations INTEGER NOT NULL,
+		interval INTEGER NOT NULL,
+		o11y_sources TEXT NOT NULL, -- JSON array of source names
+		status TEXT NOT NULL DEFAULT 'running' -- 'running', 'completed', 'stopped', 'failed'
+	);`
+
+	_, err = DB.Exec(createK6RunsTableSQL)
+	if err != nil {
+		return fmt.Errorf("failed to create k6_runs table: %w", err)
+	}
+
+	// Create index on k6_runs status for faster queries
+	k6IndexSQL := `CREATE INDEX IF NOT EXISTS idx_k6_runs_status ON k6_runs(status);`
+	_, err = DB.Exec(k6IndexSQL)
+	if err != nil {
+		return fmt.Errorf("failed to create k6_runs status index: %w", err)
+	}
+
+	// Create index on k6_runs start_time for ordering
+	k6TimeIndexSQL := `CREATE INDEX IF NOT EXISTS idx_k6_runs_start_time ON k6_runs(start_time DESC);`
+	_, err = DB.Exec(k6TimeIndexSQL)
+	if err != nil {
+		return fmt.Errorf("failed to create k6_runs start_time index: %w", err)
+	}
+
 	return nil
 }
 
