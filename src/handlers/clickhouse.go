@@ -120,7 +120,7 @@ func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 		"mssql-telegraf",
 	}
 
-	kafkaMetrics, err := clickhouse.GetKafkaTopicMetrics(r.Context(), topics)
+	kafkaMetrics, err := clickhouse.GetKafkaTopicMetrics(r.Context(), topics, timeRange)
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,

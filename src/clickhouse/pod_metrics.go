@@ -320,7 +320,7 @@ func (ch *ClickHouseClient) getContainerMetrics(ctx context.Context, limit int) 
 // 	return metrics, nil
 // }
 
-func GetKafkaTopicMetrics(ctx context.Context, topics []string) ([]KafkaTopicMetric, error) {
+func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRange) ([]KafkaTopicMetric, error) {
 	if monitoringDBClient == nil {
 		return nil, fmt.Errorf("monitoring DB client not initialized")
 	}
@@ -329,33 +329,6 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string) ([]KafkaTopicMet
 	if len(topics) == 0 {
 		return nil, fmt.Errorf("no topics provided")
 	}
-
-	// query := `
-	// 	SELECT
-	// 		t.topic AS metric,
-	// 		t.timestamp AS timestamp,
-	// 		sum(t.OneMinuteRate) AS OneMinuteRate
-	// 	FROM kafka_Broker_Topic_Metrics AS t
-	// 	INNER JOIN (
-	// 		SELECT
-	// 			topic,
-	// 			max(timestamp) AS latest_ts
-	// 		FROM kafka_Broker_Topic_Metrics
-	// 		WHERE
-	// 			name = 'MessagesInPerSec'
-	// 			AND timestamp >= now() - INTERVAL 10 MINUTE
-	// 		GROUP BY topic
-	// 	) AS latest
-	// 	ON t.topic = latest.topic AND t.timestamp = latest.latest_ts
-	// 	WHERE
-	// 		t.name = 'MessagesInPerSec'
-	// 		AND has(?, t.topic)         -- ✅ use array parameter binding
-	// 	GROUP BY
-	// 		t.topic,
-	// 		t.timestamp
-	// 	ORDER BY
-	// 		t.timestamp DESC
-	// `
 
 	query := `
 	SELECT
@@ -370,7 +343,8 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string) ([]KafkaTopicMet
 		FROM kafka_Broker_Topic_Metrics
 		WHERE
 			name = 'MessagesInPerSec'
-			AND timestamp >= now() - INTERVAL 10 MINUTE
+			AND timestamp >= ?
+			AND timestamp <= ?
 		GROUP BY topic
 	) AS latest
 	ON t.topic = latest.topic AND t.timestamp = latest.latest_ts
@@ -384,9 +358,8 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string) ([]KafkaTopicMet
 		t.timestamp DESC
 `
 
-
-	// Pass the topics slice as a single array parameter
-rows, err := monitoringDBClient.Client.Query(ctx, query, topics)
+	// Pass the time range and topics as parameters
+	rows, err := monitoringDBClient.Client.Query(ctx, query, timeRange.From, timeRange.To, topics)
 	if err != nil {
 		return nil, fmt.Errorf("error querying Kafka topic metrics: %v", err)
 	}
@@ -434,7 +407,12 @@ func (c *ClickHouseClient) CollectMetrics(timeRange TimeRange) (*ClickHouseMetri
 		"mongo-metrics-input",
 		"mssql-telegraf",
 	}
-	kafkaTopicMetrics, err := GetKafkaTopicMetrics(ctx, kafkaTopics)
+	// Use default time range (last 5 minutes) for general metrics collection
+	defaultTimeRange := TimeRange{
+		From: time.Now().Add(-5 * time.Minute),
+		To:   time.Now(),
+	}
+	kafkaTopicMetrics, err := GetKafkaTopicMetrics(ctx, kafkaTopics, defaultTimeRange)
 	if err != nil {
 		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Error collecting Kafka topic metrics: %v", err), "error")
 	} else {
