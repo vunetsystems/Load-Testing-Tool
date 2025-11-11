@@ -366,7 +366,6 @@ class O11ySources {
                     this.updateSyncProgress(100, 'vuDataSim started successfully');
                     this.updateStep(6, 'completed', 'check_circle', 'Completed');
                     this.showSyncSuccess();
-                    this.manager.showNotification('vuDataSim started successfully!', 'success');
 
                     // Update button states to show running
                     const startBtn = this.manager.elements.startVuDataSimBtn;

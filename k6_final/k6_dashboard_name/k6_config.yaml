@@ -5,7 +5,7 @@ dashboards:
     - id: b1ec2dfd-6a8e-456b-869e-1f8df644e614
       name: MSSQL Overview Dashboard
       slug: mssql-overview-dashboard
-      enabled: false
+      enabled: true
     - id: cf5c449b-42e0-433d-9183-d5f717ae3a83
       name: Linux Server Insights
       slug: linux-server-insights

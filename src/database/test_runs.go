@@ -47,7 +47,7 @@ func CreateTestRun(targetEPS int, o11ySources []string, timeoutSeconds int) (*mo
 func StopTestRun(testID string) error {
 	stopTime := time.Now().UTC()
 
-	query := `UPDATE test_runs SET stop_time = ?, status = 'stopped' WHERE test_id = ?`
+	query := `UPDATE test_runs SET end_time = ?, status = 'stopped' WHERE test_id = ?`
 	_, err := DB.Exec(query, stopTime, testID)
 	if err != nil {
 		return fmt.Errorf("failed to update test run stop time: %w", err)
@@ -59,21 +59,45 @@ func StopTestRun(testID string) error {
 // GetTestRun retrieves a specific test run by ID
 func GetTestRun(testID string) (*models.TestRun, error) {
 	query := `
-		SELECT test_id, target_eps, start_time, stop_time, o11y_sources, timeout_seconds, status
+		SELECT test_id, test_name, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
+			   total_input_msgs, total_output_msgs, avg_input_msgs_per_sec, avg_output_msgs_per_sec,
+			   peak_input_msgs_per_sec, peak_output_msgs_per_sec, min_input_msgs_per_sec, min_output_msgs_per_sec,
+			   data_loss_pct, lag_ms_avg, lag_ms_max, anomaly_detected, anomaly_score_overall,
+			   anomaly_details, o11y_sources_summary, kafka_summary_generated
 		FROM test_runs WHERE test_id = ?`
 
 	var testRun models.TestRun
 	var sourcesJSON string
-	var stopTime sql.NullTime
+	var endTime sql.NullTime
+	var testName sql.NullString
+	var anomalyDetails sql.NullString
+	var o11ySourcesSummary sql.NullString
 
 	err := DB.QueryRow(query, testID).Scan(
 		&testRun.TestID,
+		&testName,
 		&testRun.TargetEPS,
 		&testRun.StartTime,
-		&stopTime,
+		&endTime,
 		&sourcesJSON,
 		&testRun.TimeoutSeconds,
 		&testRun.Status,
+		&testRun.TotalInputMsgs,
+		&testRun.TotalOutputMsgs,
+		&testRun.AvgInputMsgsPerSec,
+		&testRun.AvgOutputMsgsPerSec,
+		&testRun.PeakInputMsgsPerSec,
+		&testRun.PeakOutputMsgsPerSec,
+		&testRun.MinInputMsgsPerSec,
+		&testRun.MinOutputMsgsPerSec,
+		&testRun.DataLossPct,
+		&testRun.LagMsAvg,
+		&testRun.LagMsMax,
+		&testRun.AnomalyDetected,
+		&testRun.AnomalyScoreOverall,
+		&anomalyDetails,
+		&o11ySourcesSummary,
+		&testRun.KafkaSummaryGenerated,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -82,8 +106,17 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 		return nil, fmt.Errorf("failed to query test run: %w", err)
 	}
 
-	if stopTime.Valid {
-		testRun.StopTime = &stopTime.Time
+	if endTime.Valid {
+		testRun.EndTime = &endTime.Time
+	}
+	if testName.Valid {
+		testRun.TestName = testName.String
+	}
+	if anomalyDetails.Valid {
+		testRun.AnomalyDetails = anomalyDetails.String
+	}
+	if o11ySourcesSummary.Valid {
+		testRun.O11ySourcesSummary = o11ySourcesSummary.String
 	}
 
 	// Parse JSON sources
@@ -98,7 +131,11 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 // GetAllTestRuns retrieves all test runs ordered by start time descending
 func GetAllTestRuns() ([]*models.TestRun, error) {
 	query := `
-		SELECT test_id, target_eps, start_time, stop_time, o11y_sources, timeout_seconds, status
+		SELECT test_id, test_name, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
+			   total_input_msgs, total_output_msgs, avg_input_msgs_per_sec, avg_output_msgs_per_sec,
+			   peak_input_msgs_per_sec, peak_output_msgs_per_sec, min_input_msgs_per_sec, min_output_msgs_per_sec,
+			   data_loss_pct, lag_ms_avg, lag_ms_max, anomaly_detected, anomaly_score_overall,
+			   anomaly_details, o11y_sources_summary, kafka_summary_generated
 		FROM test_runs ORDER BY start_time DESC`
 
 	rows, err := DB.Query(query)
@@ -111,23 +148,52 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 	for rows.Next() {
 		var testRun models.TestRun
 		var sourcesJSON string
-		var stopTime sql.NullTime
+		var endTime sql.NullTime
+		var testName sql.NullString
+		var anomalyDetails sql.NullString
+		var o11ySourcesSummary sql.NullString
 
 		err := rows.Scan(
 			&testRun.TestID,
+			&testName,
 			&testRun.TargetEPS,
 			&testRun.StartTime,
-			&stopTime,
+			&endTime,
 			&sourcesJSON,
 			&testRun.TimeoutSeconds,
 			&testRun.Status,
+			&testRun.TotalInputMsgs,
+			&testRun.TotalOutputMsgs,
+			&testRun.AvgInputMsgsPerSec,
+			&testRun.AvgOutputMsgsPerSec,
+			&testRun.PeakInputMsgsPerSec,
+			&testRun.PeakOutputMsgsPerSec,
+			&testRun.MinInputMsgsPerSec,
+			&testRun.MinOutputMsgsPerSec,
+			&testRun.DataLossPct,
+			&testRun.LagMsAvg,
+			&testRun.LagMsMax,
+			&testRun.AnomalyDetected,
+			&testRun.AnomalyScoreOverall,
+			&anomalyDetails,
+			&o11ySourcesSummary,
+			&testRun.KafkaSummaryGenerated,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan test run: %w", err)
 		}
 
-		if stopTime.Valid {
-			testRun.StopTime = &stopTime.Time
+		if endTime.Valid {
+			testRun.EndTime = &endTime.Time
+		}
+		if testName.Valid {
+			testRun.TestName = testName.String
+		}
+		if anomalyDetails.Valid {
+			testRun.AnomalyDetails = anomalyDetails.String
+		}
+		if o11ySourcesSummary.Valid {
+			testRun.O11ySourcesSummary = o11ySourcesSummary.String
 		}
 
 		// Parse JSON sources
@@ -171,7 +237,7 @@ func CompleteTimedOutTestRuns() error {
 
 	query := `
 		UPDATE test_runs
-		SET stop_time = ?, status = 'completed'
+		SET end_time = ?, status = 'completed'
 		WHERE status = 'running'
 		AND datetime(start_time, '+' || timeout_seconds || ' seconds') <= ?
 	`
