@@ -212,10 +212,10 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 	}
 
 	// 4. Fetch and compute pod resource metrics
-	podSummaryJSON, podDataFound, err := pod_processors.ProcessPodResourceSummary(chClient, startTime, endTime)
+	podMetrics, podDataFound, err := pod_processors.ProcessPodResourceSummary(chClient, startTime, endTime)
 	if err != nil {
 		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process pod metrics: %v", err))
-		podSummaryJSON = ""
+		podMetrics = pod_processors.PodMetrics{}
 		podDataFound = false
 	}
 
@@ -224,6 +224,13 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 	if err != nil {
 		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process node memory metrics: %v", err))
 		nodeMemoryResult = NodeMemoryResult{} // default to zeros
+	}
+
+	// 7. Fetch and compute node CPU metrics
+	nodeCPUResult, err := ProcessNodeCPUSummary(chClient, startTime, endTime)
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process node CPU metrics: %v", err))
+		nodeCPUResult = NodeCPUResult{} // default to zeros
 	}
 
 	// 5. Store the summary back to the database
@@ -275,21 +282,53 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		    max_input_msgs_per_sec = ?, max_output_msgs_per_sec = ?,
 		    min_input_msgs_per_sec = ?, min_output_msgs_per_sec = ?,
 		    data_loss_pct = ?, kafka_summary_generated = 1,
-		    pod_resource_check = ?, pod_metrics = ?, process_rate_summary = ?, ingestion_summary = ?, -- Added for ingestion summary
+		    pod_resource_check = ?,
+		    kafka_cluster_cp_kafka_0_cpu_min = ?, kafka_cluster_cp_kafka_0_cpu_avg = ?, kafka_cluster_cp_kafka_0_cpu_max = ?,
+		    kafka_cluster_cp_kafka_0_mem_min = ?, kafka_cluster_cp_kafka_0_mem_avg = ?, kafka_cluster_cp_kafka_0_mem_max = ?,
+		    kafka_cluster_cp_kafka_1_cpu_min = ?, kafka_cluster_cp_kafka_1_cpu_avg = ?, kafka_cluster_cp_kafka_1_cpu_max = ?,
+		    kafka_cluster_cp_kafka_1_mem_min = ?, kafka_cluster_cp_kafka_1_mem_avg = ?, kafka_cluster_cp_kafka_1_mem_max = ?,
+		    kafka_cluster_cp_kafka_2_cpu_min = ?, kafka_cluster_cp_kafka_2_cpu_avg = ?, kafka_cluster_cp_kafka_2_cpu_max = ?,
+		    kafka_cluster_cp_kafka_2_mem_min = ?, kafka_cluster_cp_kafka_2_mem_avg = ?, kafka_cluster_cp_kafka_2_mem_max = ?,
+		    chi_clickhouse_vusmart_0_0_0_cpu_min = ?, chi_clickhouse_vusmart_0_0_0_cpu_avg = ?, chi_clickhouse_vusmart_0_0_0_cpu_max = ?,
+		    chi_clickhouse_vusmart_0_0_0_mem_min = ?, chi_clickhouse_vusmart_0_0_0_mem_avg = ?, chi_clickhouse_vusmart_0_0_0_mem_max = ?,
+		    chi_clickhouse_vusmart_0_1_0_cpu_min = ?, chi_clickhouse_vusmart_0_1_0_cpu_avg = ?, chi_clickhouse_vusmart_0_1_0_cpu_max = ?,
+		    chi_clickhouse_vusmart_0_1_0_mem_min = ?, chi_clickhouse_vusmart_0_1_0_mem_avg = ?, chi_clickhouse_vusmart_0_1_0_mem_max = ?,
+		    process_rate_summary = ?, ingestion_summary = ?, -- Added for ingestion summary
 		    kafka_1_node_mem_min = ?, kafka_1_node_mem_avg = ?, kafka_1_node_mem_max = ?,
 		    kafka_2_node_mem_min = ?, kafka_2_node_mem_avg = ?, kafka_2_node_mem_max = ?,
 		    kafka_3_node_mem_min = ?, kafka_3_node_mem_avg = ?, kafka_3_node_mem_max = ?,
 		    ch1_node_mem_min = ?, ch1_node_mem_avg = ?, ch1_node_mem_max = ?,
-		    ch2_node_mem_min = ?, ch2_node_mem_avg = ?, ch2_node_mem_max = ?
+		    ch2_node_mem_min = ?, ch2_node_mem_avg = ?, ch2_node_mem_max = ?,
+		    kafka_1_node_cpu_min = ?, kafka_1_node_cpu_avg = ?, kafka_1_node_cpu_max = ?,
+		    kafka_2_node_cpu_min = ?, kafka_2_node_cpu_avg = ?, kafka_2_node_cpu_max = ?,
+		    kafka_3_node_cpu_min = ?, kafka_3_node_cpu_avg = ?, kafka_3_node_cpu_max = ?,
+		    ch1_node_cpu_min = ?, ch1_node_cpu_avg = ?, ch1_node_cpu_max = ?,
+		    ch2_node_cpu_min = ?, ch2_node_cpu_avg = ?, ch2_node_cpu_max = ?
 		WHERE test_id = ?;
 	`, avgInputRate, avgOutputRate,
 		peakInputRate, peakOutputRate, minInputRate, minOutputRate,
-		dataLossPct, podDataFound, string(podSummaryJSON), string(processRateSummaryJSON), string(ingestionSummaryJSON),
+		dataLossPct, podDataFound,
+		podMetrics.KafkaClusterCpKafka0CpuMin, podMetrics.KafkaClusterCpKafka0CpuAvg, podMetrics.KafkaClusterCpKafka0CpuMax,
+		podMetrics.KafkaClusterCpKafka0MemMin, podMetrics.KafkaClusterCpKafka0MemAvg, podMetrics.KafkaClusterCpKafka0MemMax,
+		podMetrics.KafkaClusterCpKafka1CpuMin, podMetrics.KafkaClusterCpKafka1CpuAvg, podMetrics.KafkaClusterCpKafka1CpuMax,
+		podMetrics.KafkaClusterCpKafka1MemMin, podMetrics.KafkaClusterCpKafka1MemAvg, podMetrics.KafkaClusterCpKafka1MemMax,
+		podMetrics.KafkaClusterCpKafka2CpuMin, podMetrics.KafkaClusterCpKafka2CpuAvg, podMetrics.KafkaClusterCpKafka2CpuMax,
+		podMetrics.KafkaClusterCpKafka2MemMin, podMetrics.KafkaClusterCpKafka2MemAvg, podMetrics.KafkaClusterCpKafka2MemMax,
+		podMetrics.ChiClickhouseVusmart000CpuMin, podMetrics.ChiClickhouseVusmart000CpuAvg, podMetrics.ChiClickhouseVusmart000CpuMax,
+		podMetrics.ChiClickhouseVusmart000MemMin, podMetrics.ChiClickhouseVusmart000MemAvg, podMetrics.ChiClickhouseVusmart000MemMax,
+		podMetrics.ChiClickhouseVusmart010CpuMin, podMetrics.ChiClickhouseVusmart010CpuAvg, podMetrics.ChiClickhouseVusmart010CpuMax,
+		podMetrics.ChiClickhouseVusmart010MemMin, podMetrics.ChiClickhouseVusmart010MemAvg, podMetrics.ChiClickhouseVusmart010MemMax,
+		string(processRateSummaryJSON), string(ingestionSummaryJSON),
 		nodeMemoryResult.Kafka1Min, nodeMemoryResult.Kafka1Avg, nodeMemoryResult.Kafka1Max,
 		nodeMemoryResult.Kafka2Min, nodeMemoryResult.Kafka2Avg, nodeMemoryResult.Kafka2Max,
 		nodeMemoryResult.Kafka3Min, nodeMemoryResult.Kafka3Avg, nodeMemoryResult.Kafka3Max,
 		nodeMemoryResult.Ch1Min, nodeMemoryResult.Ch1Avg, nodeMemoryResult.Ch1Max,
 		nodeMemoryResult.Ch2Min, nodeMemoryResult.Ch2Avg, nodeMemoryResult.Ch2Max,
+		nodeCPUResult.Kafka1Min, nodeCPUResult.Kafka1Avg, nodeCPUResult.Kafka1Max,
+		nodeCPUResult.Kafka2Min, nodeCPUResult.Kafka2Avg, nodeCPUResult.Kafka2Max,
+		nodeCPUResult.Kafka3Min, nodeCPUResult.Kafka3Avg, nodeCPUResult.Kafka3Max,
+		nodeCPUResult.Ch1Min, nodeCPUResult.Ch1Avg, nodeCPUResult.Ch1Max,
+		nodeCPUResult.Ch2Min, nodeCPUResult.Ch2Avg, nodeCPUResult.Ch2Max,
 		testID)
 	if err != nil {
 		return fmt.Errorf("failed to update test run with summary: %w", err)
