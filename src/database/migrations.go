@@ -111,6 +111,21 @@ func runSchemaUpdates() error {
 		"pod_metrics":                "TEXT",
 		"process_rate_summary":       "TEXT", // JSON summary of process rates per o11y source
 		"ingestion_summary":          "TEXT", // JSON summary of hyperscale ingestion table-wise EPS data
+		"kafka_1_node_mem_min":       "REAL DEFAULT 0.0",
+		"kafka_1_node_mem_avg":       "REAL DEFAULT 0.0",
+		"kafka_1_node_mem_max":       "REAL DEFAULT 0.0",
+		"kafka_2_node_mem_min":       "REAL DEFAULT 0.0",
+		"kafka_2_node_mem_avg":       "REAL DEFAULT 0.0",
+		"kafka_2_node_mem_max":       "REAL DEFAULT 0.0",
+		"kafka_3_node_mem_min":       "REAL DEFAULT 0.0",
+		"kafka_3_node_mem_avg":       "REAL DEFAULT 0.0",
+		"kafka_3_node_mem_max":       "REAL DEFAULT 0.0",
+		"ch1_node_mem_min":           "REAL DEFAULT 0.0",
+		"ch1_node_mem_avg":           "REAL DEFAULT 0.0",
+		"ch1_node_mem_max":           "REAL DEFAULT 0.0",
+		"ch2_node_mem_min":           "REAL DEFAULT 0.0",
+		"ch2_node_mem_avg":           "REAL DEFAULT 0.0",
+		"ch2_node_mem_max":           "REAL DEFAULT 0.0",
 	}
 
 	for name, def := range columnsToAdd {

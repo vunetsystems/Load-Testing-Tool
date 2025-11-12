@@ -219,6 +219,13 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		podDataFound = false
 	}
 
+	// 6. Fetch and compute node memory metrics
+	nodeMemoryResult, err := ProcessNodeMemorySummary(chClient, startTime, endTime)
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process node memory metrics: %v", err))
+		nodeMemoryResult = NodeMemoryResult{} // default to zeros
+	}
+
 	// 5. Store the summary back to the database
 	processRateSummaryJSON, _ := json.Marshal(processRateSummary) // Added for process rate summary - store in separate column
 	ingestionSummaryJSON, _ := json.Marshal(ingestionEntries) // Added for ingestion summary - store EPS data for ClickHouse tables
@@ -268,11 +275,22 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		    max_input_msgs_per_sec = ?, max_output_msgs_per_sec = ?,
 		    min_input_msgs_per_sec = ?, min_output_msgs_per_sec = ?,
 		    data_loss_pct = ?, kafka_summary_generated = 1,
-		    pod_resource_check = ?, pod_metrics = ?, process_rate_summary = ?, ingestion_summary = ? -- Added for ingestion summary
+		    pod_resource_check = ?, pod_metrics = ?, process_rate_summary = ?, ingestion_summary = ?, -- Added for ingestion summary
+		    kafka_1_node_mem_min = ?, kafka_1_node_mem_avg = ?, kafka_1_node_mem_max = ?,
+		    kafka_2_node_mem_min = ?, kafka_2_node_mem_avg = ?, kafka_2_node_mem_max = ?,
+		    kafka_3_node_mem_min = ?, kafka_3_node_mem_avg = ?, kafka_3_node_mem_max = ?,
+		    ch1_node_mem_min = ?, ch1_node_mem_avg = ?, ch1_node_mem_max = ?,
+		    ch2_node_mem_min = ?, ch2_node_mem_avg = ?, ch2_node_mem_max = ?
 		WHERE test_id = ?;
 	`, avgInputRate, avgOutputRate,
 		peakInputRate, peakOutputRate, minInputRate, minOutputRate,
-		dataLossPct, podDataFound, string(podSummaryJSON), string(processRateSummaryJSON), string(ingestionSummaryJSON), testID)
+		dataLossPct, podDataFound, string(podSummaryJSON), string(processRateSummaryJSON), string(ingestionSummaryJSON),
+		nodeMemoryResult.Kafka1Min, nodeMemoryResult.Kafka1Avg, nodeMemoryResult.Kafka1Max,
+		nodeMemoryResult.Kafka2Min, nodeMemoryResult.Kafka2Avg, nodeMemoryResult.Kafka2Max,
+		nodeMemoryResult.Kafka3Min, nodeMemoryResult.Kafka3Avg, nodeMemoryResult.Kafka3Max,
+		nodeMemoryResult.Ch1Min, nodeMemoryResult.Ch1Avg, nodeMemoryResult.Ch1Max,
+		nodeMemoryResult.Ch2Min, nodeMemoryResult.Ch2Avg, nodeMemoryResult.Ch2Max,
+		testID)
 	if err != nil {
 		return fmt.Errorf("failed to update test run with summary: %w", err)
 	}
