@@ -59,47 +59,34 @@ func StopTestRun(testID string) error {
 // GetTestRun retrieves a specific test run by ID
 func GetTestRun(testID string) (*models.TestRun, error) {
 	query := `
-		SELECT test_id, test_name, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
-			   total_input_msgs, total_output_msgs, avg_input_msgs_per_sec, avg_output_msgs_per_sec,
-			   peak_input_msgs_per_sec, peak_output_msgs_per_sec, min_input_msgs_per_sec, min_output_msgs_per_sec,
-			   data_loss_pct, lag_ms_avg, lag_ms_max, anomaly_detected, anomaly_score_overall,
-			   anomaly_details, o11y_sources_summary, kafka_summary_generated, pod_resource_check, pod_metrics, process_rate_summary, ingestion_summary
+		SELECT test_id, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
+			   avg_input_msgs_per_sec, avg_output_msgs_per_sec,
+			   max_input_msgs_per_sec, max_output_msgs_per_sec, min_input_msgs_per_sec, min_output_msgs_per_sec,
+			   data_loss_pct, kafka_summary_generated, pod_resource_check, pod_metrics, process_rate_summary, ingestion_summary
 		FROM test_runs WHERE test_id = ?`
 
 	var testRun models.TestRun
 	var sourcesJSON string
 	var endTime sql.NullTime
-	var testName sql.NullString
-	var anomalyDetails sql.NullString
-	var o11ySourcesSummary sql.NullString
 	var podMetrics sql.NullString
 	var processRateSummary sql.NullString // New column for process rate summary JSON
 	var ingestionSummary sql.NullString   // New ingestion summary column
 
 	err := DB.QueryRow(query, testID).Scan(
 		&testRun.TestID,
-		&testName,
 		&testRun.TargetEPS,
 		&testRun.StartTime,
 		&endTime,
 		&sourcesJSON,
 		&testRun.TimeoutSeconds,
 		&testRun.Status,
-		&testRun.TotalInputMsgs,
-		&testRun.TotalOutputMsgs,
 		&testRun.AvgInputMsgsPerSec,
 		&testRun.AvgOutputMsgsPerSec,
-		&testRun.PeakInputMsgsPerSec,
-		&testRun.PeakOutputMsgsPerSec,
+		&testRun.MaxInputMsgsPerSec,
+		&testRun.MaxOutputMsgsPerSec,
 		&testRun.MinInputMsgsPerSec,
 		&testRun.MinOutputMsgsPerSec,
 		&testRun.DataLossPct,
-		&testRun.LagMsAvg,
-		&testRun.LagMsMax,
-		&testRun.AnomalyDetected,
-		&testRun.AnomalyScoreOverall,
-		&anomalyDetails,
-		&o11ySourcesSummary,
 		&testRun.KafkaSummaryGenerated,
 		&testRun.PodResourceCheck,
 		&podMetrics,
@@ -115,15 +102,6 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 
 	if endTime.Valid {
 		testRun.EndTime = &endTime.Time
-	}
-	if testName.Valid {
-		testRun.TestName = testName.String
-	}
-	if anomalyDetails.Valid {
-		testRun.AnomalyDetails = anomalyDetails.String
-	}
-	if o11ySourcesSummary.Valid {
-		testRun.O11ySourcesSummary = o11ySourcesSummary.String
 	}
 	if podMetrics.Valid {
 		testRun.PodMetrics = podMetrics.String
@@ -147,11 +125,10 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 // GetAllTestRuns retrieves all test runs ordered by start time descending
 func GetAllTestRuns() ([]*models.TestRun, error) {
 	query := `
-		SELECT test_id, test_name, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
-			   total_input_msgs, total_output_msgs, avg_input_msgs_per_sec, avg_output_msgs_per_sec,
-			   peak_input_msgs_per_sec, peak_output_msgs_per_sec, min_input_msgs_per_sec, min_output_msgs_per_sec,
-			   data_loss_pct, lag_ms_avg, lag_ms_max, anomaly_detected, anomaly_score_overall,
-			   anomaly_details, o11y_sources_summary, kafka_summary_generated, pod_resource_check, pod_metrics, process_rate_summary, ingestion_summary
+		SELECT test_id, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
+			   avg_input_msgs_per_sec, avg_output_msgs_per_sec,
+			   max_input_msgs_per_sec, max_output_msgs_per_sec, min_input_msgs_per_sec, min_output_msgs_per_sec,
+			   data_loss_pct, kafka_summary_generated, pod_resource_check, pod_metrics, process_rate_summary, ingestion_summary
 		FROM test_runs ORDER BY start_time DESC`
 
 	rows, err := DB.Query(query)
@@ -165,37 +142,25 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		var testRun models.TestRun
 		var sourcesJSON string
 		var endTime sql.NullTime
-		var testName sql.NullString
-		var anomalyDetails sql.NullString
-		var o11ySourcesSummary sql.NullString
 		var podMetrics sql.NullString
 		var processRateSummary sql.NullString // New column for process rate summary JSON
 		var ingestionSummary sql.NullString // New column for ingestion summary JSON
 	
 		err := rows.Scan(
 			&testRun.TestID,
-			&testName,
 			&testRun.TargetEPS,
 			&testRun.StartTime,
 			&endTime,
 			&sourcesJSON,
 			&testRun.TimeoutSeconds,
 			&testRun.Status,
-			&testRun.TotalInputMsgs,
-			&testRun.TotalOutputMsgs,
 			&testRun.AvgInputMsgsPerSec,
 			&testRun.AvgOutputMsgsPerSec,
-			&testRun.PeakInputMsgsPerSec,
-			&testRun.PeakOutputMsgsPerSec,
+			&testRun.MaxInputMsgsPerSec,
+			&testRun.MaxOutputMsgsPerSec,
 			&testRun.MinInputMsgsPerSec,
 			&testRun.MinOutputMsgsPerSec,
 			&testRun.DataLossPct,
-			&testRun.LagMsAvg,
-			&testRun.LagMsMax,
-			&testRun.AnomalyDetected,
-			&testRun.AnomalyScoreOverall,
-			&anomalyDetails,
-			&o11ySourcesSummary,
 			&testRun.KafkaSummaryGenerated,
 			&testRun.PodResourceCheck,
 			&podMetrics,
@@ -208,15 +173,6 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 
 		if endTime.Valid {
 			testRun.EndTime = &endTime.Time
-		}
-		if testName.Valid {
-			testRun.TestName = testName.String
-		}
-		if anomalyDetails.Valid {
-			testRun.AnomalyDetails = anomalyDetails.String
-		}
-		if o11ySourcesSummary.Valid {
-			testRun.O11ySourcesSummary = o11ySourcesSummary.String
 		}
 		if podMetrics.Valid {
 			testRun.PodMetrics = podMetrics.String

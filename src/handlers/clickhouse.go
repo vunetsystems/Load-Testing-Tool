@@ -111,50 +111,6 @@ func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Define O11y source mappings (available for both real-time and test-filtered modes)
-	o11yToTopics := map[string][]string{
-		"MongoDB": {
-			"mongo-metrics-input",           // input
-			"mongo-metrics", "mongo-top-stats", "mongo-shard-stats", "mongo-col-stats", "mongo-db-stats", // outputs
-		},
-		"Mssql": {  // ✅ Fixed: matches categories.yaml "Mssql"
-			"mssql-telegraf",               // input
-			"mssql-memory-clerks", "mssql-database-io", "mssql-net-response", "mssql-hadr-replica",
-			"mssql-schedulers", "mssql-requests", "mssql-server-properties", "mssql-performance",
-			"mssql-hadr-dbreplica", "mssql-session", "mssql-telegraf-health", "mssql-volume-space",
-			"mssql-cpu", "mssql-waitstats", "mssql-cluster", "mssql-recentbackup", // outputs
-		},
-		"Apache": {
-			"apache-metrics-input", "apache-logs-input", // inputs
-			"apache-logs", "apache-metrics",             // outputs
-		},
-		"LinuxMonitor": {  // ✅ Fixed: matches categories.yaml "LinuxMonitor"
-			"linux-monitor-input", // input
-			"linux-monitor-additional-metrics", "linux-monitor-process-metrics",
-			"linux-monitor-resource-metrics", "linux-monitor-storage-metrics", // outputs
-		},
-		"Azure_Firewall": {
-			"azure-firewall-input", // input
-			// Add output topics if they exist
-		},
-		"Azure_Redis_Cache": {
-			"azure-redis-cache-input", // input
-			// Add output topics if they exist
-		},
-		"AzureStorageBlob": {
-			"vuazure-storage-blob-input", // input
-			// Add output topics if they exist
-		},
-	}
-
-	// Map database names to categories.yaml names for compatibility
-	dbNameToCategory := map[string]string{
-		"Linux Monitor": "LinuxMonitor",
-		"Azure Firewall": "Azure_Firewall",
-		"Azure Redis Cache": "Azure_Redis_Cache",
-		"Azure Storage Blob": "AzureStorageBlob",
-	}
-
 	// Define Kafka topics to monitor - default to all topics (input + output)
 	topics := []string{
 		// Input topics
@@ -184,29 +140,47 @@ func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Use test run's time range if no custom time range provided
-		if startStr == "" || endStr == "" {
-			if testRun.EndTime != nil {
-				timeRange.From = testRun.StartTime
-				timeRange.To = *testRun.EndTime
-			} else {
-				// Test is still running, use start time to now
-				timeRange.From = testRun.StartTime
-				timeRange.To = time.Now()
-			}
+		// Map O11y source names to their input and output topics (keys must match categories.yaml exactly)
+		o11yToTopics := map[string][]string{
+			"MongoDB": {
+				"mongo-metrics-input",           // input
+				"mongo-metrics", "mongo-top-stats", "mongo-shard-stats", "mongo-col-stats", "mongo-db-stats", // outputs
+			},
+			"Mssql": {  // ✅ Fixed: matches categories.yaml "Mssql"
+				"mssql-telegraf",               // input
+				"mssql-memory-clerks", "mssql-database-io", "mssql-net-response", "mssql-hadr-replica",
+				"mssql-schedulers", "mssql-requests", "mssql-server-properties", "mssql-performance",
+				"mssql-hadr-dbreplica", "mssql-session", "mssql-telegraf-health", "mssql-volume-space",
+				"mssql-cpu", "mssql-waitstats", "mssql-cluster", "mssql-recentbackup", // outputs
+			},
+			"Apache": {
+				"apache-metrics-input", "apache-logs-input", // inputs
+				"apache-logs", "apache-metrics",             // outputs
+			},
+			"LinuxMonitor": {  // ✅ Fixed: matches categories.yaml "LinuxMonitor"
+				"linux-monitor-input", // input
+				"linux-monitor-additional-metrics", "linux-monitor-process-metrics",
+				"linux-monitor-resource-metrics", "linux-monitor-storage-metrics", // outputs
+			},
+			"Azure_Firewall": {
+				"azure-firewall-input", // input
+				// Add output topics if they exist
+			},
+			"Azure_Redis_Cache": {
+				"azure-redis-cache-input", // input
+				// Add output topics if they exist
+			},
+			"AzureStorageBlob": {
+				"vuazure-storage-blob-input", // input
+				// Add output topics if they exist
+			},
 		}
 
 		// Filter topics to only include those enabled for this test run
 		filteredTopics := []string{}
 		for _, source := range testRun.O11ySources {
-			// Map database name to category name if needed
-			categoryName := source
-			if mapped, exists := dbNameToCategory[source]; exists {
-				categoryName = mapped
-			}
-
-			if topicList, exists := o11yToTopics[categoryName]; exists {
-				filteredTopics = append(filteredTopics, topicList...)
+			if topics, exists := o11yToTopics[source]; exists {
+				filteredTopics = append(filteredTopics, topics...)
 			}
 		}
 
@@ -361,60 +335,7 @@ func HandleAPIGetK6MaxVus(w http.ResponseWriter, r *http.Request) {
 }
 // HandleAPIGetK6LoginResults handles GET /api/clickhouse/k6-login-results
 func HandleAPIGetK6LoginResults(w http.ResponseWriter, r *http.Request) {
-	startStr := r.URL.Query().Get("start")
-	endStr := r.URL.Query().Get("end")
-	testIDStr := r.URL.Query().Get("test_id")
-
-	var timeRange clickhouse.TimeRange
-	if startStr == "" || endStr == "" {
-		// Default to last 24 hours if no time range provided
-		timeRange.To = time.Now()
-		timeRange.From = timeRange.To.Add(-24 * time.Hour)
-	} else {
-		var err error
-		timeRange.From, err = time.Parse(time.RFC3339, startStr)
-		if err != nil {
-			sendJSONResponse(w, http.StatusBadRequest, APIResponse{
-				Success: false,
-				Message: fmt.Sprintf("Invalid start time format: %v", err),
-			})
-			return
-		}
-		timeRange.To, err = time.Parse(time.RFC3339, endStr)
-		if err != nil {
-			sendJSONResponse(w, http.StatusBadRequest, APIResponse{
-				Success: false,
-				Message: fmt.Sprintf("Invalid end time format: %v", err),
-			})
-			return
-		}
-	}
-
-	// If test_id is provided, get time range from database
-	if testIDStr != "" {
-		k6Run, err := database.GetK6Run(testIDStr)
-		if err != nil {
-			sendJSONResponse(w, http.StatusBadRequest, APIResponse{
-				Success: false,
-				Message: fmt.Sprintf("Invalid test_id or K6 run not found: %v", err),
-			})
-			return
-		}
-
-		// Use K6 run's time range if no custom time range provided
-		if startStr == "" || endStr == "" {
-			if k6Run.EndTime != nil {
-				timeRange.From = k6Run.StartTime
-				timeRange.To = *k6Run.EndTime
-			} else {
-				// Test is still running, use start time to now
-				timeRange.From = k6Run.StartTime
-				timeRange.To = time.Now()
-			}
-		}
-	}
-
-	k6LoginResults, err := clickhouse.GetK6LoginResults(r.Context(), timeRange)
+	k6LoginResults, err := clickhouse.GetK6LoginResults(r.Context())
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
@@ -431,60 +352,7 @@ func HandleAPIGetK6LoginResults(w http.ResponseWriter, r *http.Request) {
 }
 // HandleAPIGetK6DashboardResults handles GET /api/clickhouse/k6-dashboard-results
 func HandleAPIGetK6DashboardResults(w http.ResponseWriter, r *http.Request) {
-	startStr := r.URL.Query().Get("start")
-	endStr := r.URL.Query().Get("end")
-	testIDStr := r.URL.Query().Get("test_id")
-
-	var timeRange clickhouse.TimeRange
-	if startStr == "" || endStr == "" {
-		// Default to last 24 hours if no time range provided
-		timeRange.To = time.Now()
-		timeRange.From = timeRange.To.Add(-24 * time.Hour)
-	} else {
-		var err error
-		timeRange.From, err = time.Parse(time.RFC3339, startStr)
-		if err != nil {
-			SendJSONResponse(w, http.StatusBadRequest, APIResponse{
-				Success: false,
-				Message: fmt.Sprintf("Invalid start time format: %v", err),
-			})
-			return
-		}
-		timeRange.To, err = time.Parse(time.RFC3339, endStr)
-		if err != nil {
-			SendJSONResponse(w, http.StatusBadRequest, APIResponse{
-				Success: false,
-				Message: fmt.Sprintf("Invalid end time format: %v", err),
-			})
-			return
-		}
-	}
-
-	// If test_id is provided, get time range from database
-	if testIDStr != "" {
-		k6Run, err := database.GetK6Run(testIDStr)
-		if err != nil {
-			SendJSONResponse(w, http.StatusBadRequest, APIResponse{
-				Success: false,
-				Message: fmt.Sprintf("Invalid test_id or K6 run not found: %v", err),
-			})
-			return
-		}
-
-		// Use K6 run's time range if no custom time range provided
-		if startStr == "" || endStr == "" {
-			if k6Run.EndTime != nil {
-				timeRange.From = k6Run.StartTime
-				timeRange.To = *k6Run.EndTime
-			} else {
-				// Test is still running, use start time to now
-				timeRange.From = k6Run.StartTime
-				timeRange.To = time.Now()
-			}
-		}
-	}
-
-	k6DashboardResults, err := clickhouse.GetK6DashboardResults(r.Context(), timeRange)
+	k6DashboardResults, err := clickhouse.GetK6DashboardResults(r.Context())
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
@@ -502,77 +370,17 @@ func HandleAPIGetK6DashboardResults(w http.ResponseWriter, r *http.Request) {
 // HandleAPIGetK6Results handles GET /api/clickhouse/k6-results
 func HandleAPIGetK6Results(w http.ResponseWriter, r *http.Request) {
 	dashboard := r.URL.Query().Get("dashboard")
-	startStr := r.URL.Query().Get("start")
-	endStr := r.URL.Query().Get("end")
-	testIDStr := r.URL.Query().Get("test_id")
 
-	var timeRange clickhouse.TimeRange
-	if startStr == "" || endStr == "" {
-		// Default to last 24 hours if no time range provided
-		timeRange.To = time.Now()
-		timeRange.From = timeRange.To.Add(-24 * time.Hour)
-	} else {
-		var err error
-		timeRange.From, err = time.Parse(time.RFC3339, startStr)
-		if err != nil {
-			SendJSONResponse(w, http.StatusBadRequest, APIResponse{
-				Success: false,
-				Message: fmt.Sprintf("Invalid start time format: %v", err),
-			})
-			return
-		}
-		timeRange.To, err = time.Parse(time.RFC3339, endStr)
-		if err != nil {
-			SendJSONResponse(w, http.StatusBadRequest, APIResponse{
-				Success: false,
-				Message: fmt.Sprintf("Invalid end time format: %v", err),
-			})
-			return
-		}
-	}
-
-	// If test_id is provided, get time range from database
-	if testIDStr != "" {
-		k6Run, err := database.GetK6Run(testIDStr)
-		if err != nil {
-			SendJSONResponse(w, http.StatusBadRequest, APIResponse{
-				Success: false,
-				Message: fmt.Sprintf("Invalid test_id or K6 run not found: %v", err),
-			})
-			return
-		}
-
-		// Use K6 run's time range if no custom time range provided
-		if startStr == "" || endStr == "" {
-			if k6Run.EndTime != nil {
-				timeRange.From = k6Run.StartTime
-				timeRange.To = *k6Run.EndTime
-			} else {
-				// Test is still running, use start time to now
-				timeRange.From = k6Run.StartTime
-				timeRange.To = time.Now()
-			}
-		}
-	}
-
-	// Debug: return test data
-	sendJSONResponse(w, http.StatusOK, APIResponse{
-		Success: true,
-		Message: "K6 results retrieved successfully",
-		Data: "test data",
-	})
-	return
-
-	k6Results, err := clickhouse.GetK6Results(r.Context(), dashboard, timeRange)
+	k6Results, err := clickhouse.GetK6Results(r.Context(), dashboard)
 	if err != nil {
-		sendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Failed to get k6 results: %v", err),
 		})
 		return
 	}
 
-	sendJSONResponse(w, http.StatusOK, APIResponse{
+	SendJSONResponse(w, http.StatusOK, APIResponse{
 		Success: true,
 		Message: "K6 results retrieved successfully",
 		Data:    k6Results,
@@ -705,4 +513,3 @@ func HandleAPIGetPodTrendData(w http.ResponseWriter, r *http.Request) {
 		Data:    trendData,
 	})
 }
-

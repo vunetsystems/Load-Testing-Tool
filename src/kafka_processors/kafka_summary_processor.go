@@ -220,22 +220,17 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 	}
 
 	// 5. Store the summary back to the database
-	o11ySummaryJSON, _ := json.Marshal(summary) // Store the same summary in o11y_sources_summary
 	processRateSummaryJSON, _ := json.Marshal(processRateSummary) // Added for process rate summary - store in separate column
 	ingestionSummaryJSON, _ := json.Marshal(ingestionEntries) // Added for ingestion summary - store EPS data for ClickHouse tables
 
-	// Calculate totals and averages across all sources
-	var totalInput, totalOutput int64
+	// Calculate averages across all sources
 	var avgInputRate, avgOutputRate, peakInputRate, peakOutputRate, minInputRate, minOutputRate float64
 	minInputRate = math.MaxFloat64
 	minOutputRate = math.MaxFloat64
-	var anomalyScore float64
-	var anomalyDetected bool
 
 	for _, srcSummary := range summary {
 		if srcData, ok := srcSummary.(map[string]interface{}); ok {
 			if inputData, ok := srcData["input"].(map[string]interface{}); ok {
-				totalInput += int64(inputData["total_messages"].(float64))
 				avgInputRate += inputData["avg_msgs_per_sec"].(float64)
 				if inputData["max_msgs_per_sec"].(float64) > peakInputRate {
 					peakInputRate = inputData["max_msgs_per_sec"].(float64)
@@ -243,11 +238,8 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 				if inputData["min_msgs_per_sec"].(float64) < minInputRate {
 					minInputRate = inputData["min_msgs_per_sec"].(float64)
 				}
-				// anomaly_spikes may be int or float depending on how map values were created -> normalize
-				anomalyScore += ifaceToFloat64(inputData["anomaly_spikes"])
 			}
 			if outputData, ok := srcData["output"].(map[string]interface{}); ok {
-				totalOutput += int64(outputData["total_messages"].(float64))
 				avgOutputRate += outputData["avg_msgs_per_sec"].(float64)
 				if outputData["max_msgs_per_sec"].(float64) > peakOutputRate {
 					peakOutputRate = outputData["max_msgs_per_sec"].(float64)
@@ -255,7 +247,6 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 				if outputData["min_msgs_per_sec"].(float64) < minOutputRate {
 					minOutputRate = outputData["min_msgs_per_sec"].(float64)
 				}
-				anomalyScore += ifaceToFloat64(outputData["anomaly_spikes"])
 			}
 		}
 	}
@@ -268,29 +259,20 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		minOutputRate = 0.0
 	}
 
-	// Calculate data loss percentage
-	var dataLossPct float64
-	if totalInput > 0 {
-		dataLossPct = ((float64(totalInput - totalOutput)) / float64(totalInput)) * 100
-	}
-
-	// Determine if anomaly detected (simple threshold)
-	anomalyDetected = anomalyScore > 5.0 // More than 5 total spikes across all sources
+	// Calculate data loss percentage (placeholder, since totals are removed)
+	var dataLossPct float64 = 0.0
 
 	_, err = db.Exec(`
 		UPDATE test_runs
-		SET total_input_msgs = ?, total_output_msgs = ?,
-		    avg_input_msgs_per_sec = ?, avg_output_msgs_per_sec = ?,
-		    peak_input_msgs_per_sec = ?, peak_output_msgs_per_sec = ?,
+		SET avg_input_msgs_per_sec = ?, avg_output_msgs_per_sec = ?,
+		    max_input_msgs_per_sec = ?, max_output_msgs_per_sec = ?,
 		    min_input_msgs_per_sec = ?, min_output_msgs_per_sec = ?,
-		    data_loss_pct = ?, anomaly_detected = ?, anomaly_score_overall = ?,
-		    anomaly_details = ?, o11y_sources_summary = ?, kafka_summary_generated = 1,
+		    data_loss_pct = ?, kafka_summary_generated = 1,
 		    pod_resource_check = ?, pod_metrics = ?, process_rate_summary = ?, ingestion_summary = ? -- Added for ingestion summary
 		WHERE test_id = ?;
-	`, totalInput, totalOutput, avgInputRate, avgOutputRate,
+	`, avgInputRate, avgOutputRate,
 		peakInputRate, peakOutputRate, minInputRate, minOutputRate,
-		dataLossPct, anomalyDetected, anomalyScore,
-		"Anomaly detection based on message rate spikes", string(o11ySummaryJSON), podDataFound, string(podSummaryJSON), string(processRateSummaryJSON), string(ingestionSummaryJSON), testID)
+		dataLossPct, podDataFound, string(podSummaryJSON), string(processRateSummaryJSON), string(ingestionSummaryJSON), testID)
 	if err != nil {
 		return fmt.Errorf("failed to update test run with summary: %w", err)
 	}
