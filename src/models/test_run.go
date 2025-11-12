@@ -61,6 +61,9 @@ type TestRun struct {
 	PipelinePodMemMin        float64   `json:"pipeline_pod_mem_min,omitempty"`
 	PipelinePodMemAvg        float64   `json:"pipeline_pod_mem_avg,omitempty"`
 	PipelinePodMemMax        float64   `json:"pipeline_pod_mem_max,omitempty"`
+	MinLag                   float64   `json:"min_lag,omitempty"`
+	AvgLag                   float64   `json:"avg_lag,omitempty"`
+	MaxLag                   float64   `json:"max_lag,omitempty"`
 }
 
 // TestRunStartRequest represents the request payload for starting a test run

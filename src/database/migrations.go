@@ -177,6 +177,9 @@ func runSchemaUpdates() error {
 		"pipeline_pod_mem_min": "REAL DEFAULT 0.0",
 		"pipeline_pod_mem_avg": "REAL DEFAULT 0.0",
 		"pipeline_pod_mem_max": "REAL DEFAULT 0.0",
+		"min_lag":              "REAL DEFAULT 0.0",
+		"avg_lag":              "REAL DEFAULT 0.0",
+		"max_lag":              "REAL DEFAULT 0.0",
 	}
 
 	for name, def := range columnsToAdd {
