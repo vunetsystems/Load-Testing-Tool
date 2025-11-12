@@ -84,6 +84,7 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 	var podMetrics sql.NullString
 	var processRateSummary sql.NullString // New column for process rate summary JSON
 	var ingestionSummary sql.NullString   // New ingestion summary column
+	var minLag, avgLag, maxLag float64
 
 	err := DB.QueryRow(query, testID).Scan(
 		&testRun.TestID,
@@ -141,6 +142,7 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 		&testRun.PipelinePodMemMax,
 		&processRateSummary, // New process rate summary column
 		&ingestionSummary, // New ingestion summary column
+		&minLag, &avgLag, &maxLag,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -161,6 +163,9 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 	if ingestionSummary.Valid {
 		testRun.IngestionSummary = ingestionSummary.String // Assign ingestion summary JSON
 	}
+	testRun.MinLag = minLag
+	testRun.AvgLag = avgLag
+	testRun.MaxLag = maxLag
 
 	// Parse JSON sources
 	err = json.Unmarshal([]byte(sourcesJSON), &testRun.O11ySources)
@@ -190,7 +195,8 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			   chi_clickhouse_vusmart_0_1_0_mem_min, chi_clickhouse_vusmart_0_1_0_mem_avg, chi_clickhouse_vusmart_0_1_0_mem_max,
 			   pipeline_pod_cpu_min, pipeline_pod_cpu_avg, pipeline_pod_cpu_max,
 			   pipeline_pod_mem_min, pipeline_pod_mem_avg, pipeline_pod_mem_max,
-			   process_rate_summary, ingestion_summary
+			   process_rate_summary, ingestion_summary,
+			   min_lag, avg_lag, max_lag
 		FROM test_runs ORDER BY start_time DESC`
 
 	rows, err := DB.Query(query)
@@ -207,7 +213,8 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		var podMetrics sql.NullString
 		var processRateSummary sql.NullString // New column for process rate summary JSON
 		var ingestionSummary sql.NullString // New column for ingestion summary JSON
-	
+		var minLag, avgLag, maxLag float64
+
 		err := rows.Scan(
 			&testRun.TestID,
 			&testRun.TargetEPS,
@@ -264,6 +271,7 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			&testRun.PipelinePodMemMax,
 			&processRateSummary,
 			&ingestionSummary, // New ingestion summary column
+			&minLag, &avgLag, &maxLag,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan test run: %w", err)
@@ -281,7 +289,10 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		if ingestionSummary.Valid {
 			testRun.IngestionSummary = ingestionSummary.String // Assign ingestion summary JSON
 		}
-	
+		testRun.MinLag = minLag
+		testRun.AvgLag = avgLag
+		testRun.MaxLag = maxLag
+
 		// Parse JSON sources
 		err = json.Unmarshal([]byte(sourcesJSON), &testRun.O11ySources)
 		if err != nil {

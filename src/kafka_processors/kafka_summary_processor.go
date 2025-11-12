@@ -98,7 +98,22 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 	var o11ySources []string
 	json.Unmarshal([]byte(o11ySourcesStr), &o11ySources)
 
-	// 3. Collect app-ids for process rate fetching
+	// 3. Collect input topics for consumer lag processing
+	var inputTopics []string
+	for _, src := range o11ySources {
+		for _, s := range cfg.Sources {
+			if strings.ToLower(strings.ReplaceAll(s.Name, " ", "")) == strings.ToLower(strings.ReplaceAll(src, " ", "")) {
+				if len(s.InputTopic) > 0 {
+					for _, inputTopic := range s.InputTopic {
+						inputTopics = append(inputTopics, inputTopic.Name)
+					}
+				}
+				break
+			}
+		}
+	}
+
+	// 4. Collect app-ids for process rate fetching
 	// Added for process rate summary - map o11y sources to app-ids via pipeline field
 	appIDMap := make(map[string]string) // source -> app-id
 	for _, src := range o11ySources {
@@ -233,7 +248,14 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		nodeCPUResult = NodeCPUResult{} // default to zeros
 	}
 
-	// 5. Store the summary back to the database
+	// 8. Fetch and compute consumer lag metrics
+	minLag, avgLag, maxLag, err := ProcessConsumerLagSummary(chClient, inputTopics, startTime, endTime)
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process consumer lag metrics: %v", err))
+		minLag, avgLag, maxLag = 0.0, 0.0, 0.0
+	}
+
+	// 9. Store the summary back to the database
 	processRateSummaryJSON, _ := json.Marshal(processRateSummary) // Added for process rate summary - store in separate column
 	ingestionSummaryJSON, _ := json.Marshal(ingestionEntries) // Added for ingestion summary - store EPS data for ClickHouse tables
 
@@ -305,7 +327,8 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		    kafka_2_node_cpu_min = ?, kafka_2_node_cpu_avg = ?, kafka_2_node_cpu_max = ?,
 		    kafka_3_node_cpu_min = ?, kafka_3_node_cpu_avg = ?, kafka_3_node_cpu_max = ?,
 		    ch1_node_cpu_min = ?, ch1_node_cpu_avg = ?, ch1_node_cpu_max = ?,
-		    ch2_node_cpu_min = ?, ch2_node_cpu_avg = ?, ch2_node_cpu_max = ?
+		    ch2_node_cpu_min = ?, ch2_node_cpu_avg = ?, ch2_node_cpu_max = ?,
+		    min_lag = ?, avg_lag = ?, max_lag = ?
 		WHERE test_id = ?;
 	`, avgInputRate, avgOutputRate,
 		peakInputRate, peakOutputRate, minInputRate, minOutputRate,
@@ -333,6 +356,7 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		nodeCPUResult.Kafka3Min, nodeCPUResult.Kafka3Avg, nodeCPUResult.Kafka3Max,
 		nodeCPUResult.Ch1Min, nodeCPUResult.Ch1Avg, nodeCPUResult.Ch1Max,
 		nodeCPUResult.Ch2Min, nodeCPUResult.Ch2Avg, nodeCPUResult.Ch2Max,
+		minLag, avgLag, maxLag,
 		testID)
 	if err != nil {
 		return fmt.Errorf("failed to update test run with summary: %w", err)
