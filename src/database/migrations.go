@@ -171,6 +171,12 @@ func runSchemaUpdates() error {
 		"chi_clickhouse_vusmart_0_1_0_mem_min": "REAL DEFAULT 0.0",
 		"chi_clickhouse_vusmart_0_1_0_mem_avg": "REAL DEFAULT 0.0",
 		"chi_clickhouse_vusmart_0_1_0_mem_max": "REAL DEFAULT 0.0",
+		"pipeline_pod_cpu_min": "REAL DEFAULT 0.0",
+		"pipeline_pod_cpu_avg": "REAL DEFAULT 0.0",
+		"pipeline_pod_cpu_max": "REAL DEFAULT 0.0",
+		"pipeline_pod_mem_min": "REAL DEFAULT 0.0",
+		"pipeline_pod_mem_avg": "REAL DEFAULT 0.0",
+		"pipeline_pod_mem_max": "REAL DEFAULT 0.0",
 	}
 
 	for name, def := range columnsToAdd {

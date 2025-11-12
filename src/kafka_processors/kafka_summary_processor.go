@@ -212,7 +212,7 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 	}
 
 	// 4. Fetch and compute pod resource metrics
-	podMetrics, podDataFound, err := pod_processors.ProcessPodResourceSummary(chClient, startTime, endTime)
+	podMetrics, podDataFound, err := pod_processors.ProcessPodResourceSummary(chClient, testID, startTime, endTime)
 	if err != nil {
 		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process pod metrics: %v", err))
 		podMetrics = pod_processors.PodMetrics{}
@@ -293,6 +293,8 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		    chi_clickhouse_vusmart_0_0_0_mem_min = ?, chi_clickhouse_vusmart_0_0_0_mem_avg = ?, chi_clickhouse_vusmart_0_0_0_mem_max = ?,
 		    chi_clickhouse_vusmart_0_1_0_cpu_min = ?, chi_clickhouse_vusmart_0_1_0_cpu_avg = ?, chi_clickhouse_vusmart_0_1_0_cpu_max = ?,
 		    chi_clickhouse_vusmart_0_1_0_mem_min = ?, chi_clickhouse_vusmart_0_1_0_mem_avg = ?, chi_clickhouse_vusmart_0_1_0_mem_max = ?,
+		    pipeline_pod_cpu_min = ?, pipeline_pod_cpu_avg = ?, pipeline_pod_cpu_max = ?,
+		    pipeline_pod_mem_min = ?, pipeline_pod_mem_avg = ?, pipeline_pod_mem_max = ?,
 		    process_rate_summary = ?, ingestion_summary = ?, -- Added for ingestion summary
 		    kafka_1_node_mem_min = ?, kafka_1_node_mem_avg = ?, kafka_1_node_mem_max = ?,
 		    kafka_2_node_mem_min = ?, kafka_2_node_mem_avg = ?, kafka_2_node_mem_max = ?,
@@ -318,6 +320,8 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		podMetrics.ChiClickhouseVusmart000MemMin, podMetrics.ChiClickhouseVusmart000MemAvg, podMetrics.ChiClickhouseVusmart000MemMax,
 		podMetrics.ChiClickhouseVusmart010CpuMin, podMetrics.ChiClickhouseVusmart010CpuAvg, podMetrics.ChiClickhouseVusmart010CpuMax,
 		podMetrics.ChiClickhouseVusmart010MemMin, podMetrics.ChiClickhouseVusmart010MemAvg, podMetrics.ChiClickhouseVusmart010MemMax,
+		podMetrics.PipelinePodCpuMin, podMetrics.PipelinePodCpuAvg, podMetrics.PipelinePodCpuMax,
+		podMetrics.PipelinePodMemMin, podMetrics.PipelinePodMemAvg, podMetrics.PipelinePodMemMax,
 		string(processRateSummaryJSON), string(ingestionSummaryJSON),
 		nodeMemoryResult.Kafka1Min, nodeMemoryResult.Kafka1Avg, nodeMemoryResult.Kafka1Max,
 		nodeMemoryResult.Kafka2Min, nodeMemoryResult.Kafka2Avg, nodeMemoryResult.Kafka2Max,

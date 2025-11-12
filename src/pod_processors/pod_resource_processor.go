@@ -3,13 +3,29 @@ package pod_processors
 
 import (
 	"context"
-	
+	"os"
+
 	"fmt"
+	"strings"
 	"time"
 
 	"vuDataSim/src/clickhouse"
+	"vuDataSim/src/database"
 	"vuDataSim/src/logger"
+
+	"gopkg.in/yaml.v3"
 )
+
+// TopicConfig represents a single source configuration from topics_tables.yaml
+type TopicConfig struct {
+	Name     string   `yaml:"name"`
+	Pipeline []string `yaml:"pipeline"`
+}
+
+// TopicsConfig represents the structure of topics_tables.yaml
+type TopicsConfig struct {
+	Sources []TopicConfig `yaml:"sources"`
+}
 
 // PodStat represents pod resource usage data from ClickHouse
 type PodStat struct {
@@ -53,6 +69,12 @@ type PodMetrics struct {
 	ChiClickhouseVusmart010MemMin float64
 	ChiClickhouseVusmart010MemAvg float64
 	ChiClickhouseVusmart010MemMax float64
+	PipelinePodCpuMin float64
+	PipelinePodCpuAvg float64
+	PipelinePodCpuMax float64
+	PipelinePodMemMin float64
+	PipelinePodMemAvg float64
+	PipelinePodMemMax float64
 }
 
 // fetchPodMetrics fetches pod resource metrics from ClickHouse for the given time range
@@ -160,6 +182,68 @@ func FetchPodMetrics(chClient *clickhouse.ClickHouseClient, start, end time.Time
 	return stats, nil
 }
 
+// FetchPipelinePodMetrics fetches pod metrics for pipeline pods
+func FetchPipelinePodMetrics(chClient *clickhouse.ClickHouseClient, pipelines map[string]bool, start, end time.Time) ([]PodStat, error) {
+	if len(pipelines) == 0 {
+		return nil, nil
+	}
+
+	// Build the LIKE conditions for pipelines
+	conditions := make([]string, 0, len(pipelines))
+	for p := range pipelines {
+		conditions = append(conditions, fmt.Sprintf("pod_name LIKE '%s%%'", p))
+	}
+	pipelineCondition := strings.Join(conditions, " OR ")
+
+	query := fmt.Sprintf(`
+		SELECT
+			pod_name,
+			container_name,
+			MAX(cpu_usage_nanocores) / 1000000000 AS used_cpu_cores,
+			MAX(memory_usage_bytes) / 1073741824 AS used_memory_gb,
+			MAX(resource_limits_millicpu_units) / 1000 AS cpu_limit_cores,
+			MAX(resource_limits_memory_bytes) / 1073741824 AS memory_limit_gb
+		FROM monitoring.kubernetes_pod_container_data
+		WHERE (%s)
+		  AND pod_name NOT LIKE '%%debug%%'
+		  AND timestamp >= toDateTime('%s')
+		  AND timestamp <= toDateTime('%s')
+		GROUP BY pod_name, container_name
+		ORDER BY pod_name ASC
+	`, pipelineCondition, start.Format("2006-01-02 15:04:05"), end.Format("2006-01-02 15:04:05"))
+
+	logger.LogWithNode("System", "PipelinePodFetcher", fmt.Sprintf("Running ClickHouse query:\n%s", query), "debug")
+
+	rows, err := chClient.Client.Query(context.Background(), query)
+	if err != nil {
+		return nil, fmt.Errorf("query execution failed: %w", err)
+	}
+	defer rows.Close()
+
+	var stats []PodStat
+	for rows.Next() {
+		var stat PodStat
+		err := rows.Scan(&stat.PodName, &stat.ContainerName, &stat.UsedCPUCores, &stat.UsedMemoryGB, &stat.CPULimitCores, &stat.MemoryLimitGB)
+		if err != nil {
+			logger.LogWarning("System", "PipelinePodFetcher", fmt.Sprintf("Failed to scan pod metric row: %v", err))
+			continue
+		}
+		stats = append(stats, stat)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	if len(stats) == 0 {
+		logger.LogWithNode("System", "PipelinePodFetcher", "No pipeline pod metrics found for given time range", "warn")
+	} else {
+		logger.LogSuccess("System", "PipelinePodFetcher", fmt.Sprintf("Fetched %d pipeline pod metric rows", len(stats)))
+	}
+
+	return stats, nil
+}
+
 
 
 // ComputePodStats computes aggregated pod resource statistics
@@ -212,7 +296,7 @@ func ComputePodStats(stats []PodStat) (map[string]interface{}, bool) {
 
 
 // ProcessPodResourceSummary processes pod resource metrics for a test run
-func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, start, end time.Time) (PodMetrics, bool, error) {
+func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, testID string, start, end time.Time) (PodMetrics, bool, error) {
 	stats, err := FetchPodMetrics(chClient, start, end)
 	if err != nil {
 		return PodMetrics{}, false, err
@@ -221,6 +305,53 @@ func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, start, end
 	summary, found := ComputePodStats(stats)
 	if !found {
 		return PodMetrics{}, false, nil
+	}
+
+	// Get test run to fetch o11y_sources
+	testRun, err := database.GetTestRun(testID)
+	if err != nil {
+		logger.LogWarning("System", "PodResourceProcessor", fmt.Sprintf("Failed to get test run %s: %v", testID, err))
+		// Continue without pipeline pods
+	} else {
+		// Load topics_tables.yaml
+		yamlData, err := os.ReadFile("src/configs/topics_tables.yaml")
+		if err != nil {
+			logger.LogWarning("System", "PodResourceProcessor", fmt.Sprintf("Failed to read topics_tables.yaml: %v", err))
+		} else {
+			var cfg TopicsConfig
+			err = yaml.Unmarshal(yamlData, &cfg)
+			if err != nil {
+				logger.LogWarning("System", "PodResourceProcessor", fmt.Sprintf("Failed to parse YAML: %v", err))
+			} else {
+				// Map o11y_sources to pipelines
+				pipelines := make(map[string]bool)
+				for _, src := range testRun.O11ySources {
+					for _, s := range cfg.Sources {
+						if strings.ToLower(strings.ReplaceAll(s.Name, " ", "")) == strings.ToLower(strings.ReplaceAll(src, " ", "")) {
+							for _, p := range s.Pipeline {
+								pipelines[p] = true
+							}
+							break
+						}
+					}
+				}
+
+				if len(pipelines) > 0 {
+					// Fetch pipeline pod metrics
+					pipelineStats, err := FetchPipelinePodMetrics(chClient, pipelines, start, end)
+					if err != nil {
+						logger.LogWarning("System", "PodResourceProcessor", fmt.Sprintf("Failed to fetch pipeline pod metrics: %v", err))
+					} else {
+						// Compute aggregated metrics for pipeline pods
+						pipelineSummary := ComputePipelinePodStats(pipelineStats)
+						// Add to summary
+						for k, v := range pipelineSummary {
+							summary[k] = v
+						}
+					}
+				}
+			}
+		}
 	}
 
 	// Extract metrics for specific pods
@@ -281,6 +412,26 @@ func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, start, end
 		}
 	}
 
+	// Extract pipeline pod metrics
+	if pipelineData, exists := summary["pipeline_pod_cpu_min"]; exists {
+		metrics.PipelinePodCpuMin = pipelineData.(float64)
+	}
+	if pipelineData, exists := summary["pipeline_pod_cpu_avg"]; exists {
+		metrics.PipelinePodCpuAvg = pipelineData.(float64)
+	}
+	if pipelineData, exists := summary["pipeline_pod_cpu_max"]; exists {
+		metrics.PipelinePodCpuMax = pipelineData.(float64)
+	}
+	if pipelineData, exists := summary["pipeline_pod_mem_min"]; exists {
+		metrics.PipelinePodMemMin = pipelineData.(float64)
+	}
+	if pipelineData, exists := summary["pipeline_pod_mem_avg"]; exists {
+		metrics.PipelinePodMemAvg = pipelineData.(float64)
+	}
+	if pipelineData, exists := summary["pipeline_pod_mem_max"]; exists {
+		metrics.PipelinePodMemMax = pipelineData.(float64)
+	}
+
 	return metrics, true, nil
 }
 
@@ -320,4 +471,40 @@ func avgSlice(vals []float64) float64 {
 		sum += v
 	}
 	return sum / float64(len(vals))
+}
+
+// ComputePipelinePodStats computes aggregated pipeline pod resource statistics
+func ComputePipelinePodStats(stats []PodStat) map[string]interface{} {
+	if len(stats) == 0 {
+		return map[string]interface{}{
+			"pipeline_pod_cpu_min": 0.0,
+			"pipeline_pod_cpu_avg": 0.0,
+			"pipeline_pod_cpu_max": 0.0,
+			"pipeline_pod_mem_min": 0.0,
+			"pipeline_pod_mem_avg": 0.0,
+			"pipeline_pod_mem_max": 0.0,
+		}
+	}
+
+	var cpuPercents, memoryPercents []float64
+
+	for _, stat := range stats {
+		if stat.CPULimitCores > 0 {
+			cpuPercent := (stat.UsedCPUCores / stat.CPULimitCores) * 100
+			cpuPercents = append(cpuPercents, cpuPercent)
+		}
+		if stat.MemoryLimitGB > 0 {
+			memoryPercent := (stat.UsedMemoryGB / stat.MemoryLimitGB) * 100
+			memoryPercents = append(memoryPercents, memoryPercent)
+		}
+	}
+
+	return map[string]interface{}{
+		"pipeline_pod_cpu_min": minSlice(cpuPercents),
+		"pipeline_pod_cpu_avg": avgSlice(cpuPercents),
+		"pipeline_pod_cpu_max": maxSlice(cpuPercents),
+		"pipeline_pod_mem_min": minSlice(memoryPercents),
+		"pipeline_pod_mem_avg": avgSlice(memoryPercents),
+		"pipeline_pod_mem_max": maxSlice(memoryPercents),
+	}
 }

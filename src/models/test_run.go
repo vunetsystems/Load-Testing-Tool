@@ -53,8 +53,14 @@ type TestRun struct {
 	ChiClickhouseVusmart010MemMin float64 `json:"chi_clickhouse_vusmart_0_1_0_mem_min,omitempty"`
 	ChiClickhouseVusmart010MemAvg float64 `json:"chi_clickhouse_vusmart_0_1_0_mem_avg,omitempty"`
 	ChiClickhouseVusmart010MemMax float64 `json:"chi_clickhouse_vusmart_0_1_0_mem_max,omitempty"`
-	ProcessRateSummary      string    `json:"process_rate_summary,omitempty"` // JSON summary of process rates per o11y source
+	ProcessRateSummary        string    `json:"process_rate_summary,omitempty"` // JSON summary of process rates per o11y source
 	IngestionSummary        string    `json:"ingestion_summary,omitempty"` // JSON summary of hyperscale ingestion table-wise EPS data
+	PipelinePodCpuMin        float64   `json:"pipeline_pod_cpu_min,omitempty"`
+	PipelinePodCpuAvg        float64   `json:"pipeline_pod_cpu_avg,omitempty"`
+	PipelinePodCpuMax        float64   `json:"pipeline_pod_cpu_max,omitempty"`
+	PipelinePodMemMin        float64   `json:"pipeline_pod_mem_min,omitempty"`
+	PipelinePodMemAvg        float64   `json:"pipeline_pod_mem_avg,omitempty"`
+	PipelinePodMemMax        float64   `json:"pipeline_pod_mem_max,omitempty"`
 }
 
 // TestRunStartRequest represents the request payload for starting a test run
