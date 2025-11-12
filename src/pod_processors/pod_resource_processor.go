@@ -3,7 +3,7 @@ package pod_processors
 
 import (
 	"context"
-	"encoding/json"
+	
 	"fmt"
 	"time"
 
@@ -21,7 +21,90 @@ type PodStat struct {
 	MemoryLimitGB       float64
 }
 
+// PodMetrics represents individual pod resource metrics for database columns
+type PodMetrics struct {
+	KafkaClusterCpKafka0CpuMin float64
+	KafkaClusterCpKafka0CpuAvg float64
+	KafkaClusterCpKafka0CpuMax float64
+	KafkaClusterCpKafka0MemMin float64
+	KafkaClusterCpKafka0MemAvg float64
+	KafkaClusterCpKafka0MemMax float64
+	KafkaClusterCpKafka1CpuMin float64
+	KafkaClusterCpKafka1CpuAvg float64
+	KafkaClusterCpKafka1CpuMax float64
+	KafkaClusterCpKafka1MemMin float64
+	KafkaClusterCpKafka1MemAvg float64
+	KafkaClusterCpKafka1MemMax float64
+	KafkaClusterCpKafka2CpuMin float64
+	KafkaClusterCpKafka2CpuAvg float64
+	KafkaClusterCpKafka2CpuMax float64
+	KafkaClusterCpKafka2MemMin float64
+	KafkaClusterCpKafka2MemAvg float64
+	KafkaClusterCpKafka2MemMax float64
+	ChiClickhouseVusmart000CpuMin float64
+	ChiClickhouseVusmart000CpuAvg float64
+	ChiClickhouseVusmart000CpuMax float64
+	ChiClickhouseVusmart000MemMin float64
+	ChiClickhouseVusmart000MemAvg float64
+	ChiClickhouseVusmart000MemMax float64
+	ChiClickhouseVusmart010CpuMin float64
+	ChiClickhouseVusmart010CpuAvg float64
+	ChiClickhouseVusmart010CpuMax float64
+	ChiClickhouseVusmart010MemMin float64
+	ChiClickhouseVusmart010MemAvg float64
+	ChiClickhouseVusmart010MemMax float64
+}
+
 // fetchPodMetrics fetches pod resource metrics from ClickHouse for the given time range
+// func FetchPodMetrics(chClient *clickhouse.ClickHouseClient, start, end time.Time) ([]PodStat, error) {
+// 	query := fmt.Sprintf(`
+// 		SELECT
+// 			pod_name,
+// 			container_name,
+// 			MAX(cpu_usage_nanocores) / 1000000000 AS used_cpu_cores,
+// 			MAX(memory_usage_bytes) / 1073741824 AS used_memory_gb,
+// 			MAX(resource_limits_millicpu_units) / 1000 AS cpu_limit_cores,
+// 			MAX(resource_limits_memory_bytes) / 1073741824 AS memory_limit_gb
+// 		FROM monitoring.kubernetes_pod_container_data
+// 		WHERE (pod_name LIKE '%%kafka%%') OR (pod_name LIKE '%%click%%')
+// 		  AND timestamp >= toDateTime('%s')
+// 		  AND timestamp <= toDateTime('%s')
+// 		GROUP BY pod_name, container_name
+// 		ORDER BY pod_name ASC
+// 	`, start.Format("2006-01-02 15:04:05"), end.Format("2006-01-02 15:04:05"))
+
+// 	logger.LogWithNode("System", "PodFetcher", fmt.Sprintf("Running ClickHouse query:\n%s", query), "debug")
+
+// 	rows, err := chClient.Client.Query(context.Background(), query)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("query execution failed: %w", err)
+// 	}
+// 	defer rows.Close()
+
+// 	var stats []PodStat
+// 	for rows.Next() {
+// 		var stat PodStat
+// 		err := rows.Scan(&stat.PodName, &stat.ContainerName, &stat.UsedCPUCores, &stat.UsedMemoryGB, &stat.CPULimitCores, &stat.MemoryLimitGB)
+// 		if err != nil {
+// 			logger.LogWarning("System", "PodSummaryProcessor", fmt.Sprintf("Failed to scan pod metric row: %v", err))
+// 			continue
+// 		}
+// 		stats = append(stats, stat)
+// 	}
+
+// 	if err := rows.Err(); err != nil {
+// 		return nil, fmt.Errorf("row iteration error: %w", err)
+// 	}
+
+// 	if len(stats) == 0 {
+// 		logger.LogWithNode("System", "PodFetcher", "No pod metrics found for given time range", "warn")
+// 	} else {
+// 		logger.LogSuccess("System", "PodFetcher", fmt.Sprintf("Fetched %d pod metric rows", len(stats)))
+// 	}
+
+// 	return stats, nil
+// }
+
 func FetchPodMetrics(chClient *clickhouse.ClickHouseClient, start, end time.Time) ([]PodStat, error) {
 	query := fmt.Sprintf(`
 		SELECT
@@ -32,7 +115,13 @@ func FetchPodMetrics(chClient *clickhouse.ClickHouseClient, start, end time.Time
 			MAX(resource_limits_millicpu_units) / 1000 AS cpu_limit_cores,
 			MAX(resource_limits_memory_bytes) / 1073741824 AS memory_limit_gb
 		FROM monitoring.kubernetes_pod_container_data
-		WHERE (pod_name LIKE '%%kafka%%') OR (pod_name LIKE '%%click%%')
+		WHERE pod_name IN (
+			'chi-clickhouse-vusmart-0-0-0',
+			'chi-clickhouse-vusmart-0-1-0',
+			'kafka-cluster-cp-kafka-0',
+			'kafka-cluster-cp-kafka-1',
+			'kafka-cluster-cp-kafka-2'
+		)
 		  AND timestamp >= toDateTime('%s')
 		  AND timestamp <= toDateTime('%s')
 		GROUP BY pod_name, container_name
@@ -70,6 +159,8 @@ func FetchPodMetrics(chClient *clickhouse.ClickHouseClient, start, end time.Time
 
 	return stats, nil
 }
+
+
 
 // ComputePodStats computes aggregated pod resource statistics
 func ComputePodStats(stats []PodStat) (map[string]interface{}, bool) {
@@ -121,23 +212,76 @@ func ComputePodStats(stats []PodStat) (map[string]interface{}, bool) {
 
 
 // ProcessPodResourceSummary processes pod resource metrics for a test run
-func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, start, end time.Time) (string, bool, error) {
+func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, start, end time.Time) (PodMetrics, bool, error) {
 	stats, err := FetchPodMetrics(chClient, start, end)
 	if err != nil {
-		return "", false, err
+		return PodMetrics{}, false, err
 	}
 
 	summary, found := ComputePodStats(stats)
 	if !found {
-		return "", false, nil
+		return PodMetrics{}, false, nil
 	}
 
-	summaryJSON, err := json.Marshal(summary)
-	if err != nil {
-		return "", false, fmt.Errorf("failed to marshal pod summary: %w", err)
+	// Extract metrics for specific pods
+	metrics := PodMetrics{}
+
+	if podData, exists := summary["kafka-cluster-cp-kafka-0"]; exists {
+		if data, ok := podData.(map[string]interface{}); ok {
+			metrics.KafkaClusterCpKafka0CpuMin = data["min_cpu_percent"].(float64)
+			metrics.KafkaClusterCpKafka0CpuAvg = data["avg_cpu_percent"].(float64)
+			metrics.KafkaClusterCpKafka0CpuMax = data["max_cpu_percent"].(float64)
+			metrics.KafkaClusterCpKafka0MemMin = data["min_memory_percent"].(float64)
+			metrics.KafkaClusterCpKafka0MemAvg = data["avg_memory_percent"].(float64)
+			metrics.KafkaClusterCpKafka0MemMax = data["max_memory_percent"].(float64)
+		}
 	}
 
-	return string(summaryJSON), true, nil
+	if podData, exists := summary["kafka-cluster-cp-kafka-1"]; exists {
+		if data, ok := podData.(map[string]interface{}); ok {
+			metrics.KafkaClusterCpKafka1CpuMin = data["min_cpu_percent"].(float64)
+			metrics.KafkaClusterCpKafka1CpuAvg = data["avg_cpu_percent"].(float64)
+			metrics.KafkaClusterCpKafka1CpuMax = data["max_cpu_percent"].(float64)
+			metrics.KafkaClusterCpKafka1MemMin = data["min_memory_percent"].(float64)
+			metrics.KafkaClusterCpKafka1MemAvg = data["avg_memory_percent"].(float64)
+			metrics.KafkaClusterCpKafka1MemMax = data["max_memory_percent"].(float64)
+		}
+	}
+
+	if podData, exists := summary["kafka-cluster-cp-kafka-2"]; exists {
+		if data, ok := podData.(map[string]interface{}); ok {
+			metrics.KafkaClusterCpKafka2CpuMin = data["min_cpu_percent"].(float64)
+			metrics.KafkaClusterCpKafka2CpuAvg = data["avg_cpu_percent"].(float64)
+			metrics.KafkaClusterCpKafka2CpuMax = data["max_cpu_percent"].(float64)
+			metrics.KafkaClusterCpKafka2MemMin = data["min_memory_percent"].(float64)
+			metrics.KafkaClusterCpKafka2MemAvg = data["avg_memory_percent"].(float64)
+			metrics.KafkaClusterCpKafka2MemMax = data["max_memory_percent"].(float64)
+		}
+	}
+
+	if podData, exists := summary["chi-clickhouse-vusmart-0-0-0"]; exists {
+		if data, ok := podData.(map[string]interface{}); ok {
+			metrics.ChiClickhouseVusmart000CpuMin = data["min_cpu_percent"].(float64)
+			metrics.ChiClickhouseVusmart000CpuAvg = data["avg_cpu_percent"].(float64)
+			metrics.ChiClickhouseVusmart000CpuMax = data["max_cpu_percent"].(float64)
+			metrics.ChiClickhouseVusmart000MemMin = data["min_memory_percent"].(float64)
+			metrics.ChiClickhouseVusmart000MemAvg = data["avg_memory_percent"].(float64)
+			metrics.ChiClickhouseVusmart000MemMax = data["max_memory_percent"].(float64)
+		}
+	}
+
+	if podData, exists := summary["chi-clickhouse-vusmart-0-1-0"]; exists {
+		if data, ok := podData.(map[string]interface{}); ok {
+			metrics.ChiClickhouseVusmart010CpuMin = data["min_cpu_percent"].(float64)
+			metrics.ChiClickhouseVusmart010CpuAvg = data["avg_cpu_percent"].(float64)
+			metrics.ChiClickhouseVusmart010CpuMax = data["max_cpu_percent"].(float64)
+			metrics.ChiClickhouseVusmart010MemMin = data["min_memory_percent"].(float64)
+			metrics.ChiClickhouseVusmart010MemAvg = data["avg_memory_percent"].(float64)
+			metrics.ChiClickhouseVusmart010MemMax = data["max_memory_percent"].(float64)
+		}
+	}
+
+	return metrics, true, nil
 }
 
 // Helper functions for slices

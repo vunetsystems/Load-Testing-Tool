@@ -22,6 +22,37 @@ type TestRun struct {
 	KafkaSummaryGenerated   bool      `json:"kafka_summary_generated,omitempty"`
 	PodResourceCheck        bool      `json:"pod_resource_check,omitempty"`
 	PodMetrics              string    `json:"pod_metrics,omitempty"`
+	// Individual pod metrics columns
+	KafkaClusterCpKafka0CpuMin float64 `json:"kafka_cluster_cp_kafka_0_cpu_min,omitempty"`
+	KafkaClusterCpKafka0CpuAvg float64 `json:"kafka_cluster_cp_kafka_0_cpu_avg,omitempty"`
+	KafkaClusterCpKafka0CpuMax float64 `json:"kafka_cluster_cp_kafka_0_cpu_max,omitempty"`
+	KafkaClusterCpKafka0MemMin float64 `json:"kafka_cluster_cp_kafka_0_mem_min,omitempty"`
+	KafkaClusterCpKafka0MemAvg float64 `json:"kafka_cluster_cp_kafka_0_mem_avg,omitempty"`
+	KafkaClusterCpKafka0MemMax float64 `json:"kafka_cluster_cp_kafka_0_mem_max,omitempty"`
+	KafkaClusterCpKafka1CpuMin float64 `json:"kafka_cluster_cp_kafka_1_cpu_min,omitempty"`
+	KafkaClusterCpKafka1CpuAvg float64 `json:"kafka_cluster_cp_kafka_1_cpu_avg,omitempty"`
+	KafkaClusterCpKafka1CpuMax float64 `json:"kafka_cluster_cp_kafka_1_cpu_max,omitempty"`
+	KafkaClusterCpKafka1MemMin float64 `json:"kafka_cluster_cp_kafka_1_mem_min,omitempty"`
+	KafkaClusterCpKafka1MemAvg float64 `json:"kafka_cluster_cp_kafka_1_mem_avg,omitempty"`
+	KafkaClusterCpKafka1MemMax float64 `json:"kafka_cluster_cp_kafka_1_mem_max,omitempty"`
+	KafkaClusterCpKafka2CpuMin float64 `json:"kafka_cluster_cp_kafka_2_cpu_min,omitempty"`
+	KafkaClusterCpKafka2CpuAvg float64 `json:"kafka_cluster_cp_kafka_2_cpu_avg,omitempty"`
+	KafkaClusterCpKafka2CpuMax float64 `json:"kafka_cluster_cp_kafka_2_cpu_max,omitempty"`
+	KafkaClusterCpKafka2MemMin float64 `json:"kafka_cluster_cp_kafka_2_mem_min,omitempty"`
+	KafkaClusterCpKafka2MemAvg float64 `json:"kafka_cluster_cp_kafka_2_mem_avg,omitempty"`
+	KafkaClusterCpKafka2MemMax float64 `json:"kafka_cluster_cp_kafka_2_mem_max,omitempty"`
+	ChiClickhouseVusmart000CpuMin float64 `json:"chi_clickhouse_vusmart_0_0_0_cpu_min,omitempty"`
+	ChiClickhouseVusmart000CpuAvg float64 `json:"chi_clickhouse_vusmart_0_0_0_cpu_avg,omitempty"`
+	ChiClickhouseVusmart000CpuMax float64 `json:"chi_clickhouse_vusmart_0_0_0_cpu_max,omitempty"`
+	ChiClickhouseVusmart000MemMin float64 `json:"chi_clickhouse_vusmart_0_0_0_mem_min,omitempty"`
+	ChiClickhouseVusmart000MemAvg float64 `json:"chi_clickhouse_vusmart_0_0_0_mem_avg,omitempty"`
+	ChiClickhouseVusmart000MemMax float64 `json:"chi_clickhouse_vusmart_0_0_0_mem_max,omitempty"`
+	ChiClickhouseVusmart010CpuMin float64 `json:"chi_clickhouse_vusmart_0_1_0_cpu_min,omitempty"`
+	ChiClickhouseVusmart010CpuAvg float64 `json:"chi_clickhouse_vusmart_0_1_0_cpu_avg,omitempty"`
+	ChiClickhouseVusmart010CpuMax float64 `json:"chi_clickhouse_vusmart_0_1_0_cpu_max,omitempty"`
+	ChiClickhouseVusmart010MemMin float64 `json:"chi_clickhouse_vusmart_0_1_0_mem_min,omitempty"`
+	ChiClickhouseVusmart010MemAvg float64 `json:"chi_clickhouse_vusmart_0_1_0_mem_avg,omitempty"`
+	ChiClickhouseVusmart010MemMax float64 `json:"chi_clickhouse_vusmart_0_1_0_mem_max,omitempty"`
 	ProcessRateSummary      string    `json:"process_rate_summary,omitempty"` // JSON summary of process rates per o11y source
 	IngestionSummary        string    `json:"ingestion_summary,omitempty"` // JSON summary of hyperscale ingestion table-wise EPS data
 }
