@@ -11,28 +11,20 @@ func RunMigrations() error {
 	createTableSQL := `
 	CREATE TABLE IF NOT EXISTS test_runs (
 		test_id TEXT PRIMARY KEY,
-		test_name TEXT,
+		test_id TEXT PRIMARY KEY,
 		target_eps INTEGER NOT NULL,
 		start_time DATETIME NOT NULL,
 		end_time DATETIME NULL,
 		o11y_sources TEXT NOT NULL, -- JSON array of source names
 		timeout_seconds INTEGER NOT NULL,
 		status TEXT NOT NULL DEFAULT 'running', -- 'running', 'completed', 'stopped', 'failed'
-		total_input_msgs BIGINT DEFAULT 0,
-		total_output_msgs BIGINT DEFAULT 0,
 		avg_input_msgs_per_sec REAL DEFAULT 0.0,
 		avg_output_msgs_per_sec REAL DEFAULT 0.0,
-		peak_input_msgs_per_sec REAL DEFAULT 0.0,
-		peak_output_msgs_per_sec REAL DEFAULT 0.0,
+		max_input_msgs_per_sec REAL DEFAULT 0.0,
+		max_output_msgs_per_sec REAL DEFAULT 0.0,
 		min_input_msgs_per_sec REAL DEFAULT 0.0,
 		min_output_msgs_per_sec REAL DEFAULT 0.0,
 		data_loss_pct REAL DEFAULT 0.0,
-		lag_ms_avg REAL DEFAULT 0.0,
-		lag_ms_max REAL DEFAULT 0.0,
-		anomaly_detected BOOLEAN DEFAULT FALSE,
-		anomaly_score_overall REAL DEFAULT 0.0,
-		anomaly_details TEXT,
-		o11y_sources_summary TEXT,
 		kafka_summary_generated BOOLEAN DEFAULT FALSE
 	);`
 
@@ -107,22 +99,13 @@ func runSchemaUpdates() error {
 
 	// Define columns to add with their definitions
 	columnsToAdd := map[string]string{
-		"test_name":                  "TEXT",
-		"total_input_msgs":           "BIGINT DEFAULT 0",
-		"total_output_msgs":          "BIGINT DEFAULT 0",
 		"avg_input_msgs_per_sec":     "REAL DEFAULT 0.0",
 		"avg_output_msgs_per_sec":    "REAL DEFAULT 0.0",
-		"peak_input_msgs_per_sec":    "REAL DEFAULT 0.0",
-		"peak_output_msgs_per_sec":   "REAL DEFAULT 0.0",
+		"max_input_msgs_per_sec":     "REAL DEFAULT 0.0",
+		"max_output_msgs_per_sec":    "REAL DEFAULT 0.0",
 		"min_input_msgs_per_sec":     "REAL DEFAULT 0.0",
 		"min_output_msgs_per_sec":    "REAL DEFAULT 0.0",
 		"data_loss_pct":              "REAL DEFAULT 0.0",
-		"lag_ms_avg":                 "REAL DEFAULT 0.0",
-		"lag_ms_max":                 "REAL DEFAULT 0.0",
-		"anomaly_detected":           "BOOLEAN DEFAULT FALSE",
-		"anomaly_score_overall":      "REAL DEFAULT 0.0",
-		"anomaly_details":            "TEXT",
-		"o11y_sources_summary":       "TEXT",
 		"kafka_summary_generated":    "BOOLEAN DEFAULT FALSE",
 		"pod_resource_check":         "BOOLEAN DEFAULT FALSE",
 		"pod_metrics":                "TEXT",
@@ -136,6 +119,44 @@ func runSchemaUpdates() error {
 			_, err := DB.Exec(alterSQL)
 			if err != nil {
 				return fmt.Errorf("failed to add column %s: %w", name, err)
+			}
+		}
+	}
+
+	// Rename peak columns to max if they exist and max doesn't exist
+	if columnExists("test_runs", "peak_input_msgs_per_sec") && !columnExists("test_runs", "max_input_msgs_per_sec") {
+		_, err := DB.Exec("ALTER TABLE test_runs RENAME COLUMN peak_input_msgs_per_sec TO max_input_msgs_per_sec;")
+		if err != nil {
+			return fmt.Errorf("failed to rename peak_input_msgs_per_sec: %w", err)
+		}
+	}
+	if columnExists("test_runs", "peak_output_msgs_per_sec") && !columnExists("test_runs", "max_output_msgs_per_sec") {
+		_, err := DB.Exec("ALTER TABLE test_runs RENAME COLUMN peak_output_msgs_per_sec TO max_output_msgs_per_sec;")
+		if err != nil {
+			return fmt.Errorf("failed to rename peak_output_msgs_per_sec: %w", err)
+		}
+	}
+
+	// Drop removed columns if they exist
+	columnsToDrop := []string{
+		"test_name",
+		"total_input_msgs",
+		"total_output_msgs",
+		"lag_ms_avg",
+		"lag_ms_max",
+		"anomaly_detected",
+		"anomaly_score_overall",
+		"anomaly_details",
+		"o11y_sources_summary",
+		"peak_input_msgs_per_sec",
+		"peak_output_msgs_per_sec",
+	}
+	for _, col := range columnsToDrop {
+		if columnExists("test_runs", col) {
+			dropSQL := fmt.Sprintf("ALTER TABLE test_runs DROP COLUMN %s;", col)
+			_, err := DB.Exec(dropSQL)
+			if err != nil {
+				return fmt.Errorf("failed to drop column %s: %w", col, err)
 			}
 		}
 	}
