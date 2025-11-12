@@ -73,6 +73,8 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 			   chi_clickhouse_vusmart_0_0_0_mem_min, chi_clickhouse_vusmart_0_0_0_mem_avg, chi_clickhouse_vusmart_0_0_0_mem_max,
 			   chi_clickhouse_vusmart_0_1_0_cpu_min, chi_clickhouse_vusmart_0_1_0_cpu_avg, chi_clickhouse_vusmart_0_1_0_cpu_max,
 			   chi_clickhouse_vusmart_0_1_0_mem_min, chi_clickhouse_vusmart_0_1_0_mem_avg, chi_clickhouse_vusmart_0_1_0_mem_max,
+			   pipeline_pod_cpu_min, pipeline_pod_cpu_avg, pipeline_pod_cpu_max,
+			   pipeline_pod_mem_min, pipeline_pod_mem_avg, pipeline_pod_mem_max,
 			   process_rate_summary, ingestion_summary
 		FROM test_runs WHERE test_id = ?`
 
@@ -131,6 +133,12 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 		&testRun.ChiClickhouseVusmart010MemMin,
 		&testRun.ChiClickhouseVusmart010MemAvg,
 		&testRun.ChiClickhouseVusmart010MemMax,
+		&testRun.PipelinePodCpuMin,
+		&testRun.PipelinePodCpuAvg,
+		&testRun.PipelinePodCpuMax,
+		&testRun.PipelinePodMemMin,
+		&testRun.PipelinePodMemAvg,
+		&testRun.PipelinePodMemMax,
 		&processRateSummary, // New process rate summary column
 		&ingestionSummary, // New ingestion summary column
 	)
@@ -180,6 +188,8 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			   chi_clickhouse_vusmart_0_0_0_mem_min, chi_clickhouse_vusmart_0_0_0_mem_avg, chi_clickhouse_vusmart_0_0_0_mem_max,
 			   chi_clickhouse_vusmart_0_1_0_cpu_min, chi_clickhouse_vusmart_0_1_0_cpu_avg, chi_clickhouse_vusmart_0_1_0_cpu_max,
 			   chi_clickhouse_vusmart_0_1_0_mem_min, chi_clickhouse_vusmart_0_1_0_mem_avg, chi_clickhouse_vusmart_0_1_0_mem_max,
+			   pipeline_pod_cpu_min, pipeline_pod_cpu_avg, pipeline_pod_cpu_max,
+			   pipeline_pod_mem_min, pipeline_pod_mem_avg, pipeline_pod_mem_max,
 			   process_rate_summary, ingestion_summary
 		FROM test_runs ORDER BY start_time DESC`
 
@@ -246,6 +256,12 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			&testRun.ChiClickhouseVusmart010MemMin,
 			&testRun.ChiClickhouseVusmart010MemAvg,
 			&testRun.ChiClickhouseVusmart010MemMax,
+			&testRun.PipelinePodCpuMin,
+			&testRun.PipelinePodCpuAvg,
+			&testRun.PipelinePodCpuMax,
+			&testRun.PipelinePodMemMin,
+			&testRun.PipelinePodMemAvg,
+			&testRun.PipelinePodMemMax,
 			&processRateSummary,
 			&ingestionSummary, // New ingestion summary column
 		)
