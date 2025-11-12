@@ -29,6 +29,10 @@ type TestRun struct {
 	AnomalyDetails          string    `json:"anomaly_details,omitempty"`
 	O11ySourcesSummary      string    `json:"o11y_sources_summary,omitempty"`
 	KafkaSummaryGenerated   bool      `json:"kafka_summary_generated,omitempty"`
+	PodResourceCheck        bool      `json:"pod_resource_check,omitempty"`
+	PodMetrics              string    `json:"pod_metrics,omitempty"`
+	ProcessRateSummary      string    `json:"process_rate_summary,omitempty"` // JSON summary of process rates per o11y source
+	IngestionSummary        string    `json:"ingestion_summary,omitempty"` // JSON summary of hyperscale ingestion table-wise EPS data
 }
 
 // TestRunStartRequest represents the request payload for starting a test run

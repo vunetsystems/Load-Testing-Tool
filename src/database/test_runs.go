@@ -63,7 +63,7 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 			   total_input_msgs, total_output_msgs, avg_input_msgs_per_sec, avg_output_msgs_per_sec,
 			   peak_input_msgs_per_sec, peak_output_msgs_per_sec, min_input_msgs_per_sec, min_output_msgs_per_sec,
 			   data_loss_pct, lag_ms_avg, lag_ms_max, anomaly_detected, anomaly_score_overall,
-			   anomaly_details, o11y_sources_summary, kafka_summary_generated
+			   anomaly_details, o11y_sources_summary, kafka_summary_generated, pod_resource_check, pod_metrics, process_rate_summary, ingestion_summary
 		FROM test_runs WHERE test_id = ?`
 
 	var testRun models.TestRun
@@ -72,6 +72,9 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 	var testName sql.NullString
 	var anomalyDetails sql.NullString
 	var o11ySourcesSummary sql.NullString
+	var podMetrics sql.NullString
+	var processRateSummary sql.NullString // New column for process rate summary JSON
+	var ingestionSummary sql.NullString   // New ingestion summary column
 
 	err := DB.QueryRow(query, testID).Scan(
 		&testRun.TestID,
@@ -98,6 +101,10 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 		&anomalyDetails,
 		&o11ySourcesSummary,
 		&testRun.KafkaSummaryGenerated,
+		&testRun.PodResourceCheck,
+		&podMetrics,
+		&processRateSummary, // New process rate summary column
+		&ingestionSummary, // New ingestion summary column
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -118,6 +125,15 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 	if o11ySourcesSummary.Valid {
 		testRun.O11ySourcesSummary = o11ySourcesSummary.String
 	}
+	if podMetrics.Valid {
+		testRun.PodMetrics = podMetrics.String
+	}
+	if processRateSummary.Valid {
+		testRun.ProcessRateSummary = processRateSummary.String // Assign process rate summary JSON
+	}
+	if ingestionSummary.Valid {
+		testRun.IngestionSummary = ingestionSummary.String // Assign ingestion summary JSON
+	}
 
 	// Parse JSON sources
 	err = json.Unmarshal([]byte(sourcesJSON), &testRun.O11ySources)
@@ -135,7 +151,7 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			   total_input_msgs, total_output_msgs, avg_input_msgs_per_sec, avg_output_msgs_per_sec,
 			   peak_input_msgs_per_sec, peak_output_msgs_per_sec, min_input_msgs_per_sec, min_output_msgs_per_sec,
 			   data_loss_pct, lag_ms_avg, lag_ms_max, anomaly_detected, anomaly_score_overall,
-			   anomaly_details, o11y_sources_summary, kafka_summary_generated
+			   anomaly_details, o11y_sources_summary, kafka_summary_generated, pod_resource_check, pod_metrics, process_rate_summary, ingestion_summary
 		FROM test_runs ORDER BY start_time DESC`
 
 	rows, err := DB.Query(query)
@@ -152,7 +168,10 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		var testName sql.NullString
 		var anomalyDetails sql.NullString
 		var o11ySourcesSummary sql.NullString
-
+		var podMetrics sql.NullString
+		var processRateSummary sql.NullString // New column for process rate summary JSON
+		var ingestionSummary sql.NullString // New column for ingestion summary JSON
+	
 		err := rows.Scan(
 			&testRun.TestID,
 			&testName,
@@ -178,6 +197,10 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			&anomalyDetails,
 			&o11ySourcesSummary,
 			&testRun.KafkaSummaryGenerated,
+			&testRun.PodResourceCheck,
+			&podMetrics,
+			&processRateSummary,
+			&ingestionSummary, // New ingestion summary column
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan test run: %w", err)
@@ -195,7 +218,16 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		if o11ySourcesSummary.Valid {
 			testRun.O11ySourcesSummary = o11ySourcesSummary.String
 		}
-
+		if podMetrics.Valid {
+			testRun.PodMetrics = podMetrics.String
+		}
+		if processRateSummary.Valid {
+			testRun.ProcessRateSummary = processRateSummary.String // Assign process rate summary JSON
+		}
+		if ingestionSummary.Valid {
+			testRun.IngestionSummary = ingestionSummary.String // Assign ingestion summary JSON
+		}
+	
 		// Parse JSON sources
 		err = json.Unmarshal([]byte(sourcesJSON), &testRun.O11ySources)
 		if err != nil {

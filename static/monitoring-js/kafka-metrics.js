@@ -194,7 +194,7 @@ class KafkaMetricsManager {
     // Fetch test runs for dropdown
     async fetchTestRuns() {
         try {
-            const response = await fetch('http://216.48.191.10:8086/api/test-runs/dropdown');
+            const response = await fetch('/api/test-runs/dropdown');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -231,6 +231,7 @@ class KafkaMetricsManager {
 
     // Handle test run selection
     onTestRunChange(testId) {
+        console.log('onTestRunChange called with testId:', testId);
         if (!testId) {
             this.clearTestFilter();
             return;
@@ -248,9 +249,12 @@ class KafkaMetricsManager {
             this.updateSelectedTestInfo();
 
             // Refresh data with time filter
+            console.log('Fetching Kafka metrics for test run:', selectedTest.test_id);
             this.fetchKafkaMetrics();
 
             console.log('Test run selected:', selectedTest);
+        } else {
+            console.error('Test run not found for ID:', testId);
         }
     }
 
@@ -313,7 +317,7 @@ class KafkaMetricsManager {
 
         try {
             // Build API URL with optional time range and test_id parameters
-            let apiUrl = 'http://216.48.191.10:8086/api/clickhouse/kafka-topics';
+            let apiUrl = '/api/clickhouse/kafka-topics';
 
             if (this.isTestFiltered && this.selectedTestRun) {
                 const startTime = new Date(this.selectedTestRun.start_time).toISOString();
@@ -333,7 +337,7 @@ class KafkaMetricsManager {
 
                 this.kafkaData = result.data;
                 this.lastUpdate = new Date();
-                console.log('Kafka metrics updated:', this.kafkaData);
+                console.log('Kafka metrics updated:', this.kafkaData.length, 'records, isTestFiltered:', this.isTestFiltered);
 
                 // Only update display if charts are initialized (section is visible)
                 if (this.chartsInitialized) {
@@ -643,18 +647,20 @@ class KafkaMetricsManager {
         }
 
         if (!this.kafkaData || this.kafkaData.length === 0) {
+            console.log('No data available, showing empty charts');
             this.showEmptyCharts();
             return;
         }
 
         try {
+            console.log('Updating charts with data:', this.kafkaData.length, 'records, isTestFiltered:', this.isTestFiltered);
             this.updateInputTrendChart();
             this.updateOutputTrendChart();
             this.updateComparisonChart();
             this.updateDistributionChart();
             this.updateLegend();
 
-            console.log('Kafka charts updated');
+            console.log('Kafka charts updated successfully');
         } catch (error) {
             console.error('Error updating charts:', error);
             this.showChartError('Error updating charts. Please refresh the page.');
@@ -1209,6 +1215,7 @@ class KafkaMetricsManager {
 
     // Initialize charts when section becomes visible
     onSectionVisible() {
+        console.log('onSectionVisible called, chartsInitialized:', this.chartsInitialized, 'isInitialized:', this.isInitialized);
         if (!this.chartsInitialized && this.isInitialized) {
             console.log('Kafka metrics section became visible, initializing charts...');
 
@@ -1218,12 +1225,17 @@ class KafkaMetricsManager {
 
                 // Update display with current data
                 if (this.kafkaData) {
+                    console.log('Updating display with existing data after chart initialization');
                     this.updateKafkaDisplay();
                 } else {
                     // If no data yet, show loading state
+                    console.log('No data available, showing loading state');
                     this.showLoadingCharts();
                 }
             }, 100); // Small delay to ensure DOM is ready
+        } else if (this.chartsInitialized && this.kafkaData) {
+            console.log('Charts already initialized, updating with current data');
+            this.updateKafkaDisplay();
         }
     }
 

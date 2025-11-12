@@ -16,23 +16,23 @@ type K6LoginResult struct {
 }
 
 // GetK6LoginResults fetches k6 login test results based on the specified query
-func GetK6LoginResults(ctx context.Context) ([]K6LoginResult, error) {
+func GetK6LoginResults(ctx context.Context, timeRange TimeRange) ([]K6LoginResult, error) {
 	if monitoringDBClient == nil {
 		return nil, fmt.Errorf("Monitoring ClickHouse client not initialized")
 	}
 
-	query := `
+	query := fmt.Sprintf(`
 		SELECT
 		    timestamp AS "timestamp",
 		    vus AS "No of Users",
 		    test_name AS "Test Name",
 		    quantile(0.9)(avg_response_time) AS "P95 Response time"
 		FROM monitoring.k6_login
-		WHERE timestamp >= now() - toIntervalDay(1)
+		WHERE timestamp >= '%s' AND timestamp <= '%s'
 		GROUP BY
 		    timestamp, vus, test_name
 		ORDER BY timestamp;
-	`
+	`, timeRange.From.Format("2006-01-02 15:04:05"), timeRange.To.Format("2006-01-02 15:04:05"))
 
 	rows, err := monitoringDBClient.Client.Query(ctx, query)
 	if err != nil {
@@ -57,6 +57,6 @@ func GetK6LoginResults(ctx context.Context) ([]K6LoginResult, error) {
 		results = append(results, result)
 	}
 
-	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Fetched %d k6 login results", len(results)), "info")
+	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Fetched %d k6 login results for time range %v to %v", len(results), timeRange.From, timeRange.To), "info")
 	return results, nil
 }

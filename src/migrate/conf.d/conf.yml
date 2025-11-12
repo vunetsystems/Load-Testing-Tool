@@ -8,13 +8,13 @@ include_module_dirs:
   Azure_Redis_Cache:
     enabled: false
   K8s:
-    enabled: true
+    enabled: false
   LinuxMonitor:
     enabled: false
   MongoDB:
     enabled: false
   Mssql:
-    enabled: false
+    enabled: true
   Traces:
     enabled: false
 logging:
