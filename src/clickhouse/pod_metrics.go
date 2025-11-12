@@ -345,7 +345,16 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 
 	if isHistoricalQuery {
 		// Return ALL data points within the time range for trend visualization
-		query = `
+		// Build dynamic query with topics list for ClickHouse compatibility
+		topicsList := ""
+		for i, topic := range topics {
+			if i > 0 {
+				topicsList += ", "
+			}
+			topicsList += "'" + topic + "'"
+		}
+
+		query = fmt.Sprintf(`
 		SELECT
 			topic,
 			timestamp,
@@ -355,15 +364,24 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 			name = 'MessagesInPerSec'
 			AND timestamp >= ?
 			AND timestamp <= ?
-			AND topic IN ?
+			AND topic IN (%s)
 		ORDER BY
 			topic,
 			timestamp ASC
-		`
-		args = []interface{}{timeRange.From, timeRange.To, topics}
+		`, topicsList)
+		args = []interface{}{timeRange.From, timeRange.To}
 	} else {
 		// Return only latest data points per topic for real-time monitoring
-		query = `
+		// Build dynamic query with topics list for ClickHouse compatibility
+		topicsList := ""
+		for i, topic := range topics {
+			if i > 0 {
+				topicsList += ", "
+			}
+			topicsList += "'" + topic + "'"
+		}
+
+		query = fmt.Sprintf(`
 		SELECT
 			t.topic AS metric,
 			t.timestamp AS timestamp,
@@ -383,14 +401,14 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 		ON t.topic = latest.topic AND t.timestamp = latest.latest_ts
 		WHERE
 			t.name = 'MessagesInPerSec'
-			AND t.topic IN ?
+			AND t.topic IN (%s)
 		GROUP BY
 			t.topic,
 			t.timestamp
 		ORDER BY
 			t.timestamp DESC
-		`
-		args = []interface{}{timeRange.From, timeRange.To, topics}
+		`, topicsList)
+		args = []interface{}{timeRange.From, timeRange.To}
 	}
 
 	rows, err := monitoringDBClient.Client.Query(ctx, query, args...)

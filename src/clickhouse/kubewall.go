@@ -507,6 +507,127 @@ type PodTrendData struct {
 // 	return trendData, nil
 // }
 
+// func GetPodTrendData(ctx context.Context, namespace, podName string, hours int) ([]PodTrendData, error) {
+// 	if clickHouseClient == nil {
+// 		return nil, fmt.Errorf("ClickHouse client not initialized")
+// 	}
+
+// 	query := `
+// 		SELECT
+// 		    toStartOfInterval(timestamp, INTERVAL 5 minute) AS time_bucket,
+
+// 		    -- ✅ CPU usage percentage based on actual resource limits (millicores)
+// 		    ROUND(
+// 		        (avg(cpu_usage_nanocores) / 1_000_000) / 
+// 		        NULLIF(avg(resource_limits_millicpu_units), 0) * 100,
+// 		        2
+// 		    ) AS avg_cpu_usage_percent,
+
+// 		    -- ✅ Memory usage percentage based on actual resource limits (bytes)
+// 		    ROUND(
+// 		        (avg(memory_usage_bytes) / 
+// 		        NULLIF(avg(resource_limits_memory_bytes), 0)) * 100,
+// 		        2
+// 		    ) AS avg_memory_usage_percent
+
+// 		FROM monitoring.kubernetes_pod_container_data
+// 		WHERE timestamp >= now() - toIntervalHour(?)
+// 		  AND namespace = ?
+// 		  AND pod_name = ?
+// 		GROUP BY time_bucket
+// 		ORDER BY time_bucket ASC
+// 	`
+
+// 	rows, err := clickHouseClient.Client.Query(ctx, query, hours, namespace, podName)
+// 	if err != nil {
+// 		logger.LogError("System", "ClickHouse", fmt.Sprintf("Failed to query pod trend data: %v", err))
+// 		return nil, fmt.Errorf("failed to query pod trend data: %v", err)
+// 	}
+// 	defer rows.Close()
+
+// 	var trendData []PodTrendData
+// 	for rows.Next() {
+// 		var data PodTrendData
+// 		err := rows.Scan(
+// 			&data.Timestamp,
+// 			&data.CPUUsage,
+// 			&data.MemoryUsage,
+// 		)
+// 		if err != nil {
+// 			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan pod trend row: %v", err))
+// 			continue
+// 		}
+// 		trendData = append(trendData, data)
+// 	}
+
+// 	logger.LogWithNode("System", "ClickHouse",
+// 		fmt.Sprintf("Fetched %d trend data points for pod %s/%s", len(trendData), namespace, podName),
+// 		"info",
+// 	)
+// 	return trendData, nil
+// }
+
+// func GetPodTrendData(ctx context.Context, namespace, podName string, hours int) ([]PodTrendData, error) {
+// 	if clickHouseClient == nil {
+// 		return nil, fmt.Errorf("ClickHouse client not initialized")
+// 	}
+
+// 	query := `
+// 		SELECT
+// 		    toStartOfInterval(timestamp, INTERVAL 5 minute) AS time_bucket,
+
+// 		    -- ✅ CPU usage percentage based on actual resource limits (millicores)
+// 		    ROUND(
+// 		        (avg(cpu_usage_nanocores) / 1_000_000) /
+// 		        NULLIF(avg(resource_limits_millicpu_units), 0) * 100,
+// 		        2
+// 		    ) AS avg_cpu_usage_percent,
+
+// 		    -- ✅ Memory usage percentage based on actual resource limits (bytes)
+// 		    ROUND(
+// 		        (avg(memory_usage_bytes) /
+// 		        NULLIF(avg(resource_limits_memory_bytes), 0)) * 100,
+// 		        2
+// 		    ) AS avg_memory_usage_percent
+
+// 		FROM monitoring.kubernetes_pod_container_data
+// 		WHERE timestamp >= now() - toIntervalHour(?)
+// 		  AND namespace = ?
+// 		  AND pod_name = ?
+// 		GROUP BY time_bucket
+// 		ORDER BY time_bucket ASC
+// 	`
+
+// 	rows, err := clickHouseClient.Client.Query(ctx, query, hours, namespace, podName)
+// 	if err != nil {
+// 		logger.LogError("System", "ClickHouse", fmt.Sprintf("Failed to query pod trend data: %v", err))
+// 		return nil, fmt.Errorf("failed to query pod trend data: %v", err)
+// 	}
+// 	defer rows.Close()
+
+// 	var trendData []PodTrendData
+// 	for rows.Next() {
+// 		var data PodTrendData
+// 		err := rows.Scan(
+// 			&data.Timestamp,
+// 			&data.CPUUsage,
+// 			&data.MemoryUsage,
+// 		)
+// 		if err != nil {
+// 			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan pod trend row: %v", err))
+// 			continue
+// 		}
+// 		trendData = append(trendData, data)
+// 	}
+
+// 	logger.LogWithNode("System", "ClickHouse",
+// 		fmt.Sprintf("Fetched %d trend data points for pod %s/%s", len(trendData), namespace, podName),
+// 		"info",
+// 	)
+// 	return trendData, nil
+// }
+
+
 func GetPodTrendData(ctx context.Context, namespace, podName string, hours int) ([]PodTrendData, error) {
 	if clickHouseClient == nil {
 		return nil, fmt.Errorf("ClickHouse client not initialized")
@@ -518,14 +639,14 @@ func GetPodTrendData(ctx context.Context, namespace, podName string, hours int) 
 
 		    -- ✅ CPU usage percentage based on actual resource limits (millicores)
 		    ROUND(
-		        (avg(cpu_usage_nanocores) / 1_000_000) / 
+		        (avg(cpu_usage_nanocores) / 1_000_000) /
 		        NULLIF(avg(resource_limits_millicpu_units), 0) * 100,
 		        2
 		    ) AS avg_cpu_usage_percent,
 
 		    -- ✅ Memory usage percentage based on actual resource limits (bytes)
 		    ROUND(
-		        (avg(memory_usage_bytes) / 
+		        (avg(memory_usage_bytes) /
 		        NULLIF(avg(resource_limits_memory_bytes), 0)) * 100,
 		        2
 		    ) AS avg_memory_usage_percent
@@ -566,4 +687,3 @@ func GetPodTrendData(ctx context.Context, namespace, podName string, hours int) 
 	)
 	return trendData, nil
 }
-

@@ -737,11 +737,23 @@ class VuDataSimManager {
 
             console.log('Starting vuDataSim with sources:', selectedSources, 'EPS:', selectedEPS, 'Timeout:', timeoutSeconds, 'Skip CH Truncate:', skipChTruncate);
 
+            const sourceNameTranslation = {
+                "LinuxMonitor": "Linux Monitor",
+                "MongoDB": "MongoDB",
+                "Mssql": "MSSQL",
+                "Apache": "Apache",
+                "Azure_Firewall": "Azure Firewall",
+                "Azure_Redis_Cache": "Azure Redis Cache",
+                "Traces": "Traces",
+                "K8s": "Kubernetes"
+            };
+            const translatedSources = selectedSources.map(src => sourceNameTranslation[src] || src);
+
             // Create test run record first - belongs to the test run tracking process
             console.log('Creating test run record...');
             const testRunData = {
                 target_eps: selectedEPS,
-                o11y_sources: selectedSources,
+                o11y_sources: translatedSources,
                 timeout_seconds: timeoutSeconds
             };
 

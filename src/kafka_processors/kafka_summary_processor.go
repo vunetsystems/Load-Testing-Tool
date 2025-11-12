@@ -17,6 +17,7 @@ import (
 
 	"vuDataSim/src/clickhouse"
 	"vuDataSim/src/logger"
+	"vuDataSim/src/pod_processors"
 
 	"gopkg.in/yaml.v3"
 	_ "github.com/mattn/go-sqlite3"
@@ -30,6 +31,15 @@ type KafkaStat struct {
 	OneMinuteRate float64
 	Count         float64 // changed from int64 -> float64 to match ClickHouse
 }
+
+// ProcessRateStat represents process rate metrics from ClickHouse
+// Added for process rate summary functionality
+type ProcessRateStat struct {
+	MaxProcessRate float64 `json:"max_process_rate"`
+	MinProcessRate float64 `json:"min_process_rate"`
+	AvgProcessRate float64 `json:"avg_process_rate"`
+}
+
 
 // type TopicEntry struct {
 // 	Name string `yaml:"name"`
@@ -88,8 +98,60 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 	var o11ySources []string
 	json.Unmarshal([]byte(o11ySourcesStr), &o11ySources)
 
-	// 3. Build summary for each o11y source
+	// 3. Collect app-ids for process rate fetching
+	// Added for process rate summary - map o11y sources to app-ids via pipeline field
+	appIDMap := make(map[string]string) // source -> app-id
+	for _, src := range o11ySources {
+		for _, s := range cfg.Sources {
+			if strings.ToLower(strings.ReplaceAll(s.Name, " ", "")) == strings.ToLower(strings.ReplaceAll(src, " ", "")) {
+				if len(s.Pipeline) > 0 {
+					appIDMap[src] = s.Pipeline[0]
+				}
+				break
+			}
+		}
+	}
+
+	// Fetch process rates for all app-ids
+	// Added for process rate summary - query ClickHouse for process-rate metrics
+	var appIDs []string
+	for _, appID := range appIDMap {
+		appIDs = append(appIDs, appID)
+	}
+	processRates, err := fetchProcessRates(chClient, appIDs, startTime, endTime)
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to fetch process rates: %v", err))
+		processRates = make(map[string]ProcessRateStat)
+	}
+
+	// 5. Collect ClickHouse tables for ingestion EPS calculation
+	// Added for ingestion summary - collect all clickhouse tables from o11y sources
+	var allClickHouseTables []string
+	for _, src := range o11ySources {
+		for _, s := range cfg.Sources {
+			if strings.ToLower(strings.ReplaceAll(s.Name, " ", "")) == strings.ToLower(strings.ReplaceAll(src, " ", "")) {
+				if len(s.ClickHouseTables) > 0 {
+					allClickHouseTables = append(allClickHouseTables, s.ClickHouseTables...)
+				}
+				break
+			}
+		}
+	}
+
+	// Fetch ingestion EPS data
+	// Added for ingestion summary - calculate EPS for all relevant ClickHouse tables
+	var ingestionEntries []IngestionEPSEntry
+	if len(allClickHouseTables) > 0 {
+		ingestionEntries, err = fetchIngestionEPS(chClient, allClickHouseTables, startTime, endTime)
+		if err != nil {
+			logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to fetch ingestion EPS: %v", err))
+			ingestionEntries = []IngestionEPSEntry{}
+		}
+	}
+
+	// 4. Build summary for each o11y source
 	summary := make(map[string]interface{})
+	processRateSummary := make(map[string]ProcessRateStat) // Separate summary for process rates
 
 	for _, src := range o11ySources {
 		for _, s := range cfg.Sources {
@@ -130,16 +192,37 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 					outputSummary["output_efficiency_pct"] = 0.0
 				}
 
-				summary[src] = map[string]interface{}{
+				// Add process rate data if available
+				// Added for process rate summary - include in both full summary and separate summary
+				sourceSummary := map[string]interface{}{
 					"input":  inputSummary,
 					"output": outputSummary,
 				}
+
+				if appID, exists := appIDMap[src]; exists {
+					if stat, found := processRates[appID]; found {
+						sourceSummary["process_rate"] = stat
+						processRateSummary[src] = stat
+					}
+				}
+
+				summary[src] = sourceSummary
 			}
 		}
 	}
 
-	// 4. Store the summary back to the database
+	// 4. Fetch and compute pod resource metrics
+	podSummaryJSON, podDataFound, err := pod_processors.ProcessPodResourceSummary(chClient, startTime, endTime)
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process pod metrics: %v", err))
+		podSummaryJSON = ""
+		podDataFound = false
+	}
+
+	// 5. Store the summary back to the database
 	o11ySummaryJSON, _ := json.Marshal(summary) // Store the same summary in o11y_sources_summary
+	processRateSummaryJSON, _ := json.Marshal(processRateSummary) // Added for process rate summary - store in separate column
+	ingestionSummaryJSON, _ := json.Marshal(ingestionEntries) // Added for ingestion summary - store EPS data for ClickHouse tables
 
 	// Calculate totals and averages across all sources
 	var totalInput, totalOutput int64
@@ -201,12 +284,13 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		    peak_input_msgs_per_sec = ?, peak_output_msgs_per_sec = ?,
 		    min_input_msgs_per_sec = ?, min_output_msgs_per_sec = ?,
 		    data_loss_pct = ?, anomaly_detected = ?, anomaly_score_overall = ?,
-		    anomaly_details = ?, o11y_sources_summary = ?, kafka_summary_generated = 1
+		    anomaly_details = ?, o11y_sources_summary = ?, kafka_summary_generated = 1,
+		    pod_resource_check = ?, pod_metrics = ?, process_rate_summary = ?, ingestion_summary = ? -- Added for ingestion summary
 		WHERE test_id = ?;
 	`, totalInput, totalOutput, avgInputRate, avgOutputRate,
 		peakInputRate, peakOutputRate, minInputRate, minOutputRate,
 		dataLossPct, anomalyDetected, anomalyScore,
-		"Anomaly detection based on message rate spikes", string(o11ySummaryJSON), testID)
+		"Anomaly detection based on message rate spikes", string(o11ySummaryJSON), podDataFound, string(podSummaryJSON), string(processRateSummaryJSON), string(ingestionSummaryJSON), testID)
 	if err != nil {
 		return fmt.Errorf("failed to update test run with summary: %w", err)
 	}
@@ -283,6 +367,156 @@ func fetchKafkaMetrics(chClient *clickhouse.ClickHouseClient, topics []string, s
 
 	return stats, nil
 }
+
+// IngestionEPSEntry represents a single ingestion EPS entry for a table
+// Added for ingestion summary functionality
+type IngestionEPSEntry struct {
+	Table string  `json:"table"`
+	AvgEPS float64 `json:"avg_eps"`
+}
+
+// fetchIngestionEPS fetches ingestion EPS metrics from ClickHouse system.part_log for given tables and time range
+// Added for ingestion summary functionality - calculates average EPS for tables based on part log events
+func fetchIngestionEPS(chClient *clickhouse.ClickHouseClient, tables []string, start, end time.Time) ([]IngestionEPSEntry, error) {
+	if len(tables) == 0 {
+		return nil, fmt.Errorf("no tables provided")
+	}
+
+	// Build the IN clause for tables
+	tableList := make([]string, len(tables))
+	for i, t := range tables {
+		tableList[i] = fmt.Sprintf("'%s'", t)
+	}
+	tableStr := strings.Join(tableList, ",")
+
+	query := fmt.Sprintf(`
+		SELECT
+			`+"`table`"+`,
+			avg(eps) AS avg_eps
+		FROM
+		(
+			SELECT
+				`+"`table`"+`,
+				toStartOfMinute(event_time) AS minute,
+				sum(rows) / 60 AS eps
+			FROM system.part_log
+			WHERE
+				event_type = 'NewPart'
+				AND event_time >= toDateTime('%s')
+				AND event_time <= toDateTime('%s')
+				AND `+"`table`"+` IN (%s)
+			GROUP BY
+				minute, `+"`table`"+`
+		)
+		GROUP BY
+			`+"`table`"+`
+		ORDER BY
+			avg_eps DESC
+	`, start.Format("2006-01-02 15:04:05"), end.Format("2006-01-02 15:04:05"), tableStr)
+
+	logger.LogWithNode("System", "IngestionEPSFetcher", fmt.Sprintf("Running ClickHouse query:\n%s", query), "debug")
+
+	rows, err := chClient.Client.Query(context.Background(), query)
+	if err != nil {
+		return nil, fmt.Errorf("query execution failed: %w", err)
+	}
+	defer rows.Close()
+
+	var entries []IngestionEPSEntry
+
+	for rows.Next() {
+		var entry IngestionEPSEntry
+
+		if err := rows.Scan(&entry.Table, &entry.AvgEPS); err != nil {
+			logger.LogWarning("System", "IngestionEPSFetcher", fmt.Sprintf("Failed to scan ingestion EPS row: %v", err))
+			continue
+		}
+
+		entries = append(entries, entry)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	if len(entries) == 0 {
+		logger.LogWithNode("System", "IngestionEPSFetcher", "No ingestion EPS data found for given tables/time range", "warn")
+	} else {
+		logger.LogSuccess("System", "IngestionEPSFetcher", fmt.Sprintf("Fetched ingestion EPS for %d tables", len(entries)))
+	}
+
+	return entries, nil
+}
+
+// fetchProcessRates fetches process rate metrics from ClickHouse for given app-ids and time range
+// Added for process rate summary functionality - queries monitoring.kafka_streams_ThreadMetrics
+func fetchProcessRates(chClient *clickhouse.ClickHouseClient, appIDs []string, start, end time.Time) (map[string]ProcessRateStat, error) {
+	if len(appIDs) == 0 {
+		return nil, fmt.Errorf("no app-ids provided")
+	}
+
+	// Build the IN clause for app-ids
+	appIDList := make([]string, len(appIDs))
+	for i, id := range appIDs {
+		appIDList[i] = fmt.Sprintf("'%s'", id)
+	}
+	appIDStr := strings.Join(appIDList, ",")
+
+	query := fmt.Sprintf(`SELECT
+	   `+"`app-id`"+` AS app_id,
+	   MAX(interval_sum) AS max_process_rate,
+	   MIN(interval_sum) AS min_process_rate,
+	   AVG(interval_sum) AS avg_process_rate
+FROM (
+	   SELECT
+	       `+"`app-id`"+`,
+	       toStartOfInterval(timestamp, toIntervalSecond(1)) AS time,
+	       sum(`+"`process-rate`"+`) AS interval_sum
+	   FROM monitoring.kafka_streams_ThreadMetrics
+	   WHERE `+"`app-id`"+` IN (%s)
+	     AND timestamp >= toDateTime64('%s', 9)
+	     AND timestamp <= toDateTime64('%s', 9)
+	   GROUP BY `+"`app-id`"+`, time
+	   HAVING interval_sum > 0
+) AS per_second
+GROUP BY `+"`app-id`"+`
+ORDER BY `+"`app-id`"+``, appIDStr, start.Format("2006-01-02 15:04:05.000000000"), end.Format("2006-01-02 15:04:05.000000000"))
+
+	logger.LogWithNode("System", "ProcessRateFetcher", fmt.Sprintf("Running ClickHouse query:\n%s", query), "debug")
+
+	rows, err := chClient.Client.Query(context.Background(), query)
+	if err != nil {
+		return nil, fmt.Errorf("query execution failed: %w", err)
+	}
+	defer rows.Close()
+
+	processRates := make(map[string]ProcessRateStat)
+
+	for rows.Next() {
+		var appID string
+		var stat ProcessRateStat
+
+		if err := rows.Scan(&appID, &stat.MaxProcessRate, &stat.MinProcessRate, &stat.AvgProcessRate); err != nil {
+			logger.LogWarning("System", "ProcessRateFetcher", fmt.Sprintf("Failed to scan process rate row: %v", err))
+			continue
+		}
+
+		processRates[appID] = stat
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	if len(processRates) == 0 {
+		logger.LogWithNode("System", "ProcessRateFetcher", "No process rate metrics found for given app-ids/time range", "warn")
+	} else {
+		logger.LogSuccess("System", "ProcessRateFetcher", fmt.Sprintf("Fetched process rates for %d app-ids", len(processRates)))
+	}
+
+	return processRates, nil
+}
+
 
 // computeKafkaStats computes statistics for a single topic
 // This is an update for Kafka summarization functionality
