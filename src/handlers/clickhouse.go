@@ -216,16 +216,41 @@ func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 // HandleAPIGetPodMonitoring handles GET /api/clickhouse/pod-monitoring
 func HandleAPIGetPodMonitoring(w http.ResponseWriter, r *http.Request) {
 	namespace := r.URL.Query().Get("namespace")
+	testID := r.URL.Query().Get("test_id")
 
 	var podData []clickhouse.PodMonitoringData
 	var err error
 
+	// If test_id is provided, get the time range from test_runs
+	var timeRange *clickhouse.TimeRange
+	if testID != "" {
+		testRun, err := database.GetTestRun(testID)
+		if err != nil {
+			SendJSONResponse(w, http.StatusBadRequest, APIResponse{
+				Success: false,
+				Message: fmt.Sprintf("Invalid test_id or test run not found: %v", err),
+			})
+			return
+		}
+
+		// Set time range from test run
+		timeRange = &clickhouse.TimeRange{
+			From: testRun.StartTime,
+		}
+		if testRun.EndTime != nil {
+			timeRange.To = *testRun.EndTime
+		} else {
+			// If test is still running, use current time
+			timeRange.To = time.Now()
+		}
+	}
+
 	if namespace == "" || namespace == "All Namespaces" {
 		// Fetch from all namespaces when no namespace specified or "All Namespaces" selected
-		podData, err = clickhouse.GetPodMonitoringDataAllNamespaces(r.Context())
+		podData, err = clickhouse.GetPodMonitoringDataAllNamespaces(r.Context(), timeRange)
 	} else {
 		// Fetch from specific namespace
-		podData, err = clickhouse.GetPodMonitoringData(r.Context(), namespace)
+		podData, err = clickhouse.GetPodMonitoringData(r.Context(), namespace, timeRange)
 	}
 
 	if err != nil {
@@ -478,6 +503,7 @@ func HandleAPIGetPodTrendData(w http.ResponseWriter, r *http.Request) {
 	namespace := r.URL.Query().Get("namespace")
 	podName := r.URL.Query().Get("pod")
 	hoursStr := r.URL.Query().Get("hours")
+	testID := r.URL.Query().Get("test_id")
 
 	if namespace == "" {
 		namespace = "vsmaps" // default namespace
@@ -498,7 +524,31 @@ func HandleAPIGetPodTrendData(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	trendData, err := clickhouse.GetPodTrendData(r.Context(), namespace, podName, hours)
+	// If test_id is provided, get the time range from test_runs
+	var timeRange *clickhouse.TimeRange
+	if testID != "" {
+		testRun, err := database.GetTestRun(testID)
+		if err != nil {
+			SendJSONResponse(w, http.StatusBadRequest, APIResponse{
+				Success: false,
+				Message: fmt.Sprintf("Invalid test_id or test run not found: %v", err),
+			})
+			return
+		}
+
+		// Set time range from test run
+		timeRange = &clickhouse.TimeRange{
+			From: testRun.StartTime,
+		}
+		if testRun.EndTime != nil {
+			timeRange.To = *testRun.EndTime
+		} else {
+			// If test is still running, use current time
+			timeRange.To = time.Now()
+		}
+	}
+
+	trendData, err := clickhouse.GetPodTrendData(r.Context(), namespace, podName, hours, timeRange)
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,

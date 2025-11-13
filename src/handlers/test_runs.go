@@ -213,21 +213,20 @@ func HandleAPIGetNextTestID(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleAPIGetTestRunsForDropdown handles GET /api/test-runs/dropdown
-// This endpoint returns simplified test run data for dropdown selection (only completed tests)
+// This endpoint returns simplified test run data for dropdown selection
 func HandleAPIGetTestRunsForDropdown(w http.ResponseWriter, r *http.Request) {
-	k6Runs, err := database.GetAllK6Runs()
+	testRuns, err := database.GetAllTestRuns()
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
-			Message: fmt.Sprintf("Failed to retrieve K6 runs: %v", err),
+			Message: fmt.Sprintf("Failed to retrieve test runs: %v", err),
 		})
 		return
 	}
 
-	// Filter to only completed K6 runs and create simplified response
+	// Create simplified response for dropdown
 	type TestRunOption struct {
 		TestID    string `json:"test_id"`
-		TestName  string `json:"test_name,omitempty"`
 		StartTime string `json:"start_time"`
 		EndTime   string `json:"end_time,omitempty"`
 		Duration  string `json:"duration,omitempty"`
@@ -235,20 +234,19 @@ func HandleAPIGetTestRunsForDropdown(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var options []TestRunOption
-	for _, k6Run := range k6Runs {
-		// Include all K6 runs (running and completed)
+	for _, testRun := range testRuns {
 		option := TestRunOption{
-			TestID: k6Run.TestID,
-			Status: k6Run.Status,
+			TestID: testRun.TestID,
+			Status: testRun.Status,
 		}
 
 		// Format times as RFC3339 strings
-		option.StartTime = k6Run.StartTime.Format("2006-01-02T15:04:05Z07:00")
-		if k6Run.EndTime != nil {
-			option.EndTime = k6Run.EndTime.Format("2006-01-02T15:04:05Z07:00")
+		option.StartTime = testRun.StartTime.Format("2006-01-02T15:04:05Z07:00")
+		if testRun.EndTime != nil {
+			option.EndTime = testRun.EndTime.Format("2006-01-02T15:04:05Z07:00")
 
-			// Calculate duration for completed runs
-			duration := k6Run.EndTime.Sub(k6Run.StartTime)
+			// Calculate duration
+			duration := testRun.EndTime.Sub(testRun.StartTime)
 			option.Duration = duration.String()
 		}
 
@@ -257,7 +255,7 @@ func HandleAPIGetTestRunsForDropdown(w http.ResponseWriter, r *http.Request) {
 
 	SendJSONResponse(w, http.StatusOK, APIResponse{
 		Success: true,
-		Message: fmt.Sprintf("Retrieved %d K6 runs", len(options)),
+		Message: fmt.Sprintf("Retrieved %d test runs", len(options)),
 		Data:    options,
 	})
 }

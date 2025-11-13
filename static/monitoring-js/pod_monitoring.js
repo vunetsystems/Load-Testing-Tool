@@ -13,6 +13,8 @@ class PodMonitoringManager {
         this.itemsPerPage = 25;
         this.searchTerm = '';
         this.selectedNamespace = 'vsmaps';
+        this.selectedTestID = ''; // Selected test ID for filtering
+        this.testRuns = []; // Available test runs for dropdown
         // Sorting properties
         this.sortColumn = null;
         this.sortDirection = 'asc'; // 'asc' or 'desc'
@@ -25,6 +27,7 @@ class PodMonitoringManager {
     async initialize() {
         console.log('Initializing pod monitoring...');
         this.attachEventListeners();
+        await this.fetchTestRuns(); // Load test runs for dropdown
         await this.fetchPodLogs(); // Load logs first
         await this.fetchPodMonitoringData();
         this.initializeTrendChart();
@@ -39,6 +42,18 @@ class PodMonitoringManager {
             searchInput.addEventListener('input', (e) => {
                 this.searchTerm = e.target.value.toLowerCase();
                 this.filterAndDisplayData();
+            });
+        }
+
+        // Test ID filter
+        const testIdFilter = document.getElementById('test-id-filter');
+        if (testIdFilter) {
+            testIdFilter.addEventListener('change', (e) => {
+                this.selectedTestID = e.target.value;
+                this.fetchPodMonitoringData();
+                if (this.selectedPodForTrend) {
+                    this.fetchPodTrendData();
+                }
             });
         }
 
@@ -152,14 +167,79 @@ class PodMonitoringManager {
         }
     }
 
+    // Fetch test runs for dropdown
+    async fetchTestRuns() {
+        try {
+            const response = await fetch('/api/test-runs/dropdown');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.success && result.data) {
+                this.testRuns = result.data;
+                console.log('Test runs loaded:', this.testRuns.length, 'runs');
+                this.populateTestRunsDropdown();
+            } else {
+                console.error('Failed to fetch test runs:', result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching test runs:', error);
+        }
+    }
+
+    // Populate test runs dropdown
+    populateTestRunsDropdown() {
+        const select = document.getElementById('test-id-filter');
+        if (!select) return;
+
+        // Clear existing options except the first one
+        select.innerHTML = '<option value="">All Tests (Recent)</option>';
+
+        // Add test runs as options
+        this.testRuns.forEach(testRun => {
+            const option = document.createElement('option');
+            option.value = testRun.test_id;
+
+            // Format display text
+            const startTime = new Date(testRun.start_time).toLocaleString();
+            const status = testRun.status.charAt(0).toUpperCase() + testRun.status.slice(1);
+            let displayText = `${testRun.test_id} - ${status} (${startTime})`;
+
+            if (testRun.end_time) {
+                const endTime = new Date(testRun.end_time).toLocaleString();
+                displayText += ` to ${endTime}`;
+            }
+
+            option.textContent = displayText;
+            select.appendChild(option);
+        });
+
+        console.log('Test runs dropdown populated with', this.testRuns.length, 'options');
+    }
+
+
     // Fetch pod monitoring data from API
     async fetchPodMonitoringData() {
         if (this.isUpdating) return;
 
         this.isUpdating = true;
         try {
-            const namespaceParam = this.selectedNamespace !== 'All Namespaces' ? `?namespace=${this.selectedNamespace}` : '';
-            const response = await fetch(`/api/clickhouse/pod-monitoring${namespaceParam}`);
+            let url = '/api/clickhouse/pod-monitoring';
+            const params = new URLSearchParams();
+
+            if (this.selectedNamespace !== 'All Namespaces') {
+                params.append('namespace', this.selectedNamespace);
+            }
+            if (this.selectedTestID) {
+                params.append('test_id', this.selectedTestID);
+            }
+
+            if (params.toString()) {
+                url += '?' + params.toString();
+            }
+
+            const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -168,10 +248,11 @@ class PodMonitoringManager {
             if (result.success && result.data) {
                 this.podData = result.data;
                 this.lastUpdate = new Date();
-                console.log('Pod monitoring data updated:', this.podData);
+                console.log('Pod monitoring data updated:', this.podData.length, 'pods');
                 this.updateLastUpdateTime();
                 this.filterAndDisplayData();
                 this.updateStatsCards();
+                this.updatePodTrendDropdown();
             } else {
                 console.error('Failed to fetch pod monitoring data:', result.message);
             }
@@ -462,9 +543,14 @@ renderPodTable(pods) {
 
         try {
             this.showTrendLoading();
-            console.log('Fetching trend data for pod:', this.selectedPodForTrend, 'in namespace:', this.selectedNamespace);
+            console.log('Fetching trend data for pod:', this.selectedPodForTrend, 'in namespace:', this.selectedNamespace, 'test_id:', this.selectedTestID);
 
-            const response = await fetch(`/api/clickhouse/pod-trend?namespace=${this.selectedNamespace}&pod=${this.selectedPodForTrend}&hours=24`);
+            let url = `/api/clickhouse/pod-trend?namespace=${this.selectedNamespace}&pod=${this.selectedPodForTrend}&hours=24`;
+            if (this.selectedTestID) {
+                url += `&test_id=${this.selectedTestID}`;
+            }
+
+            const response = await fetch(url);
             console.log('Trend API response status:', response.status);
 
             if (!response.ok) {

@@ -161,16 +161,84 @@ def format_lag_table(row):
 
 
 def format_grouped_table(title, group_def, row):
-    """Create grouped horizontal table (Pods / Nodes)."""
-    md = f"### {title}\n\n"
-    md += "| Component | Min | Avg | Max |\n|------------|-----|-----|-----|\n"
-    for comp in group_def["rows"]:
-        min_field = f"{comp}_{group_def['cols'][0]}"
-        avg_field = f"{comp}_{group_def['cols'][1]}"
-        max_field = f"{comp}_{group_def['cols'][2]}"
-        md += f"| {comp} | `{safe_get(row, min_field)}` | `{safe_get(row, avg_field)}` | `{safe_get(row, max_field)}` |\n"
+    """
+    Create grouped horizontal table (Pods / Nodes / Pipelines) 
+    with Allocated column (raw numbers) and percentage metrics for Min/Avg/Max.
+    """
+    is_pipeline_group = "Pipeline Pod" in title
+    is_pod_or_node_group = any(keyword in title for keyword in ["Pod", "Node"])
+
+    # Determine if this group is CPU or Memory
+    is_cpu = "CPU" in title
+    is_memory = "Memory" in title
+
+    # Add % marker to resource-based titles
+    if is_pod_or_node_group and (is_cpu or is_memory):
+        title_suffix = " (%)"
+    else:
+        title_suffix = ""
+
+    # Extract pipeline name (for pipeline groups)
+    pipeline_name = None
+    if is_pipeline_group:
+        try:
+            info = json.loads(safe_get(row, "pipeline_info"))
+            if isinstance(info, dict) and len(info) > 0:
+                first_entry = next(iter(info.values()))
+                pipeline_name = first_entry.get("name", "unknown_pipeline")
+        except Exception:
+            pipeline_name = "unknown_pipeline"
+
+    # Table column label (Pipeline or Component)
+    col_label = "Pipeline Name" if is_pipeline_group else "Component"
+
+    # Header construction with optional % markers
+    header_allocated = "Allocated"  # Raw number (not %)
+    header_min = "Min (%)" if is_pod_or_node_group else "Min"
+    header_avg = "Avg (%)" if is_pod_or_node_group else "Avg"
+    header_max = "Max (%)" if is_pod_or_node_group else "Max"
+
+    # Build Markdown table
+    md = f"### {title}{title_suffix}\n\n"
+    md += f"| {col_label} | {header_allocated} | {header_min} | {header_avg} | {header_max} |\n"
+    md += "|--------------|-------------|----------|----------|----------|\n"
+
+    # Function to determine allocated field key
+    def get_allocated_field(component):
+        if is_cpu:
+            return f"{component}_cpu_allocated"
+        elif is_memory:
+            return f"{component}_mem_allocated"
+        return None
+
+    # For pipeline pods, only one row (pipeline name)
+    if is_pipeline_group:
+        for comp in group_def["rows"]:
+            alloc_field = get_allocated_field(comp)
+            min_field = f"{comp}_{group_def['cols'][0]}"
+            avg_field = f"{comp}_{group_def['cols'][1]}"
+            max_field = f"{comp}_{group_def['cols'][2]}"
+            md += (
+                f"| `{pipeline_name}` | `{safe_get(row, alloc_field)}` | "
+                f"`{safe_get(row, min_field)}` | `{safe_get(row, avg_field)}` | `{safe_get(row, max_field)}` |\n"
+            )
+    else:
+        # Normal pod/node tables
+        for comp in group_def["rows"]:
+            alloc_field = get_allocated_field(comp)
+            min_field = f"{comp}_{group_def['cols'][0]}"
+            avg_field = f"{comp}_{group_def['cols'][1]}"
+            max_field = f"{comp}_{group_def['cols'][2]}"
+            md += (
+                f"| {comp} | `{safe_get(row, alloc_field)}` | "
+                f"`{safe_get(row, min_field)}` | `{safe_get(row, avg_field)}` | `{safe_get(row, max_field)}` |\n"
+            )
+
     md += "\n"
     return md
+
+
+
 
 
 def get_o11y_source_name(o11y_sources):

@@ -45,35 +45,35 @@
 
 ## 🖥️ Pod Metrics
 
-### Kafka Cluster Pods CPU
+### Kafka Cluster Pods CPU (%)
 
-| Component | Min | Avg | Max |
-|------------|-----|-----|-----|
-| kafka_cluster_cp_kafka_0 | `0.0` | `0.3102413829761905` | `4.48104595` |
-| kafka_cluster_cp_kafka_1 | `0.0` | `0.30456019980158733` | `3.59413265` |
-| kafka_cluster_cp_kafka_2 | `0.0` | `0.27744596396825394` | `5.014965616666666` |
+| Component | Allocated | Min (%) | Avg (%) | Max (%) |
+|--------------|-------------|----------|----------|----------|
+| kafka_cluster_cp_kafka_0 | `6.0` | `0.0` | `0.3102413829761905` | `4.48104595` |
+| kafka_cluster_cp_kafka_1 | `6.0` | `0.0` | `0.30456019980158733` | `3.59413265` |
+| kafka_cluster_cp_kafka_2 | `6.0` | `0.0` | `0.27744596396825394` | `5.014965616666666` |
 
-### Kafka Cluster Pods Memory
+### Kafka Cluster Pods Memory (%)
 
-| Component | Min | Avg | Max |
-|------------|-----|-----|-----|
-| kafka_cluster_cp_kafka_0 | `0.0` | `9.995831989106678` | `99.99001026153564` |
-| kafka_cluster_cp_kafka_1 | `0.0` | `10.640076171784173` | `99.99792575836182` |
-| kafka_cluster_cp_kafka_2 | `0.0` | `10.27513969512213` | `99.2225170135498` |
+| Component | Allocated | Min (%) | Avg (%) | Max (%) |
+|--------------|-------------|----------|----------|----------|
+| kafka_cluster_cp_kafka_0 | `16.0` | `0.0` | `9.995831989106678` | `99.99001026153564` |
+| kafka_cluster_cp_kafka_1 | `16.0` | `0.0` | `10.640076171784173` | `99.99792575836182` |
+| kafka_cluster_cp_kafka_2 | `16.0` | `0.0` | `10.27513969512213` | `99.2225170135498` |
 
-### ClickHouse Pods CPU
+### ClickHouse Pods CPU (%)
 
-| Component | Min | Avg | Max |
-|------------|-----|-----|-----|
-| chi_clickhouse_vusmart_0_0_0 | `0.0` | `1.1793546342570598` | `14.441117555555557` |
-| chi_clickhouse_vusmart_0_1_0 | `0.0` | `0.7809428013492066` | `89.16321193333333` |
+| Component | Allocated | Min (%) | Avg (%) | Max (%) |
+|--------------|-------------|----------|----------|----------|
+| chi_clickhouse_vusmart_0_0_0 | `9.0` | `0.0` | `1.1793546342570598` | `14.441117555555557` |
+| chi_clickhouse_vusmart_0_1_0 | `9.0` | `0.0` | `0.7809428013492066` | `89.16321193333333` |
 
-### ClickHouse Pods Memory
+### ClickHouse Pods Memory (%)
 
-| Component | Min | Avg | Max |
-|------------|-----|-----|-----|
-| chi_clickhouse_vusmart_0_0_0 | `0.0` | `6.626285453307091` | `48.125771915211395` |
-| chi_clickhouse_vusmart_0_1_0 | `0.0` | `1.5183550570191455` | `14.53081018784467` |
+| Component | Allocated | Min (%) | Avg (%) | Max (%) |
+|--------------|-------------|----------|----------|----------|
+| chi_clickhouse_vusmart_0_0_0 | `34.0` | `0.0` | `6.626285453307091` | `48.125771915211395` |
+| chi_clickhouse_vusmart_0_1_0 | `34.0` | `0.0` | `1.5183550570191455` | `14.53081018784467` |
 
 ## 🔧 Pipeline Pod Metrics
 
@@ -83,47 +83,47 @@
 |---------|----------------|----------|------------|
 | `Linux Monitor` | `linuxmonitor` | `4` | `1` |
 
-### Pipeline Pod CPU
+### Pipeline Pod CPU (%)
 
-| Component | Min | Avg | Max |
-|------------|-----|-----|-----|
-| pipeline_pod | `0.0` | `9.441617043809524` | `71.6013495` |
+| Pipeline Name | Allocated | Min (%) | Avg (%) | Max (%) |
+|--------------|-------------|----------|----------|----------|
+| `linuxmonitor` | `1.0` | `0.0` | `9.441617043809524` | `71.6013495` |
 
-### Pipeline Pod Memory
+### Pipeline Pod Memory (%)
 
-| Component | Min | Avg | Max |
-|------------|-----|-----|-----|
-| pipeline_pod | `0.0` | `8.649389880952379` | `63.68515625` |
+| Pipeline Name | Allocated | Min (%) | Avg (%) | Max (%) |
+|--------------|-------------|----------|----------|----------|
+| `linuxmonitor` | `0.48828125` | `0.0` | `8.649389880952379` | `63.68515625` |
 
 ## 💻 Node Metrics
 
-### Kafka Node CPU
+### Kafka Node CPU (%)
 
-| Component | Min | Avg | Max |
-|------------|-----|-----|-----|
-| kafka_1_node | `1.72` | `2.23` | `3.04` |
-| kafka_2_node | `8.01` | `8.66` | `9.33` |
-| kafka_3_node | `1.45` | `2.23` | `3.91` |
+| Component | Allocated | Min (%) | Avg (%) | Max (%) |
+|--------------|-------------|----------|----------|----------|
+| kafka_1_node | `` | `1.72` | `2.23` | `3.04` |
+| kafka_2_node | `` | `8.01` | `8.66` | `9.33` |
+| kafka_3_node | `` | `1.45` | `2.23` | `3.91` |
 
-### Kafka Node Memory
+### Kafka Node Memory (%)
 
-| Component | Min | Avg | Max |
-|------------|-----|-----|-----|
-| kafka_1_node | `44.31` | `56.1` | `64.35` |
-| kafka_2_node | `47.85` | `62.87` | `72.9` |
-| kafka_3_node | `45.16` | `58.36` | `65.8` |
+| Component | Allocated | Min (%) | Avg (%) | Max (%) |
+|--------------|-------------|----------|----------|----------|
+| kafka_1_node | `` | `44.31` | `56.1` | `64.35` |
+| kafka_2_node | `` | `47.85` | `62.87` | `72.9` |
+| kafka_3_node | `` | `45.16` | `58.36` | `65.8` |
 
-### ClickHouse Node CPU
+### ClickHouse Node CPU (%)
 
-| Component | Min | Avg | Max |
-|------------|-----|-----|-----|
-| ch1_node | `2.08` | `3.02` | `4.25` |
-| ch2_node | `9.59` | `10.43` | `11.88` |
+| Component | Allocated | Min (%) | Avg (%) | Max (%) |
+|--------------|-------------|----------|----------|----------|
+| ch1_node | `` | `2.08` | `3.02` | `4.25` |
+| ch2_node | `` | `9.59` | `10.43` | `11.88` |
 
-### ClickHouse Node Memory
+### ClickHouse Node Memory (%)
 
-| Component | Min | Avg | Max |
-|------------|-----|-----|-----|
-| ch1_node | `60.6` | `61.24` | `61.53` |
-| ch2_node | `63.86` | `64.95` | `66.24` |
+| Component | Allocated | Min (%) | Avg (%) | Max (%) |
+|--------------|-------------|----------|----------|----------|
+| ch1_node | `` | `60.6` | `61.24` | `61.53` |
+| ch2_node | `` | `63.86` | `64.95` | `66.24` |
 

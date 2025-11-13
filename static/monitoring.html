@@ -590,6 +590,35 @@ drop_in - The total number of received packets dropped by the interface">
                         </div>
                     </div>
 
+                    <div
+                        class="flex flex-wrap justify-between gap-4 px-4 py-3 bg-white rounded-xl border border-slate-200 mb-6 shadow-sm">
+                        <div class="relative flex-1">
+                            <span
+                                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                            <input
+                                class="w-full h-10 pl-10 pr-4 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                placeholder="Search by pod name or namespace..." type="text" id="pod-search" />
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <select class="h-10 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" id="test-id-filter">
+                                <option value="">All Tests (Recent)</option>
+                            </select>
+                            <select
+                                class="h-10 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                id="namespace-filter">
+                                <option>All Namespaces</option>
+                                <option>vsmaps</option>
+                                <option>kube-system</option>
+                                <option>default</option>
+                            </select>
+                            <button
+                                class="p-2.5 rounded-lg text-slate-600 bg-slate-50 border border-slate-300 hover:bg-slate-100 transition-colors"
+                                id="pod-refresh-btn">
+                                <span class="material-symbols-outlined animate-spin-slow">refresh</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="@container">
                         <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
                             <table class="w-full min-w-max text-left">
