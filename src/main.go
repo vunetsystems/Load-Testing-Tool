@@ -19,11 +19,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Import kafka_summary_processor for new Kafka summarization functionality
-// This is an update for Kafka summarization functionality
-import (
-	"vuDataSim/src/kafka_processors"
-)
+// Kafka summarization functionality is now handled via API
 
 var kafkaHandler, _ = handlers.NewKafkaHandler()
 
@@ -47,30 +43,22 @@ func startTestRunCompletionChecker() {
 	}
 }
 
-// startKafkaSummarization starts a background goroutine that periodically
-// generates Kafka summaries for completed test runs using the new processor
-// This is an update for Kafka summarization functionality
-func startKafkaSummarization() {
-	logger.Info().Msg("Starting Kafka summarization process")
+// startKafkaSummarizationViaAPI starts a background goroutine that periodically
+// triggers Kafka summarization via the API handler every 10 seconds
+func startKafkaSummarizationViaAPI() {
+	logger.Info().Msg("Starting Kafka summarization via API process")
 
-	ticker := time.NewTicker(30 * time.Second) // Check every 30 seconds
+	ticker := time.NewTicker(10 * time.Second) // Check every 10 seconds
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ticker.C:
-			// Get ClickHouse client from the initialized client
-			chClient := clickhouse.GetClickHouseClient()
-			if chClient == nil {
-				logger.Warn().Msg("ClickHouse client not available for Kafka summarization")
-				continue
-			}
-
-			// Process Kafka summaries for completed test runs using new processor
-			if err := kafka_processors.ProcessKafkaSummaries(database.DB, chClient); err != nil {
-				logger.Error().Err(err).Msg("Failed to process Kafka summaries")
+			// Trigger Kafka summarization using the API handler logic
+			if err := handlers.TriggerKafkaSummarization(); err != nil {
+				logger.Error().Err(err).Msg("Failed to trigger Kafka summarization via API")
 			} else {
-				logger.Debug().Msg("Kafka summarization check completed")
+				logger.Debug().Msg("Kafka summarization check completed via API")
 			}
 		}
 	}
@@ -282,9 +270,9 @@ func main() {
 		// Start background test run completion checker
 		go startTestRunCompletionChecker()
 
-		// Start background Kafka summarization process
+		// Start background Kafka summarization process via API
 		// This is an update for Kafka summarization functionality
-		go startKafkaSummarization()
+		go startKafkaSummarizationViaAPI()
 	}
 
 	// Start background real metrics collection

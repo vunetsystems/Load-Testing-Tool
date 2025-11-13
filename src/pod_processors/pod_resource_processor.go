@@ -79,60 +79,6 @@ type PodMetrics struct {
 
 
 
-// func FetchPodMetrics(chClient *clickhouse.ClickHouseClient, start, end time.Time) ([]PodStat, error) {
-// 	query := fmt.Sprintf(`
-// 		SELECT
-// 			pod_name,
-// 			container_name,
-// 			MAX(cpu_usage_nanocores) / 1000000000 AS used_cpu_cores,
-// 			MAX(memory_usage_bytes) / 1073741824 AS used_memory_gb,
-// 			MAX(resource_limits_millicpu_units) / 1000 AS cpu_limit_cores,
-// 			MAX(resource_limits_memory_bytes) / 1073741824 AS memory_limit_gb
-// 		FROM monitoring.kubernetes_pod_container_data
-// 		WHERE pod_name IN (
-// 			'chi-clickhouse-vusmart-0-0-0',
-// 			'chi-clickhouse-vusmart-0-1-0',
-// 			'kafka-cluster-cp-kafka-0',
-// 			'kafka-cluster-cp-kafka-1',
-// 			'kafka-cluster-cp-kafka-2'
-// 		)
-// 		  AND timestamp >= toDateTime('%s')
-// 		  AND timestamp <= toDateTime('%s')
-// 		GROUP BY pod_name, container_name
-// 		ORDER BY pod_name ASC
-// 	`, start.Format("2006-01-02 15:04:05"), end.Format("2006-01-02 15:04:05"))
-
-// 	logger.LogWithNode("System", "PodFetcher", fmt.Sprintf("Running ClickHouse query:\n%s", query), "debug")
-
-// 	rows, err := chClient.Client.Query(context.Background(), query)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("query execution failed: %w", err)
-// 	}
-// 	defer rows.Close()
-
-// 	var stats []PodStat
-// 	for rows.Next() {
-// 		var stat PodStat
-// 		err := rows.Scan(&stat.PodName, &stat.ContainerName, &stat.UsedCPUCores, &stat.UsedMemoryGB, &stat.CPULimitCores, &stat.MemoryLimitGB)
-// 		if err != nil {
-// 			logger.LogWarning("System", "PodSummaryProcessor", fmt.Sprintf("Failed to scan pod metric row: %v", err))
-// 			continue
-// 		}
-// 		stats = append(stats, stat)
-// 	}
-
-// 	if err := rows.Err(); err != nil {
-// 		return nil, fmt.Errorf("row iteration error: %w", err)
-// 	}
-
-// 	if len(stats) == 0 {
-// 		logger.LogWithNode("System", "PodFetcher", "No pod metrics found for given time range", "warn")
-// 	} else {
-// 		logger.LogSuccess("System", "PodFetcher", fmt.Sprintf("Fetched %d pod metric rows", len(stats)))
-// 	}
-
-// 	return stats, nil
-// }
 
 // FetchPodMetrics fetches pod resource metrics (min, avg, max) from ClickHouse for the given time range
 func FetchPodMetrics(chClient *clickhouse.ClickHouseClient, start, end time.Time) ([]PodStat, error) {
