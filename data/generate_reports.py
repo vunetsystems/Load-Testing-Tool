@@ -130,6 +130,32 @@ def get_o11y_source_name(o11y_sources):
         pass
     return "unknown_source"
 
+def format_kafka_specs(row):
+    """Parse and format kafka_specs JSON if available."""
+    specs_data = safe_get(row, "kafka_specs")
+    if not specs_data:
+        return ""
+
+    md = "### Kafka Specs\n\n"
+    try:
+        specs = json.loads(specs_data)
+        if isinstance(specs, dict):
+            md += "| Spec | Value |\n|------|--------|\n"
+            for key, value in specs.items():
+                md += f"| `{key}` | `{value}` |\n"
+        elif isinstance(specs, list):
+            md += "| Index | Spec |\n|--------|--------|\n"
+            for i, item in enumerate(specs, start=1):
+                md += f"| {i} | `{json.dumps(item, indent=2)}` |\n"
+        else:
+            md += f"`{specs_data}`\n"
+    except Exception as e:
+        md += f"⚠️ Could not parse kafka_specs JSON: `{specs_data}`\n"
+
+    md += "\n"
+    return md
+
+
 
 def generate_report(row):
     """Generate the markdown for one test record."""
@@ -138,6 +164,7 @@ def generate_report(row):
 
     # Combined Topic Metrics section
     md += "## 📈 Topic Metrics\n\n"
+    md += format_kafka_specs(row)  
     md += format_combined_topic_table(row)
     md += format_lag_table(row)
 

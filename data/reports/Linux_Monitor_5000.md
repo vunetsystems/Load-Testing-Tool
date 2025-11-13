@@ -12,12 +12,19 @@
 
 ## 📈 Topic Metrics
 
+### Kafka Specs
+
+| Spec | Value |
+|------|--------|
+| `input_topics` | `[{'name': 'linux-monitor-input', 'partitions': 1, 'replication_factor': 2}]` |
+| `output_topics` | `[{'name': 'linux-monitor-additional-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'linux-monitor-process-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'linux-monitor-resource-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'linux-monitor-storage-metrics', 'partitions': 1, 'replication_factor': 2}]` |
+
 ### Input/Output Topic Metrics
 
 | Type | Min (msg/s) | Avg (msg/s) | Max (msg/s) |
 |------|--------------|--------------|--------------|
 | Input  | `4961.049541381013` | `5007.302350257911` | `5469.799999999999` |
-| Output | `0.0` | `4948.844202409506` | `3019.4115464106812` |
+| Output | `0.0` | `4948.844202409503` | `5030.4949417568105` |
 
 ### Lag Metrics
 
@@ -39,35 +46,35 @@
 
 | Component | Min | Avg | Max |
 |------------|-----|-----|-----|
-| kafka_cluster_cp_kafka_0 | `9.995831989106678` | `36.66194741688077` | `99.99001026153564` |
-| kafka_cluster_cp_kafka_1 | `10.640076171784173` | `36.87933397671533` | `99.99792575836182` |
-| kafka_cluster_cp_kafka_2 | `10.27513969512213` | `36.49921890289065` | `99.2225170135498` |
+| kafka_cluster_cp_kafka_0 | `0.0` | `9.995831989106678` | `99.99001026153564` |
+| kafka_cluster_cp_kafka_1 | `0.0` | `10.640076171784173` | `99.99792575836182` |
+| kafka_cluster_cp_kafka_2 | `0.0` | `10.27513969512213` | `99.2225170135498` |
 
 ### ClickHouse Pods CPU
 
 | Component | Min | Avg | Max |
 |------------|-----|-----|-----|
-| chi_clickhouse_vusmart_0_0_0 | `0.0` | `0.006600925178147269` | `16.2305860375` |
-| chi_clickhouse_vusmart_0_1_0 | `0.0` | `0.010092263571428572` | `100.29312139999999` |
+| chi_clickhouse_vusmart_0_0_0 | `0.0` | `1.1793546342570598` | `14.441117555555557` |
+| chi_clickhouse_vusmart_0_1_0 | `0.0` | `0.7809428013492066` | `89.16321193333333` |
 
 ### ClickHouse Pods Memory
 
 | Component | Min | Avg | Max |
 |------------|-----|-----|-----|
-| chi_clickhouse_vusmart_0_0_0 | `0.2909037392949265` | `6.689594316746824` | `50.89014768600464` |
-| chi_clickhouse_vusmart_0_1_0 | `0.39846329461960567` | `2.2197778546620928` | `15.193212032318115` |
+| chi_clickhouse_vusmart_0_0_0 | `0.0` | `6.626285453307091` | `48.125771915211395` |
+| chi_clickhouse_vusmart_0_1_0 | `0.0` | `1.5183550570191455` | `14.53081018784467` |
 
 ### Pipeline Pod CPU
 
 | Component | Min | Avg | Max |
 |------------|-----|-----|-----|
-| pipeline_pod | `71.538374` | `71.538374` | `71.538374` |
+| pipeline_pod | `0.0` | `9.441617043809524` | `71.6013495` |
 
 ### Pipeline Pod Memory
 
 | Component | Min | Avg | Max |
 |------------|-----|-----|-----|
-| pipeline_pod | `55.54687499999999` | `55.54687499999999` | `55.54687499999999` |
+| pipeline_pod | `0.0` | `8.649389880952379` | `63.68515625` |
 
 ## 💻 Node Metrics
 
