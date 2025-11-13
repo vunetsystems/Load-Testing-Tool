@@ -85,6 +85,18 @@ type PodMetrics struct {
 	PipelinePodMemMin float64
 	PipelinePodMemAvg float64
 	PipelinePodMemMax float64
+	KafkaClusterCpKafka0CpuAllocated float64
+	KafkaClusterCpKafka0MemAllocated float64
+	KafkaClusterCpKafka1CpuAllocated float64
+	KafkaClusterCpKafka1MemAllocated float64
+	KafkaClusterCpKafka2CpuAllocated float64
+	KafkaClusterCpKafka2MemAllocated float64
+	ChiClickhouseVusmart000CpuAllocated float64
+	ChiClickhouseVusmart000MemAllocated float64
+	ChiClickhouseVusmart010CpuAllocated float64
+	ChiClickhouseVusmart010MemAllocated float64
+	PipelinePodCpuAllocated float64
+	PipelinePodMemAllocated float64
 }
 
 
@@ -319,6 +331,8 @@ func ComputePodStats(stats []PodStat) (map[string]interface{}, bool) {
 			"max_memory_percent": calcPercent(s.MaxUsedMemory, s.MemoryLimit),
 			"min_memory_percent": calcPercent(s.MinUsedMemory, s.MemoryLimit),
 			"avg_memory_percent": calcPercent(s.AvgUsedMemory, s.MemoryLimit),
+			"cpu_allocated":       s.CPULimit,
+			"mem_allocated":       s.MemoryLimit,
 		}
 	}
 	return perPodData, true
@@ -396,6 +410,8 @@ func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, testID str
 			metrics.KafkaClusterCpKafka0MemMin = data["min_memory_percent"].(float64)
 			metrics.KafkaClusterCpKafka0MemAvg = data["avg_memory_percent"].(float64)
 			metrics.KafkaClusterCpKafka0MemMax = data["max_memory_percent"].(float64)
+			metrics.KafkaClusterCpKafka0CpuAllocated = data["cpu_allocated"].(float64)
+			metrics.KafkaClusterCpKafka0MemAllocated = data["mem_allocated"].(float64)
 		}
 	}
 
@@ -407,6 +423,8 @@ func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, testID str
 			metrics.KafkaClusterCpKafka1MemMin = data["min_memory_percent"].(float64)
 			metrics.KafkaClusterCpKafka1MemAvg = data["avg_memory_percent"].(float64)
 			metrics.KafkaClusterCpKafka1MemMax = data["max_memory_percent"].(float64)
+			metrics.KafkaClusterCpKafka1CpuAllocated = data["cpu_allocated"].(float64)
+			metrics.KafkaClusterCpKafka1MemAllocated = data["mem_allocated"].(float64)
 		}
 	}
 
@@ -418,6 +436,8 @@ func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, testID str
 			metrics.KafkaClusterCpKafka2MemMin = data["min_memory_percent"].(float64)
 			metrics.KafkaClusterCpKafka2MemAvg = data["avg_memory_percent"].(float64)
 			metrics.KafkaClusterCpKafka2MemMax = data["max_memory_percent"].(float64)
+			metrics.KafkaClusterCpKafka2CpuAllocated = data["cpu_allocated"].(float64)
+			metrics.KafkaClusterCpKafka2MemAllocated = data["mem_allocated"].(float64)
 		}
 	}
 
@@ -429,6 +449,8 @@ func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, testID str
 			metrics.ChiClickhouseVusmart000MemMin = data["min_memory_percent"].(float64)
 			metrics.ChiClickhouseVusmart000MemAvg = data["avg_memory_percent"].(float64)
 			metrics.ChiClickhouseVusmart000MemMax = data["max_memory_percent"].(float64)
+			metrics.ChiClickhouseVusmart000CpuAllocated = data["cpu_allocated"].(float64)
+			metrics.ChiClickhouseVusmart000MemAllocated = data["mem_allocated"].(float64)
 		}
 	}
 
@@ -440,6 +462,8 @@ func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, testID str
 			metrics.ChiClickhouseVusmart010MemMin = data["min_memory_percent"].(float64)
 			metrics.ChiClickhouseVusmart010MemAvg = data["avg_memory_percent"].(float64)
 			metrics.ChiClickhouseVusmart010MemMax = data["max_memory_percent"].(float64)
+			metrics.ChiClickhouseVusmart010CpuAllocated = data["cpu_allocated"].(float64)
+			metrics.ChiClickhouseVusmart010MemAllocated = data["mem_allocated"].(float64)
 		}
 	}
 
@@ -461,6 +485,12 @@ func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, testID str
 	}
 	if pipelineData, exists := summary["pipeline_pod_mem_max"]; exists {
 		metrics.PipelinePodMemMax = pipelineData.(float64)
+	}
+	if pipelineData, exists := summary["pipeline_pod_cpu_allocated"]; exists {
+		metrics.PipelinePodCpuAllocated = pipelineData.(float64)
+	}
+	if pipelineData, exists := summary["pipeline_pod_mem_allocated"]; exists {
+		metrics.PipelinePodMemAllocated = pipelineData.(float64)
 	}
 
 	return metrics, true, nil
@@ -589,5 +619,7 @@ func ComputePipelinePodStats(stats []PodStat) map[string]interface{} {
         "pipeline_pod_mem_min": calcPercent(sumMinMem, sumMemLimit),
         "pipeline_pod_mem_avg": calcPercent(sumAvgMem, sumMemLimit),
         "pipeline_pod_mem_max": calcPercent(sumMaxMem, sumMemLimit),
+        "pipeline_pod_cpu_allocated": sumCPULimit,
+        "pipeline_pod_mem_allocated": sumMemLimit,
     }
 }

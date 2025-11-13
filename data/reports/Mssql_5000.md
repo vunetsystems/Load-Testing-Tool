@@ -47,7 +47,7 @@
 | Type | Min (msg/s) | Avg (msg/s) | Max (msg/s) |
 |------|--------------|--------------|--------------|
 | Input  | `4819.654021925699` | `4884.7317699882815` | `5572.8` |
-| Output | `0.0` | `4835.113220332742` | `4883.372963338767` |
+| Output | `0.0` | `4835.113220332743` | `4883.372963338767` |
 
 ### Lag Metrics
 
@@ -88,6 +88,12 @@
 | chi_clickhouse_vusmart_0_1_0 | `0.0` | `1.6922868199709082` | `13.962936401367188` |
 
 ## 🔧 Pipeline Pod Metrics
+
+### Pipeline Info
+
+| Source | Pipeline Name | Threads | Instances |
+|---------|----------------|----------|------------|
+| `Mssql` | `mssql-telegraf-pipeline` | `1` | `1` |
 
 ### Pipeline Pod CPU
 

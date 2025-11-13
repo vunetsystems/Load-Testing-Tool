@@ -103,6 +103,39 @@ def format_summary(row):
     md += "\n"
     return md
 
+def format_pipeline_info(row):
+    """Format pipeline_info JSON into a readable Markdown table."""
+    info_data = safe_get(row, "pipeline_info")
+    if not info_data:
+        return ""
+
+    md = "### Pipeline Info\n\n"
+
+    try:
+        info = json.loads(info_data)
+        if not isinstance(info, dict):
+            md += f"⚠️ Unexpected data format: `{info_data}`\n\n"
+            return md
+
+        # Build table header
+        md += "| Source | Pipeline Name | Threads | Instances |\n"
+        md += "|---------|----------------|----------|------------|\n"
+
+        # Each key is a pipeline source (e.g., "LinuxMonitor", "Kubernetes", "Mssql")
+        for source, details in info.items():
+            name = details.get("name", "")
+            threads = details.get("threads", "")
+            instances = details.get("instances", "")
+            md += f"| `{source}` | `{name}` | `{threads}` | `{instances}` |\n"
+
+        md += "\n"
+
+    except Exception as e:
+        md += f"⚠️ Could not parse pipeline_info JSON: `{info_data}`\n\n"
+
+    return md
+
+
 
 
 
@@ -210,6 +243,8 @@ def generate_report(row):
 
     # Pipeline Pod Metrics (separate section)
     md += "## 🔧 Pipeline Pod Metrics\n\n"
+    md += format_pipeline_info(row)
+
     for title, group_def in PIPELINE_GROUPS.items():
         md += format_grouped_table(title, group_def, row)
 
