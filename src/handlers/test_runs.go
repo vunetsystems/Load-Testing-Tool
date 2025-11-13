@@ -262,6 +262,24 @@ func HandleAPIGetTestRunsForDropdown(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// TriggerKafkaSummarization triggers Kafka summarization for pending test runs
+// This function contains the core logic for Kafka summarization
+func TriggerKafkaSummarization() error {
+	// Get ClickHouse client from the initialized client
+	chClient := clickhouse.GetClickHouseClient()
+	if chClient == nil {
+		return fmt.Errorf("ClickHouse client not available")
+	}
+
+	// Trigger Kafka summarization for pending test runs using new processor
+	err := kafka_processors.ProcessKafkaSummaries(database.DB, chClient)
+	if err != nil {
+		return fmt.Errorf("failed to process Kafka summary: %w", err)
+	}
+
+	return nil
+}
+
 // HandleAPITriggerKafkaSummarization handles POST /api/test-runs/{id}/kafka-summary
 // This endpoint triggers Kafka summarization for a specific test run
 // This is an update for Kafka summarization functionality
@@ -278,22 +296,12 @@ func HandleAPITriggerKafkaSummarization(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Get ClickHouse client from the initialized client
-	chClient := clickhouse.GetClickHouseClient()
-	if chClient == nil {
-		SendJSONResponse(w, http.StatusServiceUnavailable, APIResponse{
-			Success: false,
-			Message: "ClickHouse client not available",
-		})
-		return
-	}
-
-	// Trigger Kafka summarization for the specific test run using new processor
-	err := kafka_processors.ProcessKafkaSummaries(database.DB, chClient)
+	// Call the core summarization function
+	err := TriggerKafkaSummarization()
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
-			Message: fmt.Sprintf("Failed to process Kafka summary: %v", err),
+			Message: err.Error(),
 		})
 		return
 	}
