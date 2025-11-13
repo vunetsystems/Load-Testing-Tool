@@ -35,7 +35,7 @@
 | Type | Min (msg/s) | Avg (msg/s) | Max (msg/s) |
 |------|--------------|--------------|--------------|
 | Input  | `9973.88318783893` | `10010.66360759976` | `10591.4` |
-| Output | `0.0` | `6829.176117248159` | `8576.924490792437` |
+| Output | `0.0` | `6829.176117248162` | `8576.924490792437` |
 
 ### Lag Metrics
 
@@ -76,6 +76,12 @@
 | chi_clickhouse_vusmart_0_1_0 | `0.0` | `1.370037971090536` | `13.751602172851562` |
 
 ## 🔧 Pipeline Pod Metrics
+
+### Pipeline Info
+
+| Source | Pipeline Name | Threads | Instances |
+|---------|----------------|----------|------------|
+| `LinuxMonitor` | `linuxmonitor` | `4` | `1` |
 
 ### Pipeline Pod CPU
 

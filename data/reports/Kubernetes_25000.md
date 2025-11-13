@@ -80,6 +80,12 @@
 
 ## 🔧 Pipeline Pod Metrics
 
+### Pipeline Info
+
+| Source | Pipeline Name | Threads | Instances |
+|---------|----------------|----------|------------|
+| `Kubernetes` | `kubernetes-metrics` | `4` | `1` |
+
 ### Pipeline Pod CPU
 
 | Component | Min | Avg | Max |
