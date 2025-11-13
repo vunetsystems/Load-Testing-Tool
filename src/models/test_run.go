@@ -12,17 +12,36 @@ type TestRun struct {
 	O11ySources             []string  `json:"o11y_sources"`
 	TimeoutSeconds          int       `json:"timeout_seconds"`
 	Status                  string    `json:"status"` // 'running', 'completed', 'stopped', 'failed'
-	AvgInputMsgsPerSec      float64   `json:"avg_input_msgs_per_sec,omitempty"`
-	AvgOutputMsgsPerSec     float64   `json:"avg_output_msgs_per_sec,omitempty"`
-	MaxInputMsgsPerSec      float64   `json:"max_input_msgs_per_sec,omitempty"`
-	MaxOutputMsgsPerSec     float64   `json:"max_output_msgs_per_sec,omitempty"`
-	MinInputMsgsPerSec      float64   `json:"min_input_msgs_per_sec,omitempty"`
-	MinOutputMsgsPerSec     float64   `json:"min_output_msgs_per_sec,omitempty"`
-	DataLossPct             float64   `json:"data_loss_pct,omitempty"`
-	KafkaSummaryGenerated   bool      `json:"kafka_summary_generated,omitempty"`
-	PodResourceCheck        bool      `json:"pod_resource_check,omitempty"`
-	PodMetrics              string    `json:"pod_metrics,omitempty"`
-	// Individual pod metrics columns
+	Kafka1NodeCpuMin        float64   `json:"kafka_1_node_cpu_min,omitempty"`
+	Kafka1NodeCpuAvg        float64   `json:"kafka_1_node_cpu_avg,omitempty"`
+	Kafka1NodeCpuMax        float64   `json:"kafka_1_node_cpu_max,omitempty"`
+	Kafka1NodeMemMin        float64   `json:"kafka_1_node_mem_min,omitempty"`
+	Kafka1NodeMemAvg        float64   `json:"kafka_1_node_mem_avg,omitempty"`
+	Kafka1NodeMemMax        float64   `json:"kafka_1_node_mem_max,omitempty"`
+	Kafka2NodeCpuMin        float64   `json:"kafka_2_node_cpu_min,omitempty"`
+	Kafka2NodeCpuAvg        float64   `json:"kafka_2_node_cpu_avg,omitempty"`
+	Kafka2NodeCpuMax        float64   `json:"kafka_2_node_cpu_max,omitempty"`
+	Kafka2NodeMemMin        float64   `json:"kafka_2_node_mem_min,omitempty"`
+	Kafka2NodeMemAvg        float64   `json:"kafka_2_node_mem_avg,omitempty"`
+	Kafka2NodeMemMax        float64   `json:"kafka_2_node_mem_max,omitempty"`
+	Kafka3NodeCpuMin        float64   `json:"kafka_3_node_cpu_min,omitempty"`
+	Kafka3NodeCpuAvg        float64   `json:"kafka_3_node_cpu_avg,omitempty"`
+	Kafka3NodeCpuMax        float64   `json:"kafka_3_node_cpu_max,omitempty"`
+	Kafka3NodeMemMin        float64   `json:"kafka_3_node_mem_min,omitempty"`
+	Kafka3NodeMemAvg        float64   `json:"kafka_3_node_mem_avg,omitempty"`
+	Kafka3NodeMemMax        float64   `json:"kafka_3_node_mem_max,omitempty"`
+	Ch1NodeCpuMin           float64   `json:"ch1_node_cpu_min,omitempty"`
+	Ch1NodeCpuAvg           float64   `json:"ch1_node_cpu_avg,omitempty"`
+	Ch1NodeCpuMax           float64   `json:"ch1_node_cpu_max,omitempty"`
+	Ch1NodeMemMin           float64   `json:"ch1_node_mem_min,omitempty"`
+	Ch1NodeMemAvg           float64   `json:"ch1_node_mem_avg,omitempty"`
+	Ch1NodeMemMax           float64   `json:"ch1_node_mem_max,omitempty"`
+	Ch2NodeCpuMin           float64   `json:"ch2_node_cpu_min,omitempty"`
+	Ch2NodeCpuAvg           float64   `json:"ch2_node_cpu_avg,omitempty"`
+	Ch2NodeCpuMax           float64   `json:"ch2_node_cpu_max,omitempty"`
+	Ch2NodeMemMin           float64   `json:"ch2_node_mem_min,omitempty"`
+	Ch2NodeMemAvg           float64   `json:"ch2_node_mem_avg,omitempty"`
+	Ch2NodeMemMax           float64   `json:"ch2_node_mem_max,omitempty"`
 	KafkaClusterCpKafka0CpuMin float64 `json:"kafka_cluster_cp_kafka_0_cpu_min,omitempty"`
 	KafkaClusterCpKafka0CpuAvg float64 `json:"kafka_cluster_cp_kafka_0_cpu_avg,omitempty"`
 	KafkaClusterCpKafka0CpuMax float64 `json:"kafka_cluster_cp_kafka_0_cpu_max,omitempty"`
@@ -53,17 +72,26 @@ type TestRun struct {
 	ChiClickhouseVusmart010MemMin float64 `json:"chi_clickhouse_vusmart_0_1_0_mem_min,omitempty"`
 	ChiClickhouseVusmart010MemAvg float64 `json:"chi_clickhouse_vusmart_0_1_0_mem_avg,omitempty"`
 	ChiClickhouseVusmart010MemMax float64 `json:"chi_clickhouse_vusmart_0_1_0_mem_max,omitempty"`
-	ProcessRateSummary        string    `json:"process_rate_summary,omitempty"` // JSON summary of process rates per o11y source
-	IngestionSummary        string    `json:"ingestion_summary,omitempty"` // JSON summary of hyperscale ingestion table-wise EPS data
 	PipelinePodCpuMin        float64   `json:"pipeline_pod_cpu_min,omitempty"`
 	PipelinePodCpuAvg        float64   `json:"pipeline_pod_cpu_avg,omitempty"`
 	PipelinePodCpuMax        float64   `json:"pipeline_pod_cpu_max,omitempty"`
 	PipelinePodMemMin        float64   `json:"pipeline_pod_mem_min,omitempty"`
 	PipelinePodMemAvg        float64   `json:"pipeline_pod_mem_avg,omitempty"`
 	PipelinePodMemMax        float64   `json:"pipeline_pod_mem_max,omitempty"`
+	MinInputMsgsPerSec       float64   `json:"min_input_msgs_per_sec,omitempty"`
+	AvgInputMsgsPerSec       float64   `json:"avg_input_msgs_per_sec,omitempty"`
+	MaxInputMsgsPerSec       float64   `json:"max_input_msgs_per_sec,omitempty"`
+	MinOutputMsgsPerSec      float64   `json:"min_output_msgs_per_sec,omitempty"`
+	AvgOutputMsgsPerSec      float64   `json:"avg_output_msgs_per_sec,omitempty"`
+	MaxOutputMsgsPerSec      float64   `json:"max_output_msgs_per_sec,omitempty"`
 	MinLag                   float64   `json:"min_lag,omitempty"`
 	AvgLag                   float64   `json:"avg_lag,omitempty"`
 	MaxLag                   float64   `json:"max_lag,omitempty"`
+	DataLossPct              float64   `json:"data_loss_pct,omitempty"`
+	KafkaSummaryGenerated    bool      `json:"kafka_summary_generated,omitempty"`
+	PodResourceCheck         bool      `json:"pod_resource_check,omitempty"`
+	ProcessRateSummary       string    `json:"process_rate_summary,omitempty"` // JSON summary of process rates per o11y source
+	IngestionSummary         string    `json:"ingestion_summary,omitempty"` // JSON summary of hyperscale ingestion table-wise EPS data
 }
 
 // TestRunStartRequest represents the request payload for starting a test run
