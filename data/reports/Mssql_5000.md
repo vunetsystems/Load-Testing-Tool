@@ -12,12 +12,19 @@
 
 ## 📈 Topic Metrics
 
+### Kafka Specs
+
+| Spec | Value |
+|------|--------|
+| `input_topics` | `[{'name': 'mssql-telegraf', 'partitions': 1, 'replication_factor': 2}]` |
+| `output_topics` | `[{'name': 'mssql-memory-clerks', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-database-io', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-net-response', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-hadr-replica', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-schedulers', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-requests', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-server-properties', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-performance', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-hadr-dbreplica', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-session', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-telegraf-health', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-volume-space', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-cpu', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-waitstats', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-cluster', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-recentbackup', 'partitions': 1, 'replication_factor': 2}]` |
+
 ### Input/Output Topic Metrics
 
 | Type | Min (msg/s) | Avg (msg/s) | Max (msg/s) |
 |------|--------------|--------------|--------------|
 | Input  | `4819.654021925699` | `4884.7317699882815` | `5572.8` |
-| Output | `0.0` | `4835.113220332747` | `3284.3938429990794` |
+| Output | `0.0` | `4835.1132203327425` | `4883.372963338767` |
 
 ### Lag Metrics
 
@@ -39,35 +46,35 @@
 
 | Component | Min | Avg | Max |
 |------------|-----|-----|-----|
-| kafka_cluster_cp_kafka_0 | `12.421902531669254` | `37.02587568570697` | `98.65572452545166` |
-| kafka_cluster_cp_kafka_1 | `12.189204863139562` | `37.395217475436986` | `99.99644756317139` |
-| kafka_cluster_cp_kafka_2 | `13.815035536175682` | `37.93739150440882` | `99.99713897705078` |
+| kafka_cluster_cp_kafka_0 | `0.0` | `12.421902531669254` | `98.65572452545166` |
+| kafka_cluster_cp_kafka_1 | `0.0` | `12.189204863139562` | `99.99644756317139` |
+| kafka_cluster_cp_kafka_2 | `0.0` | `13.815035536175682` | `99.99713897705078` |
 
 ### ClickHouse Pods CPU
 
 | Component | Min | Avg | Max |
 |------------|-----|-----|-----|
-| chi_clickhouse_vusmart_0_0_0 | `0.0` | `0.006491881904761905` | `12.6848292125` |
-| chi_clickhouse_vusmart_0_1_0 | `0.0` | `0.00952012880952381` | `6.51547475` |
+| chi_clickhouse_vusmart_0_0_0 | `0.0` | `0.8398056988359789` | `11.287468377777781` |
+| chi_clickhouse_vusmart_0_1_0 | `0.0` | `0.38681836751322757` | `5.8093662` |
 
 ### ClickHouse Pods Memory
 
 | Component | Min | Avg | Max |
 |------------|-----|-----|-----|
-| chi_clickhouse_vusmart_0_0_0 | `0.28603690011160715` | `6.863012547215456` | `52.248334884643555` |
-| chi_clickhouse_vusmart_0_1_0 | `0.3986549377441406` | `2.172860783874673` | `14.590513706207275` |
+| chi_clickhouse_vusmart_0_0_0 | `0.0` | `6.815300308355764` | `49.40321305218865` |
+| chi_clickhouse_vusmart_0_1_0 | `0.0` | `1.6922868199709082` | `13.962936401367188` |
 
 ### Pipeline Pod CPU
 
 | Component | Min | Avg | Max |
 |------------|-----|-----|-----|
-| pipeline_pod | `46.7632794` | `46.7632794` | `46.7632794` |
+| pipeline_pod | `0.0` | `6.062789487857143` | `46.8182473` |
 
 ### Pipeline Pod Memory
 
 | Component | Min | Avg | Max |
 |------------|-----|-----|-----|
-| pipeline_pod | `57.475781250000004` | `57.475781250000004` | `57.475781250000004` |
+| pipeline_pod | `0.0` | `9.144300595238096` | `66.11015625` |
 
 ## 💻 Node Metrics
 

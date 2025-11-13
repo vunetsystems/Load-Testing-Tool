@@ -180,6 +180,7 @@ func runSchemaUpdates() error {
 		"min_lag":              "REAL DEFAULT 0.0",
 		"avg_lag":              "REAL DEFAULT 0.0",
 		"max_lag":              "REAL DEFAULT 0.0",
+		"kafka_specs":          "TEXT", // JSON specs of input/output topic partitions and replication factors
 	}
 
 	for name, def := range columnsToAdd {

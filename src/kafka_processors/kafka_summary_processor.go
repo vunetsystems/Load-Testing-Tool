@@ -98,6 +98,13 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 	var o11ySources []string
 	json.Unmarshal([]byte(o11ySourcesStr), &o11ySources)
 
+	// Process Kafka specs for this test run
+	err = ProcessKafkaSpecs(db, testID, o11ySources)
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process Kafka specs: %v", err))
+		// Continue with summarization even if specs fail
+	}
+
 	// 3. Collect input topics for consumer lag processing
 	var inputTopics []string
 	for _, src := range o11ySources {
@@ -666,96 +673,76 @@ func computeKafkaStatsMulti(stats []KafkaStat, topicNames []string) map[string]i
 		}
 	}
 
-	// Group stats by topic
+	// Group stats by topic for total_messages calculation
 	grouped := make(map[string][]KafkaStat)
 	for _, stat := range stats {
 		grouped[stat.Topic] = append(grouped[stat.Topic], stat)
 	}
 
-	var totalMessages float64
-	var totalAvgRate float64
-	var maxRate, minRate float64
-	minRate = math.MaxFloat64
-	var allRates []float64
-
-	// Compute per-topic averages and sum them
-	for _, tstats := range grouped {
-		if len(tstats) == 0 {
-			continue
-		}
-
-		var topicSum float64
-		var topicMaxRate float64
-		var topicMinRate float64 = math.MaxFloat64
-		var topicMaxCount float64
-
-		for _, stat := range tstats {
-			topicSum += stat.OneMinuteRate
-			allRates = append(allRates, stat.OneMinuteRate)
-
-			if stat.OneMinuteRate > topicMaxRate {
-				topicMaxRate = stat.OneMinuteRate
-			}
-			if stat.OneMinuteRate < topicMinRate {
-				topicMinRate = stat.OneMinuteRate
-			}
-			if float64(stat.Count) > topicMaxCount {
-				topicMaxCount = float64(stat.Count)
-			}
-		}
-
-		// Per-topic avg (mean for this topic)
-		topicAvg := topicSum / float64(len(tstats))
-
-		// Sum all topic averages (instead of taking overall mean)
-		totalAvgRate += topicAvg
-
-		// Update global min/max
-		if topicMaxRate > maxRate {
-			maxRate = topicMaxRate
-		}
-		if topicMinRate < minRate {
-			minRate = topicMinRate
-		}
-
-		// Add topic total messages
-		totalMessages += topicMaxCount
+	// Aggregate rates by timestamp across all topics
+	timestampSums := make(map[time.Time]float64)
+	for _, stat := range stats {
+		timestampSums[stat.Timestamp] += stat.OneMinuteRate
 	}
 
-	// Calculate overall stdev (for info only)
-	var stdev float64
-	if len(allRates) > 0 {
-		var sum float64
-		for _, v := range allRates {
-			sum += v
-		}
-		mean := sum / float64(len(allRates))
+	// Calculate max, min, and avg from timestamp sums
+	var maxRate float64
+	var minRate float64 = math.MaxFloat64
+	var totalSum float64
+	var count int
+	var sums []float64
 
+	for _, sum := range timestampSums {
+		if sum > maxRate {
+			maxRate = sum
+		}
+		if sum < minRate {
+			minRate = sum
+		}
+		totalSum += sum
+		sums = append(sums, sum)
+		count++
+	}
+
+	avgRate := totalSum / float64(count)
+
+	// Calculate stdev from timestamp sums
+	var stdev float64
+	if len(sums) > 0 {
+		mean := totalSum / float64(len(sums))
 		var variance float64
-		for _, v := range allRates {
+		for _, v := range sums {
 			variance += (v - mean) * (v - mean)
 		}
-		stdev = math.Sqrt(variance / float64(len(allRates)))
+		stdev = math.Sqrt(variance / float64(len(sums)))
 	}
 
-	// Count anomalies (beyond ±2σ)
+	// Count anomalies (beyond ±2σ) from timestamp sums
 	anomalies := 0
-	if len(allRates) > 0 {
-		var sum float64
-		for _, v := range allRates {
-			sum += v
-		}
-		mean := sum / float64(len(allRates))
-		for _, v := range allRates {
+	if len(sums) > 0 {
+		mean := totalSum / float64(len(sums))
+		for _, v := range sums {
 			if math.Abs(v-mean) > 2*stdev {
 				anomalies++
 			}
 		}
 	}
 
+	// Calculate total messages (sum of max count per topic)
+	var totalMessages float64
+	for _, tstats := range grouped {
+		var topicMaxCount float64
+		for _, stat := range tstats {
+			if float64(stat.Count) > topicMaxCount {
+				topicMaxCount = float64(stat.Count)
+			}
+		}
+		totalMessages += topicMaxCount
+	}
+
 	return map[string]interface{}{
 		"total_topics":          len(grouped),
-		"avg_msgs_per_sec":      totalAvgRate, // ✅ sum of all topic averages
+		"avg_msgs_per_sec":      avgRate,
 		"max_msgs_per_sec":      maxRate,
 		"min_msgs_per_sec":      minRate,
 		"stdev_msgs_per_sec":    stdev,
