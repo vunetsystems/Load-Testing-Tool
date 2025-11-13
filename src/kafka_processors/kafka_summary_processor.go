@@ -98,6 +98,13 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 	var o11ySources []string
 	json.Unmarshal([]byte(o11ySourcesStr), &o11ySources)
 
+	// Fetch pipeline information from PostgreSQL
+	pipelineInfoJSON, err := ProcessPipelineInfo(o11ySources, endTime)
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to fetch pipeline info: %v", err))
+		pipelineInfoJSON = ""
+	}
+
 	// Process Kafka specs for this test run
 	err = ProcessKafkaSpecs(db, testID, o11ySources)
 	if err != nil {
@@ -324,7 +331,7 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		    chi_clickhouse_vusmart_0_1_0_mem_min = ?, chi_clickhouse_vusmart_0_1_0_mem_avg = ?, chi_clickhouse_vusmart_0_1_0_mem_max = ?,
 		    pipeline_pod_cpu_min = ?, pipeline_pod_cpu_avg = ?, pipeline_pod_cpu_max = ?,
 		    pipeline_pod_mem_min = ?, pipeline_pod_mem_avg = ?, pipeline_pod_mem_max = ?,
-		    process_rate_summary = ?, ingestion_summary = ?, -- Added for ingestion summary
+		    process_rate_summary = ?, ingestion_summary = ?, pipeline_info = ?, -- Added for pipeline info
 		    kafka_1_node_mem_min = ?, kafka_1_node_mem_avg = ?, kafka_1_node_mem_max = ?,
 		    kafka_2_node_mem_min = ?, kafka_2_node_mem_avg = ?, kafka_2_node_mem_max = ?,
 		    kafka_3_node_mem_min = ?, kafka_3_node_mem_avg = ?, kafka_3_node_mem_max = ?,
@@ -352,7 +359,7 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		podMetrics.ChiClickhouseVusmart010MemMin, podMetrics.ChiClickhouseVusmart010MemAvg, podMetrics.ChiClickhouseVusmart010MemMax,
 		podMetrics.PipelinePodCpuMin, podMetrics.PipelinePodCpuAvg, podMetrics.PipelinePodCpuMax,
 		podMetrics.PipelinePodMemMin, podMetrics.PipelinePodMemAvg, podMetrics.PipelinePodMemMax,
-		string(processRateSummaryJSON), string(ingestionSummaryJSON),
+		string(processRateSummaryJSON), string(ingestionSummaryJSON), pipelineInfoJSON,
 		nodeMemoryResult.Kafka1Min, nodeMemoryResult.Kafka1Avg, nodeMemoryResult.Kafka1Max,
 		nodeMemoryResult.Kafka2Min, nodeMemoryResult.Kafka2Avg, nodeMemoryResult.Kafka2Max,
 		nodeMemoryResult.Kafka3Min, nodeMemoryResult.Kafka3Avg, nodeMemoryResult.Kafka3Max,

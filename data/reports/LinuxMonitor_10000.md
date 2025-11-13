@@ -7,24 +7,35 @@
 - **Start Time**: `2025-11-11 18:00:08.120238133+00:00`
 - **End Time**: `2025-11-11 19:00:16.910522743+00:00`
 - **O11Y Sources**: `["LinuxMonitor"]`
-- **Timeout Seconds**: `3600`
+- **Duration**: `1.00 hours`
 - **Status**: `completed`
 
 ## 📈 Topic Metrics
 
 ### Kafka Specs
 
-| Spec | Value |
-|------|--------|
-| `input_topics` | `[{'name': 'linux-monitor-input', 'partitions': 1, 'replication_factor': 2}]` |
-| `output_topics` | `[{'name': 'linux-monitor-additional-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'linux-monitor-process-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'linux-monitor-resource-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'linux-monitor-storage-metrics', 'partitions': 1, 'replication_factor': 2}]` |
+#### 📥 Input Topics
+
+| Topic Name | Partitions | Replication Factor |
+|-------------|-------------|--------------------|
+| `linux-monitor-input` | `1` | `2` |
+
+#### 📤 Output Topics
+
+| Topic Name | Partitions | Replication Factor |
+|-------------|-------------|--------------------|
+| `linux-monitor-additional-metrics` | `1` | `2` |
+| `linux-monitor-process-metrics` | `1` | `2` |
+| `linux-monitor-resource-metrics` | `1` | `2` |
+| `linux-monitor-storage-metrics` | `1` | `2` |
+
 
 ### Input/Output Topic Metrics
 
 | Type | Min (msg/s) | Avg (msg/s) | Max (msg/s) |
 |------|--------------|--------------|--------------|
 | Input  | `9973.88318783893` | `10010.66360759976` | `10591.4` |
-| Output | `0.0` | `6829.176117248158` | `8576.924490792437` |
+| Output | `0.0` | `6829.176117248159` | `8576.924490792437` |
 
 ### Lag Metrics
 
@@ -63,6 +74,8 @@
 |------------|-----|-----|-----|
 | chi_clickhouse_vusmart_0_0_0 | `0.0` | `7.357395930784424` | `55.38654327392578` |
 | chi_clickhouse_vusmart_0_1_0 | `0.0` | `1.370037971090536` | `13.751602172851562` |
+
+## 🔧 Pipeline Pod Metrics
 
 ### Pipeline Pod CPU
 
