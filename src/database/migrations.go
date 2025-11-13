@@ -111,6 +111,7 @@ func runSchemaUpdates() error {
 		"pod_metrics":                "TEXT",
 		"process_rate_summary":       "TEXT", // JSON summary of process rates per o11y source
 		"ingestion_summary":          "TEXT", // JSON summary of hyperscale ingestion table-wise EPS data
+		"pipeline_info":              "TEXT", // JSON mapping of o11y sources to pipeline details
 		"kafka_1_node_mem_min":       "REAL DEFAULT 0.0",
 		"kafka_1_node_mem_avg":       "REAL DEFAULT 0.0",
 		"kafka_1_node_mem_max":       "REAL DEFAULT 0.0",

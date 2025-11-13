@@ -37,7 +37,9 @@ POD_GROUPS = {
     "ClickHouse Pods Memory": {
         "rows": ["chi_clickhouse_vusmart_0_0_0", "chi_clickhouse_vusmart_0_1_0"],
         "cols": ["mem_min", "mem_avg", "mem_max"]
-    },
+    }
+}
+PIPELINE_GROUPS = {
     "Pipeline Pod CPU": {
         "rows": ["pipeline_pod"],
         "cols": ["cpu_min", "cpu_avg", "cpu_max"]
@@ -47,6 +49,7 @@ POD_GROUPS = {
         "cols": ["mem_min", "mem_avg", "mem_max"]
     }
 }
+
 
 # Nodes next
 NODE_GROUPS = {
@@ -81,9 +84,26 @@ def safe_get(row, key):
 def format_summary(row):
     md = "## 🧾 Test Summary\n\n"
     for field in SUMMARY_FIELDS:
-        md += f"- **{field.replace('_', ' ').title()}**: `{safe_get(row, field)}`\n"
+        value = safe_get(row, field)
+
+        # Special handling for timeout_seconds → Duration (hours)
+        if field == "timeout_seconds":
+            if value:
+                try:
+                    hours = float(value) / 3600
+                    value = f"{hours:.2f} hours"
+                except Exception:
+                    pass
+            label = "Duration"  # Rename field
+        else:
+            label = field.replace("_", " ").title()
+
+        md += f"- **{label}**: `{value}`\n"
+
     md += "\n"
     return md
+
+
 
 
 def format_combined_topic_table(row):
@@ -131,7 +151,7 @@ def get_o11y_source_name(o11y_sources):
     return "unknown_source"
 
 def format_kafka_specs(row):
-    """Parse and format kafka_specs JSON if available."""
+    """Parse and format kafka_specs JSON into separate Input and Output topic tables."""
     specs_data = safe_get(row, "kafka_specs")
     if not specs_data:
         return ""
@@ -139,21 +159,36 @@ def format_kafka_specs(row):
     md = "### Kafka Specs\n\n"
     try:
         specs = json.loads(specs_data)
-        if isinstance(specs, dict):
-            md += "| Spec | Value |\n|------|--------|\n"
-            for key, value in specs.items():
-                md += f"| `{key}` | `{value}` |\n"
-        elif isinstance(specs, list):
-            md += "| Index | Spec |\n|--------|--------|\n"
-            for i, item in enumerate(specs, start=1):
-                md += f"| {i} | `{json.dumps(item, indent=2)}` |\n"
-        else:
-            md += f"`{specs_data}`\n"
+
+        # --- Input Topics ---
+        if "input_topics" in specs and isinstance(specs["input_topics"], list):
+            md += "#### 📥 Input Topics\n\n"
+            md += "| Topic Name | Partitions | Replication Factor |\n"
+            md += "|-------------|-------------|--------------------|\n"
+            for topic in specs["input_topics"]:
+                name = topic.get("name", "")
+                partitions = topic.get("partitions", "")
+                replication = topic.get("replication_factor", "")
+                md += f"| `{name}` | `{partitions}` | `{replication}` |\n"
+            md += "\n"
+
+        # --- Output Topics ---
+        if "output_topics" in specs and isinstance(specs["output_topics"], list):
+            md += "#### 📤 Output Topics\n\n"
+            md += "| Topic Name | Partitions | Replication Factor |\n"
+            md += "|-------------|-------------|--------------------|\n"
+            for topic in specs["output_topics"]:
+                name = topic.get("name", "")
+                partitions = topic.get("partitions", "")
+                replication = topic.get("replication_factor", "")
+                md += f"| `{name}` | `{partitions}` | `{replication}` |\n"
+            md += "\n"
+
     except Exception as e:
         md += f"⚠️ Could not parse kafka_specs JSON: `{specs_data}`\n"
 
-    md += "\n"
-    return md
+    return md + "\n"
+
 
 
 
@@ -171,6 +206,11 @@ def generate_report(row):
     # Pod Metrics FIRST
     md += "## 🖥️ Pod Metrics\n\n"
     for title, group_def in POD_GROUPS.items():
+        md += format_grouped_table(title, group_def, row)
+
+    # Pipeline Pod Metrics (separate section)
+    md += "## 🔧 Pipeline Pod Metrics\n\n"
+    for title, group_def in PIPELINE_GROUPS.items():
         md += format_grouped_table(title, group_def, row)
 
     # Node Metrics SECOND

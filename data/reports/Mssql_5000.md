@@ -7,24 +7,47 @@
 - **Start Time**: `2025-11-11 15:29:07.967017281+00:00`
 - **End Time**: `2025-11-11 16:29:16.910432546+00:00`
 - **O11Y Sources**: `["Mssql"]`
-- **Timeout Seconds**: `3600`
+- **Duration**: `1.00 hours`
 - **Status**: `completed`
 
 ## 📈 Topic Metrics
 
 ### Kafka Specs
 
-| Spec | Value |
-|------|--------|
-| `input_topics` | `[{'name': 'mssql-telegraf', 'partitions': 1, 'replication_factor': 2}]` |
-| `output_topics` | `[{'name': 'mssql-memory-clerks', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-database-io', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-net-response', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-hadr-replica', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-schedulers', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-requests', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-server-properties', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-performance', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-hadr-dbreplica', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-session', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-telegraf-health', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-volume-space', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-cpu', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-waitstats', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-cluster', 'partitions': 1, 'replication_factor': 2}, {'name': 'mssql-recentbackup', 'partitions': 1, 'replication_factor': 2}]` |
+#### 📥 Input Topics
+
+| Topic Name | Partitions | Replication Factor |
+|-------------|-------------|--------------------|
+| `mssql-telegraf` | `1` | `2` |
+
+#### 📤 Output Topics
+
+| Topic Name | Partitions | Replication Factor |
+|-------------|-------------|--------------------|
+| `mssql-memory-clerks` | `1` | `2` |
+| `mssql-database-io` | `1` | `2` |
+| `mssql-net-response` | `1` | `2` |
+| `mssql-hadr-replica` | `1` | `2` |
+| `mssql-schedulers` | `1` | `2` |
+| `mssql-requests` | `1` | `2` |
+| `mssql-server-properties` | `1` | `2` |
+| `mssql-performance` | `1` | `2` |
+| `mssql-hadr-dbreplica` | `1` | `2` |
+| `mssql-session` | `1` | `2` |
+| `mssql-telegraf-health` | `1` | `2` |
+| `mssql-volume-space` | `1` | `2` |
+| `mssql-cpu` | `1` | `2` |
+| `mssql-waitstats` | `1` | `2` |
+| `mssql-cluster` | `1` | `2` |
+| `mssql-recentbackup` | `1` | `2` |
+
 
 ### Input/Output Topic Metrics
 
 | Type | Min (msg/s) | Avg (msg/s) | Max (msg/s) |
 |------|--------------|--------------|--------------|
 | Input  | `4819.654021925699` | `4884.7317699882815` | `5572.8` |
-| Output | `0.0` | `4835.1132203327425` | `4883.372963338767` |
+| Output | `0.0` | `4835.113220332742` | `4883.372963338767` |
 
 ### Lag Metrics
 
@@ -63,6 +86,8 @@
 |------------|-----|-----|-----|
 | chi_clickhouse_vusmart_0_0_0 | `0.0` | `6.815300308355764` | `49.40321305218865` |
 | chi_clickhouse_vusmart_0_1_0 | `0.0` | `1.6922868199709082` | `13.962936401367188` |
+
+## 🔧 Pipeline Pod Metrics
 
 ### Pipeline Pod CPU
 

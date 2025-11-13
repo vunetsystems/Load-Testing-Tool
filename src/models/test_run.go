@@ -92,6 +92,7 @@ type TestRun struct {
 	PodResourceCheck         bool      `json:"pod_resource_check,omitempty"`
 	ProcessRateSummary       string    `json:"process_rate_summary,omitempty"` // JSON summary of process rates per o11y source
 	IngestionSummary         string    `json:"ingestion_summary,omitempty"` // JSON summary of hyperscale ingestion table-wise EPS data
+	PipelineInfo             string    `json:"pipeline_info,omitempty"` // JSON mapping of o11y sources to pipeline details
 }
 
 // TestRunStartRequest represents the request payload for starting a test run

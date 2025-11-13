@@ -7,24 +7,38 @@
 - **Start Time**: `2025-11-11 14:17:07.904338581+00:00`
 - **End Time**: `2025-11-11 15:17:15.515239781+00:00`
 - **O11Y Sources**: `["Kubernetes"]`
-- **Timeout Seconds**: `3600`
+- **Duration**: `1.00 hours`
 - **Status**: `completed`
 
 ## 📈 Topic Metrics
 
 ### Kafka Specs
 
-| Spec | Value |
-|------|--------|
-| `input_topics` | `[{'name': 'kubernetes-metrics-input', 'partitions': 1, 'replication_factor': 2}]` |
-| `output_topics` | `[{'name': 'kubernetes-kubelet-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'kubernetes-kube-state-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'kubernetes-etcd-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'kubernetes-apiserver-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'kubernetes-controllermanager-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'kubernetes-scheduler-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'kubernetes-proxy-metrics', 'partitions': 1, 'replication_factor': 2}]` |
+#### 📥 Input Topics
+
+| Topic Name | Partitions | Replication Factor |
+|-------------|-------------|--------------------|
+| `kubernetes-metrics-input` | `1` | `2` |
+
+#### 📤 Output Topics
+
+| Topic Name | Partitions | Replication Factor |
+|-------------|-------------|--------------------|
+| `kubernetes-kubelet-metrics` | `1` | `2` |
+| `kubernetes-kube-state-metrics` | `1` | `2` |
+| `kubernetes-etcd-metrics` | `1` | `2` |
+| `kubernetes-apiserver-metrics` | `1` | `2` |
+| `kubernetes-controllermanager-metrics` | `1` | `2` |
+| `kubernetes-scheduler-metrics` | `1` | `2` |
+| `kubernetes-proxy-metrics` | `1` | `2` |
+
 
 ### Input/Output Topic Metrics
 
 | Type | Min (msg/s) | Avg (msg/s) | Max (msg/s) |
 |------|--------------|--------------|--------------|
 | Input  | `0.0` | `4979.809894965163` | `5136.91904416021` |
-| Output | `0.0` | `4286.424801768306` | `4829.815751401648` |
+| Output | `0.0` | `4286.42480176831` | `4829.815751401648` |
 
 ### Lag Metrics
 
@@ -63,6 +77,8 @@
 |------------|-----|-----|-----|
 | chi_clickhouse_vusmart_0_0_0 | `0.0` | `6.614981018194631` | `49.00320838479435` |
 | chi_clickhouse_vusmart_0_1_0 | `0.0` | `1.6907489466733958` | `16.09632828656365` |
+
+## 🔧 Pipeline Pod Metrics
 
 ### Pipeline Pod CPU
 

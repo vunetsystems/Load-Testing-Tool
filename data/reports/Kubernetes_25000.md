@@ -7,17 +7,31 @@
 - **Start Time**: `2025-11-12 04:07:08.229112349+00:00`
 - **End Time**: `2025-11-12 05:07:08.508526133+00:00`
 - **O11Y Sources**: `["Kubernetes"]`
-- **Timeout Seconds**: `3600`
+- **Duration**: `1.00 hours`
 - **Status**: `completed`
 
 ## 📈 Topic Metrics
 
 ### Kafka Specs
 
-| Spec | Value |
-|------|--------|
-| `input_topics` | `[{'name': 'kubernetes-metrics-input', 'partitions': 1, 'replication_factor': 2}]` |
-| `output_topics` | `[{'name': 'kubernetes-kubelet-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'kubernetes-kube-state-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'kubernetes-etcd-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'kubernetes-apiserver-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'kubernetes-controllermanager-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'kubernetes-scheduler-metrics', 'partitions': 1, 'replication_factor': 2}, {'name': 'kubernetes-proxy-metrics', 'partitions': 1, 'replication_factor': 2}]` |
+#### 📥 Input Topics
+
+| Topic Name | Partitions | Replication Factor |
+|-------------|-------------|--------------------|
+| `kubernetes-metrics-input` | `1` | `2` |
+
+#### 📤 Output Topics
+
+| Topic Name | Partitions | Replication Factor |
+|-------------|-------------|--------------------|
+| `kubernetes-kubelet-metrics` | `1` | `2` |
+| `kubernetes-kube-state-metrics` | `1` | `2` |
+| `kubernetes-etcd-metrics` | `1` | `2` |
+| `kubernetes-apiserver-metrics` | `1` | `2` |
+| `kubernetes-controllermanager-metrics` | `1` | `2` |
+| `kubernetes-scheduler-metrics` | `1` | `2` |
+| `kubernetes-proxy-metrics` | `1` | `2` |
+
 
 ### Input/Output Topic Metrics
 
@@ -63,6 +77,8 @@
 |------------|-----|-----|-----|
 | chi_clickhouse_vusmart_0_0_0 | `0.0` | `10.290517379589776` | `80.19507913028492` |
 | chi_clickhouse_vusmart_0_1_0 | `0.0` | `3.6918022786201874` | `29.992193334242877` |
+
+## 🔧 Pipeline Pod Metrics
 
 ### Pipeline Pod CPU
 

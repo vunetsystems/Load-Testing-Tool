@@ -6,3 +6,13 @@
 | Role            | `monitoring_reader`                       |
 | Role privileges | `SHOW ON *.*`, `SELECT ON monitoring.*`   |
 | Permissions     | Read-only access to `monitoring` database |
+
+
+
+
+
+postgres
+
+CREATE ROLE Load_Testing_Tool_read_user WITH LOGIN PASSWORD 'StrongPassword123';
+
+| Field | Value | | -------- | --------------------------------------------------------------------- | | Host | timescaledb.vsmaps.svc.cluster.local (internal DNS) or 10.96.1.65 | | Port | 5432 | | User | Load_Testing_Tool_read_user | | Password | StrongPassword123 | | Database | multicore |
