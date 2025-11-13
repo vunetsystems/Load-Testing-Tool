@@ -129,9 +129,18 @@ type PodMonitoringData struct {
 // }
 
 
-func GetPodMonitoringData(ctx context.Context, namespace string) ([]PodMonitoringData, error) {
+func GetPodMonitoringData(ctx context.Context, namespace string, timeRange *TimeRange) ([]PodMonitoringData, error) {
 	if clickHouseClient == nil {
 		return nil, fmt.Errorf("ClickHouse client not initialized")
+	}
+
+	// Default time range if not provided
+	if timeRange == nil {
+		now := time.Now()
+		timeRange = &TimeRange{
+			From: now.Add(-15 * time.Minute),
+			To:   now,
+		}
 	}
 
 	query := `
@@ -150,7 +159,7 @@ func GetPodMonitoringData(ctx context.Context, namespace string) ([]PodMonitorin
 		                )
 		            ) AS latest_condition
 		        FROM monitoring.kubernetes_pod_container_data
-		        WHERE timestamp >= (now() - toIntervalMinute(15))
+		        WHERE timestamp >= ? AND timestamp <= ?
 		        GROUP BY namespace, pod_name
 		    ),
 
@@ -167,7 +176,7 @@ func GetPodMonitoringData(ctx context.Context, namespace string) ([]PodMonitorin
 		                toString(uniqExact(container_name))
 		            ) AS ready_status
 		        FROM monitoring.kubernetes_pod_container_data
-		        WHERE timestamp >= (now() - toIntervalMinute(15))
+		        WHERE timestamp >= ? AND timestamp <= ?
 		        GROUP BY namespace, pod_name
 		    )
 
@@ -180,14 +189,14 @@ func GetPodMonitoringData(ctx context.Context, namespace string) ([]PodMonitorin
 
 		    -- ✅ CPU usage % using actual resource limits (millicores)
 		    ROUND(
-		        (quantileExact(0.95)(k.cpu_usage_nanocores) / 1_000_000) / 
+		        (quantileExact(0.95)(k.cpu_usage_nanocores) / 1_000_000) /
 		        NULLIF(quantileExact(0.95)(k.resource_limits_millicpu_units), 0) * 100,
 		        2
 		    ) AS cpu_usage_percent,
 
 		    -- ✅ Memory usage % using actual memory limits (bytes)
 		    ROUND(
-		        (quantileExact(0.95)(k.memory_usage_bytes) / 
+		        (quantileExact(0.95)(k.memory_usage_bytes) /
 		        NULLIF(quantileExact(0.95)(k.resource_limits_memory_bytes), 0)) * 100,
 		        2
 		    ) AS memory_usage_percent,
@@ -195,11 +204,11 @@ func GetPodMonitoringData(ctx context.Context, namespace string) ([]PodMonitorin
 		    max(k.restarts_total) AS restarts,
 		    max(k.timestamp) AS last_seen
 		FROM monitoring.kubernetes_pod_container_data AS k
-		LEFT JOIN readiness_summary AS r 
+		LEFT JOIN readiness_summary AS r
 		    ON k.namespace = r.namespace AND k.pod_name = r.pod_name
-		LEFT JOIN latest_status AS l 
+		LEFT JOIN latest_status AS l
 		    ON k.namespace = l.namespace AND k.pod_name = l.pod_name
-		WHERE (k.timestamp >= (now() - toIntervalMinute(15)))
+		WHERE (k.timestamp >= ? AND k.timestamp <= ?)
 		  AND (k.namespace = ?)
 		GROUP BY
 		    k.namespace,
@@ -210,7 +219,7 @@ func GetPodMonitoringData(ctx context.Context, namespace string) ([]PodMonitorin
 		ORDER BY last_seen DESC
 	`
 
-	rows, err := clickHouseClient.Client.Query(ctx, query, namespace)
+	rows, err := clickHouseClient.Client.Query(ctx, query, timeRange.From, timeRange.To, timeRange.From, timeRange.To, timeRange.From, timeRange.To, namespace)
 	if err != nil {
 		logger.LogError("System", "ClickHouse", fmt.Sprintf("Failed to query pod monitoring data: %v", err))
 		return nil, fmt.Errorf("failed to query pod monitoring data: %v", err)
@@ -238,7 +247,7 @@ func GetPodMonitoringData(ctx context.Context, namespace string) ([]PodMonitorin
 		pods = append(pods, pod)
 	}
 
-	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Fetched %d pods for namespace %s", len(pods), namespace), "info")
+	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Fetched %d pods for namespace %s in time range %v to %v", len(pods), namespace, timeRange.From, timeRange.To), "info")
 	return pods, nil
 }
 
@@ -346,9 +355,18 @@ func GetPodMonitoringData(ctx context.Context, namespace string) ([]PodMonitorin
 // 	return pods, nil
 // }
 
-func GetPodMonitoringDataAllNamespaces(ctx context.Context) ([]PodMonitoringData, error) {
+func GetPodMonitoringDataAllNamespaces(ctx context.Context, timeRange *TimeRange) ([]PodMonitoringData, error) {
 	if clickHouseClient == nil {
 		return nil, fmt.Errorf("ClickHouse client not initialized")
+	}
+
+	// Default time range if not provided
+	if timeRange == nil {
+		now := time.Now()
+		timeRange = &TimeRange{
+			From: now.Add(-15 * time.Minute),
+			To:   now,
+		}
 	}
 
 	query := `
@@ -366,7 +384,7 @@ func GetPodMonitoringDataAllNamespaces(ctx context.Context) ([]PodMonitoringData
 		                )
 		            ) AS latest_condition
 		        FROM monitoring.kubernetes_pod_container_data
-		        WHERE timestamp >= (now() - toIntervalMinute(15))
+		        WHERE timestamp >= ? AND timestamp <= ?
 		        GROUP BY pod_name
 		    ),
 
@@ -382,7 +400,7 @@ func GetPodMonitoringDataAllNamespaces(ctx context.Context) ([]PodMonitoringData
 		                toString(uniqExact(container_name))
 		            ) AS ready_status
 		        FROM monitoring.kubernetes_pod_container_data
-		        WHERE timestamp >= (now() - toIntervalMinute(15))
+		        WHERE timestamp >= ? AND timestamp <= ?
 		        GROUP BY pod_name
 		    )
 
@@ -395,14 +413,14 @@ func GetPodMonitoringDataAllNamespaces(ctx context.Context) ([]PodMonitoringData
 
 		    -- ✅ CPU usage % using actual limits
 		    ROUND(
-		        (quantileExact(0.95)(k.cpu_usage_nanocores) / 1_000_000) / 
+		        (quantileExact(0.95)(k.cpu_usage_nanocores) / 1_000_000) /
 		        NULLIF(quantileExact(0.95)(k.resource_limits_millicpu_units), 0) * 100,
 		        2
 		    ) AS cpu_usage_percent,
 
 		    -- ✅ Memory usage % using actual limits
 		    ROUND(
-		        (quantileExact(0.95)(k.memory_usage_bytes) / 
+		        (quantileExact(0.95)(k.memory_usage_bytes) /
 		        NULLIF(quantileExact(0.95)(k.resource_limits_memory_bytes), 0)) * 100,
 		        2
 		    ) AS memory_usage_percent,
@@ -412,7 +430,7 @@ func GetPodMonitoringDataAllNamespaces(ctx context.Context) ([]PodMonitoringData
 		FROM monitoring.kubernetes_pod_container_data AS k
 		LEFT JOIN readiness_summary AS r ON k.pod_name = r.pod_name
 		LEFT JOIN latest_status AS l ON k.pod_name = l.pod_name
-		WHERE k.timestamp >= (now() - toIntervalMinute(15))
+		WHERE k.timestamp >= ? AND k.timestamp <= ?
 		GROUP BY
 		    k.namespace,
 		    k.pod_name,
@@ -422,7 +440,7 @@ func GetPodMonitoringDataAllNamespaces(ctx context.Context) ([]PodMonitoringData
 		ORDER BY last_seen DESC
 	`
 
-	rows, err := clickHouseClient.Client.Query(ctx, query)
+	rows, err := clickHouseClient.Client.Query(ctx, query, timeRange.From, timeRange.To, timeRange.From, timeRange.To, timeRange.From, timeRange.To)
 	if err != nil {
 		logger.LogError("System", "ClickHouse", fmt.Sprintf("Failed to query pod monitoring data: %v", err))
 		return nil, fmt.Errorf("failed to query pod monitoring data: %v", err)
@@ -450,7 +468,7 @@ func GetPodMonitoringDataAllNamespaces(ctx context.Context) ([]PodMonitoringData
 		pods = append(pods, pod)
 	}
 
-	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Fetched %d pods from all namespaces", len(pods)), "info")
+	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Fetched %d pods from all namespaces in time range %v to %v", len(pods), timeRange.From, timeRange.To), "info")
 	return pods, nil
 }
 
@@ -628,38 +646,171 @@ type PodTrendData struct {
 // }
 
 
-func GetPodTrendData(ctx context.Context, namespace, podName string, hours int) ([]PodTrendData, error) {
+// func GetPodTrendData(ctx context.Context, namespace, podName string, hours int, timeRange *TimeRange) ([]PodTrendData, error) {
+// 	if clickHouseClient == nil {
+// 		return nil, fmt.Errorf("ClickHouse client not initialized")
+// 	}
+
+// 	var query string
+// 	var args []interface{}
+
+// 	if timeRange != nil {
+// 		// Use specific time range
+// 		query = `
+// 			SELECT
+// 			    toStartOfInterval(timestamp, INTERVAL 5 minute) AS time_bucket,
+
+// 			    -- ✅ CPU usage percentage based on actual resource limits (millicores)
+// 			    ROUND(
+// 			        (avg(cpu_usage_nanocores) / 1_000_000) /
+// 			        NULLIF(avg(resource_limits_millicpu_units), 0) * 100,
+// 			        2
+// 			    ) AS avg_cpu_usage_percent,
+
+// 			    -- ✅ Memory usage percentage based on actual resource limits (bytes)
+// 			    ROUND(
+// 			        (avg(memory_usage_bytes) /
+// 			        NULLIF(avg(resource_limits_memory_bytes), 0)) * 100,
+// 			        2
+// 			    ) AS avg_memory_usage_percent
+
+// 			FROM monitoring.kubernetes_pod_container_data
+// 			WHERE timestamp >= ? AND timestamp <= ?
+// 			  AND namespace = ?
+// 			  AND pod_name = ?
+// 			GROUP BY time_bucket
+// 			ORDER BY time_bucket ASC
+// 		`
+// 		args = []interface{}{timeRange.From, timeRange.To, namespace, podName}
+// 	} else {
+// 		// Use hours-based range (backward compatibility)
+// 		query = `
+// 			SELECT
+// 			    toStartOfInterval(timestamp, INTERVAL 5 minute) AS time_bucket,
+
+// 			    -- ✅ CPU usage percentage based on actual resource limits (millicores)
+// 			    ROUND(
+// 			        (avg(cpu_usage_nanocores) / 1_000_000) /
+// 			        NULLIF(avg(resource_limits_millicpu_units), 0) * 100,
+// 			        2
+// 			    ) AS avg_cpu_usage_percent,
+
+// 			    -- ✅ Memory usage percentage based on actual resource limits (bytes)
+// 			    ROUND(
+// 			        (avg(memory_usage_bytes) /
+// 			        NULLIF(avg(resource_limits_memory_bytes), 0)) * 100,
+// 			        2
+// 			    ) AS avg_memory_usage_percent
+
+// 			FROM monitoring.kubernetes_pod_container_data
+// 			WHERE timestamp >= now() - toIntervalHour(?)
+// 			  AND namespace = ?
+// 			  AND pod_name = ?
+// 			GROUP BY time_bucket
+// 			ORDER BY time_bucket ASC
+// 		`
+// 		args = []interface{}{hours, namespace, podName}
+// 	}
+
+// 	rows, err := clickHouseClient.Client.Query(ctx, query, args...)
+// 	if err != nil {
+// 		logger.LogError("System", "ClickHouse", fmt.Sprintf("Failed to query pod trend data: %v", err))
+// 		return nil, fmt.Errorf("failed to query pod trend data: %v", err)
+// 	}
+// 	defer rows.Close()
+
+// 	var trendData []PodTrendData
+// 	for rows.Next() {
+// 		var data PodTrendData
+// 		err := rows.Scan(
+// 			&data.Timestamp,
+// 			&data.CPUUsage,
+// 			&data.MemoryUsage,
+// 		)
+// 		if err != nil {
+// 			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan pod trend row: %v", err))
+// 			continue
+// 		}
+// 		trendData = append(trendData, data)
+// 	}
+
+// 	timeRangeDesc := "last hours"
+// 	if timeRange != nil {
+// 		timeRangeDesc = fmt.Sprintf("time range %v to %v", timeRange.From, timeRange.To)
+// 	}
+
+// 	logger.LogWithNode("System", "ClickHouse",
+// 		fmt.Sprintf("Fetched %d trend data points for pod %s/%s in %s", len(trendData), namespace, podName, timeRangeDesc),
+// 		"info",
+// 	)
+// 	return trendData, nil
+// }
+
+func GetPodTrendData(ctx context.Context, namespace, podName string, hours int, timeRange *TimeRange) ([]PodTrendData, error) {
 	if clickHouseClient == nil {
 		return nil, fmt.Errorf("ClickHouse client not initialized")
 	}
 
-	query := `
-		SELECT
-		    toStartOfInterval(timestamp, INTERVAL 5 minute) AS time_bucket,
+	var query string
+	var args []interface{}
 
-		    -- ✅ CPU usage percentage based on actual resource limits (millicores)
-		    ROUND(
-		        (avg(cpu_usage_nanocores) / 1_000_000) /
-		        NULLIF(avg(resource_limits_millicpu_units), 0) * 100,
-		        2
-		    ) AS avg_cpu_usage_percent,
+	if timeRange != nil {
+		// Use specific time range with 10-minute buffer
+		query = `
+			SELECT
+			    toStartOfInterval(timestamp, INTERVAL 1 minute) AS time_bucket,
 
-		    -- ✅ Memory usage percentage based on actual resource limits (bytes)
-		    ROUND(
-		        (avg(memory_usage_bytes) /
-		        NULLIF(avg(resource_limits_memory_bytes), 0)) * 100,
-		        2
-		    ) AS avg_memory_usage_percent
+			    ROUND(
+			        (avg(cpu_usage_nanocores) / 1_000_000) /
+			        NULLIF(avg(resource_limits_millicpu_units), 0) * 100,
+			        2
+			    ) AS avg_cpu_usage_percent,
 
-		FROM monitoring.kubernetes_pod_container_data
-		WHERE timestamp >= now() - toIntervalHour(?)
-		  AND namespace = ?
-		  AND pod_name = ?
-		GROUP BY time_bucket
-		ORDER BY time_bucket ASC
-	`
+			    ROUND(
+			        (avg(memory_usage_bytes) /
+			        NULLIF(avg(resource_limits_memory_bytes), 0)) * 100,
+			        2
+			    ) AS avg_memory_usage_percent
 
-	rows, err := clickHouseClient.Client.Query(ctx, query, hours, namespace, podName)
+			FROM monitoring.kubernetes_pod_container_data
+			WHERE timestamp >= ? - INTERVAL 10 minute
+			  AND timestamp <= ? + INTERVAL 10 minute
+			  AND namespace = ?
+			  AND pod_name = ?
+			GROUP BY time_bucket
+			ORDER BY time_bucket ASC
+		`
+		args = []interface{}{timeRange.From, timeRange.To, namespace, podName}
+	} else {
+		// Use hours-based range with 10-minute buffer
+		query = `
+			SELECT
+			    toStartOfInterval(timestamp, INTERVAL 1 minute) AS time_bucket,
+
+			    ROUND(
+			        (avg(cpu_usage_nanocores) / 1_000_000) /
+			        NULLIF(avg(resource_limits_millicpu_units), 0) * 100,
+			        2
+			    ) AS avg_cpu_usage_percent,
+
+			    ROUND(
+			        (avg(memory_usage_bytes) /
+			        NULLIF(avg(resource_limits_memory_bytes), 0)) * 100,
+			        2
+			    ) AS avg_memory_usage_percent
+
+			FROM monitoring.kubernetes_pod_container_data
+			WHERE timestamp >= now() - toIntervalHour(?) - INTERVAL 10 minute
+			  AND timestamp <= now() + INTERVAL 10 minute
+			  AND namespace = ?
+			  AND pod_name = ?
+			GROUP BY time_bucket
+			ORDER BY time_bucket ASC
+		`
+		args = []interface{}{hours, namespace, podName}
+	}
+
+	rows, err := clickHouseClient.Client.Query(ctx, query, args...)
 	if err != nil {
 		logger.LogError("System", "ClickHouse", fmt.Sprintf("Failed to query pod trend data: %v", err))
 		return nil, fmt.Errorf("failed to query pod trend data: %v", err)
@@ -681,8 +832,13 @@ func GetPodTrendData(ctx context.Context, namespace, podName string, hours int) 
 		trendData = append(trendData, data)
 	}
 
+	timeRangeDesc := "last hours"
+	if timeRange != nil {
+		timeRangeDesc = fmt.Sprintf("time range %v to %v (with ±10 min buffer)", timeRange.From, timeRange.To)
+	}
+
 	logger.LogWithNode("System", "ClickHouse",
-		fmt.Sprintf("Fetched %d trend data points for pod %s/%s", len(trendData), namespace, podName),
+		fmt.Sprintf("Fetched %d trend data points for pod %s/%s in %s", len(trendData), namespace, podName, timeRangeDesc),
 		"info",
 	)
 	return trendData, nil
