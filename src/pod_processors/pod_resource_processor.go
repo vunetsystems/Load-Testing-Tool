@@ -77,7 +77,8 @@ type PodMetrics struct {
 	PipelinePodMemMax float64
 }
 
-// fetchPodMetrics fetches pod resource metrics from ClickHouse for the given time range
+
+
 // func FetchPodMetrics(chClient *clickhouse.ClickHouseClient, start, end time.Time) ([]PodStat, error) {
 // 	query := fmt.Sprintf(`
 // 		SELECT
@@ -88,7 +89,13 @@ type PodMetrics struct {
 // 			MAX(resource_limits_millicpu_units) / 1000 AS cpu_limit_cores,
 // 			MAX(resource_limits_memory_bytes) / 1073741824 AS memory_limit_gb
 // 		FROM monitoring.kubernetes_pod_container_data
-// 		WHERE (pod_name LIKE '%%kafka%%') OR (pod_name LIKE '%%click%%')
+// 		WHERE pod_name IN (
+// 			'chi-clickhouse-vusmart-0-0-0',
+// 			'chi-clickhouse-vusmart-0-1-0',
+// 			'kafka-cluster-cp-kafka-0',
+// 			'kafka-cluster-cp-kafka-1',
+// 			'kafka-cluster-cp-kafka-2'
+// 		)
 // 		  AND timestamp >= toDateTime('%s')
 // 		  AND timestamp <= toDateTime('%s')
 // 		GROUP BY pod_name, container_name
@@ -127,15 +134,29 @@ type PodMetrics struct {
 // 	return stats, nil
 // }
 
+// FetchPodMetrics fetches pod resource metrics (min, avg, max) from ClickHouse for the given time range
 func FetchPodMetrics(chClient *clickhouse.ClickHouseClient, start, end time.Time) ([]PodStat, error) {
 	query := fmt.Sprintf(`
 		SELECT
 			pod_name,
 			container_name,
-			MAX(cpu_usage_nanocores) / 1000000000 AS used_cpu_cores,
-			MAX(memory_usage_bytes) / 1073741824 AS used_memory_gb,
+
+			-- ✅ Properly aggregated CPU usage (in cores)
+			MAX(cpu_usage_nanocores) / 1000000000 AS max_used_cpu_cores,
+			MIN(cpu_usage_nanocores) / 1000000000 AS min_used_cpu_cores,
+			AVG(cpu_usage_nanocores) / 1000000000 AS avg_used_cpu_cores,
+
+			-- ✅ CPU limits (in cores)
 			MAX(resource_limits_millicpu_units) / 1000 AS cpu_limit_cores,
+
+			-- ✅ Properly aggregated Memory usage (in GB)
+			MAX(memory_usage_bytes) / 1073741824 AS max_used_memory_gb,
+			MIN(memory_usage_bytes) / 1073741824 AS min_used_memory_gb,
+			AVG(memory_usage_bytes) / 1073741824 AS avg_used_memory_gb,
+
+			-- ✅ Memory limits (in GB)
 			MAX(resource_limits_memory_bytes) / 1073741824 AS memory_limit_gb
+
 		FROM monitoring.kubernetes_pod_container_data
 		WHERE pod_name IN (
 			'chi-clickhouse-vusmart-0-0-0',
@@ -158,15 +179,64 @@ func FetchPodMetrics(chClient *clickhouse.ClickHouseClient, start, end time.Time
 	}
 	defer rows.Close()
 
+	type RawStat struct {
+		PodName         string
+		ContainerName   string
+		MaxUsedCPUCores float64
+		MinUsedCPUCores float64
+		AvgUsedCPUCores float64
+		CPULimitCores   float64
+		MaxUsedMemGB    float64
+		MinUsedMemGB    float64
+		AvgUsedMemGB    float64
+		MemoryLimitGB   float64
+	}
+
 	var stats []PodStat
 	for rows.Next() {
-		var stat PodStat
-		err := rows.Scan(&stat.PodName, &stat.ContainerName, &stat.UsedCPUCores, &stat.UsedMemoryGB, &stat.CPULimitCores, &stat.MemoryLimitGB)
+		var r RawStat
+		err := rows.Scan(
+			&r.PodName,
+			&r.ContainerName,
+			&r.MaxUsedCPUCores,
+			&r.MinUsedCPUCores,
+			&r.AvgUsedCPUCores,
+			&r.CPULimitCores,
+			&r.MaxUsedMemGB,
+			&r.MinUsedMemGB,
+			&r.AvgUsedMemGB,
+			&r.MemoryLimitGB,
+		)
 		if err != nil {
 			logger.LogWarning("System", "PodSummaryProcessor", fmt.Sprintf("Failed to scan pod metric row: %v", err))
 			continue
 		}
-		stats = append(stats, stat)
+
+		// Compute percentages individually for min, avg, max
+		safeDiv := func(a, b float64) float64 {
+			if b == 0 {
+				return 0
+			}
+			return (a / b) * 100
+		}
+
+		// Store three PodStat entries for each aggregate type
+		stats = append(stats,
+			PodStat{r.PodName, r.ContainerName, r.MaxUsedCPUCores, r.MaxUsedMemGB, r.CPULimitCores, r.MemoryLimitGB},
+			PodStat{r.PodName, r.ContainerName, r.MinUsedCPUCores, r.MinUsedMemGB, r.CPULimitCores, r.MemoryLimitGB},
+			PodStat{r.PodName, r.ContainerName, r.AvgUsedCPUCores, r.AvgUsedMemGB, r.CPULimitCores, r.MemoryLimitGB},
+		)
+
+		logger.LogWithNode("System", "PodFetcher", fmt.Sprintf(
+			"Pod %s | CPU[Min: %.2f%%, Avg: %.2f%%, Max: %.2f%%] | MEM[Min: %.2f%%, Avg: %.2f%%, Max: %.2f%%]",
+			r.PodName,
+			safeDiv(r.MinUsedCPUCores, r.CPULimitCores),
+			safeDiv(r.AvgUsedCPUCores, r.CPULimitCores),
+			safeDiv(r.MaxUsedCPUCores, r.CPULimitCores),
+			safeDiv(r.MinUsedMemGB, r.MemoryLimitGB),
+			safeDiv(r.AvgUsedMemGB, r.MemoryLimitGB),
+			safeDiv(r.MaxUsedMemGB, r.MemoryLimitGB),
+		), "debug")
 	}
 
 	if err := rows.Err(); err != nil {
@@ -181,6 +251,7 @@ func FetchPodMetrics(chClient *clickhouse.ClickHouseClient, start, end time.Time
 
 	return stats, nil
 }
+
 
 // FetchPipelinePodMetrics fetches pod metrics for pipeline pods
 func FetchPipelinePodMetrics(chClient *clickhouse.ClickHouseClient, pipelines map[string]bool, start, end time.Time) ([]PodStat, error) {
@@ -247,47 +318,103 @@ func FetchPipelinePodMetrics(chClient *clickhouse.ClickHouseClient, pipelines ma
 
 
 // ComputePodStats computes aggregated pod resource statistics
+// func ComputePodStats(stats []PodStat) (map[string]interface{}, bool) {
+// 	if len(stats) == 0 {
+// 		return nil, false
+// 	}
+
+// 	// Group by pod_name
+// 	podGroups := make(map[string][]PodStat)
+// 	for _, stat := range stats {
+// 		podGroups[stat.PodName] = append(podGroups[stat.PodName], stat)
+// 	}
+
+// 	perPodData := make(map[string]interface{})
+
+// 	for podName, podStats := range podGroups {
+// 		var podTotalCPUCores, podTotalMemoryGB float64
+// 		var cpuPercents, memoryPercents []float64
+
+// 		for _, stat := range podStats {
+// 			podTotalCPUCores += stat.CPULimitCores
+// 			podTotalMemoryGB += stat.MemoryLimitGB
+
+// 			if stat.CPULimitCores > 0 {
+// 				cpuPercent := (stat.UsedCPUCores / stat.CPULimitCores) * 100
+// 				cpuPercents = append(cpuPercents, cpuPercent)
+// 			}
+// 			if stat.MemoryLimitGB > 0 {
+// 				memoryPercent := (stat.UsedMemoryGB / stat.MemoryLimitGB) * 100
+// 				memoryPercents = append(memoryPercents, memoryPercent)
+// 			}
+// 		}
+
+// 		// Per-pod data
+// 		perPodData[podName] = map[string]interface{}{
+// 			"total_allocated_cpu_cores":  podTotalCPUCores,
+// 			"total_allocated_memory_gb":  podTotalMemoryGB,
+// 			"max_cpu_percent":            maxSlice(cpuPercents),
+// 			"min_cpu_percent":            minSlice(cpuPercents),
+// 			"avg_cpu_percent":            avgSlice(cpuPercents),
+// 			"max_memory_percent":         maxSlice(memoryPercents),
+// 			"min_memory_percent":         minSlice(memoryPercents),
+// 			"avg_memory_percent":         avgSlice(memoryPercents),
+// 		}
+// 	}
+
+// 	return perPodData, true
+// }
+
 func ComputePodStats(stats []PodStat) (map[string]interface{}, bool) {
 	if len(stats) == 0 {
 		return nil, false
 	}
 
-	// Group by pod_name
 	podGroups := make(map[string][]PodStat)
 	for _, stat := range stats {
 		podGroups[stat.PodName] = append(podGroups[stat.PodName], stat)
 	}
 
 	perPodData := make(map[string]interface{})
-
 	for podName, podStats := range podGroups {
-		var podTotalCPUCores, podTotalMemoryGB float64
-		var cpuPercents, memoryPercents []float64
+		var minCPU, maxCPU, avgCPU float64
+		var minMem, maxMem, avgMem float64
 
+		// Each PodStat is one of (min, avg, max)
 		for _, stat := range podStats {
-			podTotalCPUCores += stat.CPULimitCores
-			podTotalMemoryGB += stat.MemoryLimitGB
-
 			if stat.CPULimitCores > 0 {
-				cpuPercent := (stat.UsedCPUCores / stat.CPULimitCores) * 100
-				cpuPercents = append(cpuPercents, cpuPercent)
+				percent := (stat.UsedCPUCores / stat.CPULimitCores) * 100
+				switch {
+				case strings.Contains(strings.ToLower(fmt.Sprintf("%v", stat.UsedCPUCores)), "min"):
+					minCPU = percent
+				default:
+					avgCPU = percent
+				}
+				if percent > maxCPU {
+					maxCPU = percent
+				}
 			}
+
 			if stat.MemoryLimitGB > 0 {
-				memoryPercent := (stat.UsedMemoryGB / stat.MemoryLimitGB) * 100
-				memoryPercents = append(memoryPercents, memoryPercent)
+				memPercent := (stat.UsedMemoryGB / stat.MemoryLimitGB) * 100
+				if memPercent > maxMem {
+					maxMem = memPercent
+				}
+				if memPercent < minMem || minMem == 0 {
+					minMem = memPercent
+				}
+				avgMem += memPercent
 			}
 		}
+		avgMem = avgMem / float64(len(podStats))
 
-		// Per-pod data
 		perPodData[podName] = map[string]interface{}{
-			"total_allocated_cpu_cores":  podTotalCPUCores,
-			"total_allocated_memory_gb":  podTotalMemoryGB,
-			"max_cpu_percent":            maxSlice(cpuPercents),
-			"min_cpu_percent":            minSlice(cpuPercents),
-			"avg_cpu_percent":            avgSlice(cpuPercents),
-			"max_memory_percent":         maxSlice(memoryPercents),
-			"min_memory_percent":         minSlice(memoryPercents),
-			"avg_memory_percent":         avgSlice(memoryPercents),
+			"max_cpu_percent":    maxCPU,
+			"min_cpu_percent":    minCPU,
+			"avg_cpu_percent":    avgCPU,
+			"max_memory_percent": maxMem,
+			"min_memory_percent": minMem,
+			"avg_memory_percent": avgMem,
 		}
 	}
 
