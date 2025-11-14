@@ -13,6 +13,7 @@ class VuDataSimManager {
         this.binaryControl = new BinaryControl(this);
         this.clickHouseMetrics = new ClickHouseMetrics(this);
         this.o11ySources = new O11ySources(this);
+        this.k6O11ySources = new K6O11ySources(this); // K6-specific O11y sources manager
         this.logsManager = new LogsManager(this);
         this.logsManager.bindReloadButton(); // Bind the reload button after initialization
         this.metricsManager = new MetricsManager(this);
@@ -28,11 +29,13 @@ class VuDataSimManager {
             document.addEventListener('DOMContentLoaded', () => {
                 console.log('DOM loaded, about to load O11y sources...');
                 this.o11ySources.loadO11ySources(); // Load available o11y sources
+                this.k6O11ySources.loadK6O11ySources(); // Load K6 o11y sources
             });
         } else {
             console.log('DOM already loaded, loading O11y sources...');
             setTimeout(() => {
                 this.o11ySources.loadO11ySources(); // Load available o11y sources
+                this.k6O11ySources.loadK6O11ySources(); // Load K6 o11y sources
             }, 100);
         }
 
@@ -54,6 +57,17 @@ class VuDataSimManager {
 
         this.elements = {
             // K6 Load Testing elements
+            k6O11ySourcesContainer: document.getElementById('k6-o11y-sources-container'),
+            k6O11ySourcesDropdown: document.getElementById('k6-o11y-sources-dropdown'),
+            k6O11ySourcesOptions: document.getElementById('k6-o11y-sources-options'),
+            k6O11ySourcesList: document.getElementById('k6-o11y-sources-list'),
+            k6O11ySourcesSearch: document.getElementById('k6-o11y-sources-search'),
+            k6O11ySourcesPlaceholder: document.getElementById('k6-o11y-sources-placeholder'),
+            k6O11ySourcesSelected: document.getElementById('k6-o11y-sources-selected'),
+            k6O11ySourcesArrow: document.getElementById('k6-o11y-sources-arrow'),
+            k6O11ySourcesSelectAll: document.getElementById('k6-o11y-sources-select-all'),
+            k6O11ySourcesClearAll: document.getElementById('k6-o11y-sources-clear-all'),
+            k6O11ySourcesCount: document.getElementById('k6-o11y-sources-count'),
             k6TimeRanges: document.getElementById('k6-time-ranges'),
             k6Vus: document.getElementById('k6-vus'),
             k6Duration: document.getElementById('k6-duration'),
@@ -236,6 +250,12 @@ class VuDataSimManager {
         this.elements.o11ySourcesSelectAll?.addEventListener('click', () => this.o11ySources.selectAllO11ySources());
         this.elements.o11ySourcesClearAll?.addEventListener('click', () => this.o11ySources.clearAllO11ySources());
 
+        // K6 O11y sources event listeners
+        this.elements.k6O11ySourcesDropdown?.addEventListener('click', () => this.k6O11ySources.toggleK6O11ySourcesDropdown());
+        this.elements.k6O11ySourcesSearch?.addEventListener('input', (e) => this.k6O11ySources.filterK6O11ySources(e.target.value));
+        this.elements.k6O11ySourcesSelectAll?.addEventListener('click', () => this.k6O11ySources.selectAllK6O11ySources());
+        this.elements.k6O11ySourcesClearAll?.addEventListener('click', () => this.k6O11ySources.clearAllK6O11ySources());
+
         // EPS Mode switching
         this.elements.epsMode?.addEventListener('change', () => {
             if (this.elements.epsMode.value === 'custom') {
@@ -254,6 +274,9 @@ class VuDataSimManager {
         document.addEventListener('click', (e) => {
             if (!this.elements.o11ySourcesContainer?.contains(e.target)) {
                 this.o11ySources.closeO11ySourcesDropdown();
+            }
+            if (!this.elements.k6O11ySourcesContainer?.contains(e.target)) {
+                this.k6O11ySources.closeK6O11ySourcesDropdown();
             }
         });
 
@@ -618,6 +641,7 @@ class VuDataSimManager {
             const timeRangesCsv = this.elements.k6TimeRanges?.value?.trim() || '15m,30m,5m';
             const vus = parseInt(this.elements.k6Vus?.value) || 10;
             const duration = this.elements.k6Duration?.value?.trim() || '60m';
+            const o11ySources = [...this.k6O11ySources.selectedK6O11ySources];
 
             // Validate inputs
             if (!timeRangesCsv) {
@@ -632,6 +656,10 @@ class VuDataSimManager {
                 this.showNotification('Duration is required', 'error');
                 return;
             }
+            if (o11ySources.length === 0) {
+                this.showNotification('Please select at least one O11y source for K6 testing', 'error');
+                return;
+            }
 
             // Disable the button and show loading state
             const button = this.elements.startK6TestBtn;
@@ -639,13 +667,14 @@ class VuDataSimManager {
             button.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Running...</span>';
             button.disabled = true;
 
-            console.log('Starting K6 test with parameters:', { timeRangesCsv, vus, duration });
+            console.log('Starting K6 test with parameters:', { timeRangesCsv, vus, duration, o11ySources });
 
             // Call the API to start K6 test (no timeout)
             const response = await this.callAPI('/api/k6/run-combined', 'POST', {
                 timeRangesCsv,
                 vus,
-                duration
+                duration,
+                o11ySources
             }, 0);
 
             if (!response.success) {
@@ -1145,6 +1174,232 @@ class VuDataSimManager {
                 this.elements.k6TestIdDisplay.value = fallbackUUID;
             }
         }
+    }
+}
+
+// K6 O11y Sources Management Module (Simplified version for K6 testing)
+class K6O11ySources {
+    constructor(manager) {
+        this.manager = manager;
+        this.k6O11ySources = [];
+        this.selectedK6O11ySources = [];
+    }
+
+    loadK6O11ySources() {
+        console.log('Loading K6 o11y sources...');
+        // Use the same API as main o11y sources
+        this.manager.callAPI('/api/o11y/sources')
+            .then(response => {
+                console.log('K6 O11y sources API response:', response);
+                if (response.success && response.data) {
+                    console.log('K6 Sources data:', response.data);
+                    this.populateK6O11ySourcesSelect(response.data);
+                    console.log('Loaded K6 o11y sources:', response.data.length, 'sources');
+                } else {
+                    console.error('Failed to load K6 o11y sources:', response.message);
+                    this.manager.showNotification('Failed to load K6 O11y sources: ' + response.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading K6 o11y sources:', error);
+                this.manager.showNotification('Error loading K6 O11y sources: ' + error.message, 'error');
+            });
+    }
+
+    populateK6O11ySourcesSelect(sources) {
+        console.log('populateK6O11ySourcesSelect called with:', sources);
+        const list = this.manager.elements.k6O11ySourcesList;
+        if (!list) {
+            console.error('k6O11ySourcesList element not found!');
+            return;
+        }
+
+        console.log('k6O11ySourcesList element found:', list);
+
+        // Store sources for filtering
+        this.k6O11ySources = sources;
+
+        // Clear existing options
+        list.innerHTML = '';
+
+        if (!sources || sources.length === 0) {
+            console.error('No sources provided or sources array is empty');
+            list.innerHTML = '<div class="k6-o11y-sources-empty"><span class="material-symbols-outlined">error</span><p>No O11y sources available</p></div>';
+            return;
+        }
+
+        // Add sources as custom options with checkboxes
+        sources.forEach((source, index) => {
+            console.log(`Adding K6 source ${index + 1}: ${source}`);
+            const option = document.createElement('div');
+            option.className = 'k6-o11y-source-option';
+            option.innerHTML = `
+                <div class="k6-o11y-source-checkbox" data-source="${source}"></div>
+                <span class="k6-o11y-source-label">${source}</span>
+            `;
+
+            option.addEventListener('click', () => {
+                console.log('K6 Source clicked:', source);
+                this.toggleK6O11ySource(source);
+            });
+            list.appendChild(option);
+        });
+
+        // Initialize selected sources array
+        this.selectedK6O11ySources = [];
+
+        console.log(`Successfully populated ${sources.length} K6 o11y sources`);
+    }
+
+    toggleK6O11ySourcesDropdown() {
+        const isOpen = !this.manager.elements.k6O11ySourcesOptions.classList.contains('hidden');
+
+        if (isOpen) {
+            this.closeK6O11ySourcesDropdown();
+        } else {
+            this.openK6O11ySourcesDropdown();
+        }
+    }
+
+    openK6O11ySourcesDropdown() {
+        this.manager.elements.k6O11ySourcesOptions.classList.remove('hidden');
+        this.manager.elements.k6O11ySourcesContainer.classList.add('open');
+        this.manager.elements.k6O11ySourcesSearch.focus();
+
+        // Update checkboxes to reflect current selection
+        this.updateK6O11ySourceCheckboxes();
+    }
+
+    closeK6O11ySourcesDropdown() {
+        this.manager.elements.k6O11ySourcesOptions.classList.add('hidden');
+        this.manager.elements.k6O11ySourcesContainer.classList.remove('open');
+        this.manager.elements.k6O11ySourcesSearch.value = '';
+        this.filterK6O11ySources(''); // Show all sources
+    }
+
+    toggleK6O11ySource(source) {
+        const index = this.selectedK6O11ySources.indexOf(source);
+
+        if (index > -1) {
+            this.selectedK6O11ySources.splice(index, 1);
+        } else {
+            this.selectedK6O11ySources.push(source);
+        }
+
+        this.updateK6O11ySourceDisplay();
+        this.updateK6O11ySourceCheckboxes();
+        this.updateK6O11ySourceCount();
+    }
+
+    updateK6O11ySourceDisplay() {
+        const selectedContainer = this.manager.elements.k6O11ySourcesSelected;
+        const placeholder = this.manager.elements.k6O11ySourcesPlaceholder;
+
+        // Clear current selection display
+        selectedContainer.innerHTML = '';
+
+        if (this.selectedK6O11ySources.length === 0) {
+            placeholder.textContent = 'Select O11y sources...';
+            selectedContainer.classList.add('hidden');
+        } else {
+            placeholder.textContent = `${this.selectedK6O11ySources.length} source${this.selectedK6O11ySources.length > 1 ? 's' : ''} selected`;
+            selectedContainer.classList.remove('hidden');
+
+            // Add selected items as removable tags
+            this.selectedK6O11ySources.forEach(source => {
+                const tag = document.createElement('div');
+                tag.className = 'k6-o11y-selected-item';
+                tag.innerHTML = `
+                    <span>${source}</span>
+                    <span class="k6-o11y-selected-item-remove material-symbols-outlined" data-source="${source}">close</span>
+                `;
+
+                tag.querySelector('.k6-o11y-selected-item-remove').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleK6O11ySource(source);
+                });
+
+                selectedContainer.appendChild(tag);
+            });
+        }
+    }
+
+    updateK6O11ySourceCheckboxes() {
+        // Update all checkboxes to reflect current selection
+        const checkboxes = this.manager.elements.k6O11ySourcesList.querySelectorAll('.k6-o11y-source-checkbox');
+        checkboxes.forEach(checkbox => {
+            const source = checkbox.dataset.source;
+            const isSelected = this.selectedK6O11ySources.includes(source);
+
+            if (isSelected) {
+                checkbox.classList.add('checked');
+            } else {
+                checkbox.classList.remove('checked');
+            }
+        });
+    }
+
+    updateK6O11ySourceCount() {
+        const countElement = this.manager.elements.k6O11ySourcesCount;
+        const totalSources = this.k6O11ySources.length;
+        const selectedCount = this.selectedK6O11ySources.length;
+
+        countElement.textContent = `${selectedCount}/${totalSources} selected`;
+    }
+
+    filterK6O11ySources(searchTerm) {
+        const options = this.manager.elements.k6O11ySourcesList.querySelectorAll('.k6-o11y-source-option');
+        const term = searchTerm.toLowerCase();
+
+        options.forEach(option => {
+            const label = option.querySelector('.k6-o11y-source-label');
+            const source = label.textContent.toLowerCase();
+
+            if (source.includes(term)) {
+                option.style.display = 'flex';
+                // Highlight search term
+                if (term && source.includes(term)) {
+                    const regex = new RegExp(`(${term})`, 'gi');
+                    label.innerHTML = label.textContent.replace(regex, '<span class="search-highlight">$1</span>');
+                } else {
+                    label.innerHTML = label.textContent;
+                }
+            } else {
+                option.style.display = 'none';
+            }
+        });
+
+        // Show empty state if no results
+        const visibleOptions = Array.from(options).filter(opt => opt.style.display !== 'none');
+        const emptyState = this.manager.elements.k6O11ySourcesList.querySelector('.k6-o11y-sources-empty');
+
+        if (visibleOptions.length === 0) {
+            if (!emptyState) {
+                const empty = document.createElement('div');
+                empty.className = 'k6-o11y-sources-empty';
+                empty.innerHTML = `
+                    <span class="material-symbols-outlined">search_off</span>
+                    <p>No sources found matching "${searchTerm}"</p>
+                `;
+                this.manager.elements.k6O11ySourcesList.appendChild(empty);
+            }
+        } else if (emptyState) {
+            emptyState.remove();
+        }
+    }
+
+    selectAllK6O11ySources() {
+        this.selectedK6O11ySources = [...this.k6O11ySources];
+        this.updateK6O11ySourceDisplay();
+        this.updateK6O11ySourceCheckboxes();
+        this.updateK6O11ySourceCount();
+    }
+
+    clearAllK6O11ySources() {
+        this.selectedK6O11ySources = [];
+        this.updateK6O11ySourceDisplay();
+        this.updateK6O11ySourceCheckboxes();
+        this.updateK6O11ySourceCount();
     }
 }
 

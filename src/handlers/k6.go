@@ -66,9 +66,10 @@ type K6DashboardConfig struct {
 
 // K6ScriptParams represents parameters for K6 script execution
 type K6ScriptParams struct {
-	TimeRangesCsv string `json:"timeRangesCsv"`
-	VUs           int    `json:"vus"`
-	Duration      string `json:"duration"`
+	TimeRangesCsv string   `json:"timeRangesCsv"`
+	VUs           int      `json:"vus"`
+	Duration      string   `json:"duration"`
+	O11ySources   []string `json:"o11ySources"`
 }
 
 // K6Handler manages K6 load testing operations
@@ -539,11 +540,15 @@ func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
     h.status.LastUpdated = time.Now()
     h.mutex.Unlock()
 
-    // Read enabled modules for K6 run tracking
-    enabledModules, err := h.readModuleConfig()
-    if err != nil {
-        logger.LogError("System", "k6", fmt.Sprintf("Failed to read module config: %v", err))
-        // Continue execution even if module config fails
+    // Use provided O11y sources for K6 run tracking
+    enabledModules := params.O11ySources
+    if len(enabledModules) == 0 {
+        logger.LogError("System", "k6", "No O11y sources selected for K6 testing")
+        SendJSONResponse(w, http.StatusBadRequest, APIResponse{
+            Success: false,
+            Message: "At least one O11y source must be selected for K6 testing",
+        })
+        return
     }
 
     // Create K6 run record - using 0 for iterations and interval since they're not used in phase11.sh
@@ -555,13 +560,15 @@ func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
         logger.LogWithNode("System", "k6", fmt.Sprintf("Created K6 run record with ID: %s", k6Run.TestID), "info")
     }
 
-    // Add config sync before execution
-    if enabledModules != nil {
-        err = h.updateDashboardConfig(enabledModules)
-        if err != nil {
-            logger.LogError("System", "k6", fmt.Sprintf("Failed to update dashboard config: %v", err))
-            // Handle error appropriately
-        }
+    // Update K6 config with selected sources
+    err = h.updateDashboardConfig(enabledModules)
+    if err != nil {
+        logger.LogError("System", "k6", fmt.Sprintf("Failed to update dashboard config: %v", err))
+        SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+            Success: false,
+            Message: fmt.Sprintf("Failed to update K6 dashboard configuration: %v", err),
+        })
+        return
     }
 
     logger.LogWithNode("System", "k6", fmt.Sprintf("Starting phase11 script with VUs=%d, Duration=%s, TimeRangesCsv=%s", params.VUs, params.Duration, params.TimeRangesCsv), "info")
@@ -853,7 +860,7 @@ func (h *K6Handler) readModuleConfig() ([]string, error) {
 	return enabledModules, nil
 }
 
-// updateDashboardConfig updates k6_config.yaml based on enabled modules
+// updateDashboardConfig updates k6_config.yaml based on provided modules
 func (h *K6Handler) updateDashboardConfig(enabledModules []string) error {
 	logger.LogWithNode("System", "k6", fmt.Sprintf("Updating dashboard config for %d enabled modules", len(enabledModules)), "info")
 

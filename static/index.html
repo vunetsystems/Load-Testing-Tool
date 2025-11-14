@@ -243,6 +243,50 @@
                                     <p class="text-xs text-slate-500 mt-1">Current K6 test run identifier (auto-generated)</p>
                                 </div>
                                 <div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="material-symbols-outlined text-indigo-600">source</span>
+                                        <span class="font-medium text-slate-700">O11y Sources</span>
+                                    </div>
+                                    <div class="relative">
+                                        <div id="k6-o11y-sources-container" class="w-full min-h-[120px] rounded-lg border border-slate-300 bg-white focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-all duration-200">
+                                            <button id="k6-o11y-sources-dropdown" type="button" class="w-full p-3 text-left flex items-center justify-between hover:bg-slate-50 transition-colors duration-200">
+                                                <div class="flex-1">
+                                                    <div id="k6-o11y-sources-placeholder" class="text-slate-500">Select O11y sources...</div>
+                                                    <div id="k6-o11y-sources-selected" class="hidden flex flex-wrap gap-1 mt-1">
+                                                        </div>
+                                                </div>
+                                                <span id="k6-o11y-sources-arrow" class="material-symbols-outlined text-slate-500 transition-transform duration-200">expand_more</span>
+                                            </button>
+
+                                            <div id="k6-o11y-sources-options" class="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto hidden">
+                                                <div class="p-3 border-b border-slate-200">
+                                                    <div class="relative">
+                                                        <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">search</span>
+                                                        <input id="k6-o11y-sources-search" type="text" placeholder="Search sources..." class="w-full pl-10 pr-4 py-2 rounded-md bg-slate-50 border-slate-300 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                                    </div>
+                                                </div>
+
+                                                <div id="k6-o11y-sources-list" class="max-h-40 overflow-y-auto">
+                                                    </div>
+
+                                                <div class="p-3 border-t border-slate-200 bg-slate-50/50">
+                                                    <div class="flex items-center justify-between text-xs">
+                                                        <button id="k6-o11y-sources-select-all" type="button" class="text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+                                                            Select All
+                                                        </button>
+                                                        <button id="k6-o11y-sources-clear-all" type="button" class="text-slate-600 hover:text-red-600 font-medium transition-colors">
+                                                            Clear All
+                                                        </button>
+                                                        <div id="k6-o11y-sources-count" class="text-slate-500">
+                                                            0 selected
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
                                     <label class="block text-xs font-medium text-slate-600 mb-1">Time Ranges (CSV)</label>
                                     <input id="k6-time-ranges" type="text" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2" placeholder="15m,30m,5m" value="15m,30m,5m">
                                 </div>
