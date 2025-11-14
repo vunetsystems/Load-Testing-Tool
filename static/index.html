@@ -243,20 +243,16 @@
                                     <p class="text-xs text-slate-500 mt-1">Current K6 test run identifier (auto-generated)</p>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium text-slate-600 mb-1">Time Range</label>
-                                    <input id="k6-time-range" type="text" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2" placeholder="15m" value="15m">
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Time Ranges (CSV)</label>
+                                    <input id="k6-time-ranges" type="text" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2" placeholder="15m,30m,5m" value="15m,30m,5m">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-slate-600 mb-1">Virtual Users</label>
                                     <input id="k6-vus" type="number" min="1" max="1000" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2" placeholder="10" value="10">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium text-slate-600 mb-1">Iterations</label>
-                                    <input id="k6-iterations" type="number" min="1" max="1000" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2" placeholder="5" value="5">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-slate-600 mb-1">Interval (seconds)</label>
-                                    <input id="k6-interval" type="number" min="1" max="300" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2" placeholder="5" value="5">
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Duration</label>
+                                    <input id="k6-duration" type="text" class="w-full rounded-lg border-slate-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2" placeholder="60m" value="60m">
                                 </div>
                                 <button id="start-k6-test-btn" class="group flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-white font-semibold transition-transform hover:scale-105 active:scale-100 hover:bg-green-600">
                                     <span class="material-symbols-outlined">play_arrow</span>
