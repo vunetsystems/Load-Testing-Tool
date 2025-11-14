@@ -14,6 +14,20 @@ const panelResponseTime = new Trend('panel_response_time');
 const panelSuccessCount = new Counter('panel_success_count');
 const panelFailureCount = new Counter('panel_failure_count');
 
+// ------------------ New metrics ------------------
+
+// Throughput per dashboard/panel (requests per second)
+const dashboardThroughput = new Trend('dashboard_throughput');
+const panelThroughput = new Trend('panel_throughput');
+
+// Error breakdown
+const dashboardError4xx = new Counter('dashboard_error_4xx');
+const dashboardError5xx = new Counter('dashboard_error_5xx');
+const panelError4xx = new Counter('panel_error_4xx');
+const panelError5xx = new Counter('panel_error_5xx');
+const dashboardConnectionError = new Counter('dashboard_connection_error');
+const panelConnectionError = new Counter('panel_connection_error');
+
 // ================================
 // Config Paths
 // ================================
@@ -167,43 +181,97 @@ export default function () {
 
     group(`Dashboard: ${d.name}`, function () {
       const startTime = Date.now();
-      const { res, json } = fetchJSON(dashboardUrl, {}, headers);
+      let res;
+      try {
+        const fetch = fetchJSON(dashboardUrl, {}, headers);
+        res = fetch.res;
+      } catch (err) {
+        dashboardConnectionError.add(1, { dashboard: d.name });
+        console.error(`Connection error loading dashboard ${d.name}: ${err}`);
+        return;
+      }
       const endTime = Date.now();
 
-      const responseTime = res.timings?.duration || (endTime - startTime);
+      const responseTime = res.status === 200 ? (res.timings?.duration || (endTime - startTime)) : 0;
       dashboardResponseTime.add(responseTime, { dashboard: d.name });
+
+      // Throughput (req/sec) = 1 request per duration in seconds (only for successful requests)
+      let throughput = 0;
+      if (responseTime > 0) {
+        throughput = 1000 / responseTime;
+        dashboardThroughput.add(throughput, { dashboard: d.name });
+      }
+
+      // Error breakdown
+      if (res.status >= 400 && res.status < 500) dashboardError4xx.add(1, { dashboard: d.name });
+      else if (res.status >= 500) dashboardError5xx.add(1, { dashboard: d.name });
 
       const ok = check(res, { 'Dashboard loaded successfully': (r) => r.status === 200 });
       if (ok) dashboardSuccessCount.add(1);
       else dashboardFailureCount.add(1);
 
-      console.log(`[DASHBOARD_DATA] name=${d.name} | status=${res.status} | response_time=${responseTime.toFixed(2)}ms`);
+      console.log(`[DASHBOARD_DATA] name=${d.name} | status=${res.status} | response_time=${responseTime.toFixed(2)}ms | throughput=${throughput.toFixed(2)}req/sec | error_4xx=${res.status >= 400 && res.status < 500 ? 1 : 0} | error_5xx=${res.status >= 500 ? 1 : 0}`);
 
-      if (!json?.dashboard?.panels) {
+      if (!res.json?.dashboard?.panels) {
         console.log(`⚠️ No panels found for ${d.name}`);
         return;
       }
 
-      const panels = extractPanels(json.dashboard.panels);
+      const panels = extractPanels(res.json.dashboard.panels);
+      let panelData = [];
 
       for (const p of panels) {
         const panelUrl = `${basePanelURL}${d.id}/${d.slug}?orgId=1&from=${TIME_FROM}&to=${TIME_TO}&panelId=${p.id}`;
         const panelStart = Date.now();
-        const res = http.get(panelUrl, { headers });
+        let panelRes;
+        try {
+          panelRes = http.get(panelUrl, { headers });
+        } catch (err) {
+          panelConnectionError.add(1, { dashboard: d.name, panel: p.title });
+          console.error(`Connection error loading panel ${p.title}: ${err}`);
+          continue;
+        }
         const panelEnd = Date.now();
 
-        const responseTime = res.timings?.duration || (panelEnd - panelStart);
-        panelResponseTime.add(responseTime, { dashboard: d.name, panel: p.title });
+        const panelResponseTimeValue = panelRes.status === 200 ? (panelRes.timings?.duration || (panelEnd - panelStart)) : 0;
+        panelResponseTime.add(panelResponseTimeValue, { dashboard: d.name, panel: p.title });
 
-        const success = res.status === 200;
+        // Throughput (only for successful requests)
+        let panelThroughputValue = 0;
+        if (panelResponseTimeValue > 0) {
+          panelThroughputValue = 1000 / panelResponseTimeValue;
+          panelThroughput.add(panelThroughputValue, { dashboard: d.name, panel: p.title });
+        }
+
+        // Error breakdown
+        if (panelRes.status >= 400 && panelRes.status < 500) panelError4xx.add(1, { dashboard: d.name, panel: p.title });
+        else if (panelRes.status >= 500) panelError5xx.add(1, { dashboard: d.name, panel: p.title });
+
+        const success = panelRes.status === 200;
         if (success) panelSuccessCount.add(1);
         else panelFailureCount.add(1);
 
-        const safeTitle = (p.title || 'Untitled').replace(/\|/g, '-');
+        panelData.push({
+          id: p.id,
+          title: p.title,
+          status: panelRes.status,
+          responseTime: panelResponseTimeValue,
+          throughput: panelThroughputValue,
+          error4xx: panelRes.status >= 400 && panelRes.status < 500 ? 1 : 0,
+          error5xx: panelRes.status >= 500 ? 1 : 0
+        });
+      }
 
-        console.log(
-          `[PANEL_DATA] dashboard=${d.name} | panel_id=${p.id} | panel_name=${safeTitle} | status=${res.status} | response_time=${responseTime.toFixed(2)}ms`
-        );
+      // Dashboard Panel Impact
+      const totalPanelTime = panelData.reduce((sum, pd) => sum + pd.responseTime, 0);
+      if (totalPanelTime > 0) {
+        panelData.forEach(pd => {
+          const contribution = (pd.responseTime / totalPanelTime) * 100;
+          const safeTitle = (pd.title || 'Untitled').replace(/\|/g, '-');
+          console.log(
+            `[PANEL_DATA] dashboard=${d.name} | panel_id=${pd.id} | panel_name=${safeTitle} | status=${pd.status} | response_time=${pd.responseTime.toFixed(2)}ms | throughput=${pd.throughput.toFixed(2)}req/sec | error_4xx=${pd.error4xx} | error_5xx=${pd.error5xx} | contribution=${contribution.toFixed(2)}%`
+          );
+        });
       }
     });
 
