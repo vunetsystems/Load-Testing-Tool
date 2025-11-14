@@ -9,7 +9,7 @@ import math
 # ===============================
 DB_PATH = "vudatasim.db"
 TABLE_NAME = "test_runs"
-OUTPUT_DIR = "html_reports"
+OUTPUT_DIR = "css_reports"
 
 # ===============================
 # FIELD GROUP DEFINITIONS
@@ -303,62 +303,214 @@ def wrap_html_template(content):
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Test Report</title>
 <style>
+* {{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}}
+
 body {{
-  font-family: 'Segoe UI', Arial, sans-serif;
-  margin: 2rem auto;
-  max-width: 1100px;
-  background: #f8fafc;
-  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  color: #1e293b;
   line-height: 1.6;
 }}
-h1, h2, h3, h4 {{
-  color: #1a365d;
+
+.container {{
+  max-width: 1200px;
+  margin: 0 auto;
 }}
+
+h1 {{
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  letter-spacing: -0.02em;
+}}
+
+h2 {{
+  color: #0f172a;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: -0.01em;
+}}
+
+h3 {{
+  color: #334155;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 1.5rem 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}}
+
 section {{
-  background: #fff;
-  padding: 1rem 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
   margin-bottom: 1.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }}
+
+section:hover {{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+}}
+
 table {{
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin-top: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
 }}
-th, td {{
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
+
+thead {{
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }}
+
 th {{
-  background: #1a365d;
-  color: white;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  border: none;
 }}
-tr:nth-child(even) {{
-  background-color: #f2f2f2;
+
+td {{
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.9375rem;
+  color: #475569;
 }}
-tr:hover {{
-  background-color: #e6f0ff;
+
+tbody tr {{
+  background: #ffffff;
+  transition: background-color 0.15s ease;
 }}
+
+tbody tr:nth-child(even) {{
+  background-color: #f8fafc;
+}}
+
+tbody tr:hover {{
+  background-color: #f1f5f9;
+  transform: scale(1.001);
+}}
+
+tbody tr:last-child td {{
+  border-bottom: none;
+}}
+
 ul {{
   list-style-type: none;
   padding-left: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
 }}
+
 li {{
-  margin-bottom: 5px;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 3px solid #667eea;
+  transition: all 0.2s ease;
 }}
+
+li:hover {{
+  background: #f1f5f9;
+  border-left-color: #764ba2;
+  transform: translateX(4px);
+}}
+
+strong {{
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}}
+
 code {{
-  background-color: #edf2f7;
-  padding: 2px 6px;
-  border-radius: 4px;
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.9em;
+  color: #5b21b6;
+  border: 1px solid #ddd6fe;
+  font-weight: 500;
+}}
+
+@media (max-width: 768px) {{
+  body {{
+    padding: 1rem 0.5rem;
+  }}
+  
+  h1 {{
+    font-size: 1.75rem;
+  }}
+  
+  section {{
+    padding: 1.25rem;
+    border-radius: 12px;
+  }}
+  
+  ul {{
+    grid-template-columns: 1fr;
+  }}
+  
+  table {{
+    font-size: 0.875rem;
+  }}
+  
+  th, td {{
+    padding: 0.75rem 0.5rem;
+  }}
+}}
+
+@media print {{
+  body {{
+    background: white;
+    padding: 0;
+  }}
+  
+  section {{
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+    page-break-inside: avoid;
+  }}
+  
+  section:hover {{
+    transform: none;
+  }}
 }}
 </style>
 </head>
 <body>
+<div class="container">
 {content}
+</div>
 </body>
 </html>
 """

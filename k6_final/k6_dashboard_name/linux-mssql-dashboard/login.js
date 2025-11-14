@@ -2,75 +2,124 @@ import http from "k6/http";
 import { check } from "k6";
 import { Trend, Rate } from "k6/metrics";
 
-// Load all users from a file
-const usersRaw = open("/home/vunet/Load-Testing-Tool/k6_final/user_creation_k6/user_cookies.txt").split("\n");
+// ------------------------------
+// Load users file
+// ------------------------------
+const RAW = open("/home/vunet/Load-Testing-Tool/k6_final/user_creation_k6/user_cookies.txt", "utf-8");
+const usersRaw = RAW
+  .split("\n")
+  .map((l) => l.trim())
+  .filter((l) => l && !l.startsWith("#"));
+
 const users = usersRaw.map((line) => {
-  const [username, password] = line.split(",");
-  return { username, password };
+  // support both "username,password" and "username,password,..." lines
+  const parts = line.split(",");
+  return { username: parts[0] ? parts[0].trim() : "", password: parts[1] ? parts[1].trim() : "" };
 });
 
+// simple guard
 if (users.length === 0) {
-  console.error("🚨 No valid users found in user_passwords_fixed.txt!");
-  __ENV.K6_ABORT_ON_FAIL = "true";
+  console.error("🚨 No valid users found in user_cookies.txt — aborting test.");
+  // k6 won't gracefully stop here, but this prevents later null access
 }
 
-console.log(users);
-
-// Test Configuration: each VU runs one iteration
+// ------------------------------
+// Options: duration-based login
+// ------------------------------
 export let options = {
   scenarios: {
     default: {
-      executor: "per-vu-iterations",
-      vus: users.length,  // Use one VU per user
-      iterations: 1,      // Run one iteration per VU
+      executor: 'constant-vus',
+      vus: __ENV.VUS ? parseInt(__ENV.VUS) : 1,       // Controlled by shell
+      duration: __ENV.DURATION || '1m',           // Controlled by shell
+      gracefulStop: '30s',
     },
   },
   insecureSkipTLSVerify: true,
 };
 
-// Base URL and login endpoint
+// ------------------------------
+// Endpoints & metrics
+// ------------------------------
 const BASE_URL = "https://qa.vunetsystems.com";
 const LOGIN_ENDPOINT = `${BASE_URL}/vui/a/vusmartmaps-app?redirect=dashboard&lte=now&gte=now-15m`;
 
-// Metrics
 const loginSuccessRate = new Rate("login_success_rate");
 const loginResponseTime = new Trend("login_response_time");
 
-export default function () {
-  let user = users[__VU - 1];
-  let timestamp = new Date().toISOString();
-
-  console.log(`[${timestamp}] 🔹 VU ${__VU} Logging in as: ${user.username}`);
-
-  // Login Request
-  let loginRes = http.post(
-    LOGIN_ENDPOINT,
-    JSON.stringify({ username: user.username, password: user.password }),
-    { headers: { "Content-Type": "application/json" }, tags: { name: "LoginRequest" } }
-  );
-
-  console.log(loginRes.headers)
-
-  let responseTime = loginRes.timings.duration;
-  let loginSuccess = check(loginRes, {
-    [`Login Success (${user.username})`]: (r) => r.status === 200,
-  });
-
-  loginSuccessRate.add(loginSuccess, { username: user.username });
-  loginResponseTime.add(responseTime, { username: user.username });
-
-  let result;
-  // Log the status code in a consistent way for shell parsing
-  // Unique tag for shell grep
-  console.log(`[K6-METRIC] status_code=${loginRes.status}`);
-
-
-  if (!loginSuccess) {
-  const failMsg = `[${timestamp}] ❌ Login failed | User: ${user.username} | Status: ${loginRes.status} | Response Time: ${responseTime} ms | Response: ${loginRes.body}`;
-  console.error(failMsg);
-} else {
-  const successMsg = `[${timestamp}] ✅ Login successful | User: ${user.username} | Response Time: ${responseTime} ms`;
-  console.log(successMsg);
+// ------------------------------
+// Helper to safely get user for this VU
+// ------------------------------
+function getUserForVU(vuIndex) {
+  if (!users || users.length === 0) return null;
+  const idx = Math.max(0, Math.min(vuIndex - 1, users.length - 1));
+  return users[idx];
 }
 
+// ------------------------------
+// Default: attempt login once per VU
+// ------------------------------
+export default function () {
+  const user = getUserForVU(__VU);
+  const timestamp = new Date().toISOString();
+
+  if (!user) {
+    console.error(`[${timestamp}] ❌ No user mapped to VU ${__VU}. Skipping login.`);
+    return;
+  }
+
+  console.log(`[${timestamp}] 🔹 VU ${__VU} attempting login for: ${user.username}`);
+
+  const payload = JSON.stringify({ username: user.username, password: user.password });
+  const params = {
+    headers: { "Content-Type": "application/json" },
+    tags: { name: "LoginRequest", username: user.username },
+    timeout: "60s",
+  };
+
+  let loginRes;
+  try {
+    loginRes = http.post(LOGIN_ENDPOINT, payload, params);
+  } catch (err) {
+    console.error(`[${timestamp}] ❌ VU ${__VU} network/error: ${err}`);
+    loginSuccessRate.add(false, { username: user.username });
+    return;
+  }
+
+  const responseTime = loginRes.timings ? loginRes.timings.duration : -1;
+  const ok = check(loginRes, {
+    "status is 200": (r) => r.status === 200,
+  });
+
+  // metrics
+  loginSuccessRate.add(ok ? 1 : 0, { username: user.username });
+  loginResponseTime.add(responseTime, { username: user.username });
+
+  // Structured log lines for downstream parsing
+  console.log(`[K6-METRIC] status_code=${loginRes.status}`);
+  console.log(`[K6-METRIC] response_time=${responseTime}`);
+
+  // Print cookies returned by server (if any) so you can capture them in pipeline
+  try {
+    const cookieNames = Object.keys(loginRes.cookies || {});
+    if (cookieNames.length > 0) {
+      cookieNames.forEach((name) => {
+        // log cookie name and first value; do not leak secrets if you don't want to
+        const cookieVal = (loginRes.cookies[name] && loginRes.cookies[name][0] && loginRes.cookies[name][0].value) || "";
+        // OPTIONAL: If you want to export cookies to external store, avoid printing raw cookie values in logs in prod.
+        console.log(`[K6-COOKIE] user=${user.username} | cookie=${name} | value_snippet=${cookieVal.substring(0, 32)}`);
+      });
+    } else {
+      console.log(`[K6-COOKIE] user=${user.username} | no-cookies-returned`);
+    }
+  } catch (e) {
+    // non-fatal
+  }
+
+  // Human-friendly success / failure messages (kept for existing parser)
+  if (!ok) {
+    console.error(`[${timestamp}] ❌ Login failed | User: ${user.username} | Status: ${loginRes.status} | Response Time: ${responseTime} ms | Body: ${loginRes.body ? loginRes.body.substring(0, 300) : "<empty>"}`);
+  } else {
+    console.log(`[${timestamp}] ✅ Login successful | User: ${user.username} | Response Time: ${responseTime} ms`);
+  }
 }

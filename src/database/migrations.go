@@ -194,6 +194,16 @@ func runSchemaUpdates() error {
 		"avg_lag":              "REAL DEFAULT 0.0",
 		"max_lag":              "REAL DEFAULT 0.0",
 		"kafka_specs":          "TEXT", // JSON specs of input/output topic partitions and replication factors
+		"kafka_1_node_cpu_total": "REAL DEFAULT 0.0",
+		"kafka_1_node_mem_total": "REAL DEFAULT 0.0",
+		"kafka_2_node_cpu_total": "REAL DEFAULT 0.0",
+		"kafka_2_node_mem_total": "REAL DEFAULT 0.0",
+		"kafka_3_node_cpu_total": "REAL DEFAULT 0.0",
+		"kafka_3_node_mem_total": "REAL DEFAULT 0.0",
+		"ch1_node_cpu_total":   "REAL DEFAULT 0.0",
+		"ch1_node_mem_total":   "REAL DEFAULT 0.0",
+		"ch2_node_cpu_total":   "REAL DEFAULT 0.0",
+		"ch2_node_mem_total":   "REAL DEFAULT 0.0",
 	}
 
 	for name, def := range columnsToAdd {

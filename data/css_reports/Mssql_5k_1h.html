@@ -1,0 +1,215 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Report</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  color: #1e293b;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1 {
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  color: #0f172a;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  color: #334155;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 1.5rem 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+section {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+}
+
+thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  border: none;
+}
+
+td {
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.9375rem;
+  color: #475569;
+}
+
+tbody tr {
+  background: #ffffff;
+  transition: background-color 0.15s ease;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+tbody tr:hover {
+  background-color: #f1f5f9;
+  transform: scale(1.001);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+ul {
+  list-style-type: none;
+  padding-left: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+li {
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 3px solid #667eea;
+  transition: all 0.2s ease;
+}
+
+li:hover {
+  background: #f1f5f9;
+  border-left-color: #764ba2;
+  transform: translateX(4px);
+}
+
+strong {
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+code {
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.9em;
+  color: #5b21b6;
+  border: 1px solid #ddd6fe;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 1rem 0.5rem;
+  }
+  
+  h1 {
+    font-size: 1.75rem;
+  }
+  
+  section {
+    padding: 1.25rem;
+    border-radius: 12px;
+  }
+  
+  ul {
+    grid-template-columns: 1fr;
+  }
+  
+  table {
+    font-size: 0.875rem;
+  }
+  
+  th, td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+@media print {
+  body {
+    background: white;
+    padding: 0;
+  }
+  
+  section {
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+    page-break-inside: avoid;
+  }
+  
+  section:hover {
+    transform: none;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>📊 Test Report - fde8e630-d30b-4010-853f-e0f497478507</h1><section><h2>🧾 Test Summary</h2><ul><li><strong>Test Id</strong>: <code>fde8e630-d30b-4010-853f-e0f497478507</code></li><li><strong>Target Eps</strong>: <code>5000</code></li><li><strong>Start Time</strong>: <code>2025-11-11 15:29:07.967017281+00:00</code></li><li><strong>End Time</strong>: <code>2025-11-11 16:29:16.910432546+00:00</code></li><li><strong>O11Y Sources</strong>: <code>["Mssql"]</code></li><li><strong>Duration</strong>: <code>1.00 hours</code></li><li><strong>Status</strong>: <code>completed</code></li></ul></section><section><h2>🪣 Kafka Specs</h2><h3>📥 Input Topics</h3><table><thead><tr><th>Topic Name</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody><tr><td>mssql-telegraf</td><td>1</td><td>2</td></tr></tbody></table><h3>📤 Output Topics</h3><table><thead><tr><th>Topic Name</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody><tr><td>mssql-memory-clerks</td><td>1</td><td>2</td></tr><tr><td>mssql-database-io</td><td>1</td><td>2</td></tr><tr><td>mssql-net-response</td><td>1</td><td>2</td></tr><tr><td>mssql-hadr-replica</td><td>1</td><td>2</td></tr><tr><td>mssql-schedulers</td><td>1</td><td>2</td></tr><tr><td>mssql-requests</td><td>1</td><td>2</td></tr><tr><td>mssql-server-properties</td><td>1</td><td>2</td></tr><tr><td>mssql-performance</td><td>1</td><td>2</td></tr><tr><td>mssql-hadr-dbreplica</td><td>1</td><td>2</td></tr><tr><td>mssql-session</td><td>1</td><td>2</td></tr><tr><td>mssql-telegraf-health</td><td>1</td><td>2</td></tr><tr><td>mssql-volume-space</td><td>1</td><td>2</td></tr><tr><td>mssql-cpu</td><td>1</td><td>2</td></tr><tr><td>mssql-waitstats</td><td>1</td><td>2</td></tr><tr><td>mssql-cluster</td><td>1</td><td>2</td></tr><tr><td>mssql-recentbackup</td><td>1</td><td>2</td></tr></tbody></table></section><section><h2>📈 Input/Output Topic Metrics</h2><table><thead><tr><th>Type</th><th>Min (msg/s)</th><th>Avg (msg/s)</th><th>Max (msg/s)</th></tr></thead><tbody><tr><td>Input</td><td>4819.65</td><td>4884.73</td><td>5572.80</td></tr><tr><td>Output</td><td>0</td><td>4835.11</td><td>4883.37</td></tr></tbody></table></section><section><h2>⏱️ Lag Metrics</h2><table><thead><tr><th>Min Lag</th><th>Avg Lag</th><th>Max Lag</th></tr></thead><tbody><tr><td>8</td><td>1590.03</td><td>3396</td></tr></tbody></table></section><h2>🖥️ Pod Metrics</h2><section><h2>Kafka Cluster Pods CPU</h2><table><thead><tr><th>Component</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>kafka_cluster_cp_kafka_0</td><td>6</td><td>0.95</td><td>1.08</td><td>1.27</td></tr><tr><td>kafka_cluster_cp_kafka_1</td><td>6</td><td>1.07</td><td>1.22</td><td>1.38</td></tr><tr><td>kafka_cluster_cp_kafka_2</td><td>6</td><td>1.16</td><td>1.40</td><td>1.55</td></tr></tbody></table></section><section><h2>Kafka Cluster Pods Memory</h2><table><thead><tr><th>Component</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>kafka_cluster_cp_kafka_0</td><td>16</td><td>71.56</td><td>86.95</td><td>98.66</td></tr><tr><td>kafka_cluster_cp_kafka_1</td><td>16</td><td>65.81</td><td>85.32</td><td>100.00</td></tr><tr><td>kafka_cluster_cp_kafka_2</td><td>16</td><td>89.47</td><td>96.71</td><td>100.00</td></tr></tbody></table></section><section><h2>ClickHouse Pods CPU</h2><table><thead><tr><th>Component</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>chi_clickhouse_vusmart_0_0_0</td><td>9</td><td>4.04</td><td>5.88</td><td>11.29</td></tr><tr><td>chi_clickhouse_vusmart_0_1_0</td><td>9</td><td>1.36</td><td>2.71</td><td>5.81</td></tr></tbody></table></section><section><h2>ClickHouse Pods Memory</h2><table><thead><tr><th>Component</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>chi_clickhouse_vusmart_0_0_0</td><td>34</td><td>46.16</td><td>47.71</td><td>49.40</td></tr><tr><td>chi_clickhouse_vusmart_0_1_0</td><td>34</td><td>3.36</td><td>11.85</td><td>13.96</td></tr></tbody></table></section><h2>🔧 Pipeline Pod Metrics</h2><section><h2>🔧 Pipeline Info</h2><table><thead><tr><th>Source</th><th>Pipeline Name</th><th>Threads</th><th>Instances</th></tr></thead><tbody><tr><td>Mssql</td><td>mssql-telegraf-pipeline</td><td>1</td><td>1</td></tr></tbody></table></section><section><h2>Pipeline Pod CPU</h2><table><thead><tr><th>Pipeline Name</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>mssql-telegraf-pipeline</td><td>1</td><td>38.85</td><td>42.44</td><td>46.82</td></tr></tbody></table></section><section><h2>Pipeline Pod Memory</h2><table><thead><tr><th>Pipeline Name</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>mssql-telegraf-pipeline</td><td>0.49</td><td>62.51</td><td>64.01</td><td>66.11</td></tr></tbody></table></section><h2>💻 Node Metrics</h2><section><h2>Kafka Node CPU</h2><table><thead><tr><th>Component</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>kafka_1_node</td><td>16</td><td>8.37</td><td>9.26</td><td>10.31</td></tr><tr><td>kafka_2_node</td><td>16</td><td>5.49</td><td>6.22</td><td>7.38</td></tr><tr><td>kafka_3_node</td><td>16</td><td>6.30</td><td>7.48</td><td>9.38</td></tr></tbody></table></section><section><h2>Kafka Node Memory</h2><table><thead><tr><th>Component</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>kafka_1_node</td><td>29.18</td><td>62.17</td><td>63.84</td><td>64.64</td></tr><tr><td>kafka_2_node</td><td>29.18</td><td>60.75</td><td>67.08</td><td>73.39</td></tr><tr><td>kafka_3_node</td><td>29.18</td><td>59.29</td><td>62.23</td><td>63.92</td></tr></tbody></table></section><section><h2>ClickHouse Node CPU</h2><table><thead><tr><th>Component</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>ch1_node</td><td>20</td><td>23.12</td><td>30.91</td><td>34.19</td></tr><tr><td>ch2_node</td><td>20</td><td>43.24</td><td>46.70</td><td>50.46</td></tr></tbody></table></section><section><h2>ClickHouse Node Memory</h2><table><thead><tr><th>Component</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>ch1_node</td><td>58.47</td><td>61.23</td><td>61.36</td><td>61.48</td></tr><tr><td>ch2_node</td><td>58.47</td><td>63.92</td><td>64.16</td><td>64.37</td></tr></tbody></table></section>
+</div>
+</body>
+</html>
