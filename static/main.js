@@ -54,10 +54,9 @@ class VuDataSimManager {
 
         this.elements = {
             // K6 Load Testing elements
-            k6TimeRange: document.getElementById('k6-time-range'),
+            k6TimeRanges: document.getElementById('k6-time-ranges'),
             k6Vus: document.getElementById('k6-vus'),
-            k6Iterations: document.getElementById('k6-iterations'),
-            k6Interval: document.getElementById('k6-interval'),
+            k6Duration: document.getElementById('k6-duration'),
             k6TestIdDisplay: document.getElementById('k6-test-id-display'),
             startK6TestBtn: document.getElementById('start-k6-test-btn'),
             logNodeFilter: document.getElementById('log-node'),
@@ -616,26 +615,21 @@ class VuDataSimManager {
     async startK6Test() {
         try {
             // Get values from input fields
-            const timeRange = this.elements.k6TimeRange?.value?.trim() || '15m';
+            const timeRangesCsv = this.elements.k6TimeRanges?.value?.trim() || '15m,30m,5m';
             const vus = parseInt(this.elements.k6Vus?.value) || 10;
-            const iterations = parseInt(this.elements.k6Iterations?.value) || 5;
-            const interval = parseInt(this.elements.k6Interval?.value) || 5;
+            const duration = this.elements.k6Duration?.value?.trim() || '60m';
 
             // Validate inputs
-            if (!timeRange) {
-                this.showNotification('Time range is required', 'error');
+            if (!timeRangesCsv) {
+                this.showNotification('Time ranges CSV is required', 'error');
                 return;
             }
             if (vus < 1 || vus > 1000) {
                 this.showNotification('Virtual users must be between 1 and 1000', 'error');
                 return;
             }
-            if (iterations < 1 || iterations > 1000) {
-                this.showNotification('Iterations must be between 1 and 1000', 'error');
-                return;
-            }
-            if (interval < 1 || interval > 300) {
-                this.showNotification('Interval must be between 1 and 300 seconds', 'error');
+            if (!duration) {
+                this.showNotification('Duration is required', 'error');
                 return;
             }
 
@@ -645,14 +639,13 @@ class VuDataSimManager {
             button.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Running...</span>';
             button.disabled = true;
 
-            console.log('Starting K6 test with parameters:', { timeRange, vus, iterations, interval });
+            console.log('Starting K6 test with parameters:', { timeRangesCsv, vus, duration });
 
             // Call the API to start K6 test (no timeout)
             const response = await this.callAPI('/api/k6/run-combined', 'POST', {
-                timeRange,
+                timeRangesCsv,
                 vus,
-                iterations,
-                interval
+                duration
             }, 0);
 
             if (!response.success) {

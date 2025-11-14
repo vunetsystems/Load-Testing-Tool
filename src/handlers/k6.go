@@ -66,10 +66,9 @@ type K6DashboardConfig struct {
 
 // K6ScriptParams represents parameters for K6 script execution
 type K6ScriptParams struct {
-	TimeRange  string `json:"timeRange"`
-	VUs        int    `json:"vus"`
-	Iterations int    `json:"iterations"`
-	Interval   int    `json:"interval"`
+	TimeRangesCsv string `json:"timeRangesCsv"`
+	VUs           int    `json:"vus"`
+	Duration      string `json:"duration"`
 }
 
 // K6Handler manages K6 load testing operations
@@ -500,11 +499,8 @@ func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
     if params.VUs <= 0 {
         params.VUs = 1
     }
-    if params.Iterations <= 0 {
-        params.Iterations = 1
-    }
-    if params.Interval <= 0 {
-        params.Interval = 1
+    if params.Duration == "" {
+        params.Duration = "60m"
     }
 
     // Lock only to check/set shared state
@@ -550,8 +546,8 @@ func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
         // Continue execution even if module config fails
     }
 
-    // Create K6 run record
-    k6Run, err := database.CreateK6Run(params.TimeRange, params.VUs, params.Iterations, params.Interval, enabledModules)
+    // Create K6 run record - using 0 for iterations and interval since they're not used in phase11.sh
+    k6Run, err := database.CreateK6Run(params.TimeRangesCsv, params.VUs, 0, 0, enabledModules)
     if err != nil {
         logger.LogError("System", "k6", fmt.Sprintf("Failed to create K6 run record: %v", err))
         // Continue execution even if database operation fails
@@ -568,14 +564,14 @@ func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
         }
     }
 
-    logger.LogWithNode("System", "k6", fmt.Sprintf("Starting combined script with VUs=%d, Iterations=%d, Interval=%d, TimeRange=%s", params.VUs, params.Iterations, params.Interval, params.TimeRange), "info")
+    logger.LogWithNode("System", "k6", fmt.Sprintf("Starting phase11 script with VUs=%d, Duration=%s, TimeRangesCsv=%s", params.VUs, params.Duration, params.TimeRangesCsv), "info")
 
     // Check and create users if needed
     userCheckResult := h.checkAndCreateUsers(params.VUs)
     logger.LogWithNode("System", "k6", fmt.Sprintf("User check result: %s", userCheckResult), "info")
 
     // Run asynchronously with K6 run tracking
-    h.executeCombinedScriptWithTracking(params.TimeRange, params.VUs, params.Iterations, params.Interval, k6Run)
+    h.executePhase11ScriptWithTracking(params.TimeRangesCsv, params.VUs, params.Duration, k6Run)
 
     SendJSONResponse(w, http.StatusOK, APIResponse{
         Success: true,
@@ -742,7 +738,81 @@ func (h *K6Handler) executeCombinedScriptWithTracking(timeRange string, vus, ite
     h.mutex.Unlock()
 
     logger.LogSuccess("System", "k6", "K6 combined script execution completed and state reset")
-}
+   }
+   
+   // executePhase11ScriptWithTracking executes the phase11.sh script with given parameters and tracks the K6 run
+   func (h *K6Handler) executePhase11ScriptWithTracking(timeRangesCsv string, vus int, duration string, k6Run *models.K6Run) {
+       // Context with timeout (longer timeout for phase11.sh)
+       ctx, cancel := context.WithTimeout(context.Background(), 4*time.Hour)
+       defer cancel()
+   
+       // Prepare the command (kill entire group on cancel)
+       cmd := exec.CommandContext(ctx, "bash", "-c",
+           fmt.Sprintf("exec ./phase11.sh \"%s\" %d %s", timeRangesCsv, vus, duration))
+       cmd.Dir = "/home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard"
+       cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true} // ensure we can kill all children
+       h.cmd = cmd
+   
+       logger.LogWithNode("System", "k6", "About to execute phase11.sh", "info")
+   
+       start := time.Now()
+       output, err := cmd.CombinedOutput()
+       duration_exec := time.Since(start)
+   
+       logger.LogWithNode("System", "k6", fmt.Sprintf("phase11.sh finished in %s", duration_exec.String()), "info")
+   
+       if ctx.Err() == context.DeadlineExceeded {
+           // kill process group if context timed out
+           if cmd.Process != nil {
+               _ = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+               logger.LogError("System", "k6", "Killed phase11.sh due to timeout")
+           }
+       }
+   
+       // Prepare log file path
+       logDir := "/home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/logs"
+       logPath := filepath.Join(logDir, fmt.Sprintf("phase11_output_%d.log", time.Now().Unix()))
+       if err := os.MkdirAll(logDir, 0755); err == nil {
+           if writeErr := os.WriteFile(logPath, output, 0644); writeErr == nil {
+               logger.LogSuccess("System", "k6", fmt.Sprintf("K6 phase11 script output saved to %s", logPath))
+           } else {
+               logger.LogError("System", "k6", fmt.Sprintf("Failed to write phase11 output: %v", writeErr))
+           }
+       } else {
+           logger.Error().Err(err).Msg("Failed to create logs directory")
+       }
+   
+       // Update K6 run status based on execution result
+       if k6Run != nil {
+           if err != nil {
+               // Mark as failed if there was an error
+               if updateErr := database.UpdateK6RunStatus(k6Run.TestID, "failed"); updateErr != nil {
+                   logger.LogError("System", "k6", fmt.Sprintf("Failed to update K6 run status to failed: %v", updateErr))
+               }
+           } else {
+               // Mark as completed if successful
+               if completeErr := database.CompleteK6Run(k6Run.TestID); completeErr != nil {
+                   logger.LogError("System", "k6", fmt.Sprintf("Failed to complete K6 run: %v", completeErr))
+               } else {
+                   logger.LogSuccess("System", "k6", fmt.Sprintf("K6 run %s completed successfully", k6Run.TestID))
+               }
+           }
+       }
+   
+       if err != nil {
+           logger.LogError("System", "k6", fmt.Sprintf("K6 phase11 script execution failed: %v", err))
+       }
+   
+       // Update status safely after run
+       h.mutex.Lock()
+       h.status.IsRunning = false
+       h.status.CurrentScript = ""
+       h.status.LastUpdated = time.Now()
+       h.cmd = nil
+       h.mutex.Unlock()
+   
+       logger.LogSuccess("System", "k6", "K6 phase11 script execution completed and state reset")
+   }
 
 
 // readModuleConfig reads the enabled modules from conf.yml
