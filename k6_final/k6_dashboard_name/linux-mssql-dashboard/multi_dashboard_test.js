@@ -99,9 +99,17 @@ const TIME_FROM = __ENV.TIME_FROM || 'now-15m';
 const TIME_TO = __ENV.TIME_TO || 'now';
 
 // ================================
-// Dynamic Options
+// Dynamic Options — controlled by Bash
 // ================================
 export const options = {
+  scenarios: {
+    sustained_load: {
+      executor: 'constant-vus',
+      vus: __ENV.VUS ? parseInt(__ENV.VUS) : 10,
+      duration: __ENV.DURATION || '5m',
+      gracefulStop: '30s',
+    },
+  },
   insecureSkipTLSVerify: true,
 };
 
@@ -140,19 +148,20 @@ export default function () {
   };
 
   const jar = http.cookieJar();
-  jar.set('https://216.48.191.10', 'vunet_session', user.vunetSession);
-  jar.set('https://216.48.191.10', 'X-VuNet-HTTP-Info', user.xVuNetHTTPInfo);
-  jar.set('https://216.48.191.10', 'grafana_session_expiry', user.grafanaSessionExpiry.toString());
+  const base = 'https://216.48.191.10';
+  jar.set(base, 'vunet_session', user.vunetSession);
+  jar.set(base, 'X-VuNet-HTTP-Info', user.xVuNetHTTPInfo);
+  jar.set(base, 'grafana_session_expiry', user.grafanaSessionExpiry.toString());
 
   const baseDashboardAPI = config.base_urls.dashboard_api;
   const basePanelURL = config.base_urls.panel;
 
-  // Iterate through dashboards
+  // Iterate through dashboards continuously
   for (const d of config.dashboards) {
-if (String(d.enabled).toLowerCase() !== 'true') {
-  console.log(`🚫 Skipping disabled dashboard: ${d.name}`);
-  continue;
-}
+    if (String(d.enabled).toLowerCase() !== 'true') {
+      console.log(`🚫 Skipping disabled dashboard: ${d.name}`);
+      continue;
+    }
 
     const dashboardUrl = `${baseDashboardAPI}${d.id}`;
 
@@ -168,7 +177,7 @@ if (String(d.enabled).toLowerCase() !== 'true') {
       if (ok) dashboardSuccessCount.add(1);
       else dashboardFailureCount.add(1);
 
-      console.log(`DASHBOARD_DATA: name=${d.name} | status=${res.status} | response_time=${responseTime.toFixed(2)}ms`);
+      console.log(`[DASHBOARD_DATA] name=${d.name} | status=${res.status} | response_time=${responseTime.toFixed(2)}ms`);
 
       if (!json?.dashboard?.panels) {
         console.log(`⚠️ No panels found for ${d.name}`);
@@ -176,11 +185,9 @@ if (String(d.enabled).toLowerCase() !== 'true') {
       }
 
       const panels = extractPanels(json.dashboard.panels);
-      console.log(`🔹 Found ${panels.length} panels for ${d.name}`);
 
       for (const p of panels) {
         const panelUrl = `${basePanelURL}${d.id}/${d.slug}?orgId=1&from=${TIME_FROM}&to=${TIME_TO}&panelId=${p.id}`;
-
         const panelStart = Date.now();
         const res = http.get(panelUrl, { headers });
         const panelEnd = Date.now();

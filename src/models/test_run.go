@@ -42,6 +42,16 @@ type TestRun struct {
 	Ch2NodeMemMin           float64   `json:"ch2_node_mem_min,omitempty"`
 	Ch2NodeMemAvg           float64   `json:"ch2_node_mem_avg,omitempty"`
 	Ch2NodeMemMax           float64   `json:"ch2_node_mem_max,omitempty"`
+	Kafka1NodeCpuTotal      float64   `json:"kafka_1_node_cpu_total,omitempty"`
+	Kafka1NodeMemTotal      float64   `json:"kafka_1_node_mem_total,omitempty"`
+	Kafka2NodeCpuTotal      float64   `json:"kafka_2_node_cpu_total,omitempty"`
+	Kafka2NodeMemTotal      float64   `json:"kafka_2_node_mem_total,omitempty"`
+	Kafka3NodeCpuTotal      float64   `json:"kafka_3_node_cpu_total,omitempty"`
+	Kafka3NodeMemTotal      float64   `json:"kafka_3_node_mem_total,omitempty"`
+	Ch1NodeCpuTotal         float64   `json:"ch1_node_cpu_total,omitempty"`
+	Ch1NodeMemTotal         float64   `json:"ch1_node_mem_total,omitempty"`
+	Ch2NodeCpuTotal         float64   `json:"ch2_node_cpu_total,omitempty"`
+	Ch2NodeMemTotal         float64   `json:"ch2_node_mem_total,omitempty"`
 	KafkaClusterCpKafka0CpuMin float64 `json:"kafka_cluster_cp_kafka_0_cpu_min,omitempty"`
 	KafkaClusterCpKafka0CpuAvg float64 `json:"kafka_cluster_cp_kafka_0_cpu_avg,omitempty"`
 	KafkaClusterCpKafka0CpuMax float64 `json:"kafka_cluster_cp_kafka_0_cpu_max,omitempty"`

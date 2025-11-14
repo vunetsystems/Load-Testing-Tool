@@ -348,6 +348,10 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		    kafka_3_node_cpu_min = ?, kafka_3_node_cpu_avg = ?, kafka_3_node_cpu_max = ?,
 		    ch1_node_cpu_min = ?, ch1_node_cpu_avg = ?, ch1_node_cpu_max = ?,
 		    ch2_node_cpu_min = ?, ch2_node_cpu_avg = ?, ch2_node_cpu_max = ?,
+		    kafka_1_node_cpu_total = ?, kafka_2_node_cpu_total = ?, kafka_3_node_cpu_total = ?,
+		    ch1_node_cpu_total = ?, ch2_node_cpu_total = ?,
+		    kafka_1_node_mem_total = ?, kafka_2_node_mem_total = ?, kafka_3_node_mem_total = ?,
+		    ch1_node_mem_total = ?, ch2_node_mem_total = ?,
 		    min_lag = ?, avg_lag = ?, max_lag = ?
 		WHERE test_id = ?;
 	`, avgInputRate, avgOutputRate,
@@ -382,6 +386,10 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		nodeCPUResult.Kafka3Min, nodeCPUResult.Kafka3Avg, nodeCPUResult.Kafka3Max,
 		nodeCPUResult.Ch1Min, nodeCPUResult.Ch1Avg, nodeCPUResult.Ch1Max,
 		nodeCPUResult.Ch2Min, nodeCPUResult.Ch2Avg, nodeCPUResult.Ch2Max,
+		nodeCPUResult.Kafka1Total, nodeCPUResult.Kafka2Total, nodeCPUResult.Kafka3Total,
+		nodeCPUResult.Ch1Total, nodeCPUResult.Ch2Total,
+		nodeMemoryResult.Kafka1Total, nodeMemoryResult.Kafka2Total, nodeMemoryResult.Kafka3Total,
+		nodeMemoryResult.Ch1Total, nodeMemoryResult.Ch2Total,
 		minLag, avgLag, maxLag,
 		testID)
 	if err != nil {

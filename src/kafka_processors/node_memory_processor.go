@@ -15,10 +15,11 @@ import (
 
 // NodeMemoryStat represents a single node memory metric data point from ClickHouse
 type NodeMemoryStat struct {
-	NodeLabel           string
+	NodeLabel            string
 	MaxMemoryUsedPercent float64
 	MinMemoryUsedPercent float64
 	AvgMemoryUsedPercent float64
+	TotalCapacityGB      float64
 }
 
 // NodeMemoryResult represents the computed memory stats for all nodes
@@ -38,12 +39,17 @@ type NodeMemoryResult struct {
 	Ch2Min    float64
 	Ch2Avg    float64
 	Ch2Max    float64
+	Kafka1Total float64
+	Kafka2Total float64
+	Kafka3Total float64
+	Ch1Total    float64
+	Ch2Total    float64
 }
 
 // fetchNodeMemoryMetrics fetches node memory metrics from ClickHouse for the specified time range
 // This queries monitoring.kubernetes_node_data and computes memory usage percentages
 func fetchNodeMemoryMetrics(chClient *clickhouse.ClickHouseClient, start, end time.Time) ([]NodeMemoryStat, error) {
-	// Define the fixed node mappings
+	// Define node mappings
 	nodeMappings := map[string]string{
 		"e2e-82-181": "kafka_node_1",
 		"e2e-82-234": "kafka_node_2",
@@ -52,20 +58,21 @@ func fetchNodeMemoryMetrics(chClient *clickhouse.ClickHouseClient, start, end ti
 		"e2e-83-212": "clickhouse_node_2",
 	}
 
-	// Build the IN clause for node names
+	// Build IN clause for node names
 	var nodeNames []string
 	for node := range nodeMappings {
 		nodeNames = append(nodeNames, fmt.Sprintf("'%s'", node))
 	}
 	nodeStr := fmt.Sprintf("(%s)", strings.Join(nodeNames, ","))
 
-	// Build the CASE statement for node labels
+	// Build CASE statement for labels
 	var caseStatements []string
 	for node, label := range nodeMappings {
 		caseStatements = append(caseStatements, fmt.Sprintf("WHEN node_name = '%s' THEN '%s'", node, label))
 	}
 	caseStr := strings.Join(caseStatements, "\n        ")
 
+	// Build query
 	query := fmt.Sprintf(`
 		SELECT
 		    CASE
@@ -74,12 +81,20 @@ func fetchNodeMemoryMetrics(chClient *clickhouse.ClickHouseClient, start, end ti
 		    END AS node_label,
 		    ROUND(MAX(memory_used_percent), 2) AS max_memory_used_percent,
 		    ROUND(MIN(memory_used_percent), 2) AS min_memory_used_percent,
-		    ROUND(AVG(memory_used_percent), 2) AS avg_memory_used_percent
+		    ROUND(AVG(memory_used_percent), 2) AS avg_memory_used_percent,
+		    ROUND(any(total_capacity_gb), 2) AS total_capacity_gb
 		FROM
 		(
 		    SELECT
 		        b.node_name AS node_name,
-		        ROUND((SUM(b.memory_usage_bytes) / (SUM(b.memory_usage_bytes) + SUM(b.memory_available_bytes))) * 100, 2) AS memory_used_percent
+		        -- ✅ Proper memory usage percentage calculation
+		        ROUND(
+		            (SUM(b.memory_usage_bytes) /
+		             NULLIF(SUM(b.memory_usage_bytes) + SUM(b.memory_available_bytes), 0)) * 100,
+		            2
+		        ) AS memory_used_percent,
+		        -- ✅ Convert total memory capacity to GB (from bytes)
+		        (MAX(b.capacity_memory_bytes) / 1024 / 1024 / 1024) AS total_capacity_gb
 		    FROM monitoring.kubernetes_node_data AS b
 		    WHERE (b.timestamp >= toDateTime('%s'))
 		      AND (b.timestamp <= toDateTime('%s'))
@@ -101,15 +116,18 @@ func fetchNodeMemoryMetrics(chClient *clickhouse.ClickHouseClient, start, end ti
 	defer rows.Close()
 
 	var stats []NodeMemoryStat
-
 	for rows.Next() {
 		var stat NodeMemoryStat
-
-		if err := rows.Scan(&stat.NodeLabel, &stat.MaxMemoryUsedPercent, &stat.MinMemoryUsedPercent, &stat.AvgMemoryUsedPercent); err != nil {
+		if err := rows.Scan(
+			&stat.NodeLabel,
+			&stat.MaxMemoryUsedPercent,
+			&stat.MinMemoryUsedPercent,
+			&stat.AvgMemoryUsedPercent,
+			&stat.TotalCapacityGB,
+		); err != nil {
 			logger.LogWarning("System", "NodeMemoryProcessor", fmt.Sprintf("Failed to scan node memory row: %v", err))
 			continue
 		}
-
 		stats = append(stats, stat)
 	}
 
@@ -126,32 +144,37 @@ func fetchNodeMemoryMetrics(chClient *clickhouse.ClickHouseClient, start, end ti
 	return stats, nil
 }
 
-// computeNodeMemoryStats computes the final memory statistics mapped to database columns
+// computeNodeMemoryStats maps per-node memory stats into result struct
 func computeNodeMemoryStats(stats []NodeMemoryStat) NodeMemoryResult {
-	result := NodeMemoryResult{} // All fields default to 0.0
+	result := NodeMemoryResult{}
 
 	for _, stat := range stats {
 		switch stat.NodeLabel {
 		case "kafka_node_1":
 			result.Kafka1Min = stat.MinMemoryUsedPercent
-			result.Kafka1Max = stat.MaxMemoryUsedPercent
 			result.Kafka1Avg = stat.AvgMemoryUsedPercent
+			result.Kafka1Max = stat.MaxMemoryUsedPercent
+			result.Kafka1Total = stat.TotalCapacityGB
 		case "kafka_node_2":
 			result.Kafka2Min = stat.MinMemoryUsedPercent
-			result.Kafka2Max = stat.MaxMemoryUsedPercent
 			result.Kafka2Avg = stat.AvgMemoryUsedPercent
+			result.Kafka2Max = stat.MaxMemoryUsedPercent
+			result.Kafka2Total = stat.TotalCapacityGB
 		case "kafka_node_3":
 			result.Kafka3Min = stat.MinMemoryUsedPercent
-			result.Kafka3Max = stat.MaxMemoryUsedPercent
 			result.Kafka3Avg = stat.AvgMemoryUsedPercent
+			result.Kafka3Max = stat.MaxMemoryUsedPercent
+			result.Kafka3Total = stat.TotalCapacityGB
 		case "clickhouse_node_1":
 			result.Ch1Min = stat.MinMemoryUsedPercent
-			result.Ch1Max = stat.MaxMemoryUsedPercent
 			result.Ch1Avg = stat.AvgMemoryUsedPercent
+			result.Ch1Max = stat.MaxMemoryUsedPercent
+			result.Ch1Total = stat.TotalCapacityGB
 		case "clickhouse_node_2":
 			result.Ch2Min = stat.MinMemoryUsedPercent
-			result.Ch2Max = stat.MaxMemoryUsedPercent
 			result.Ch2Avg = stat.AvgMemoryUsedPercent
+			result.Ch2Max = stat.MaxMemoryUsedPercent
+			result.Ch2Total = stat.TotalCapacityGB
 		}
 	}
 
@@ -168,7 +191,7 @@ func ProcessNodeMemorySummary(chClient *clickhouse.ClickHouseClient, startTime, 
 	}
 
 	result := computeNodeMemoryStats(stats)
-
 	logger.LogSuccess("System", "NodeMemoryProcessor", "Successfully processed node memory summary")
+
 	return result, nil
 }

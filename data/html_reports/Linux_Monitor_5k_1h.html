@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Test Report</title>
+<style>
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 2rem auto;
+  max-width: 1100px;
+  background: #f8fafc;
+  color: #333;
+  line-height: 1.6;
+}
+h1, h2, h3, h4 {
+  color: #1a365d;
+}
+section {
+  background: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 1.5rem;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+th {
+  background: #1a365d;
+  color: white;
+}
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+tr:hover {
+  background-color: #e6f0ff;
+}
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+li {
+  margin-bottom: 5px;
+}
+code {
+  background-color: #edf2f7;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+</style>
+</head>
+<body>
+<h1>📊 Test Report - 98b53947-1ae7-4743-8452-d97d1afd9aa1</h1><section><h2>🧾 Test Summary</h2><ul><li><strong>Test Id</strong>: <code>98b53947-1ae7-4743-8452-d97d1afd9aa1</code></li><li><strong>Target Eps</strong>: <code>5000</code></li><li><strong>Start Time</strong>: <code>2025-11-11 13:05:07.961470855+00:00</code></li><li><strong>End Time</strong>: <code>2025-11-11 14:05:08.96212791+00:00</code></li><li><strong>O11Y Sources</strong>: <code>["Linux Monitor"]</code></li><li><strong>Duration</strong>: <code>1.00 hours</code></li><li><strong>Status</strong>: <code>completed</code></li></ul></section><section><h2>🪣 Kafka Specs</h2><h3>📥 Input Topics</h3><table><thead><tr><th>Topic Name</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody><tr><td>linux-monitor-input</td><td>1</td><td>2</td></tr></tbody></table><h3>📤 Output Topics</h3><table><thead><tr><th>Topic Name</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody><tr><td>linux-monitor-additional-metrics</td><td>1</td><td>2</td></tr><tr><td>linux-monitor-process-metrics</td><td>1</td><td>2</td></tr><tr><td>linux-monitor-resource-metrics</td><td>1</td><td>2</td></tr><tr><td>linux-monitor-storage-metrics</td><td>1</td><td>2</td></tr></tbody></table></section><section><h2>📈 Input/Output Topic Metrics</h2><table><thead><tr><th>Type</th><th>Min (msg/s)</th><th>Avg (msg/s)</th><th>Max (msg/s)</th></tr></thead><tbody><tr><td>Input</td><td>4961.05</td><td>5007.30</td><td>5469.80</td></tr><tr><td>Output</td><td>0</td><td>4948.84</td><td>5030.49</td></tr></tbody></table></section><section><h2>⏱️ Lag Metrics</h2><table><thead><tr><th>Min Lag</th><th>Avg Lag</th><th>Max Lag</th></tr></thead><tbody><tr><td>1</td><td>1004.76</td><td>16813</td></tr></tbody></table></section><h2>🖥️ Pod Metrics</h2><section><h2>Kafka Cluster Pods CPU</h2><table><thead><tr><th>Component</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>kafka_cluster_cp_kafka_0</td><td>6</td><td>1.35</td><td>2.17</td><td>4.48</td></tr><tr><td>kafka_cluster_cp_kafka_1</td><td>6</td><td>1.68</td><td>2.13</td><td>3.59</td></tr><tr><td>kafka_cluster_cp_kafka_2</td><td>6</td><td>1.37</td><td>1.94</td><td>5.01</td></tr></tbody></table></section><section><h2>Kafka Cluster Pods Memory</h2><table><thead><tr><th>Component</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>kafka_cluster_cp_kafka_0</td><td>16</td><td>21.88</td><td>69.97</td><td>99.99</td></tr><tr><td>kafka_cluster_cp_kafka_1</td><td>16</td><td>30.07</td><td>74.48</td><td>100.00</td></tr><tr><td>kafka_cluster_cp_kafka_2</td><td>16</td><td>35.65</td><td>71.93</td><td>99.22</td></tr></tbody></table></section><section><h2>ClickHouse Pods CPU</h2><table><thead><tr><th>Component</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>chi_clickhouse_vusmart_0_0_0</td><td>9</td><td>4.37</td><td>8.14</td><td>14.44</td></tr><tr><td>chi_clickhouse_vusmart_0_1_0</td><td>9</td><td>2.54</td><td>5.47</td><td>89.16</td></tr></tbody></table></section><section><h2>ClickHouse Pods Memory</h2><table><thead><tr><th>Component</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>chi_clickhouse_vusmart_0_0_0</td><td>34</td><td>43.69</td><td>45.73</td><td>48.13</td></tr><tr><td>chi_clickhouse_vusmart_0_1_0</td><td>34</td><td>3.93</td><td>10.80</td><td>14.53</td></tr></tbody></table></section><h2>🔧 Pipeline Pod Metrics</h2><section><h2>🔧 Pipeline Info</h2><table><thead><tr><th>Source</th><th>Pipeline Name</th><th>Threads</th><th>Instances</th></tr></thead><tbody><tr><td>Linux Monitor</td><td>linuxmonitor</td><td>4</td><td>1</td></tr></tbody></table></section><section><h2>Pipeline Pod CPU</h2><table><thead><tr><th>Pipeline Name</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>linuxmonitor</td><td>1</td><td>62.15</td><td>66.09</td><td>71.60</td></tr></tbody></table></section><section><h2>Pipeline Pod Memory</h2><table><thead><tr><th>Pipeline Name</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>linuxmonitor</td><td>0.49</td><td>58.77</td><td>60.55</td><td>63.69</td></tr></tbody></table></section><h2>💻 Node Metrics</h2><section><h2>Kafka Node CPU</h2><table><thead><tr><th>Component</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>kafka_1_node</td><td>16</td><td>1.72</td><td>10.46</td><td>15.21</td></tr><tr><td>kafka_2_node</td><td>16</td><td>8.50</td><td>40.01</td><td>46.65</td></tr><tr><td>kafka_3_node</td><td>16</td><td>1.72</td><td>10.53</td><td>19.54</td></tr></tbody></table></section><section><h2>Kafka Node Memory</h2><table><thead><tr><th>Component</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>kafka_1_node</td><td>29.18</td><td>44.31</td><td>56.10</td><td>64.35</td></tr><tr><td>kafka_2_node</td><td>29.18</td><td>47.85</td><td>62.87</td><td>72.90</td></tr><tr><td>kafka_3_node</td><td>29.18</td><td>45.16</td><td>58.36</td><td>65.80</td></tr></tbody></table></section><section><h2>ClickHouse Node CPU</h2><table><thead><tr><th>Component</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>ch1_node</td><td>20</td><td>2.26</td><td>14.24</td><td>21.25</td></tr><tr><td>ch2_node</td><td>20</td><td>9.96</td><td>48.32</td><td>59.42</td></tr></tbody></table></section><section><h2>ClickHouse Node Memory</h2><table><thead><tr><th>Component</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>ch1_node</td><td>58.47</td><td>60.60</td><td>61.24</td><td>61.53</td></tr><tr><td>ch2_node</td><td>58.47</td><td>63.86</td><td>64.95</td><td>66.24</td></tr></tbody></table></section>
+</body>
+</html>

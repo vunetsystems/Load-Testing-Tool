@@ -15,11 +15,14 @@ import (
 
 // NodeCPUStat represents a single node CPU metric data point from ClickHouse
 type NodeCPUStat struct {
-	NodeLabel           string
-	MaxCPUUsedPercent float64
-	MinCPUUsedPercent float64
-	AvgCPUUsedPercent float64
+	NodeLabel          string
+	MaxCPUUsedPercent  float64
+	MinCPUUsedPercent  float64
+	AvgCPUUsedPercent  float64
+	TotalCapacityCores int64     // ← changed from float64
+	AvgUsedCores       float64
 }
+
 
 // NodeCPUResult represents the computed CPU stats for all nodes
 type NodeCPUResult struct {
@@ -38,6 +41,11 @@ type NodeCPUResult struct {
 	Ch2Min    float64
 	Ch2Avg    float64
 	Ch2Max    float64
+	Kafka1Total float64
+	Kafka2Total float64
+	Kafka3Total float64
+	Ch1Total    float64
+	Ch2Total    float64
 }
 
 // fetchNodeCPUMetrics fetches node CPU metrics from ClickHouse for the specified time range
@@ -66,34 +74,36 @@ func fetchNodeCPUMetrics(chClient *clickhouse.ClickHouseClient, start, end time.
 	}
 	caseStr := strings.Join(caseStatements, "\n        ")
 
-	query := fmt.Sprintf(`
-		SELECT
-		    CASE
-		        %s
-		        ELSE node_name
-		    END AS node_label,
-		    ROUND(MAX(cpu_used_percent), 2) AS max_cpu_used_percent,
-		    ROUND(MIN(cpu_used_percent), 2) AS min_cpu_used_percent,
-		    ROUND(AVG(cpu_used_percent), 2) AS avg_cpu_used_percent
-		FROM
-		(
-		    SELECT
-		        b.node_name AS node_name,
-		        ROUND(
-		            (SUM(b.cpu_usage_nanocores) / (SUM(b.capacity_cpu_cores) * 1000000000)) * 100,
-		            2
-		        ) AS cpu_used_percent
-		    FROM monitoring.kubernetes_node_data AS b
-		    WHERE (b.timestamp >= toDateTime('%s'))
-		      AND (b.timestamp <= toDateTime('%s'))
-		      AND (b.node_name IN %s)
-		    GROUP BY
-		        toStartOfInterval(b.timestamp, toIntervalMinute(5)),
-		        b.node_name
-		) AS node_usage
-		GROUP BY node_label
-		ORDER BY node_label ASC
-	`, caseStr, start.Format("2006-01-02 15:04:05"), end.Format("2006-01-02 15:04:05"), nodeStr)
+	// Construct the query with fixed denominator calculation and added columns
+query := fmt.Sprintf(`
+	SELECT
+	    CASE
+	        %s
+	        ELSE b.node_name
+	    END AS node_label,
+	    ROUND(MAX(cpu_used_percent), 2) AS max_cpu_used_percent,
+	    ROUND(MIN(cpu_used_percent), 2) AS min_cpu_used_percent,
+	    ROUND(AVG(cpu_used_percent), 2) AS avg_cpu_used_percent,
+	    MAX(b.capacity_cpu_cores) AS total_capacity_cores,
+	    ROUND((AVG(cpu_used_percent) / 100) * MAX(b.capacity_cpu_cores), 2) AS avg_used_cores
+	FROM
+	(
+	    SELECT
+	        b.node_name,
+	        toStartOfInterval(b.timestamp, toIntervalMinute(5)) AS ts_bucket,
+	        (SUM(b.cpu_usage_nanocores) / (MAX(b.capacity_cpu_cores) * 1000000000)) * 100 AS cpu_used_percent,
+	        MAX(b.capacity_cpu_cores) AS capacity_cpu_cores
+	    FROM monitoring.kubernetes_node_data AS b
+	    WHERE (b.timestamp >= toDateTime('%s'))
+	      AND (b.timestamp <= toDateTime('%s'))
+	      AND (b.node_name IN %s)
+	    GROUP BY b.node_name, ts_bucket
+	) AS b
+	GROUP BY node_label
+	ORDER BY node_label ASC
+`, caseStr, start.Format("2006-01-02 15:04:05"), end.Format("2006-01-02 15:04:05"), nodeStr)
+
+
 
 	logger.LogWithNode("System", "NodeCPUProcessor", fmt.Sprintf("Running ClickHouse query:\n%s", query), "debug")
 
@@ -107,12 +117,17 @@ func fetchNodeCPUMetrics(chClient *clickhouse.ClickHouseClient, start, end time.
 
 	for rows.Next() {
 		var stat NodeCPUStat
-
-		if err := rows.Scan(&stat.NodeLabel, &stat.MaxCPUUsedPercent, &stat.MinCPUUsedPercent, &stat.AvgCPUUsedPercent); err != nil {
+		if err := rows.Scan(
+			&stat.NodeLabel,
+			&stat.MaxCPUUsedPercent,
+			&stat.MinCPUUsedPercent,
+			&stat.AvgCPUUsedPercent,
+			&stat.TotalCapacityCores,
+			&stat.AvgUsedCores,
+		); err != nil {
 			logger.LogWarning("System", "NodeCPUProcessor", fmt.Sprintf("Failed to scan node CPU row: %v", err))
 			continue
 		}
-
 		stats = append(stats, stat)
 	}
 
@@ -130,36 +145,45 @@ func fetchNodeCPUMetrics(chClient *clickhouse.ClickHouseClient, start, end time.
 }
 
 // computeNodeCPUStats computes the final CPU statistics mapped to database columns
+// computeNodeCPUStats computes the final CPU statistics mapped to database columns
 func computeNodeCPUStats(stats []NodeCPUStat) NodeCPUResult {
 	result := NodeCPUResult{} // All fields default to 0.0
 
 	for _, stat := range stats {
+		totalCores := float64(stat.TotalCapacityCores) // convert once here
+
 		switch stat.NodeLabel {
 		case "kafka_node_1":
 			result.Kafka1Min = stat.MinCPUUsedPercent
 			result.Kafka1Max = stat.MaxCPUUsedPercent
 			result.Kafka1Avg = stat.AvgCPUUsedPercent
+			result.Kafka1Total = totalCores
 		case "kafka_node_2":
 			result.Kafka2Min = stat.MinCPUUsedPercent
 			result.Kafka2Max = stat.MaxCPUUsedPercent
 			result.Kafka2Avg = stat.AvgCPUUsedPercent
+			result.Kafka2Total = totalCores
 		case "kafka_node_3":
 			result.Kafka3Min = stat.MinCPUUsedPercent
 			result.Kafka3Max = stat.MaxCPUUsedPercent
 			result.Kafka3Avg = stat.AvgCPUUsedPercent
+			result.Kafka3Total = totalCores
 		case "clickhouse_node_1":
 			result.Ch1Min = stat.MinCPUUsedPercent
 			result.Ch1Max = stat.MaxCPUUsedPercent
 			result.Ch1Avg = stat.AvgCPUUsedPercent
+			result.Ch1Total = totalCores
 		case "clickhouse_node_2":
 			result.Ch2Min = stat.MinCPUUsedPercent
 			result.Ch2Max = stat.MaxCPUUsedPercent
 			result.Ch2Avg = stat.AvgCPUUsedPercent
+			result.Ch2Total = totalCores
 		}
 	}
 
 	return result
 }
+
 
 // ProcessNodeCPUSummary fetches and computes node CPU statistics for a test run
 func ProcessNodeCPUSummary(chClient *clickhouse.ClickHouseClient, startTime, endTime time.Time) (NodeCPUResult, error) {
