@@ -113,17 +113,9 @@ const TIME_FROM = __ENV.TIME_FROM || 'now-15m';
 const TIME_TO = __ENV.TIME_TO || 'now';
 
 // ================================
-// Dynamic Options — controlled by Bash
+// Dynamic Options
 // ================================
 export const options = {
-  scenarios: {
-    sustained_load: {
-      executor: 'constant-vus',
-      vus: __ENV.VUS ? parseInt(__ENV.VUS) : 10,
-      duration: __ENV.DURATION || '5m',
-      gracefulStop: '30s',
-    },
-  },
   insecureSkipTLSVerify: true,
 };
 
@@ -181,15 +173,7 @@ export default function () {
 
     group(`Dashboard: ${d.name}`, function () {
       const startTime = Date.now();
-      let res;
-      try {
-        const fetch = fetchJSON(dashboardUrl, {}, headers);
-        res = fetch.res;
-      } catch (err) {
-        dashboardConnectionError.add(1, { dashboard: d.name });
-        console.error(`Connection error loading dashboard ${d.name}: ${err}`);
-        return;
-      }
+      const { res, json } = fetchJSON(dashboardUrl, {}, headers);
       const endTime = Date.now();
 
       const responseTime = res.status === 200 ? (res.timings?.duration || (endTime - startTime)) : 0;
@@ -212,12 +196,12 @@ export default function () {
 
       console.log(`[DASHBOARD_DATA] name=${d.name} | status=${res.status} | response_time=${responseTime.toFixed(2)}ms | throughput=${throughput.toFixed(2)}req/sec | error_4xx=${res.status >= 400 && res.status < 500 ? 1 : 0} | error_5xx=${res.status >= 500 ? 1 : 0}`);
 
-      if (!res.json?.dashboard?.panels) {
+      if (!json?.dashboard?.panels) {
         console.log(`⚠️ No panels found for ${d.name}`);
         return;
       }
 
-      const panels = extractPanels(res.json.dashboard.panels);
+      const panels = extractPanels(json.dashboard.panels);
       let panelData = [];
 
       for (const p of panels) {
