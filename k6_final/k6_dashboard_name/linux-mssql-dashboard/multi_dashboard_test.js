@@ -15,12 +15,9 @@ const panelSuccessCount = new Counter('panel_success_count');
 const panelFailureCount = new Counter('panel_failure_count');
 
 // ------------------ New metrics ------------------
-
-// Throughput per dashboard/panel (requests per second)
 const dashboardThroughput = new Trend('dashboard_throughput');
 const panelThroughput = new Trend('panel_throughput');
 
-// Error breakdown
 const dashboardError4xx = new Counter('dashboard_error_4xx');
 const dashboardError5xx = new Counter('dashboard_error_5xx');
 const panelError4xx = new Counter('panel_error_4xx');
@@ -37,6 +34,12 @@ const COOKIE_PATH = '../../user_creation_k6/user_cookies.txt';
 // ================================
 // Utility Functions
 // ================================
+
+// NEW: Helper to get a ClickHouse-friendly timestamp
+function getISOTime() {
+  return new Date().toISOString().replace('T', ' ').substring(0, 19);
+}
+
 function parseYAML(yamlText) {
   const result = { base_urls: {}, dashboards: [] };
   const lines = yamlText.split('\n');
@@ -122,19 +125,31 @@ export const options = {
 // ================================
 // Helper Functions
 // ================================
+
+// EDITED: Now returns a common structure
 function fetchJSON(url, params, headers) {
-  const res = http.get(url, { params, headers });
+  let res;
   let json = {};
+  let error = null;
+
   try {
+    res = http.get(url, { params, headers });
     json = res.json();
-  } catch {
-    json = {};
+  } catch (e) {
+    error = e;
   }
-  return { res, json };
+  
+  // Handle cases where res might be undefined due to connection error
+  if (!res) {
+    res = { status: 0, timings: { duration: 0 } }; // Mock response object for failures
+  }
+  
+  return { res, json, error };
 }
 
 function extractPanels(panels) {
   let list = [];
+  if (!panels) return list;
   for (const p of panels) {
     if (p.id) list.push({ id: p.id, title: p.title || 'Untitled' });
     if (p.panels) list = list.concat(extractPanels(p.panels));
@@ -154,7 +169,7 @@ export default function () {
   };
 
   const jar = http.cookieJar();
-  const base = 'https://216.48.191.10';
+  const base = 'https://216.48.191.10'; // TODO: Make this dynamic from config?
   jar.set(base, 'vunet_session', user.vunetSession);
   jar.set(base, 'X-VuNet-HTTP-Info', user.xVuNetHTTPInfo);
   jar.set(base, 'grafana_session_expiry', user.grafanaSessionExpiry.toString());
@@ -162,7 +177,6 @@ export default function () {
   const baseDashboardAPI = config.base_urls.dashboard_api;
   const basePanelURL = config.base_urls.panel;
 
-  // Iterate through dashboards continuously
   for (const d of config.dashboards) {
     if (String(d.enabled).toLowerCase() !== 'true') {
       console.log(`🚫 Skipping disabled dashboard: ${d.name}`);
@@ -173,28 +187,43 @@ export default function () {
 
     group(`Dashboard: ${d.name}`, function () {
       const startTime = Date.now();
-      const { res, json } = fetchJSON(dashboardUrl, {}, headers);
+      // EDITED: Use new fetchJSON and error handling
+      const { res, json, error } = fetchJSON(dashboardUrl, {}, headers);
       const endTime = Date.now();
-
-      const responseTime = res.status === 200 ? (res.timings?.duration || (endTime - startTime)) : 0;
-      dashboardResponseTime.add(responseTime, { dashboard: d.name });
-
-      // Throughput (req/sec) = 1 request per duration in seconds (only for successful requests)
+      
+      const isoTime = getISOTime();
+      const responseTime = (res.status > 0) ? (res.timings?.duration || (endTime - startTime)) : 0;
+      
       let throughput = 0;
       if (responseTime > 0) {
         throughput = 1000 / responseTime;
-        dashboardThroughput.add(throughput, { dashboard: d.name });
       }
-
-      // Error breakdown
-      if (res.status >= 400 && res.status < 500) dashboardError4xx.add(1, { dashboard: d.name });
-      else if (res.status >= 500) dashboardError5xx.add(1, { dashboard: d.name });
+      
+      const err4xx = (res.status >= 400 && res.status < 500) ? 1 : 0;
+      const err5xx = (res.status >= 500) ? 1 : 0;
+      const connErr = (res.status === 0 || error) ? 1 : 0; // Connection Error
+      
+      // Add metrics
+      dashboardResponseTime.add(responseTime, { dashboard: d.name });
+      dashboardThroughput.add(throughput, { dashboard: d.name });
+      if (err4xx) dashboardError4xx.add(1, { dashboard: d.name });
+      if (err5xx) dashboardError5xx.add(1, { dashboard: d.name });
+      if (connErr) dashboardConnectionError.add(1, { dashboard: d.name });
 
       const ok = check(res, { 'Dashboard loaded successfully': (r) => r.status === 200 });
-      if (ok) dashboardSuccessCount.add(1);
-      else dashboardFailureCount.add(1);
+      if (ok) {
+        dashboardSuccessCount.add(1);
+      } else {
+        dashboardFailureCount.add(1);
+      }
 
-      console.log(`[DASHBOARD_DATA] name=${d.name} | status=${res.status} | response_time=${responseTime.toFixed(2)}ms | throughput=${throughput.toFixed(2)}req/sec | error_4xx=${res.status >= 400 && res.status < 500 ? 1 : 0} | error_5xx=${res.status >= 500 ? 1 : 0}`);
+      // ----------------------------------------------------------------------
+      // NEW ROBUST LOGGING FORMAT (Pipe-delimited)
+      // [TYPE] | Timestamp | Dashboard Name | Status | Resp Time | Throughput | 4xx | 5xx | Conn Err
+      // ----------------------------------------------------------------------
+      console.log(
+        `[DASHBOARD_DATA] | ${isoTime} | ${d.name} | ${res.status} | ${responseTime.toFixed(2)} | ${throughput.toFixed(2)} | ${err4xx} | ${err5xx} | ${connErr}`
+      );
 
       if (!json?.dashboard?.panels) {
         console.log(`⚠️ No panels found for ${d.name}`);
@@ -208,28 +237,40 @@ export default function () {
         const panelUrl = `${basePanelURL}${d.id}/${d.slug}?orgId=1&from=${TIME_FROM}&to=${TIME_TO}&panelId=${p.id}`;
         const panelStart = Date.now();
         let panelRes;
+        let panelConnErr = 0;
+        
         try {
           panelRes = http.get(panelUrl, { headers });
         } catch (err) {
-          panelConnectionError.add(1, { dashboard: d.name, panel: p.title });
+          panelConnErr = 1;
           console.error(`Connection error loading panel ${p.title}: ${err}`);
-          continue;
         }
+        
+        // Handle no-response case
+        if (!panelRes) {
+            panelRes = { status: 0, timings: { duration: 0 } }; // Mock response
+        }
+        
         const panelEnd = Date.now();
+        const panelIsoTime = getISOTime(); // Timestamp for the panel event
 
-        const panelResponseTimeValue = panelRes.status === 200 ? (panelRes.timings?.duration || (panelEnd - panelStart)) : 0;
-        panelResponseTime.add(panelResponseTimeValue, { dashboard: d.name, panel: p.title });
-
-        // Throughput (only for successful requests)
+        const panelResponseTimeValue = (panelRes.status === 200) ? (panelRes.timings?.duration || (panelEnd - panelStart)) : 0;
+        
         let panelThroughputValue = 0;
         if (panelResponseTimeValue > 0) {
           panelThroughputValue = 1000 / panelResponseTimeValue;
-          panelThroughput.add(panelThroughputValue, { dashboard: d.name, panel: p.title });
         }
 
-        // Error breakdown
-        if (panelRes.status >= 400 && panelRes.status < 500) panelError4xx.add(1, { dashboard: d.name, panel: p.title });
-        else if (panelRes.status >= 500) panelError5xx.add(1, { dashboard: d.name, panel: p.title });
+        const panelErr4xx = (panelRes.status >= 400 && panelRes.status < 500) ? 1 : 0;
+        const panelErr5xx = (panelRes.status >= 500) ? 1 : 0;
+        if (panelConnErr === 0 && panelRes.status === 0) panelConnErr = 1; // Catch k6 internal 0 status
+
+        // Add metrics
+        panelResponseTime.add(panelResponseTimeValue, { dashboard: d.name, panel: p.title });
+        panelThroughput.add(panelThroughputValue, { dashboard: d.name, panel: p.title });
+        if (panelErr4xx) panelError4xx.add(1, { dashboard: d.name, panel: p.title });
+        if (panelErr5xx) panelError5xx.add(1, { dashboard: d.name, panel: p.title });
+        if (panelConnErr) panelConnectionError.add(1, { dashboard: d.name, panel: p.title });
 
         const success = panelRes.status === 200;
         if (success) panelSuccessCount.add(1);
@@ -241,22 +282,31 @@ export default function () {
           status: panelRes.status,
           responseTime: panelResponseTimeValue,
           throughput: panelThroughputValue,
-          error4xx: panelRes.status >= 400 && panelRes.status < 500 ? 1 : 0,
-          error5xx: panelRes.status >= 500 ? 1 : 0
+          error4xx: panelErr4xx,
+          error5xx: panelErr5xx,
+          connErr: panelConnErr,
+          timestamp: panelIsoTime // Store timestamp
         });
       }
 
       // Dashboard Panel Impact
       const totalPanelTime = panelData.reduce((sum, pd) => sum + pd.responseTime, 0);
-      if (totalPanelTime > 0) {
-        panelData.forEach(pd => {
-          const contribution = (pd.responseTime / totalPanelTime) * 100;
-          const safeTitle = (pd.title || 'Untitled').replace(/\|/g, '-');
+      
+      panelData.forEach(pd => {
+          let contribution = 0;
+          if (totalPanelTime > 0 && pd.responseTime > 0) {
+            contribution = (pd.responseTime / totalPanelTime) * 100;
+          }
+          const safeTitle = (pd.title || 'Untitled').replace(/\|/g, '-'); // Remove pipes from name
+
+          // ----------------------------------------------------------------------
+          // NEW ROBUST LOGGING FORMAT (Pipe-delimited)
+          // [TYPE] | Timestamp | Dashboard Name | Panel ID | Panel Name | Status | Resp Time | Throughput | 4xx | 5xx | Conn Err | Contribution %
+          // ----------------------------------------------------------------------
           console.log(
-            `[PANEL_DATA] dashboard=${d.name} | panel_id=${pd.id} | panel_name=${safeTitle} | status=${pd.status} | response_time=${pd.responseTime.toFixed(2)}ms | throughput=${pd.throughput.toFixed(2)}req/sec | error_4xx=${pd.error4xx} | error_5xx=${pd.error5xx} | contribution=${contribution.toFixed(2)}%`
+            `[PANEL_DATA] | ${pd.timestamp} | ${d.name} | ${pd.id} | ${safeTitle} | ${pd.status} | ${pd.responseTime.toFixed(2)} | ${pd.throughput.toFixed(2)} | ${pd.error4xx} | ${pd.error5xx} | ${pd.connErr} | ${contribution.toFixed(2)}`
           );
-        });
-      }
+      });
     });
 
     sleep(1);
