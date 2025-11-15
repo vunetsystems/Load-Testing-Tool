@@ -280,15 +280,18 @@ parse_and_insert_dashboard() {
   while IFS= read -r line; do
 
     # Skip lines that are not our custom logs
-    if [[ ! "$line" =~ ^\[DASHBOARD_DATA\] ]] && [[ ! "$line" =~ ^\[PANEL_DATA\] ]]; then
+    if [[ "$line" != *"[DASHBOARD_DATA]"* ]] && [[ "$line" != *"[PANEL_DATA]"* ]]; then
       continue
     fi
 
+    # Extract the msg content from K6 log format
+    msg_content=$(echo "$line" | sed 's/.*msg="//; s/".*//')
+
     # --- Dashboard ---
     # Format: [DASHBOARD_DATA] | Timestamp | Dashboard Name | Status | Resp Time | Throughput | 4xx | 5xx | Conn Err
-    if [[ "$line" == *"[DASHBOARD_DATA]"* ]]; then
+    if [[ "$msg_content" == *"[DASHBOARD_DATA]"* ]]; then
       # Use | as the delimiter
-      IFS='|' read -r _ timestamp dash_name status resp_time throughput err4xx err5xx conn_err <<< "$line"
+      IFS='|' read -r _ timestamp dash_name status resp_time throughput err4xx err5xx conn_err <<< "$msg_content"
       
       # Clean whitespace
       current_dash_name=$(echo "$dash_name" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//') # Clean whitespace
@@ -326,8 +329,8 @@ parse_and_insert_dashboard() {
 
     # --- Panel ---
     # Format: [PANEL_DATA] | Timestamp | Dashboard Name | Panel ID | Panel Name | Status | Resp Time | Throughput | 4xx | 5xx | Conn Err | Contribution %
-    elif [[ "$line" == *"[PANEL_DATA]"* ]]; then
-      IFS='|' read -r _ timestamp dash_name panel_id panel_name status resp_time throughput err4xx err5xx conn_err contribution <<< "$line"
+    elif [[ "$msg_content" == *"[PANEL_DATA]"* ]]; then
+      IFS='|' read -r _ timestamp dash_name panel_id panel_name status resp_time throughput err4xx err5xx conn_err contribution <<< "$msg_content"
 
       # Clean variables
       local panel_id=$(echo "$panel_id" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')

@@ -41,7 +41,7 @@ export let options = {
 // ------------------------------
 // Endpoints & metrics
 // ------------------------------
-const BASE_URL = "https://qa.vunetsystems.com";
+const BASE_URL = "https://216.48.191.10";
 const LOGIN_ENDPOINT = `${BASE_URL}/vui/a/vusmartmaps-app?redirect=dashboard&lte=now&gte=now-15m`;
 
 const loginSuccessRate = new Rate("login_success_rate");
