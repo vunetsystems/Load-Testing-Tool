@@ -1,28 +1,93 @@
 base_urls:
     dashboard_api: https://216.48.191.10/vui/api/dashboards/uid/
     panel: https://216.48.191.10/vui/d/
+
 dashboards:
+
+    # Existing Dashboards (same)
     - id: b1ec2dfd-6a8e-456b-869e-1f8df644e614
       name: MSSQL Overview Dashboard
       slug: mssql-overview-dashboard
-      enabled: true
+      enabled: false
+
     - id: cf5c449b-42e0-433d-9183-d5f717ae3a83
       name: Linux Server Insights
       slug: linux-server-insights
       enabled: false
+
     - id: a2bf56c5-04d3-4a97-998a-76744f0a7066
       name: Apache Overview
-      slug: Apache Overview
+      slug: apache-overview
       enabled: false
+
     - id: cceb91b5-f855-4bdb-b680-2e4d7825d28c
       name: Azure Firewall Insights
       slug: azure-firewall-insights
       enabled: false
+
     - id: acaaa547-06a4-4319-91e3-558b3c896864
       name: MongoDB Overview
       slug: mongodb-overview
       enabled: false
+
     - id: beuvjppwoeyv4d
       name: Azure Redis Cache Overview
-      slug: Azure-Redis-Cache-Overview
+      slug: azure-redis-cache-overview
+      enabled: false
+
+
+    # Newly Added Dashboards
+    - id: bdb39ed9-3323-41a9-af5d-0cc9be13ecbf
+      name: AWS ALB Overview
+      slug: aws-alb-overview
+      enabled: false
+
+    - id: a83852d5-e2af-4347-ac5d-98785ffa5b95
+      name: Azure Storage Blob Overview
+      slug: azure-storage-blob-overview
+      enabled: false
+
+    - id: e3b2c52e-ac2b-4b19-910b-0bd6089e6028
+      name: Azure API Management Overview
+      slug: azure-api-management-overview
+      enabled: false
+
+    - id: ddedcdda-1c23-4b37-9dae-85ae78354157
+      name: BRUM Overview
+      slug: brum-overview
+      enabled: false
+
+    - id: b02c26f8-b80b-4fdd-9192-9c6886fffe11
+      name: Cisco Switch
+      slug: cisco-switch
+      enabled: false
+
+    - id: afaa8fe4-ac47-4943-9b61-bf08841e8105
+      name: DNS Overview
+      slug: dns-overview
+      enabled: false
+
+    - id: aa288ead-b670-4322-ab8f-fc7a4dd61344
+      name: IBMMQ Insights
+      slug: ibmmq-insights
+      enabled: false
+
+    - id: few1sr7a7d340e
+      name: Kubernetes Cluster Overview
+      slug: kubernetes-cluster-overview
+      enabled: false
+
+    - id: ed193dfb-f374-45d4-bc0a-92301aa5e408
+      name: Synthetic Browser Journey Overview
+      slug: synthetic-browser-journey-overview
+      enabled: false
+
+    - id: aacb05c3-a234-4b29-8505-f5158afd78dd
+      name: Tomcat Overview
+      slug: tomcat-overview
+      enabled: false
+
+    - id: f02b8bd5-a68a-4ec7-9a52-b34725534827
+      name: WebLogic Overview
+      slug: weblogic-overview
       enabled: false
