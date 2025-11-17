@@ -3,19 +3,66 @@ package models
 
 import "time"
 
+// K6LoginMetrics represents the login metrics computed from k6_login table
+type K6LoginMetrics struct {
+	// Attempts
+	Seg1Attempts    uint64 `json:"seg1_attempts"`
+	Seg2Attempts    uint64 `json:"seg2_attempts"`
+	OverallAttempts uint64 `json:"overall_attempts"`
+
+	// Success Rates
+	Seg1SuccessRate    float64 `json:"seg1_success_rate"`
+	Seg2SuccessRate    float64 `json:"seg2_success_rate"`
+	OverallSuccessRate float64 `json:"overall_success_rate"`
+
+	// Average Response Time (only 200 status)
+	Seg1AvgRT    float64 `json:"seg1_avg_rt"`
+	Seg2AvgRT    float64 `json:"seg2_avg_rt"`
+	OverallAvgRT float64 `json:"overall_avg_rt"`
+
+	// P95 Percentile
+	Seg1P95RT    float64 `json:"seg1_p95_rt"`
+	Seg2P95RT    float64 `json:"seg2_p95_rt"`
+	OverallP95RT float64 `json:"overall_p95_rt"`
+
+	// P99 Percentile
+	Seg1P99RT    float64 `json:"seg1_p99_rt"`
+	Seg2P99RT    float64 `json:"seg2_p99_rt"`
+	OverallP99RT float64 `json:"overall_p99_rt"`
+
+	// 4xx Errors
+	Seg14xx    uint64 `json:"seg1_4xx"`
+	Seg24xx    uint64 `json:"seg2_4xx"`
+	Overall4xx uint64 `json:"overall_4xx"`
+
+	// 5xx Errors
+	Seg15xx    uint64 `json:"seg1_5xx"`
+	Seg25xx    uint64 `json:"seg2_5xx"`
+	Overall5xx uint64 `json:"overall_5xx"`
+
+	// Failures (status_code != 200)
+	Seg1Failures    uint64 `json:"seg1_failures"`
+	Seg2Failures    uint64 `json:"seg2_failures"`
+	OverallFailures uint64 `json:"overall_failures"`
+
+	// Status Code Failure Breakdown
+	StatusCodeFailureMap map[string]int `json:"status_code_failure_map"`
+}
+
 // K6Run represents a K6 test run record
 type K6Run struct {
-	TestID      string     `json:"test_id"`
-	TestName    string     `json:"test_name,omitempty"`
-	StartTime   time.Time  `json:"start_time"`
-	EndTime     *time.Time `json:"end_time,omitempty"`
-	TimeRange   string     `json:"time_range"`
-	Duration    string     `json:"duration"`
-	VUs         int        `json:"vus"`
-	Iterations  int        `json:"iterations"`
-	Interval    int        `json:"interval"`
-	O11ySources []string   `json:"o11y_sources"`
-	Status      string     `json:"status"` // 'running', 'completed', 'stopped', 'failed'
+	TestID       string          `json:"test_id"`
+	TestName     string          `json:"test_name,omitempty"`
+	StartTime    time.Time       `json:"start_time"`
+	EndTime      *time.Time      `json:"end_time,omitempty"`
+	TimeRange    string          `json:"time_range"`
+	Duration     string          `json:"duration"`
+	VUs          int             `json:"vus"`
+	Iterations   int             `json:"iterations"`
+	Interval     int             `json:"interval"`
+	O11ySources  []string        `json:"o11y_sources"`
+	Status       string          `json:"status"` // 'running', 'completed', 'stopped', 'failed'
+	MetricsLogin *K6LoginMetrics `json:"Metrics_Login,omitempty"`
 }
 
 // K6RunStartRequest represents the request payload for starting a K6 test run

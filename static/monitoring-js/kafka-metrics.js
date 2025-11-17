@@ -895,7 +895,7 @@ class KafkaMetricsManager {
                     }
                     outputTopicData[metric.topic].push({
                         timestamp: new Date(metric.timestamp).getTime(),
-                        count: metric.count
+                        rate: metric.oneMinuteRate
                     });
                 }
             });
@@ -908,7 +908,7 @@ class KafkaMetricsManager {
                 if (!topic.includes('-input') && topic !== 'mssql-telegraf') {
                     outputTopicData[topic] = dataPoints.map(point => ({
                         timestamp: point.timestamp,
-                        count: point.rawData ? point.rawData.count : 0
+                        rate: point.oneMinuteRate
                     }));
                 }
             }
@@ -922,7 +922,7 @@ class KafkaMetricsManager {
                         }
                         outputTopicData[metric.topic].push({
                             timestamp: new Date(metric.timestamp).getTime(),
-                            count: metric.count
+                            rate: metric.oneMinuteRate
                         });
                     }
                 });
@@ -942,7 +942,7 @@ class KafkaMetricsManager {
                 name: `📤 ${topic}`,
                 type: 'line',
                 areaStyle: this.chartConfig.outputTrend.type === 'area' ? {} : undefined,
-                data: data.map(d => [d.timestamp, d.count]),
+                data: data.map(d => [d.timestamp, d.rate]),
                 itemStyle: { color: colors[index % colors.length] },
                 lineStyle: { width: 1.5, type: 'dashed' }, // Dashed lines for output topics
                 smooth: true,
