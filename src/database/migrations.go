@@ -273,6 +273,8 @@ func runSchemaUpdates() error {
 		"ch2_node_mem_total":                         "REAL DEFAULT 0.0",
 		"pods_cpu":                                   "TEXT", // JSON string for pod CPU metrics with node_name
 		"pods_memory":                                "TEXT", // JSON string for pod memory metrics with node_name
+		"nodes_cpu":                                  "JSON", // JSON data for node CPU metrics
+		"nodes_memory":                               "JSON", // JSON data for node memory metrics
 	}
 
 	for name, def := range columnsToAdd {
