@@ -96,6 +96,33 @@ func RunMigrations() error {
 		}
 	}
 
+	// Add duration column to k6_runs table if it doesn't exist
+	if !columnExists("k6_runs", "duration") {
+		alterSQL := "ALTER TABLE k6_runs ADD COLUMN duration TEXT;"
+		_, err = DB.Exec(alterSQL)
+		if err != nil {
+			return fmt.Errorf("failed to add duration column to k6_runs: %w", err)
+		}
+	}
+
+	// Add summarised column to k6_runs table if it doesn't exist
+	if !columnExists("k6_runs", "summarised") {
+		alterSQL := "ALTER TABLE k6_runs ADD COLUMN summarised BOOLEAN DEFAULT FALSE;"
+		_, err = DB.Exec(alterSQL)
+		if err != nil {
+			return fmt.Errorf("failed to add summarised column to k6_runs: %w", err)
+		}
+	}
+
+	// Add k6_summary column to k6_runs table if it doesn't exist
+	if !columnExists("k6_runs", "k6_summary") {
+		alterSQL := "ALTER TABLE k6_runs ADD COLUMN k6_summary TEXT;"
+		_, err = DB.Exec(alterSQL)
+		if err != nil {
+			return fmt.Errorf("failed to add k6_summary column to k6_runs: %w", err)
+		}
+	}
+
 	return nil
 }
 

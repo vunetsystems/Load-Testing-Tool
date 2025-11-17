@@ -14,7 +14,9 @@ import (
 	"syscall"
 	"time"
 
+	"vuDataSim/src/clickhouse"
 	"vuDataSim/src/database"
+	"vuDataSim/src/k6_processors"
 	"vuDataSim/src/logger"
 	"vuDataSim/src/models"
 
@@ -554,7 +556,7 @@ func (h *K6Handler) RunCombinedScript(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create K6 run record - using 0 for iterations and interval since they're not used in phase11.sh
-	k6Run, err := database.CreateK6Run(params.TestName, params.TimeRangesCsv, params.VUs, 0, 0, enabledModules)
+	k6Run, err := database.CreateK6Run(params.TestName, params.TimeRangesCsv, params.Duration, params.VUs, 0, 0, enabledModules)
 	if err != nil {
 		logger.LogError("System", "k6", fmt.Sprintf("Failed to create K6 run record: %v", err))
 		// Continue execution even if database operation fails
@@ -757,7 +759,7 @@ func (h *K6Handler) executePhase11ScriptWithTracking(timeRangesCsv string, vus i
 
 	// Prepare the command (kill entire group on cancel)
 	cmd := exec.CommandContext(ctx, "bash", "-c",
-		fmt.Sprintf("exec ./phase11.sh \"%s\" %d %s", timeRangesCsv, vus, duration))
+		fmt.Sprintf("exec ./phase11.sh \"%s\" %d %s \"%s\"", timeRangesCsv, vus, duration, k6Run.TestID))
 	cmd.Dir = "/home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard"
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true} // ensure we can kill all children
 	h.cmd = cmd
@@ -977,6 +979,46 @@ func HandleAPIGetK6Logs(w http.ResponseWriter, r *http.Request) {
 
 func HandleAPIRunCombinedScript(w http.ResponseWriter, r *http.Request) {
 	K6Manager.RunCombinedScript(w, r)
+}
+
+func HandleAPIStartK6Summarizer(w http.ResponseWriter, r *http.Request) {
+	K6Manager.StartK6Summarizer(w, r)
+}
+
+// StartK6Summarizer handles POST /api/k6/start-summarizer
+func (h *K6Handler) StartK6Summarizer(w http.ResponseWriter, r *http.Request) {
+	logger.LogWithNode("System", "k6", "Starting K6 summarizer", "info")
+
+	// Get ClickHouse client
+	chClient := clickhouse.GetClickHouseClient()
+	if chClient == nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: "ClickHouse client not available",
+		})
+		return
+	}
+
+	// Start the summarizer in a goroutine
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				err := k6_processors.GenerateK6Summaries(database.DB, chClient.Client)
+				if err != nil {
+					logger.LogError("System", "K6Summarizer", fmt.Sprintf("Error generating K6 summaries: %v", err))
+				}
+			}
+		}
+	}()
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "K6 summarizer started successfully",
+	})
 }
 
 // HandleAPIGetNextK6TestID handles GET /api/k6/next-test-id
