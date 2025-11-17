@@ -13,7 +13,7 @@ import (
 )
 
 // CreateK6Run creates a new K6 run record
-func CreateK6Run(testName, timeRange string, vus, iterations, interval int, o11ySources []string) (*models.K6Run, error) {
+func CreateK6Run(testName, timeRange, duration string, vus, iterations, interval int, o11ySources []string) (*models.K6Run, error) {
 	// Generate a new UUID for the test ID
 	testID := uuid.New().String()
 
@@ -26,10 +26,10 @@ func CreateK6Run(testName, timeRange string, vus, iterations, interval int, o11y
 	startTime := time.Now().UTC()
 
 	query := `
-		INSERT INTO k6_runs (test_id, test_name, start_time, time_range, vus, iterations, interval, o11y_sources, status)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'running')`
+		INSERT INTO k6_runs (test_id, test_name, start_time, time_range, duration, vus, iterations, interval, o11y_sources, status)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'running')`
 
-	_, err = DB.Exec(query, testID, testName, startTime, timeRange, vus, iterations, interval, string(sourcesJSON))
+	_, err = DB.Exec(query, testID, testName, startTime, timeRange, duration, vus, iterations, interval, string(sourcesJSON))
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert K6 run: %w", err)
 	}
@@ -39,6 +39,7 @@ func CreateK6Run(testName, timeRange string, vus, iterations, interval int, o11y
 		TestName:    testName,
 		StartTime:   startTime,
 		TimeRange:   timeRange,
+		Duration:    duration,
 		VUs:         vus,
 		Iterations:  iterations,
 		Interval:    interval,
@@ -63,12 +64,13 @@ func StopK6Run(testID string) error {
 // GetK6Run retrieves a specific K6 run by ID
 func GetK6Run(testID string) (*models.K6Run, error) {
 	query := `
-		SELECT test_id, test_name, start_time, end_time, time_range, vus, iterations, interval, o11y_sources, status
+		SELECT test_id, test_name, start_time, end_time, time_range, duration, vus, iterations, interval, o11y_sources, status
 		FROM k6_runs WHERE test_id = ?`
 
 	var k6Run models.K6Run
 	var sourcesJSON string
 	var endTime sql.NullTime
+	var duration sql.NullString
 
 	err := DB.QueryRow(query, testID).Scan(
 		&k6Run.TestID,
@@ -76,6 +78,7 @@ func GetK6Run(testID string) (*models.K6Run, error) {
 		&k6Run.StartTime,
 		&endTime,
 		&k6Run.TimeRange,
+		&duration,
 		&k6Run.VUs,
 		&k6Run.Iterations,
 		&k6Run.Interval,
@@ -93,6 +96,10 @@ func GetK6Run(testID string) (*models.K6Run, error) {
 		k6Run.EndTime = &endTime.Time
 	}
 
+	if duration.Valid {
+		k6Run.Duration = duration.String
+	}
+
 	// Parse JSON sources
 	err = json.Unmarshal([]byte(sourcesJSON), &k6Run.O11ySources)
 	if err != nil {
@@ -105,7 +112,7 @@ func GetK6Run(testID string) (*models.K6Run, error) {
 // GetAllK6Runs retrieves all K6 runs ordered by start time descending
 func GetAllK6Runs() ([]*models.K6Run, error) {
 	query := `
-		SELECT test_id, test_name, start_time, end_time, time_range, vus, iterations, interval, o11y_sources, status
+		SELECT test_id, test_name, start_time, end_time, time_range, duration, vus, iterations, interval, o11y_sources, status
 		FROM k6_runs ORDER BY start_time DESC`
 
 	rows, err := DB.Query(query)
@@ -119,6 +126,7 @@ func GetAllK6Runs() ([]*models.K6Run, error) {
 		var k6Run models.K6Run
 		var sourcesJSON string
 		var endTime sql.NullTime
+		var duration sql.NullString
 
 		err := rows.Scan(
 			&k6Run.TestID,
@@ -126,6 +134,7 @@ func GetAllK6Runs() ([]*models.K6Run, error) {
 			&k6Run.StartTime,
 			&endTime,
 			&k6Run.TimeRange,
+			&duration,
 			&k6Run.VUs,
 			&k6Run.Iterations,
 			&k6Run.Interval,
@@ -138,6 +147,10 @@ func GetAllK6Runs() ([]*models.K6Run, error) {
 
 		if endTime.Valid {
 			k6Run.EndTime = &endTime.Time
+		}
+
+		if duration.Valid {
+			k6Run.Duration = duration.String
 		}
 
 		// Parse JSON sources

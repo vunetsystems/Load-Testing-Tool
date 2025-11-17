@@ -3,12 +3,95 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 	"vuDataSim/src/clickhouse"
 	"vuDataSim/src/database"
 	"vuDataSim/src/logger"
+
+	"gopkg.in/yaml.v3"
 )
+
+// TopicConfig represents the structure of topics_tables.yaml
+type TopicConfig struct {
+	Sources []SourceConfig `yaml:"sources"`
+}
+
+type SourceConfig struct {
+	Name             string      `yaml:"name"`
+	InputTopic       []TopicItem `yaml:"inputTopic"`
+	OutputTopic      []TopicItem `yaml:"outputTopic"`
+	ClickHouseTables []string    `yaml:"clickhouseTables,omitempty"`
+	Pipeline         []string    `yaml:"pipeline,omitempty"`
+}
+
+type TopicItem struct {
+	Name string `yaml:"name"`
+}
+
+// getTopicConfig loads the topic configuration from YAML file
+func getTopicConfig() (*TopicConfig, error) {
+	configPath := "src/configs/topics_tables.yaml"
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read topics config file: %v", err)
+	}
+
+	var config TopicConfig
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse topics config: %v", err)
+	}
+
+	return &config, nil
+}
+
+// getTopicsForSource returns all input and output topics for a given O11y source
+func getTopicsForSource(source string) ([]string, error) {
+	config, err := getTopicConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	// Normalize source name for matching
+	sourceNormalized := strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(source, "_", "-"), " ", "-"))
+
+	for _, src := range config.Sources {
+		srcNameNormalized := strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(src.Name, "_", "-"), " ", "-"))
+
+		if srcNameNormalized == sourceNormalized {
+			var topics []string
+
+			// Add input topics
+			for _, topic := range src.InputTopic {
+				topics = append(topics, topic.Name)
+			}
+
+			// Add output topics
+			for _, topic := range src.OutputTopic {
+				topics = append(topics, topic.Name)
+			}
+
+			logger.LogWithNode("System", "Kafka", fmt.Sprintf("Found %d topics for source '%s': %v", len(topics), source, topics), "debug")
+			return topics, nil
+		}
+	}
+
+	logger.LogWithNode("System", "Kafka", fmt.Sprintf("No topics found for source '%s' in config", source), "warning")
+	return []string{}, nil
+}
+
+// contains checks if a slice contains a string
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}
 
 func HandleAPIGetClickHouseMetrics(w http.ResponseWriter, r *http.Request) {
 	// Get time range from query parameters
@@ -78,7 +161,6 @@ func HandleAPIClickHouseHealth(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-
 // HandleAPIGetKafkaTopicMetrics handles GET /api/clickhouse/kafka-topics
 func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 	// Get time range from query parameters
@@ -129,7 +211,7 @@ func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 		"linux-monitor-resource-metrics", "linux-monitor-storage-metrics",
 	}
 
-	// If test_id is provided, filter topics based on the test run's O11y sources
+	// If test_id is provided, filter topics based on the test run's O11y sources using config
 	if testIDStr != "" {
 		testRun, err := database.GetTestRun(testIDStr)
 		if err != nil {
@@ -140,55 +222,35 @@ func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Map O11y source names to their input and output topics (keys must match categories.yaml exactly)
-		o11yToTopics := map[string][]string{
-			"MongoDB": {
-				"mongo-metrics-input",           // input
-				"mongo-metrics", "mongo-top-stats", "mongo-shard-stats", "mongo-col-stats", "mongo-db-stats", // outputs
-			},
-			"Mssql": {  // ✅ Fixed: matches categories.yaml "Mssql"
-				"mssql-telegraf",               // input
-				"mssql-memory-clerks", "mssql-database-io", "mssql-net-response", "mssql-hadr-replica",
-				"mssql-schedulers", "mssql-requests", "mssql-server-properties", "mssql-performance",
-				"mssql-hadr-dbreplica", "mssql-session", "mssql-telegraf-health", "mssql-volume-space",
-				"mssql-cpu", "mssql-waitstats", "mssql-cluster", "mssql-recentbackup", // outputs
-			},
-			"Apache": {
-				"apache-metrics-input", "apache-logs-input", // inputs
-				"apache-logs", "apache-metrics",             // outputs
-			},
-			"LinuxMonitor": {  // ✅ Fixed: matches categories.yaml "LinuxMonitor"
-				"linux-monitor-input", // input
-				"linux-monitor-additional-metrics", "linux-monitor-process-metrics",
-				"linux-monitor-resource-metrics", "linux-monitor-storage-metrics", // outputs
-			},
-			"Azure_Firewall": {
-				"azure-firewall-input", // input
-				// Add output topics if they exist
-			},
-			"Azure_Redis_Cache": {
-				"azure-redis-cache-input", // input
-				// Add output topics if they exist
-			},
-			"AzureStorageBlob": {
-				"vuazure-storage-blob-input", // input
-				// Add output topics if they exist
-			},
+		// Get topics for each O11y source from config file
+		filteredTopics := []string{}
+		logger.LogWithNode("System", "Kafka", fmt.Sprintf("Processing test run %s with O11y sources: %v", testIDStr, testRun.O11ySources), "info")
+
+		for _, source := range testRun.O11ySources {
+			sourceTopics, err := getTopicsForSource(source)
+			if err != nil {
+				logger.LogWarning("System", "Kafka", fmt.Sprintf("Failed to get topics for source '%s': %v", source, err))
+				continue
+			}
+
+			// Add topics to filtered list (avoiding duplicates)
+			for _, topic := range sourceTopics {
+				if !contains(filteredTopics, topic) {
+					filteredTopics = append(filteredTopics, topic)
+					logger.LogWithNode("System", "Kafka", fmt.Sprintf("✓ Added topic: %s (from source: %s)", topic, source), "debug")
+				}
+			}
+
+			logger.LogWithNode("System", "Kafka", fmt.Sprintf("Found %d topics for source '%s'", len(sourceTopics), source), "info")
 		}
 
-		// Filter topics to only include those enabled for this test run
-		filteredTopics := []string{}
-		for _, source := range testRun.O11ySources {
-			if topics, exists := o11yToTopics[source]; exists {
-				filteredTopics = append(filteredTopics, topics...)
-			}
-		}
+		logger.LogWithNode("System", "Kafka", fmt.Sprintf("Total filtered topics for test run: %d topics", len(filteredTopics)), "info")
 
 		// If no matching topics found, return empty result
 		if len(filteredTopics) == 0 {
 			SendJSONResponse(w, http.StatusOK, APIResponse{
 				Success: true,
-				Message: "No Kafka topics found for the selected test run's O11y sources",
+				Message: "No Kafka topics found for the test run's O11y sources in configuration",
 				Data:    []clickhouse.KafkaTopicMetric{},
 			})
 			return
@@ -267,6 +329,7 @@ func HandleAPIGetPodMonitoring(w http.ResponseWriter, r *http.Request) {
 		Data:    podData,
 	})
 }
+
 // HandleAPIGetK6SuccessRate handles GET /api/clickhouse/k6-success-rate
 func HandleAPIGetK6SuccessRate(w http.ResponseWriter, r *http.Request) {
 	successRate, err := clickhouse.GetK6SuccessRate(r.Context())
@@ -284,6 +347,7 @@ func HandleAPIGetK6SuccessRate(w http.ResponseWriter, r *http.Request) {
 		Data:    successRate,
 	})
 }
+
 // HandleAPIGetPodLogs handles GET /api/clickhouse/pod-logs
 func HandleAPIGetPodLogs(w http.ResponseWriter, r *http.Request) {
 	namespace := r.URL.Query().Get("namespace")
@@ -341,6 +405,7 @@ func HandleAPIGetPodEvents(w http.ResponseWriter, r *http.Request) {
 		Data:    events,
 	})
 }
+
 // HandleAPIGetK6MaxVus handles GET /api/clickhouse/k6-max-vus
 func HandleAPIGetK6MaxVus(w http.ResponseWriter, r *http.Request) {
 	maxVusResult, err := clickhouse.GetK6MaxVus(r.Context())
@@ -358,6 +423,7 @@ func HandleAPIGetK6MaxVus(w http.ResponseWriter, r *http.Request) {
 		Data:    maxVusResult,
 	})
 }
+
 // HandleAPIGetK6LoginResults handles GET /api/clickhouse/k6-login-results
 func HandleAPIGetK6LoginResults(w http.ResponseWriter, r *http.Request) {
 	k6LoginResults, err := clickhouse.GetK6LoginResults(r.Context())
@@ -375,6 +441,7 @@ func HandleAPIGetK6LoginResults(w http.ResponseWriter, r *http.Request) {
 		Data:    k6LoginResults,
 	})
 }
+
 // HandleAPIGetK6DashboardResults handles GET /api/clickhouse/k6-dashboard-results
 func HandleAPIGetK6DashboardResults(w http.ResponseWriter, r *http.Request) {
 	k6DashboardResults, err := clickhouse.GetK6DashboardResults(r.Context())
@@ -392,6 +459,7 @@ func HandleAPIGetK6DashboardResults(w http.ResponseWriter, r *http.Request) {
 		Data:    k6DashboardResults,
 	})
 }
+
 // HandleAPIGetK6Results handles GET /api/clickhouse/k6-results
 func HandleAPIGetK6Results(w http.ResponseWriter, r *http.Request) {
 	dashboard := r.URL.Query().Get("dashboard")
@@ -411,6 +479,7 @@ func HandleAPIGetK6Results(w http.ResponseWriter, r *http.Request) {
 		Data:    k6Results,
 	})
 }
+
 // HandleAPIGetKafkaPodMemory handles GET /api/clickhouse/kafka-pod-memory
 func HandleAPIGetKafkaPodMemory(w http.ResponseWriter, r *http.Request) {
 	data, err := clickhouse.GetKafkaPodMemoryData(r.Context())
@@ -428,6 +497,7 @@ func HandleAPIGetKafkaPodMemory(w http.ResponseWriter, r *http.Request) {
 		Data:    data,
 	})
 }
+
 // HandleAPIGetKafkaNetwork handles GET /api/clickhouse/kafka-network
 func HandleAPIGetKafkaNetwork(w http.ResponseWriter, r *http.Request) {
 	// Get pagination parameters

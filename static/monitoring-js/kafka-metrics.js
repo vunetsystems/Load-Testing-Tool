@@ -175,8 +175,8 @@ class KafkaMetricsManager {
 
     // Attach event listeners for test run dropdown
     attachTestRunEventListeners() {
-        const dropdown = document.getElementById('test-run-dropdown');
-        const clearBtn = document.getElementById('clear-test-filter');
+        const dropdown = document.getElementById('kafka-test-run-dropdown');
+        const clearBtn = document.getElementById('kafka-clear-test-filter');
 
         if (dropdown) {
             dropdown.addEventListener('change', (event) => {
@@ -214,7 +214,7 @@ class KafkaMetricsManager {
 
     // Populate dropdown with test runs
     populateTestRunDropdown() {
-        const dropdown = document.getElementById('test-run-dropdown');
+        const dropdown = document.getElementById('kafka-test-run-dropdown');
         if (!dropdown) return;
 
         // Clear existing options except the first one
@@ -224,7 +224,7 @@ class KafkaMetricsManager {
         this.testRuns.forEach(testRun => {
             const option = document.createElement('option');
             option.value = testRun.test_id;
-            option.textContent = `${testRun.test_id.substring(0, 8)}... - ${testRun.test_name || 'Unnamed Test'} (${testRun.duration})`;
+            option.textContent = `${testRun.test_id} (${testRun.duration})`;
             dropdown.appendChild(option);
         });
     }
@@ -264,13 +264,13 @@ class KafkaMetricsManager {
         this.isTestFiltered = false;
 
         // Reset dropdown
-        const dropdown = document.getElementById('test-run-dropdown');
+        const dropdown = document.getElementById('kafka-test-run-dropdown');
         if (dropdown) {
             dropdown.value = '';
         }
 
         // Hide test info
-        const infoDiv = document.getElementById('selected-test-info');
+        const infoDiv = document.getElementById('kafka-selected-test-info');
         if (infoDiv) {
             infoDiv.classList.add('hidden');
         }
@@ -284,10 +284,10 @@ class KafkaMetricsManager {
 
     // Update selected test info display
     updateSelectedTestInfo() {
-        const infoDiv = document.getElementById('selected-test-info');
-        const nameSpan = document.getElementById('selected-test-name');
-        const rangeSpan = document.getElementById('selected-test-range');
-        const durationSpan = document.getElementById('selected-test-duration');
+        const infoDiv = document.getElementById('kafka-selected-test-info');
+        const nameSpan = document.getElementById('kafka-selected-test-name');
+        const rangeSpan = document.getElementById('kafka-selected-test-range');
+        const durationSpan = document.getElementById('kafka-selected-test-duration');
 
         if (!infoDiv || !this.selectedTestRun) return;
 
@@ -369,6 +369,7 @@ class KafkaMetricsManager {
             const dataPoint = {
                 timestamp: now,
                 oneMinuteRate: metric.oneMinuteRate,
+                count: metric.count,
                 rawData: metric
             };
 
@@ -869,7 +870,7 @@ class KafkaMetricsManager {
             xAxis: xAxisConfig,
             yAxis: {
                 type: 'value',
-                name: 'Messages/sec',
+                name: 'Total Messages',
                 nameLocation: 'middle',
                 nameGap: 30
             },
@@ -894,7 +895,7 @@ class KafkaMetricsManager {
                     }
                     outputTopicData[metric.topic].push({
                         timestamp: new Date(metric.timestamp).getTime(),
-                        rate: metric.oneMinuteRate
+                        count: metric.count
                     });
                 }
             });
@@ -907,7 +908,7 @@ class KafkaMetricsManager {
                 if (!topic.includes('-input') && topic !== 'mssql-telegraf') {
                     outputTopicData[topic] = dataPoints.map(point => ({
                         timestamp: point.timestamp,
-                        rate: point.oneMinuteRate
+                        count: point.rawData ? point.rawData.count : 0
                     }));
                 }
             }
@@ -921,7 +922,7 @@ class KafkaMetricsManager {
                         }
                         outputTopicData[metric.topic].push({
                             timestamp: new Date(metric.timestamp).getTime(),
-                            rate: metric.oneMinuteRate
+                            count: metric.count
                         });
                     }
                 });
@@ -941,7 +942,7 @@ class KafkaMetricsManager {
                 name: `📤 ${topic}`,
                 type: 'line',
                 areaStyle: this.chartConfig.outputTrend.type === 'area' ? {} : undefined,
-                data: data.map(d => [d.timestamp, d.rate]),
+                data: data.map(d => [d.timestamp, d.count]),
                 itemStyle: { color: colors[index % colors.length] },
                 lineStyle: { width: 1.5, type: 'dashed' }, // Dashed lines for output topics
                 smooth: true,
@@ -999,7 +1000,7 @@ class KafkaMetricsManager {
                     let result = date.toLocaleTimeString() + '<br/>';
                     params.forEach(param => {
                         const cleanName = param.seriesName.replace(/^📤\s*/, '');
-                        result += `Output: ${cleanName}<br/>${param.value[1].toFixed(2)} msg/sec<br/>`;
+                        result += `Output: ${cleanName}<br/>${param.value[1].toLocaleString()} messages<br/>`;
                     });
                     return result;
                 }

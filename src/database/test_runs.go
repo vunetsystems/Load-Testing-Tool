@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"vuDataSim/src/models"
+
 	"github.com/google/uuid"
 )
 
@@ -87,7 +88,7 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 			   min_output_msgs_per_sec, avg_output_msgs_per_sec, max_output_msgs_per_sec,
 			   min_lag, avg_lag, max_lag,
 			   data_loss_pct, kafka_summary_generated, pod_resource_check,
-			   process_rate_summary, ingestion_summary
+			   process_rate_summary, ingestion_summary, traefik_cpu_allocated, traefik_mem_allocated
 		FROM test_runs WHERE test_id = ?`
 
 	var testRun models.TestRun
@@ -259,7 +260,7 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		var sourcesJSON string
 		var endTime sql.NullTime
 		var processRateSummary sql.NullString // Process rate summary JSON
-		var ingestionSummary sql.NullString // Ingestion summary JSON
+		var ingestionSummary sql.NullString   // Ingestion summary JSON
 
 		err := rows.Scan(
 			&testRun.TestID,

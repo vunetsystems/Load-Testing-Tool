@@ -10,6 +10,7 @@ type K6Run struct {
 	StartTime   time.Time  `json:"start_time"`
 	EndTime     *time.Time `json:"end_time,omitempty"`
 	TimeRange   string     `json:"time_range"`
+	Duration    string     `json:"duration"`
 	VUs         int        `json:"vus"`
 	Iterations  int        `json:"iterations"`
 	Interval    int        `json:"interval"`
@@ -20,6 +21,7 @@ type K6Run struct {
 // K6RunStartRequest represents the request payload for starting a K6 test run
 type K6RunStartRequest struct {
 	TimeRange   string   `json:"timeRange"`
+	Duration    string   `json:"duration"`
 	VUs         int      `json:"vus"`
 	Iterations  int      `json:"iterations"`
 	Interval    int      `json:"interval"`

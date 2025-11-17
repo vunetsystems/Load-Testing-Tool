@@ -69,12 +69,12 @@ type ContainerMetric struct {
 	Status        string    `json:"status"`
 }
 
-
 // KafkaTopicMetric represents Kafka topic metrics (Messages In Per Sec by Topic)
 type KafkaTopicMetric struct {
 	Timestamp     time.Time `json:"timestamp"`
 	Topic         string    `json:"topic"`
 	OneMinuteRate float64   `json:"oneMinuteRate"`
+	Count         float64   `json:"count"`
 }
 
 // getKafkaProducerMetrics retrieves latest Kafka producer metrics
@@ -358,7 +358,8 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 		SELECT
 			topic,
 			timestamp,
-			OneMinuteRate
+			OneMinuteRate,
+			Count
 		FROM kafka_Broker_Topic_Metrics
 		WHERE
 			name = 'MessagesInPerSec'
@@ -385,7 +386,8 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 		SELECT
 			t.topic AS metric,
 			t.timestamp AS timestamp,
-			sum(t.OneMinuteRate) AS OneMinuteRate
+			sum(t.OneMinuteRate) AS OneMinuteRate,
+			sum(t.Count) AS Count
 		FROM kafka_Broker_Topic_Metrics AS t
 		INNER JOIN (
 			SELECT
@@ -421,7 +423,7 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 
 	for rows.Next() {
 		var m KafkaTopicMetric
-		if err := rows.Scan(&m.Topic, &m.Timestamp, &m.OneMinuteRate); err != nil {
+		if err := rows.Scan(&m.Topic, &m.Timestamp, &m.OneMinuteRate, &m.Count); err != nil {
 			logger.LogWarning("System", "ClickHouse",
 				fmt.Sprintf("Failed to scan Kafka topic metric row: %v", err))
 			continue
@@ -435,8 +437,6 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 
 	return metrics, nil
 }
-
-
 
 // CollectMetrics gathers all metrics from ClickHouse for a specific time range
 func (c *ClickHouseClient) CollectMetrics(timeRange TimeRange) (*ClickHouseMetrics, error) {
@@ -524,9 +524,6 @@ func (c *ClickHouseClient) CollectMetrics(timeRange TimeRange) (*ClickHouseMetri
 	return metrics, nil
 }
 
-
-
-
 // collectClickHouseMetrics collects all metrics from ClickHouse for a specific time range
 func CollectClickHouseMetrics(timeRange TimeRange) (*ClickHouseMetrics, error) {
 	if clickHouseClient == nil {
@@ -543,4 +540,3 @@ func CollectClickHouseMetrics(timeRange TimeRange) (*ClickHouseMetrics, error) {
 
 	return metrics, nil
 }
-
