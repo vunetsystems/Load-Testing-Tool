@@ -341,6 +341,70 @@ func QueryK6DashboardLoadTimes(ctx context.Context, chClient clickhouse.Conn, te
 	return &dashboardLoadTimes, nil
 }
 
+// QueryK6PanelPerformance queries ClickHouse for panel performance breakdown for a specific test run
+func QueryK6PanelPerformance(ctx context.Context, chClient clickhouse.Conn, testID string) (*models.K6PanelPerformance, error) {
+	logger.LogWithNode("System", "K6Summarizer", fmt.Sprintf("Querying K6 panel performance for test run %s", testID), "info")
+
+	query := `
+		SELECT
+		    dashboard_name AS dashboard,
+		    concat(panel_name, ' (', toString(panel_id), ')') AS panel_name_id,
+		    count() AS total_attempts,
+		    countIf(panel_status != 200) AS failed_attempts,
+		    round(avgIf(panel_avg_response_time, panel_status = 200), 2) AS avg_load_ms,
+		    round(quantileIf(0.95)(panel_avg_response_time, panel_status = 200), 2) AS p95_load_ms,
+		    round(avg(panel_contribution_percent), 2) AS avg_contribution_pct,
+		    round(avg(panel_success_rate), 2) AS success_rate,
+		    sum(panel_error_4xx) AS errors_4xx,
+		    sum(panel_error_5xx) AS errors_5xx,
+		    sum(panel_connection_error) AS errors_conn
+		FROM monitoring.k6_results
+		WHERE test_id = ?
+		  AND panel_id > 0
+		GROUP BY
+		    dashboard_name,
+		    panel_name,
+		    panel_id
+		ORDER BY avg_load_ms DESC
+	`
+
+	rows, err := chClient.Query(ctx, query, testID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query K6 panel performance: %w", err)
+	}
+	defer rows.Close()
+
+	var panelPerformance models.K6PanelPerformance
+	for rows.Next() {
+		var entry models.K6PanelPerformanceEntry
+		err := rows.Scan(
+			&entry.Dashboard,
+			&entry.PanelNameID,
+			&entry.TotalAttempts,
+			&entry.FailedAttempts,
+			&entry.AvgLoadMs,
+			&entry.P95LoadMs,
+			&entry.AvgContributionPct,
+			&entry.SuccessRate,
+			&entry.Errors4xx,
+			&entry.Errors5xx,
+			&entry.ErrorsConn,
+		)
+		if err != nil {
+			logger.LogWarning("System", "K6Summarizer", fmt.Sprintf("Failed to scan panel performance row: %v", err))
+			continue
+		}
+		panelPerformance = append(panelPerformance, entry)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error reading panel performance rows: %w", err)
+	}
+
+	logger.LogWithNode("System", "K6Summarizer", fmt.Sprintf("Retrieved %d panel performance entries for test run %s", len(panelPerformance), testID), "info")
+	return &panelPerformance, nil
+}
+
 // ComputeK6Summary computes the summary statistics from raw segment data
 func ComputeK6Summary(testID string, startTime, endTime time.Time, segments []K6Segment) *K6Summary {
 	duration := endTime.Sub(startTime)
@@ -405,6 +469,12 @@ func GenerateK6SummaryForTestRun(db *sql.DB, chClient clickhouse.Conn, testID st
 		return fmt.Errorf("failed to query K6 dashboard load times: %w", err)
 	}
 
+	// Query K6 panel performance
+	panelPerformance, err := QueryK6PanelPerformance(ctx, chClient, testID)
+	if err != nil {
+		return fmt.Errorf("failed to query K6 panel performance: %w", err)
+	}
+
 	// Compute summary
 	summary := ComputeK6Summary(testID, testRun.StartTime, *testRun.EndTime, segments)
 
@@ -434,6 +504,12 @@ func GenerateK6SummaryForTestRun(db *sql.DB, chClient clickhouse.Conn, testID st
 	err = database.UpdateK6RunDashboardLoadTimes(testID, dashboardLoadTimes)
 	if err != nil {
 		return fmt.Errorf("failed to update test run dashboard load times: %w", err)
+	}
+
+	// Store panel performance in database
+	err = database.UpdateK6RunPanelPerformance(testID, panelPerformance)
+	if err != nil {
+		return fmt.Errorf("failed to update test run panel performance: %w", err)
 	}
 
 	logger.LogSuccess("System", "K6Summarizer", fmt.Sprintf("Generated K6 summary for test run %s", testID))

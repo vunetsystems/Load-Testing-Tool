@@ -58,6 +58,8 @@ func getTopicsForSource(source string) ([]string, error) {
 	// Normalize source name for matching
 	sourceNormalized := strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(source, "_", "-"), " ", "-"))
 
+	logger.LogWithNode("System", "Kafka", fmt.Sprintf("Looking for source: '%s' (normalized: '%s')", source, sourceNormalized), "debug")
+
 	for _, src := range config.Sources {
 		srcNameNormalized := strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(src.Name, "_", "-"), " ", "-"))
 
@@ -74,12 +76,17 @@ func getTopicsForSource(source string) ([]string, error) {
 				topics = append(topics, topic.Name)
 			}
 
-			logger.LogWithNode("System", "Kafka", fmt.Sprintf("Found %d topics for source '%s': %v", len(topics), source, topics), "debug")
+			logger.LogWithNode("System", "Kafka", fmt.Sprintf("✓ Matched source '%s' (config name: '%s') with %d topics: %v", source, src.Name, len(topics), topics), "debug")
 			return topics, nil
 		}
 	}
 
-	logger.LogWithNode("System", "Kafka", fmt.Sprintf("No topics found for source '%s' in config", source), "warning")
+	// Source not found in config - log available sources for debugging
+	availableSources := []string{}
+	for _, src := range config.Sources {
+		availableSources = append(availableSources, src.Name)
+	}
+	logger.LogWithNode("System", "Kafka", fmt.Sprintf("✗ Source '%s' not found in config. Available sources: %v", source, availableSources), "warning")
 	return []string{}, nil
 }
 
@@ -224,12 +231,21 @@ func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 
 		// Get topics for each O11y source from config file
 		filteredTopics := []string{}
+		unmatchedSources := []string{}
 		logger.LogWithNode("System", "Kafka", fmt.Sprintf("Processing test run %s with O11y sources: %v", testIDStr, testRun.O11ySources), "info")
 
 		for _, source := range testRun.O11ySources {
 			sourceTopics, err := getTopicsForSource(source)
 			if err != nil {
 				logger.LogWarning("System", "Kafka", fmt.Sprintf("Failed to get topics for source '%s': %v", source, err))
+				unmatchedSources = append(unmatchedSources, source)
+				continue
+			}
+
+			// If no topics found for this source after config lookup
+			if len(sourceTopics) == 0 {
+				logger.LogWithNode("System", "Kafka", fmt.Sprintf("No topics found in config for source '%s' - source name may not match config", source), "warning")
+				unmatchedSources = append(unmatchedSources, source)
 				continue
 			}
 
@@ -241,16 +257,21 @@ func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			logger.LogWithNode("System", "Kafka", fmt.Sprintf("Found %d topics for source '%s'", len(sourceTopics), source), "info")
+			logger.LogWithNode("System", "Kafka", fmt.Sprintf("✓ Found %d topics for source '%s'", len(sourceTopics), source), "info")
 		}
 
-		logger.LogWithNode("System", "Kafka", fmt.Sprintf("Total filtered topics for test run: %d topics", len(filteredTopics)), "info")
+		logger.LogWithNode("System", "Kafka", fmt.Sprintf("Total matched sources: %d/%d, Total topics: %d",
+			len(testRun.O11ySources)-len(unmatchedSources), len(testRun.O11ySources), len(filteredTopics)), "info")
 
-		// If no matching topics found, return empty result
+		if len(unmatchedSources) > 0 {
+			logger.LogWithNode("System", "Kafka", fmt.Sprintf("⚠ Unmatched sources (not found in config): %v", unmatchedSources), "warning")
+		}
+
+		// If no matching topics found, return error with details
 		if len(filteredTopics) == 0 {
 			SendJSONResponse(w, http.StatusOK, APIResponse{
 				Success: true,
-				Message: "No Kafka topics found for the test run's O11y sources in configuration",
+				Message: fmt.Sprintf("No Kafka topics found for the test run's O11y sources. Unmatched sources: %v", unmatchedSources),
 				Data:    []clickhouse.KafkaTopicMetric{},
 			})
 			return

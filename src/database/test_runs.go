@@ -265,6 +265,8 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		var endTime sql.NullTime
 		var processRateSummary sql.NullString // Process rate summary JSON
 		var ingestionSummary sql.NullString   // Ingestion summary JSON
+		var podsCpu sql.NullString
+		var podsMemory sql.NullString
 
 		err := rows.Scan(
 			&testRun.TestID,
@@ -357,8 +359,8 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			&ingestionSummary,
 			&testRun.TraefikCpuAllocated,
 			&testRun.TraefikMemAllocated,
-			&testRun.PodsCpu,
-			&testRun.PodsMemory,
+			&podsCpu,
+			&podsMemory,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan test run: %w", err)
@@ -372,6 +374,12 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		}
 		if ingestionSummary.Valid {
 			testRun.IngestionSummary = ingestionSummary.String // Assign ingestion summary JSON
+		}
+		if podsCpu.Valid {
+			testRun.PodsCpu = podsCpu.String
+		}
+		if podsMemory.Valid {
+			testRun.PodsMemory = podsMemory.String
 		}
 
 		// Parse JSON sources

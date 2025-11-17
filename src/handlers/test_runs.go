@@ -8,6 +8,7 @@ import (
 
 	"vuDataSim/src/clickhouse"
 	"vuDataSim/src/database"
+	"vuDataSim/src/logger"
 	"vuDataSim/src/models"
 	"github.com/gorilla/mux"
 )
@@ -215,6 +216,7 @@ func HandleAPIGetNextTestID(w http.ResponseWriter, r *http.Request) {
 // HandleAPIGetTestRunsForDropdown handles GET /api/test-runs/dropdown
 // This endpoint returns simplified test run data for dropdown selection
 func HandleAPIGetTestRunsForDropdown(w http.ResponseWriter, r *http.Request) {
+	logger.LogWithNode("System", "TestRuns", "Received request for test runs dropdown", "info")
 	testRuns, err := database.GetAllTestRuns()
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
@@ -223,6 +225,8 @@ func HandleAPIGetTestRunsForDropdown(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
+	logger.LogWithNode("System", "TestRuns", fmt.Sprintf("Found %d test runs for dropdown", len(testRuns)), "debug")
 
 	// Create simplified response for dropdown
 	type TestRunOption struct {
