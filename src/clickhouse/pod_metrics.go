@@ -330,90 +330,34 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 		return nil, fmt.Errorf("no topics provided")
 	}
 
-	// Calculate time range duration to determine query type
-	timeRangeDuration := timeRange.To.Sub(timeRange.From)
-
-	// Check if this is the default 5-minute real-time window
-	isDefaultRealtimeWindow := timeRangeDuration >= 4*time.Minute && timeRangeDuration <= 6*time.Minute
-
-	// For historical trends (custom time ranges, typically from test filters), return time-series data
-	// For real-time monitoring (default 5-minute window), return latest data points only
-	isHistoricalQuery := !isDefaultRealtimeWindow
-
-	var query string
-	var args []interface{}
-
-	if isHistoricalQuery {
-		// Return ALL data points within the time range for trend visualization
-		// Build dynamic query with topics list for ClickHouse compatibility
-		topicsList := ""
-		for i, topic := range topics {
-			if i > 0 {
-				topicsList += ", "
-			}
-			topicsList += "'" + topic + "'"
+	// Build dynamic query with topics list for ClickHouse compatibility
+	// Always return ALL data points within the time range for proper trend visualization
+	topicsList := ""
+	for i, topic := range topics {
+		if i > 0 {
+			topicsList += ", "
 		}
-
-		query = fmt.Sprintf(`
-		SELECT
-			topic,
-			timestamp,
-			OneMinuteRate,
-			Count
-		FROM kafka_Broker_Topic_Metrics
-		WHERE
-			name = 'MessagesInPerSec'
-			AND timestamp >= ?
-			AND timestamp <= ?
-			AND topic IN (%s)
-		ORDER BY
-			topic,
-			timestamp ASC
-		`, topicsList)
-		args = []interface{}{timeRange.From, timeRange.To}
-	} else {
-		// Return only latest data points per topic for real-time monitoring
-		// Build dynamic query with topics list for ClickHouse compatibility
-		topicsList := ""
-		for i, topic := range topics {
-			if i > 0 {
-				topicsList += ", "
-			}
-			topicsList += "'" + topic + "'"
-		}
-
-		query = fmt.Sprintf(`
-		SELECT
-			t.topic AS metric,
-			t.timestamp AS timestamp,
-			sum(t.OneMinuteRate) AS OneMinuteRate,
-			sum(t.Count) AS Count
-		FROM kafka_Broker_Topic_Metrics AS t
-		INNER JOIN (
-			SELECT
-				topic,
-				max(timestamp) AS latest_ts
-			FROM kafka_Broker_Topic_Metrics
-			WHERE
-				name = 'MessagesInPerSec'
-				AND timestamp >= ?
-				AND timestamp <= ?
-			GROUP BY topic
-		) AS latest
-		ON t.topic = latest.topic AND t.timestamp = latest.latest_ts
-		WHERE
-			t.name = 'MessagesInPerSec'
-			AND t.topic IN (%s)
-		GROUP BY
-			t.topic,
-			t.timestamp
-		ORDER BY
-			t.timestamp DESC
-		`, topicsList)
-		args = []interface{}{timeRange.From, timeRange.To}
+		topicsList += "'" + topic + "'"
 	}
 
-	rows, err := monitoringDBClient.Client.Query(ctx, query, args...)
+	// Query always returns all data points for time range (no historical vs real-time distinction)
+	query := fmt.Sprintf(`
+	SELECT
+		topic,
+		timestamp,
+		OneMinuteRate
+	FROM kafka_Broker_Topic_Metrics
+	WHERE
+		name = 'MessagesInPerSec'
+		AND timestamp >= ?
+		AND timestamp <= ?
+		AND topic IN (%s)
+	ORDER BY
+		topic,
+		timestamp ASC
+	`, topicsList)
+
+	rows, err := monitoringDBClient.Client.Query(ctx, query, timeRange.From, timeRange.To)
 	if err != nil {
 		return nil, fmt.Errorf("error querying Kafka topic metrics: %v", err)
 	}
@@ -423,11 +367,14 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 
 	for rows.Next() {
 		var m KafkaTopicMetric
-		if err := rows.Scan(&m.Topic, &m.Timestamp, &m.OneMinuteRate, &m.Count); err != nil {
+		// Scan only the three fields that are actually selected in the query
+		if err := rows.Scan(&m.Topic, &m.Timestamp, &m.OneMinuteRate); err != nil {
 			logger.LogWarning("System", "ClickHouse",
 				fmt.Sprintf("Failed to scan Kafka topic metric row: %v", err))
 			continue
 		}
+		// Set Count to 0 as a placeholder (not used in frontend)
+		m.Count = 0
 		metrics = append(metrics, m)
 	}
 

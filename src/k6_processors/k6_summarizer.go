@@ -12,6 +12,7 @@ import (
 
 	"vuDataSim/src/database"
 	"vuDataSim/src/logger"
+	"vuDataSim/src/models"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 )
@@ -28,7 +29,7 @@ type K6Summary struct {
 
 // K6SegmentSummary represents summary for a specific segment
 type K6SegmentSummary struct {
-	SegmentNumber int       `json:"segment_number"`
+	SegmentNumber uint8     `json:"segment_number"`
 	SegmentStart  time.Time `json:"segment_start"`
 	SegmentEnd    time.Time `json:"segment_end"`
 }
@@ -36,7 +37,7 @@ type K6SegmentSummary struct {
 // K6Segment represents a single segment data point from ClickHouse
 type K6Segment struct {
 	Source        string    `json:"source"`
-	SegmentNumber int       `json:"segment_number"`
+	SegmentNumber uint8     `json:"segment_number"`
 	SegmentStart  time.Time `json:"segment_start"`
 	SegmentEnd    time.Time `json:"segment_end"`
 }
@@ -133,6 +134,127 @@ func QueryK6Segments(ctx context.Context, chClient clickhouse.Conn, testID strin
 	return segments, nil
 }
 
+// QueryK6LoginMetrics queries ClickHouse for login metrics for a specific test run
+func QueryK6LoginMetrics(ctx context.Context, chClient clickhouse.Conn, testID string) (*models.K6LoginMetrics, error) {
+	logger.LogWithNode("System", "K6Summarizer", fmt.Sprintf("Querying K6 login metrics for test run %s", testID), "info")
+
+	// First query for the main metrics
+	mainQuery := `
+		SELECT
+		    -- Attempts
+		    countIf(segment_number = 1) AS seg1_attempts,
+		    countIf(segment_number = 2) AS seg2_attempts,
+		    count() AS overall_attempts,
+
+		    -- Success Rates
+		    avgIf(success_rate, segment_number = 1) AS seg1_success_rate,
+		    avgIf(success_rate, segment_number = 2) AS seg2_success_rate,
+		    avg(success_rate) AS overall_success_rate,
+
+		    -- Avg RT (only 200)
+		    avgIf(avg_response_time, (segment_number = 1 AND status_code = 200)) AS seg1_avg_rt,
+		    avgIf(avg_response_time, (segment_number = 2 AND status_code = 200)) AS seg2_avg_rt,
+		    avgIf(avg_response_time, status_code = 200) AS overall_avg_rt,
+
+		    -- Percentiles
+		    quantileIf(0.95)(avg_response_time, (segment_number = 1 AND status_code = 200)) AS seg1_p95_rt,
+		    quantileIf(0.95)(avg_response_time, (segment_number = 2 AND status_code = 200)) AS seg2_p95_rt,
+		    quantileIf(0.95)(avg_response_time, status_code = 200) AS overall_p95_rt,
+
+		    quantileIf(0.99)(avg_response_time, (segment_number = 1 AND status_code = 200)) AS seg1_p99_rt,
+		    quantileIf(0.99)(avg_response_time, (segment_number = 2 AND status_code = 200)) AS seg2_p99_rt,
+		    quantileIf(0.99)(avg_response_time, status_code = 200) AS overall_p99_rt,
+
+		    -- High-level errors
+		    sumIf(error_4xx, segment_number = 1) AS seg1_4xx,
+		    sumIf(error_4xx, segment_number = 2) AS seg2_4xx,
+		    sum(error_4xx) AS overall_4xx,
+
+		    sumIf(error_5xx, segment_number = 1) AS seg1_5xx,
+		    sumIf(error_5xx, segment_number = 2) AS seg2_5xx,
+		    sum(error_5xx) AS overall_5xx,
+
+		    -- Failure counts
+		    countIf(status_code != 200 AND segment_number = 1) AS seg1_failures,
+		    countIf(status_code != 200 AND segment_number = 2) AS seg2_failures,
+		    countIf(status_code != 200) AS overall_failures
+
+		FROM monitoring.k6_login
+		WHERE test_id = ?
+	`
+
+	var metrics models.K6LoginMetrics
+
+	err := chClient.QueryRow(ctx, mainQuery, testID).Scan(
+		&metrics.Seg1Attempts,
+		&metrics.Seg2Attempts,
+		&metrics.OverallAttempts,
+		&metrics.Seg1SuccessRate,
+		&metrics.Seg2SuccessRate,
+		&metrics.OverallSuccessRate,
+		&metrics.Seg1AvgRT,
+		&metrics.Seg2AvgRT,
+		&metrics.OverallAvgRT,
+		&metrics.Seg1P95RT,
+		&metrics.Seg2P95RT,
+		&metrics.OverallP95RT,
+		&metrics.Seg1P99RT,
+		&metrics.Seg2P99RT,
+		&metrics.OverallP99RT,
+		&metrics.Seg14xx,
+		&metrics.Seg24xx,
+		&metrics.Overall4xx,
+		&metrics.Seg15xx,
+		&metrics.Seg25xx,
+		&metrics.Overall5xx,
+		&metrics.Seg1Failures,
+		&metrics.Seg2Failures,
+		&metrics.OverallFailures,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to query K6 login metrics: %w", err)
+	}
+
+	// Second query for status code failure map
+	statusQuery := `
+		SELECT
+		    status_code,
+		    count() AS failure_count
+		FROM monitoring.k6_login
+		WHERE test_id = ? AND status_code != 200
+		GROUP BY status_code
+		ORDER BY status_code
+	`
+
+	rows, err := chClient.Query(ctx, statusQuery, testID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query status code failures: %w", err)
+	}
+	defer rows.Close()
+
+	statusCodeMap := make(map[string]int)
+	for rows.Next() {
+		var statusCode uint16
+		var count uint64
+		err := rows.Scan(&statusCode, &count)
+		if err != nil {
+			logger.LogWarning("System", "K6Summarizer", fmt.Sprintf("Failed to scan status code row: %v", err))
+			continue
+		}
+		statusCodeMap[fmt.Sprintf("%d", statusCode)] = int(count)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error reading status code rows: %w", err)
+	}
+
+	metrics.StatusCodeFailureMap = statusCodeMap
+
+	logger.LogWithNode("System", "K6Summarizer", fmt.Sprintf("Retrieved K6 login metrics for test run %s", testID), "info")
+	return &metrics, nil
+}
+
 // ComputeK6Summary computes the summary statistics from raw segment data
 func ComputeK6Summary(testID string, startTime, endTime time.Time, segments []K6Segment) *K6Summary {
 	duration := endTime.Sub(startTime)
@@ -185,6 +307,12 @@ func GenerateK6SummaryForTestRun(db *sql.DB, chClient clickhouse.Conn, testID st
 		return fmt.Errorf("failed to query K6 segments: %w", err)
 	}
 
+	// Query K6 login metrics
+	metrics, err := QueryK6LoginMetrics(ctx, chClient, testID)
+	if err != nil {
+		return fmt.Errorf("failed to query K6 login metrics: %w", err)
+	}
+
 	// Compute summary
 	summary := ComputeK6Summary(testID, testRun.StartTime, *testRun.EndTime, segments)
 
@@ -194,7 +322,7 @@ func GenerateK6SummaryForTestRun(db *sql.DB, chClient clickhouse.Conn, testID st
 		return fmt.Errorf("failed to marshal summary: %w", err)
 	}
 
-	// Update test run with summary
+	// Update test run with summary and metrics
 	_, err = db.Exec(`
 		UPDATE k6_runs
 		SET k6_summary = ?, summarised = TRUE
@@ -202,6 +330,12 @@ func GenerateK6SummaryForTestRun(db *sql.DB, chClient clickhouse.Conn, testID st
 	`, string(summaryJSON), testID)
 	if err != nil {
 		return fmt.Errorf("failed to update test run with summary: %w", err)
+	}
+
+	// Store metrics in database
+	err = database.UpdateK6RunMetrics(testID, metrics)
+	if err != nil {
+		return fmt.Errorf("failed to update test run metrics: %w", err)
 	}
 
 	logger.LogSuccess("System", "K6Summarizer", fmt.Sprintf("Generated K6 summary for test run %s", testID))
