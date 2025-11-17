@@ -29,27 +29,30 @@ def smart_format(value, precision=2):
 
 def get_json_str(value, default_fallback):
     """
-    Safely casts a value to a string and checks if it's a simple non-JSON 
-    value before returning it for json.loads. This fixes the 'not int' error.
+    Safely handles data of various types (including DB integers/booleans) 
+    and returns a string suitable for json.loads.
     """
     try:
         s = str(value).strip()
     except:
         return default_fallback
         
-    # Check for simple values often stored instead of a full JSON string
     if s.lower() in ('none', 'nan', 'true', 'false', '0', '1', ''):
         return default_fallback
     return s
 
-def wrap_html_template(content, test_id):
+def wrap_html_template(content, test_id, test_name):
     """Wraps the generated content in a full HTML5 page with improved CSS."""
+    # Use test_name in the title
+    title_text = f"K6 Report: {test_name}"
+    header_text = f"📊 K6 Scale & Performance Report: <code>{test_name}</code>"
+
     return f"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>K6 Report: {test_id}</title>
+<title>{title_text}</title>
 <style>
 body {{
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -77,6 +80,14 @@ h4 {{
     font-weight: 600;
     margin-top: 1.5rem;
 }}
+p.description {{
+    background-color: #f0f8ff; /* Very light blue background for description */
+    border-left: 4px solid #00796b; /* Teal border */
+    padding: 10px 15px;
+    margin-top: 1rem;
+    color: #333;
+    border-radius: 4px;
+}}
 section {{
   background: #ffffff;
   padding: 1.5rem 2rem;
@@ -86,10 +97,10 @@ section {{
 }}
 table {{
   width: 100%;
-  border-collapse: separate; /* Use separate for rounded corners */
+  border-collapse: separate;
   border-spacing: 0;
   margin-top: 1.5rem;
-  overflow: hidden; /* Helps with rounded corners on headers */
+  overflow: hidden;
   border-radius: 8px;
 }}
 th, td {{
@@ -98,22 +109,22 @@ th, td {{
   text-align: left;
 }}
 th {{
-  background: #00796b; /* Mid Teal Header */
+  background: #00796b;
   color: white;
   font-weight: 700;
 }}
 tr:nth-child(even) {{
-  background-color: #f8fcfd; /* Very light blue stripe */
+  background-color: #f8fcfd;
 }}
 tr:hover {{
-  background-color: #e3f2fd; /* Lightest blue on hover */
+  background-color: #e3f2fd;
 }}
 td:first-child {{
     font-weight: 500;
     color: #2d3748;
 }}
 code {{
-  background-color: #e6fffa; /* Pale green/teal for code */
+  background-color: #e6fffa;
   color: #004d40;
   padding: 3px 8px;
   border-radius: 6px;
@@ -144,18 +155,14 @@ code {{
 </style>
 </head>
 <body>
-<h1>📊 K6 Scale & Performance Report: <code>{test_id}</code></h1>
+<h1>{header_text}</h1>
 {content}
 </body>
 </html>
 """
 
 def format_summary(row):
-    """
-    Generates HTML for the Test Configuration section.
-    Updated to include VUS and use DB columns for start/end time.
-    """
-    # Use database columns directly
+    """Generates HTML for the Test Configuration section."""
     start_time_val = row.get('start_time', 'N/A')
     end_time_val = row.get('end_time', 'N/A')
     vus_val = row.get('vus', 'N/A')
@@ -170,14 +177,13 @@ def format_summary(row):
     html += f"<tr><td><strong>End Time</strong></td><td>{end_time_val}</td></tr>"
     html += f"<tr><td><strong>Configured Duration</strong></td><td>{row.get('duration', 'N/A')}</td></tr>"
     html += f"<tr><td><strong>O11y Sources</strong></td><td>{row.get('o11y_sources', 'N/A')}</td></tr>"
-    
-    # Segment details are now omitted as requested.
 
     html += "</table></section>"
     return html
 
 def create_login_charts(login_data):
     """Generates Plotly bar charts for login metrics."""
+    # ... (Chart generation logic remains the same)
     try:
         df = pd.DataFrame({
             'Segment': ['Segment 1', 'Segment 2'],
@@ -210,7 +216,6 @@ def create_login_charts(login_data):
         fig_sr.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
         fig_sr.update_layout(uniformtext_minsize=8)
 
-        # Include Plotly.js on the first chart only
         chart_html = "<div class='chart-container'>"
         chart_html += f"<div class='chart'>{pio.to_html(fig_rt, full_html=False, include_plotlyjs='cdn')}</div>"
         chart_html += f"<div class='chart'>{pio.to_html(fig_sr, full_html=False)}</div>"
@@ -220,22 +225,23 @@ def create_login_charts(login_data):
         return f"<p>⚠️ Could not generate login charts: {e}</p>"
 
 def format_login(login_data):
-    """Generates HTML for the Login Performance section."""
+    """Generates HTML for the Login Performance section with description."""
     html = "<section><h2>1. 🔑 Login Performance</h2>"
-    
+    html += "<p class='description'><strong style='color:#2a7ae2;'>Segment 1: Sequential</strong><br><strong>What it does:</strong> Runs login first, then dashboard tests, one after the other.<br><strong>Purpose / Intent:</strong> Simulate realistic user behavior where users log in before accessing dashboards. Captures metrics under a controlled, sequential load.<br><br><strong style='color:#2a7ae2;'>Segment 2: Parallel</strong><br><strong>What it does:</strong> Runs login and dashboard tests simultaneously for the full segment duration.<br><strong>Purpose / Intent:</strong> Apply concurrent load, stressing the system to see how it handles multiple operations at the same time. Helps identify bottlenecks under parallel traffic.</p>"
+
     html += create_login_charts(login_data)
     
     html += "<table>"
     html += "<thead><tr><th>Metric</th><th>Segment 1 (Sequential)</th><th>Segment 2 (Parallel)</th><th>Overall</th></tr></thead>"
     html += "<tbody>"
-    html += f"<tr><td><strong>Total Attempts</strong></td><td>{smart_format(login_data.get('seg1_attempts', 'N/A'))}</td><td>{smart_format(login_data.get('seg2_attempts', 'N/A'))}</td><td>{smart_format(login_data.get('overall_attempts', 'N/A'))}</td></tr>"
+    html += f"<tr><td><strong>Total Attempts</strong></td><td>{smart_format(login_data.get('seg1_attempts', 'N/A'), 0)}</td><td>{smart_format(login_data.get('seg2_attempts', 'N/A'), 0)}</td><td>{smart_format(login_data.get('overall_attempts', 'N/A'), 0)}</td></tr>"
     html += f"<tr><td><strong>Success Rate (%)</strong></td><td>{smart_format(login_data.get('seg1_success_rate', 'N/A'))}%</td><td>{smart_format(login_data.get('seg2_success_rate', 'N/A'))}%</td><td>{smart_format(login_data.get('overall_success_rate', 'N/A'))}%</td></tr>"
     html += f"<tr><td><strong>Avg. Response Time (ms)</strong></td><td>{smart_format(login_data.get('seg1_avg_rt', 'N/A'))}</td><td>{smart_format(login_data.get('seg2_avg_rt', 'N/A'))}</td><td>{smart_format(login_data.get('overall_avg_rt', 'N/A'))}</td></tr>"
     html += f"<tr><td><strong>P95 Response Time (ms)</strong></td><td>{smart_format(login_data.get('seg1_p95_rt', 'N/A'))}</td><td>{smart_format(login_data.get('seg2_p95_rt', 'N/A'))}</td><td>{smart_format(login_data.get('overall_p95_rt', 'N/A'))}</td></tr>"
     html += f"<tr><td><strong>P99 Response Time (ms)</strong></td><td>{smart_format(login_data.get('seg1_p99_rt', 'N/A'))}</td><td>{smart_format(login_data.get('seg2_p99_rt', 'N/A'))}</td><td>{smart_format(login_data.get('overall_p99_rt', 'N/A'))}</td></tr>"
-    html += f"<tr><td><strong>Total 4xx Errors</strong></td><td>{smart_format(login_data.get('seg1_4xx', 'N/A'))}</td><td>{smart_format(login_data.get('seg2_4xx', 'N/A'))}</td><td>{smart_format(login_data.get('overall_4xx', 'N/A'))}</td></tr>"
-    html += f"<tr><td><strong>Total 5xx Errors</strong></td><td>{smart_format(login_data.get('seg1_5xx', 'N/A'))}</td><td>{smart_format(login_data.get('seg2_5xx', 'N/A'))}</td><td>{smart_format(login_data.get('overall_5xx', 'N/A'))}</td></tr>"
-    html += f"<tr><td><strong>Total Failures</strong></td><td>{smart_format(login_data.get('seg1_failures', 'N/A'))}</td><td>{smart_format(login_data.get('seg2_failures', 'N/A'))}</td><td>{smart_format(login_data.get('overall_failures', 'N/A'))}</td></tr>"
+    html += f"<tr><td><strong>Total 4xx Errors</strong></td><td>{smart_format(login_data.get('seg1_4xx', 'N/A'), 0)}</td><td>{smart_format(login_data.get('seg2_4xx', 'N/A'), 0)}</td><td>{smart_format(login_data.get('overall_4xx', 'N/A'), 0)}</td></tr>"
+    html += f"<tr><td><strong>Total 5xx Errors</strong></td><td>{smart_format(login_data.get('seg1_5xx', 'N/A'), 0)}</td><td>{smart_format(login_data.get('seg2_5xx', 'N/A'), 0)}</td><td>{smart_format(login_data.get('overall_5xx', 'N/A'), 0)}</td></tr>"
+    html += f"<tr><td><strong>Total Failures</strong></td><td>{smart_format(login_data.get('seg1_failures', 'N/A'), 0)}</td><td>{smart_format(login_data.get('seg2_failures', 'N/A'), 0)}</td><td>{smart_format(login_data.get('overall_failures', 'N/A'), 0)}</td></tr>"
     html += "</tbody></table>"
     
     failure_map_str = json.dumps(login_data.get('status_code_failure_map', {}))
@@ -244,11 +250,15 @@ def format_login(login_data):
     return html
 
 def format_dashboard(dashboard_data):
-    """Generates HTML for the Dashboard Load Times section."""
+    """Generates HTML for the Dashboard Load Times section with description."""
+    html = "<section><h2>2. 📊 Overall Dashboard Load Times</h2>"
+    html += "<p class='description'><strong>Intent:</strong> Assess the overall performance of loading different dashboards. This metric captures the end-to-end time from initiating the dashboard load to receiving the complete response.<br><strong>Key Metric:</strong> Average Load Time (ms) and P95 Load Time.</p>"
+
     if not dashboard_data:
-        return "<section><h2>2. 📊 Overall Dashboard Load Times</h2><p>No dashboard data found.</p></section>"
+        html += "<p>No dashboard data found.</p></section>"
+        return html
         
-    html = "<section><h2>2. 📊 Overall Dashboard Load Times</h2><table>"
+    html += "<table>"
     html += "<thead><tr><th>Dashboard Name</th><th>Segment</th><th>Time Range</th><th>Total Loads</th><th>Success Rate</th><th>Avg. Load (ms)</th><th>P95 Load (ms)</th><th>Errors 4xx</th><th>Errors 5xx</th><th>Errors Conn</th></tr></thead>"
     html += "<tbody>"
     
@@ -271,19 +281,18 @@ def format_dashboard(dashboard_data):
 
 def create_panel_chart(panel_data):
     """Generates a Plotly horizontal bar chart for the top 10 slowest panels."""
+    # ... (Chart generation logic remains the same)
     try:
         if not panel_data:
             return ""
             
         df = pd.DataFrame(panel_data)
-        # Handle potential non-numeric data gracefully
         df['avg_load_ms'] = pd.to_numeric(df['avg_load_ms'], errors='coerce')
         df = df.dropna(subset=['avg_load_ms'])
         
         if df.empty:
             return ""
             
-        # Get top 10
         df_top10 = df.nlargest(10, 'avg_load_ms').sort_values('avg_load_ms', ascending=True)
         
         fig = px.bar(df_top10, 
@@ -293,7 +302,7 @@ def create_panel_chart(panel_data):
                      title='Top 10 Slowest Panels by Avg. Load Time',
                      labels={'avg_load_ms': 'Avg. Load (ms)', 'panel_name_id': 'Panel'},
                      text='avg_load_ms',
-                     color_discrete_sequence=['#9f7aea']) # Soft purple
+                     color_discrete_sequence=['#9f7aea'])
         
         fig.update_traces(texttemplate='%{text:.2f} ms', textposition='outside')
         fig.update_layout(height=500, yaxis_title_text='')
@@ -303,12 +312,14 @@ def create_panel_chart(panel_data):
         return f"<p>⚠️ Could not generate panel chart: {e}</p>"
 
 def format_panels(panel_data):
-    """Generates HTML for the Panel Performance section."""
-    if not panel_data:
-        return "<section><h2>3. 🖼️ Panel Performance Breakdown</h2><p>No panel data found.</p></section>"
-
+    """Generates HTML for the Panel Performance section with description."""
     html = "<section><h2>3. 🖼️ Panel Performance Breakdown</h2>"
-    
+    html += "<p class='description'><strong>Intent:</strong> Pinpoint the performance of individual dashboard panels within the loaded dashboards. This is crucial for identifying bottlenecks at the query execution level.<br><strong>Key Metric:</strong> Average Load Time (ms) and Average Contribution % (how much a panel contributes to the overall dashboard load time).</p>"
+
+    if not panel_data:
+        html += "<p>No panel data found.</p></section>"
+        return html
+
     html += create_panel_chart(panel_data)
     
     html += "<table><thead><tr><th>Dashboard</th><th>Panel Name (ID)</th><th>Attempts</th><th>Failed</th><th>Avg. Load (ms)</th><th>P95 Load (ms)</th><th>Avg. Contrib. %</th><th>Success Rate</th><th>4xx</th><th>5xx</th><th>Conn</th></tr></thead>"
@@ -341,7 +352,6 @@ def main():
     
     try:
         conn = sqlite3.connect(DB_PATH)
-        # Updated query to include start_time, end_time, and vus
         query = f"""
             SELECT 
                 test_id, test_name, status, duration, o11y_sources,
@@ -369,10 +379,10 @@ def main():
 
     for _, row in df.iterrows():
         test_id = row["test_id"]
-        print(f"Processing report for: {test_id}")
+        test_name = row.get("test_name", f"Report_{test_id}") # Get test_name for title
+        print(f"Processing report for: {test_name}")
         
         try:
-            # Safely parse JSON data using the helper function
             summary_raw = get_json_str(row.get("summarised"), default_fallback="{}")
             login_raw = get_json_str(row.get("Metrics_Login"), default_fallback="{}")
             dashboard_raw = get_json_str(row.get("Overall_Dashboard_Load_Times"), default_fallback="[]")
@@ -384,15 +394,19 @@ def main():
             panel_data = json.loads(panel_raw)
 
             # Generate HTML sections
-            html_summary = format_summary(row) # Updated to only need the row for DB fields
+            html_summary = format_summary(row)
             html_login = format_login(login_data)
             html_dashboard = format_dashboard(dashboard_data)
             html_panel = format_panels(panel_data)
             
             final_content = html_summary + html_login + html_dashboard + html_panel
-            final_html = wrap_html_template(final_content, test_id)
+            
+            # Use test_name in the wrapper
+            final_html = wrap_html_template(final_content, test_id, test_name)
 
-            file_name = f"k6_report_{test_id}.html"
+            # Create a robust file name using test_name
+            safe_test_name = "".join(c if c.isalnum() or c in (' ', '_', '-') else '_' for c in test_name).strip()
+            file_name = f"k6_report_{safe_test_name}_{test_id[:8]}.html"
             file_path = os.path.join(OUTPUT_DIR, file_name)
             
             with open(file_path, "w", encoding="utf-8") as f:
@@ -400,7 +414,7 @@ def main():
             print(f"📝 Generated: {file_path}")
 
         except Exception as e:
-            print(f"⚠️ Failed to generate report for {test_id}. Error: {e}")
+            print(f"⚠️ Failed to generate report for {test_name} ({test_id}). Error: {e}")
 
     print(f"\n✅ All HTML reports generated successfully in '{OUTPUT_DIR}' folder.")
 
