@@ -55,8 +55,8 @@ else
   exit 1
 fi
 
-# 1. Total Segment Duration (Total / 3)
-SEGMENT_SECONDS=$(( TOTAL_SECONDS / 3 ))
+# 1. Total Segment Duration (Total / 2) - NEW: 2 SEGMENTS
+SEGMENT_SECONDS=$(( TOTAL_SECONDS / 2 ))
 
 if [ "$SEGMENT_SECONDS" -lt 10 ]; then
   echo "Error: Segment duration is too short ($SEGMENT_SECONDS sec). Increase Total Duration."
@@ -65,30 +65,26 @@ fi
 
 # 2. Calculate Run Durations based on specific Phase Logic
 
-# Segment 1 Duration: Segment / 4 (e.g., 2m / 4 = 30s)
-DUR_SEG1=$(( SEGMENT_SECONDS / 4 ))
-[ "$DUR_SEG1" -lt 1 ] && DUR_SEG1=1
+# Segment 1 Duration (Sequential): Segment / 2 (e.g., 30m / 2 = 15m)
+DUR_SEQUENTIAL_RUN=$(( SEGMENT_SECONDS / 2 ))
+[ "$DUR_SEQUENTIAL_RUN" -lt 1 ] && DUR_SEQUENTIAL_RUN=1
 
-# Segment 2 Duration: Full Segment (Parallel run takes the whole slot)
-# e.g. 2m
-DUR_SEG2=$(( SEGMENT_SECONDS ))
+# Segment 2 Duration (Parallel): Full Segment (Parallel run takes the whole slot)
+# e.g. 30m
+DUR_PARALLEL_RUN=$(( SEGMENT_SECONDS ))
 
-# Segment 3 Duration: Segment / 2 (e.g., 2m / 2 = 1m)
-DUR_SEG3=$(( SEGMENT_SECONDS / 2 ))
-[ "$DUR_SEG3" -lt 1 ] && DUR_SEG3=1
 
 echo "============================================="
-echo "Phase-1 Plan Configuration"
+echo "Phase-1 Plan Configuration (2-Segment Plan)"
 echo "---------------------------------------------"
 echo "TIME RANGES      : ${TIME_RANGES[*]}"
 echo "VUS              : $VUS"
 echo "TOTAL DURATION   : ${TOTAL_MINUTES}m ($TOTAL_SECONDS s)"
-echo "SEGMENT DURATION : $(( SEGMENT_SECONDS / 60 ))m ($SEGMENT_SECONDS s)"
+echo "SEGMENT DURATION : $(( SEGMENT_SECONDS / 60 ))m ($SEGMENT_SECONDS s) (Total/2)"
 echo "---------------------------------------------"
 echo "Run Durations:"
-echo "  - Seg 1 (Alt) : ${DUR_SEG1}s (Seg/4)"
-echo "  - Seg 2 (Par) : ${DUR_SEG2}s (Seg)"
-echo "  - Seg 3 (Seq) : ${DUR_SEG3}s (Seg/2)"
+echo "  - Seg 1 (Seq) : ${DUR_SEQUENTIAL_RUN}s (Seg/2)"
+echo "  - Seg 2 (Par) : ${DUR_PARALLEL_RUN}s (Seg)"
 echo "============================================="
 
 # ----------------------
@@ -397,28 +393,27 @@ parse_and_insert_dashboard() {
 # EXECUTION START
 # ======================================
 
-# --- SEGMENT 1: Alternate (Login -> Dashboard) ---
-# Logic: Each run is SEGMENT/4.
-# If Seg=2m, Run=30s. (Login 30s -> Dash 30s -> Login 30s -> Dash 30s)
-echo -e "\n=== SEGMENT 1 (Alternate) ==="
-echo "Duration: ${SEGMENT_SECONDS}s | Sub-run: ${DUR_SEG1}s"
+# --- SEGMENT 1: Sequential (Login -> Dashboard) ---
+# Logic: Each run is SEGMENT/2.
+# If Seg=30m, Run=15m. (Login 15m -> Dash 15m)
+echo -e "\n=== SEGMENT 1 (Sequential) ==="
+echo "Duration: ${SEGMENT_SECONDS}s | Sub-run: ${DUR_SEQUENTIAL_RUN}s"
 seg=1
 seg_start=$(date +%s)
 elapsed=0
 iter=0
 
 while [ "$elapsed" -lt "$SEGMENT_SECONDS" ]; do
-  # Safety check: if remaining time is less than sub-run duration, break
   remaining=$(( SEGMENT_SECONDS - elapsed ))
-  if [ "$remaining" -lt "$DUR_SEG1" ]; then
-    echo "Segment 1 time ending, moving to next segment."
+  if [ "$remaining" -lt "$DUR_SEQUENTIAL_RUN" ]; then
+    echo "Segment 1 time ending."
     break
   fi
 
   tr="${TIME_RANGES[$(( iter % ${#TIME_RANGES[@]} ))]}"
-  
-  run_k6 "login.js" "$tr" "$VUS" "$DUR_SEG1" "seg${seg}_iter${iter}_login" "$seg"
-  run_k6 "multi_dashboard_test.js" "$tr" "$VUS" "$DUR_SEG1" "seg${seg}_iter${iter}_dashboard" "$seg"
+
+  run_k6 "login.js" "$tr" "$VUS" "$DUR_SEQUENTIAL_RUN" "seg${seg}_iter${iter}_login_seq" "$seg"
+  run_k6 "multi_dashboard_test.js" "$tr" "$VUS" "$DUR_SEQUENTIAL_RUN" "seg${seg}_iter${iter}_dash_seq" "$seg"
 
   iter=$((iter + 1))
   elapsed=$(( $(date +%s) - seg_start ))
@@ -426,9 +421,9 @@ done
 
 # --- SEGMENT 2: Parallel (Login + Dashboard) ---
 # Logic: Run parallely for the FULL segment duration.
-# If Seg=2m, we run 2m Parallel.
+# If Seg=30m, we run 30m Parallel.
 echo -e "\n=== SEGMENT 2 (Parallel) ==="
-echo "Duration: ${SEGMENT_SECONDS}s | Sub-run: ${DUR_SEG2}s"
+echo "Duration: ${SEGMENT_SECONDS}s | Sub-run: ${DUR_PARALLEL_RUN}s"
 seg=2
 seg_start=$(date +%s)
 elapsed=0
@@ -447,9 +442,9 @@ while [ "$elapsed" -lt "$SEGMENT_SECONDS" ]; do
   tr="${TIME_RANGES[$(( iter % ${#TIME_RANGES[@]} ))]}"
   
   echo "Launching Parallel Tests..."
-  run_k6 "login.js" "$tr" "$PAR_VUS" "$DUR_SEG2" "seg${seg}_iter${iter}_login_par" "$seg" &
+  run_k6 "login.js" "$tr" "$PAR_VUS" "$DUR_PARALLEL_RUN" "seg${seg}_iter${iter}_login_par" "$seg" &
   pid1=$!
-  run_k6 "multi_dashboard_test.js" "$tr" "$PAR_VUS" "$DUR_SEG2" "seg${seg}_iter${iter}_dash_par" "$seg" &
+  run_k6 "multi_dashboard_test.js" "$tr" "$PAR_VUS" "$DUR_PARALLEL_RUN" "seg${seg}_iter${iter}_dash_par" "$seg" &
   pid2=$!
   
   wait "$pid1" "$pid2"
@@ -458,31 +453,6 @@ while [ "$elapsed" -lt "$SEGMENT_SECONDS" ]; do
   elapsed=$(( $(date +%s) - seg_start ))
 done
 
-# --- SEGMENT 3: Sequential (Login -> Dashboard) ---
-# Logic: Each run is SEGMENT/2.
-# If Seg=2m, Run=1m. (Login 1m -> Dash 1m)
-echo -e "\n=== SEGMENT 3 (Sequential) ==="
-echo "Duration: ${SEGMENT_SECONDS}s | Sub-run: ${DUR_SEG3}s"
-seg=3
-seg_start=$(date +%s)
-elapsed=0
-iter=0
-
-while [ "$elapsed" -lt "$SEGMENT_SECONDS" ]; do
-  remaining=$(( SEGMENT_SECONDS - elapsed ))
-  if [ "$remaining" -lt "$DUR_SEG3" ]; then
-    echo "Segment 3 time ending."
-    break
-  fi
-
-  tr="${TIME_RANGES[$(( iter % ${#TIME_RANGES[@]} ))]}"
-
-  run_k6 "login.js" "$tr" "$VUS" "$DUR_SEG3" "seg${seg}_iter${iter}_login" "$seg"
-  run_k6 "multi_dashboard_test.js" "$tr" "$VUS" "$DUR_SEG3" "seg${seg}_iter${iter}_dashboard" "$seg"
-
-  iter=$((iter + 1))
-  elapsed=$(( $(date +%s) - seg_start ))
-done
 
 echo -e "\n✅ PHASE 1 COMPLETE."
 echo "Logs: $RESULT_DIR"
