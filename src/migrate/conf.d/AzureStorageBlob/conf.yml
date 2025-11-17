@@ -4,7 +4,7 @@ uniquekey:
   DataType: String
   ValueType: RandomFixed
   Value: "platformstoragenew/fileservices/default_\\d{2}"
-  NumUniqKey: 2377
+  NumUniqKey: 333
 
 period: 1s
 

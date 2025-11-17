@@ -16,6 +16,9 @@ import (
 	ch "vuDataSim/src/clickhouse"
 )
 
+var ErrNoPipelinesFound = fmt.Errorf("no pipelines found for provided o11y sources")
+
+
 // TopicName represents a topic name structure
 type TopicName struct {
 	Name string `yaml:"name"`
@@ -56,26 +59,6 @@ type O11ySourceConfig struct {
 	} `yaml:"include_module_dirs"`
 }
 
-// Source name translation dictionary to map between conf.yml and topics_tables.yaml naming conventions
-var sourceNameTranslation = map[string]string{
-	"LinuxMonitor":      "Linux Monitor",
-	"MongoDB":           "MongoDB",
-	"Mssql":             "MSSQL",
-	"Apache":            "Apache",
-	"Azure_Firewall":    "Azure Firewall",
-	"Azure_Redis_Cache": "Azure Redis Cache",
-	"Traces" :  "Traces",	
-	"K8s": "Kubernetes",
-}
-
-// translateSourceName translates source names between conf.yml and topics_tables.yaml naming conventions
-func (km *KafkaManager) translateSourceName(sourceName string) string {
-	if translatedName, exists := sourceNameTranslation[sourceName]; exists {
-		return translatedName
-	}
-	// Return original name if no translation found
-	return sourceName
-}
 
 // getKafkaNodeName retrieves the node name where the Kafka pod is running
 func getKafkaNodeName() (string, error) {
@@ -485,9 +468,8 @@ func (km *KafkaManager) RecreateTopicsForEnabledSources(confPath string) error {
 	var allTopics []string
 	sourceTopics := make(map[string][]string)
 	for _, source := range enabledSources {
-		translatedName := km.translateSourceName(source)
 		for _, topicGroup := range km.topics {
-			if topicGroup.Name == translatedName {
+			if topicGroup.Name == source {
 				for _, inputTopic := range topicGroup.InputTopic {
 					allTopics = append(allTopics, inputTopic.Name)
 					sourceTopics[source] = append(sourceTopics[source], inputTopic.Name)
@@ -549,9 +531,8 @@ func (km *KafkaManager) RecreateTopicsForEnabledSourcesUsingClient(confPath stri
 	var allTopics []string
 	sourceTopics := make(map[string][]string)
 	for _, source := range enabledSources {
-		translatedName := km.translateSourceName(source)
 		for _, topicGroup := range km.topics {
-			if topicGroup.Name == translatedName {
+			if topicGroup.Name == source {
 				for _, inputTopic := range topicGroup.InputTopic {
 					allTopics = append(allTopics, inputTopic.Name)
 					sourceTopics[source] = append(sourceTopics[source], inputTopic.Name)
@@ -669,40 +650,82 @@ func (km *KafkaManager) DeleteTopicsBulkUsingClient(topics []string) error {
 	return nil
 }
 
-// CreateTopicsBulkUsingClient creates multiple topics using kafka-go client
+// CreateTopicsBulkUsingClient creates multiple topics using kafka-go client with retry logic
 func (km *KafkaManager) CreateTopicsBulkUsingClient(topicMetadatas map[string]*TopicMetadata) error {
 	if len(topicMetadatas) == 0 {
 		return nil
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+	maxRetries := 3
+	retryDelay := 5 * time.Second
 
-	var topics []kafka.TopicConfig
-	for topicName, meta := range topicMetadatas {
-		topics = append(topics, kafka.TopicConfig{
-			Topic:             topicName,
-			NumPartitions:     meta.PartitionCount,
-			ReplicationFactor: meta.ReplicationFactor,
-		})
-	}
-
-	req := kafka.CreateTopicsRequest{
-		Topics: topics,
-	}
-
-	res, err := km.admin.CreateTopics(ctx, &req)
-	if err != nil {
-		logger.Error().Err(err).Msg("Failed to execute bulk create command using client")
-		return fmt.Errorf("failed to create topics: %v", err)
-	}
-
-	// Check for errors in individual topic creation
-	for topicName, topicErr := range res.Errors {
-		if topicErr != nil {
-			logger.Error().Err(topicErr).Str("topic", topicName).Msg("Failed to create topic")
-			return fmt.Errorf("failed to create topic %s: %v", topicName, topicErr)
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		if attempt > 0 {
+			logger.Info().Int("attempt", attempt+1).Int("maxRetries", maxRetries).Msg("Retrying topic creation")
+			time.Sleep(retryDelay)
 		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		
+		var topics []kafka.TopicConfig
+		for topicName, meta := range topicMetadatas {
+			topics = append(topics, kafka.TopicConfig{
+				Topic:             topicName,
+				NumPartitions:     meta.PartitionCount,
+				ReplicationFactor: meta.ReplicationFactor,
+			})
+		}
+
+		req := kafka.CreateTopicsRequest{
+			Topics: topics,
+		}
+
+		res, err := km.admin.CreateTopics(ctx, &req)
+		cancel()
+
+		if err != nil {
+			logger.Warn().Err(err).Int("attempt", attempt+1).Msg("Failed to execute bulk create command")
+			if attempt == maxRetries-1 {
+				return fmt.Errorf("failed to create topics after %d attempts: %v", maxRetries, err)
+			}
+			continue
+		}
+
+		// Check for errors in individual topic creation
+		hasErrors := false
+		retriableErrors := make(map[string]error)
+		
+		for topicName, topicErr := range res.Errors {
+			if topicErr != nil {
+				errorStr := topicErr.Error()
+				
+				// Check if error is "topic already exists" - this is retriable
+				if strings.Contains(strings.ToLower(errorStr), "already exists") ||
+				   strings.Contains(strings.ToLower(errorStr), "topicexistsexception") {
+					logger.Warn().Str("topic", topicName).Err(topicErr).Msg("Topic already exists during creation")
+					retriableErrors[topicName] = topicErr
+					hasErrors = true
+				} else {
+					// Non-retriable error - fail immediately
+					logger.Error().Err(topicErr).Str("topic", topicName).Msg("Failed to create topic with non-retriable error")
+					return fmt.Errorf("failed to create topic %s: %v", topicName, topicErr)
+				}
+			}
+		}
+
+		if !hasErrors {
+			logger.Info().Int("topics", len(topicMetadatas)).Msg("Bulk create command executed successfully using client")
+			return nil
+		}
+
+		// If we have retriable errors and haven't exhausted retries, continue
+		if attempt < maxRetries-1 {
+			logger.Warn().Int("retriableErrors", len(retriableErrors)).Msg("Encountered retriable errors, will retry")
+			continue
+		}
+
+		// Last attempt and still have errors
+		return fmt.Errorf("failed to create topics after %d attempts, %d topics still have 'already exists' errors", maxRetries, len(retriableErrors))
 	}
 
 	logger.Info().Int("topics", len(topicMetadatas)).Msg("Bulk create command executed successfully using client")
@@ -710,15 +733,15 @@ func (km *KafkaManager) CreateTopicsBulkUsingClient(topicMetadatas map[string]*T
 }
 
 // waitForTopicsDeletion waits for topics to be fully deleted before proceeding
+// waitForTopicsDeletion waits for topics to be fully deleted before proceeding
 func (km *KafkaManager) waitForTopicsDeletion(topics []string) error {
-	maxRetries := 30 // Wait up to 30 seconds (30 * 1 second)
+	maxRetries := 60 // Increased to 60 seconds for safer deletion wait
 	retryInterval := 1 * time.Second
 
 	for i := 0; i < maxRetries; i++ {
 		allDeleted := true
 
 		for _, topic := range topics {
-			// Check if topic still exists
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			req := kafka.MetadataRequest{
 				Topics: []string{topic},
@@ -733,10 +756,30 @@ func (km *KafkaManager) waitForTopicsDeletion(topics []string) error {
 				break
 			}
 
-			// If topic exists in metadata, it's not fully deleted
+			// Check if topic exists in the metadata response
 			for _, topicMeta := range res.Topics {
-				if topicMeta.Name == topic && topicMeta.Error == nil {
-					allDeleted = false
+				if topicMeta.Name == topic {
+					// Topic still exists if:
+					// 1. No error (topic is healthy)
+					// 2. Error is NOT "unknown topic" (topic is in transition state)
+					if topicMeta.Error == nil {
+						logger.Debug().Str("topic", topic).Msg("Topic still exists (no error)")
+						allDeleted = false
+						break
+					}
+					
+					// Check the error type - only consider deleted if it's specifically "unknown"
+					// You may need to adjust this based on your Kafka version's error types
+					errorStr := topicMeta.Error.Error()
+					if !strings.Contains(strings.ToLower(errorStr), "unknown") &&
+					   !strings.Contains(strings.ToLower(errorStr), "not exist") {
+						logger.Debug().Str("topic", topic).Str("error", errorStr).Msg("Topic in transition state")
+						allDeleted = false
+						break
+					}
+					
+					// If we get here, the error indicates topic doesn't exist
+					logger.Debug().Str("topic", topic).Msg("Topic confirmed deleted")
 					break
 				}
 			}
@@ -748,6 +791,8 @@ func (km *KafkaManager) waitForTopicsDeletion(topics []string) error {
 
 		if allDeleted {
 			logger.Info().Strs("topics", topics).Msg("All topics successfully deleted")
+			// Add a small extra buffer after confirmation
+			time.Sleep(2 * time.Second)
 			return nil
 		}
 
@@ -809,9 +854,8 @@ func (km *KafkaManager) GetTablesForEnabledSources(confPath string) ([]string, e
 	// Collect all tables for enabled sources
 	var allTables []string
 	for _, source := range enabledSources {
-		translatedName := km.translateSourceName(source)
 		for _, topicGroup := range km.topics {
-			if topicGroup.Name == translatedName {
+			if topicGroup.Name == source {
 				allTables = append(allTables, topicGroup.ClickhouseTables...)
 				break
 			}
@@ -858,9 +902,8 @@ func (km *KafkaManager) SchedulePodDeletion(timeoutSeconds int, o11ySources []st
 	// Step 2: Translate o11y sources and collect unique pipeline names (unchanged)
 	pipelineNames := make(map[string]bool)
 	for _, source := range o11ySources {
-		translatedName := km.translateSourceName(source)
 		for _, topicGroup := range km.topics {
-			if topicGroup.Name == translatedName {
+			if topicGroup.Name == source {
 				for _, pipeline := range topicGroup.Pipeline {
 					pipelineNames[pipeline] = true
 				}
@@ -869,8 +912,11 @@ func (km *KafkaManager) SchedulePodDeletion(timeoutSeconds int, o11ySources []st
 		}
 	}
 	if len(pipelineNames) == 0 {
-		return time.Time{}, fmt.Errorf("no pipelines found for provided o11y sources")
+		logger.Warn().Strs("o11y_sources", o11ySources).Msg("No pipelines found for provided o11y sources")
+		scheduledTime := time.Now() // or zero time, your preference
+		return scheduledTime, ErrNoPipelinesFound
 	}
+
 
 	// Calculate the scheduled time
 	scheduledTime := time.Now().Add(time.Duration(timeoutSeconds) * time.Second)

@@ -6,6 +6,7 @@ import "time"
 // TestRun represents a test run record
 type TestRun struct {
 	TestID                  string    `json:"test_id"`
+	TestName                string    `json:"test_name,omitempty"`
 	TargetEPS               int       `json:"target_eps"`
 	StartTime               time.Time `json:"start_time"`
 	EndTime                 *time.Time `json:"end_time,omitempty"`
@@ -103,10 +104,13 @@ type TestRun struct {
 	ProcessRateSummary       string    `json:"process_rate_summary,omitempty"` // JSON summary of process rates per o11y source
 	IngestionSummary         string    `json:"ingestion_summary,omitempty"` // JSON summary of hyperscale ingestion table-wise EPS data
 	PipelineInfo             string    `json:"pipeline_info,omitempty"` // JSON mapping of o11y sources to pipeline details
+	TraefikCpuAllocated      float64   `json:"traefik_cpu_allocated,omitempty"`
+	TraefikMemAllocated      float64   `json:"traefik_mem_allocated,omitempty"`
 }
 
 // TestRunStartRequest represents the request payload for starting a test run
 type TestRunStartRequest struct {
+	TestName       string   `json:"test_name,omitempty"`
 	TargetEPS      int      `json:"target_eps"`
 	O11ySources    []string `json:"o11y_sources"`
 	TimeoutSeconds int      `json:"timeout_seconds"`

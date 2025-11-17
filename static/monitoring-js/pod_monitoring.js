@@ -545,10 +545,15 @@ renderPodTable(pods) {
             this.showTrendLoading();
             console.log('Fetching trend data for pod:', this.selectedPodForTrend, 'in namespace:', this.selectedNamespace, 'test_id:', this.selectedTestID);
 
-            let url = `/api/clickhouse/pod-trend?namespace=${this.selectedNamespace}&pod=${this.selectedPodForTrend}&hours=24`;
+            const params = new URLSearchParams({
+                namespace: this.selectedNamespace,
+                pod: this.selectedPodForTrend,
+                hours: 24
+            });
             if (this.selectedTestID) {
-                url += `&test_id=${this.selectedTestID}`;
+                params.append('test_id', this.selectedTestID);
             }
+            const url = `/api/clickhouse/pod-trend?${params.toString()}`;
 
             const response = await fetch(url);
             console.log('Trend API response status:', response.status);

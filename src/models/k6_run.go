@@ -5,15 +5,16 @@ import "time"
 
 // K6Run represents a K6 test run record
 type K6Run struct {
-	TestID         string    `json:"test_id"`
-	StartTime      time.Time `json:"start_time"`
-	EndTime        *time.Time `json:"end_time,omitempty"`
-	TimeRange      string    `json:"time_range"`
-	VUs            int       `json:"vus"`
-	Iterations     int       `json:"iterations"`
-	Interval       int       `json:"interval"`
-	O11ySources    []string  `json:"o11y_sources"`
-	Status         string    `json:"status"` // 'running', 'completed', 'stopped', 'failed'
+	TestID      string     `json:"test_id"`
+	TestName    string     `json:"test_name,omitempty"`
+	StartTime   time.Time  `json:"start_time"`
+	EndTime     *time.Time `json:"end_time,omitempty"`
+	TimeRange   string     `json:"time_range"`
+	VUs         int        `json:"vus"`
+	Iterations  int        `json:"iterations"`
+	Interval    int        `json:"interval"`
+	O11ySources []string   `json:"o11y_sources"`
+	Status      string     `json:"status"` // 'running', 'completed', 'stopped', 'failed'
 }
 
 // K6RunStartRequest represents the request payload for starting a K6 test run
@@ -55,9 +56,9 @@ type K6RunDetailResponse struct {
 
 // NextK6TestIDResponse represents the response for getting the next K6 test ID
 type NextK6TestIDResponse struct {
-	Success     bool             `json:"success"`
-	Data        NextK6TestIDData `json:"data"`
-	Error       string           `json:"error,omitempty"`
+	Success bool             `json:"success"`
+	Data    NextK6TestIDData `json:"data"`
+	Error   string           `json:"error,omitempty"`
 }
 
 // NextK6TestIDData contains the next K6 test ID information

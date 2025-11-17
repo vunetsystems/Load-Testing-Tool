@@ -17,7 +17,7 @@ sources:
     pipeline:
       - "mongo-monitor"
 
-  - name: "MSSQL"
+  - name: "Mssql"
     inputTopic:
       - name: "mssql-telegraf"
     outputTopic:
@@ -70,7 +70,7 @@ sources:
     pipeline:
       - "apache-metrics"
 
-  - name: "Linux Monitor"
+  - name: "LinuxMonitor"
     inputTopic:
       - name: "linux-monitor-input"
     outputTopic:
@@ -86,14 +86,7 @@ sources:
     pipeline:
       - "linuxmonitor"
 
-  - name: "Traces"
-    inputTopic:
-      - name: "traces-input"
-    outputTopic:
-    clickhouseTables:
-    pipeline:
-
-  - name: "Kubernetes"
+  - name: "K8s"
     inputTopic:
       - name: "kubernetes-metrics-input"
     outputTopic:
@@ -114,3 +107,146 @@ sources:
       - "vmetrics_kubernetes_proxy_metrics_data"
     pipeline:
       - "kubernetes-metrics"
+  
+
+  - name: "AWS_ALB"
+    inputTopic:
+      - name: "aws-alb-metrics-input"
+    outputTopic:
+      - name: "aws-alb-metrics"
+    clickhouseTables:
+      - "vmetrics_aws_alb_metrics_data"
+    pipeline:
+      - "aws-alb-metrics"
+
+  - name: "AzureStorageBlob"
+    inputTopic:
+      - name: "vuazure-storage-blob-input"
+    outputTopic:
+      - name: "vuazure-storage-blob-output"
+    clickhouseTables:
+      - "vmetrics_vuazure_storage_blob_output_data"
+    pipeline:
+      - "azure-storage-blob"
+
+  - name: "BRUM"
+    inputTopic:
+      - name: "rum-input"
+    outputTopic: []
+    clickhouseTables:
+      - "vtraces_rum_data"
+    pipeline: []
+
+  - name: "CiscoIoSSwitch"
+    inputTopic:
+      - name: "snmp-cisco-l3switch"
+    outputTopic:
+      - name: "snmp-network-element-health"
+    clickhouseTables:
+      - "vmetrics_snmp_network_element_health_data"
+    pipeline:
+      - "snmp-cisco-switch"
+
+  - name: "Azure_Firewall"
+    inputTopic:
+      - name: "azure-firewall-input"
+    outputTopic:
+      - name: "azure-firewall-output"
+    clickhouseTables:
+      - "vmetrics_azure_firewall_data"
+    pipeline:
+      - "azure-firewall"
+
+  - name: "DNS_Monitoring"
+    inputTopic:
+      - name: "dns-metrics-input"
+    outputTopic:
+      - name: "dns-metrics"
+    clickhouseTables:
+      - "vmetrics_dns_metrics_data"
+    pipeline:
+      - "dns-metrics"
+
+  - name: "Azure_API_Management"
+    inputTopic:
+      - name: "azure-api-input"
+    outputTopic:
+      - name: "azure-api-output"
+    clickhouseTables:
+      - "vmetrics_azureapimetrics_data"
+    pipeline:
+      - "azure-api"
+
+  - name: "IBMMQ"
+    inputTopic:
+      - name: "ibm-mq-metrics-input"
+    outputTopic:
+      - name: "ibm-mq-metrics-QueueMetrics"
+      - name: "ibm-mq-metrics-ChannelMetrics"
+      - name: "ibm-mq-metrics-QMGRMetrics"
+    clickhouseTables:
+      - "vmetrics_ibm_error_logs_data"
+      - "vmetrics_ibm_mq_QueueMetrics_data"
+      - "vmetrics_ibm_mq_ChannelMetrics_data"
+      - "vmetrics_ibm_mq_QMGRMetrics_data"
+    pipeline:
+      - "ibm-mq-metrics"
+
+  - name: "Azure_Redis_Cache"
+    inputTopic:
+      - name: "azure-redis-cache-input"
+    outputTopic:
+      - name: "azure-redis-cache-metrics"
+    clickhouseTables:
+      - "vmetrics_azure_redis_cache_metrics_data"
+    pipeline:
+      - "azure-redis-cache-pipeline"
+
+  - name: "ServiceMonitor"
+    inputTopic:
+      - name: "servicebeat-metrics-input"
+    outputTopic:
+      - name: "servicebeat-metrics-output"
+    clickhouseTables:
+      - "vmetrics_servicemetrics_data"
+    pipeline:
+      - "servicebeat-availability"
+
+  - name: "SyntheticBrowserMonitoring"
+    inputTopic:
+      - name: "synthetic-browserjourney-monitoring-insights"
+    outputTopic: []
+    clickhouseTables: 
+      - "vlogs_synthetic_browserjourney_monitoring_insights_data"
+    pipeline: []
+
+  - name: "Tomcat"
+    inputTopic:
+      - name: "tomcat-metrics-input"
+    outputTopic:
+      - name: "tomcat-metrics"
+    clickhouseTables:
+      - "vmetrics_tomcatmetrics_data"
+    pipeline:
+      - "tomcat-metrics"
+
+  - name: "WebLogic"
+    inputTopic:
+      - name: "weblogic-metrics-input"
+    outputTopic:
+      - name: "weblogic-metrics"
+    clickhouseTables:
+      - "vmetrics_weblogicmetrics_data"
+    pipeline:
+      - "weblogic-metrics"
+  
+  - name: "Traces"
+    inputTopic:
+      - name: "traces-input"
+    outputTopic: []
+    clickhouseTables:
+      - "vtraces_metadata_data"
+      - "vtraces_apm_span_data"
+      - "vmetrics_apm_span_data"
+    pipeline:
+      - "traces-pipeline"
