@@ -5,12 +5,12 @@ set -euo pipefail
 # Usage
 # ======================================
 usage() {
-  echo "Usage: $0 [grafana_time_ranges_csv] [vus] [total_ingestion_duration]"
-  echo "Example: $0 \"15m,30m,5m\" 30 60m"
+  echo "Usage: $0 [grafana_time_ranges_csv] [vus] [total_ingestion_duration] [test_id]"
+  echo "Example: $0 \"15m,30m,5m\" 30 60m \"test-123\""
   exit 1
 }
 
-if [ $# -ne 3 ]; then
+if [ $# -ne 4 ]; then
   usage
 fi
 
@@ -20,6 +20,7 @@ fi
 TIME_RANGES_CSV="$1"       # "15m,30m,5m"
 VUS="$2"                   # integer
 TOTAL_DURATION_RAW="$3"    # e.g. 60m
+TEST_ID="$4"               # test identifier, e.g. "test-123"
 
 # ----------------------
 # Paths & ClickHouse
@@ -93,9 +94,9 @@ echo "============================================="
 # ----------------------
 # Create CSV headers (if missing)
 # ----------------------
-# UPDATED: dashboard_panel_metrics.csv now matches all 30 columns
-[ -f "$LOGIN_CSV" ] || echo "timestamp,test_name,avg_response_time,status_code,success_rate,vus,vus_max,duration,segment_number,iterations" > "$LOGIN_CSV"
-[ -f "$DASHBOARD_CSV" ] || echo "timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,iterations,segment_number,duration,dashboard_throughput,dashboard_error_4xx,dashboard_error_5xx,dashboard_connection_error,panel_throughput,panel_error_4xx,panel_error_5xx,panel_connection_error,panel_contribution_percent,concurrent_users,error_rate,request_rate,p95_response_time,p99_response_time" > "$DASHBOARD_CSV"
+# UPDATED: dashboard_panel_metrics.csv now matches all 31 columns (added test_id)
+[ -f "$LOGIN_CSV" ] || echo "test_id,timestamp,test_name,avg_response_time,status_code,success_rate,vus,vus_max,duration,segment_number,iterations" > "$LOGIN_CSV"
+[ -f "$DASHBOARD_CSV" ] || echo "test_id,timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,iterations,segment_number,duration,dashboard_throughput,dashboard_error_4xx,dashboard_error_5xx,dashboard_connection_error,panel_throughput,panel_error_4xx,panel_error_5xx,panel_connection_error,panel_contribution_percent,concurrent_users,error_rate,request_rate,p95_response_time,p99_response_time" > "$DASHBOARD_CSV"
 [ -f "$SUMMARY_FILE" ] || echo -e "DASHBOARD PERFORMANCE SUMMARY\n" > "$SUMMARY_FILE"
 
 # ----------------------
@@ -117,6 +118,14 @@ kubectl exec -i "$CLICKHOUSE_POD" -n "$CLICKHOUSE_NS" -- \
 kubectl exec -i "$CLICKHOUSE_POD" -n "$CLICKHOUSE_NS" -- \
   clickhouse-client -d "$CLICKHOUSE_DB" --user "$CLICKHOUSE_USER" --password "$CLICKHOUSE_PASS" -q \
   "ALTER TABLE monitoring.k6_results ADD COLUMN IF NOT EXISTS iterations UInt64 DEFAULT 0;"
+
+kubectl exec -i "$CLICKHOUSE_POD" -n "$CLICKHOUSE_NS" -- \
+  clickhouse-client -d "$CLICKHOUSE_DB" --user "$CLICKHOUSE_USER" --password "$CLICKHOUSE_PASS" -q \
+  "ALTER TABLE monitoring.k6_login ADD COLUMN IF NOT EXISTS test_id String DEFAULT '';"
+
+kubectl exec -i "$CLICKHOUSE_POD" -n "$CLICKHOUSE_NS" -- \
+  clickhouse-client -d "$CLICKHOUSE_DB" --user "$CLICKHOUSE_USER" --password "$CLICKHOUSE_PASS" -q \
+  "ALTER TABLE monitoring.k6_results ADD COLUMN IF NOT EXISTS test_id String DEFAULT '';"
 
 # ----------------------
 # Helper: run k6
@@ -155,9 +164,9 @@ run_k6() {
 
   # Parse and insert immediately
   if [[ "$script_name" == "login.js" ]]; then
-    parse_and_insert_login "$out" "$vus" "${duration_sec}s" "$segnum" "$K6_JSON"
+    parse_and_insert_login "$out" "$vus" "${duration_sec}s" "$segnum" "$K6_JSON" "$TEST_ID"
   else
-    parse_and_insert_dashboard "$out" "$time_range" "$vus" "${duration_sec}s" "$segnum" "$K6_JSON"
+    parse_and_insert_dashboard "$out" "$time_range" "$vus" "${duration_sec}s" "$segnum" "$K6_JSON" "$TEST_ID"
   fi
 }
 
@@ -170,6 +179,7 @@ parse_and_insert_login() {
   local duration_str="$3"
   local segnum="$4"
   local K6_JSON="$5"
+  local test_id="$6"
 
   # Get total iterations and req/sec from JSON
   iterations=0
@@ -182,7 +192,7 @@ parse_and_insert_login() {
   # Temp file for THIS run only
   local temp_csv="${RESULT_DIR}/temp_login_$(date +%s%N).csv"
   # This header matches the k6_login table + new columns
-  echo "timestamp,test_name,avg_response_time,status_code,success_rate,throughput_rps,error_4xx,error_5xx,error_connection,response_size_bytes,vus,vus_max,duration,segment_number,iterations" > "$temp_csv"
+  echo "test_id,timestamp,test_name,avg_response_time,status_code,success_rate,throughput_rps,error_4xx,error_5xx,error_connection,response_size_bytes,vus,vus_max,duration,segment_number,iterations" > "$temp_csv"
 
   # Read log line by line
   grep -E "Login (successful|failed)" "$login_output" | while IFS= read -r line; do
@@ -225,7 +235,7 @@ parse_and_insert_login() {
 
     RESPONSE_SIZE=-1 # Not captured
 
-    row="\"$timestamp\",login,$RESPONSE_TIME,$STATUS,$SUCCESS_RATE,$THROUGHPUT,$error_4xx,$error_5xx,$error_connection,$RESPONSE_SIZE,$vus,$vus,\"$duration_str\",$segnum,$iterations"
+    row="\"$test_id\",\"$timestamp\",login,$RESPONSE_TIME,$STATUS,$SUCCESS_RATE,$THROUGHPUT,$error_4xx,$error_5xx,$error_connection,$RESPONSE_SIZE,$vus,$vus,\"$duration_str\",$segnum,$iterations"
     echo "$row" >> "$temp_csv"
     echo "$row" >> "$LOGIN_CSV"
   done
@@ -236,7 +246,7 @@ parse_and_insert_login() {
     tail -n +2 "$temp_csv" | \
       kubectl exec -i "$CLICKHOUSE_POD" -n "$CLICKHOUSE_NS" -- \
       clickhouse-client -d "$CLICKHOUSE_DB" --user "$CLICKHOUSE_USER" --password "$CLICKHOUSE_PASS" \
-      -q "INSERT INTO monitoring.k6_login (timestamp,test_name,avg_response_time,status_code,success_rate,throughput_rps,error_4xx,error_5xx,error_connection,response_size_bytes,vus,vus_max,duration,segment_number,iterations) FORMAT CSV"
+      -q "INSERT INTO monitoring.k6_login (test_id,timestamp,test_name,avg_response_time,status_code,success_rate,throughput_rps,error_4xx,error_5xx,error_connection,response_size_bytes,vus,vus_max,duration,segment_number,iterations) FORMAT CSV"
   fi
   rm -f "$temp_csv"
 }
@@ -252,6 +262,7 @@ parse_and_insert_dashboard() {
   local duration_str="$4"
   local segnum="$5"
   local K6_JSON="$6"
+  local test_id="$7"
 
   # Get total iterations from JSON
   iterations=0
@@ -262,8 +273,8 @@ parse_and_insert_dashboard() {
   # Temp file for THIS run only
   local temp_csv="${RESULT_DIR}/temp_dash_$(date +%s%N).csv"
   
-  # This header MUST match the 30 columns in the printf statements below
-  echo "timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,iterations,segment_number,duration,dashboard_throughput,dashboard_error_4xx,dashboard_error_5xx,dashboard_connection_error,panel_throughput,panel_error_4xx,panel_error_5xx,panel_connection_error,panel_contribution_percent,concurrent_users,error_rate,request_rate,p95_response_time,p99_response_time" > "$temp_csv"
+  # This header MUST match the 31 columns in the printf statements below
+  echo "test_id,timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,iterations,segment_number,duration,dashboard_throughput,dashboard_error_4xx,dashboard_error_5xx,dashboard_connection_error,panel_throughput,panel_error_4xx,panel_error_5xx,panel_connection_error,panel_contribution_percent,concurrent_users,error_rate,request_rate,p95_response_time,p99_response_time" > "$temp_csv"
 
   # These variables will hold the data from the [DASHBOARD_DATA] line
   # to be used by subsequent [PANEL_DATA] lines
@@ -313,8 +324,8 @@ parse_and_insert_dashboard() {
       # All panel-specific fields are 0 or ''
       # All aggregate fields (26-30) are 0
       local row
-      row=$(printf "\"%s\",\"%s\",%s,%s,\"%s\",%s,%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" \
-        "$timestamp" "$current_dash_name" "$current_dash_response_time" \
+      row=$(printf "\"%s\",\"%s\",\"%s\",%s,%s,\"%s\",%s,%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" \
+        "$test_id" "$timestamp" "$current_dash_name" "$current_dash_response_time" \
         0 "" "$current_dash_status" "$current_dash_success_rate" \
         0 0 0 \
         "$time_range" "$vus" "$vus" "$iterations" "$segnum" "$duration_str" \
@@ -353,8 +364,8 @@ parse_and_insert_dashboard() {
       # We use the 'current_dash_*' variables saved from the last dashboard line
       # All aggregate fields (26-30) are 0
       local row
-      row=$(printf "\"%s\",\"%s\",%s,%s,\"%s\",%s,%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" \
-        "$timestamp" "$current_dash_name" "$current_dash_response_time" \
+      row=$(printf "\"%s\",\"%s\",\"%s\",%s,%s,\"%s\",%s,%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" \
+        "$test_id" "$timestamp" "$current_dash_name" "$current_dash_response_time" \
         "$panel_id" "$panel_name" "$current_dash_status" "$current_dash_success_rate" \
         "$panel_status" "$panel_success_rate" "$panel_resp_time" \
         "$time_range" "$vus" "$vus" "$iterations" "$segnum" "$duration_str" \
@@ -377,7 +388,7 @@ parse_and_insert_dashboard() {
     tail -n +2 "$temp_csv" | \
       kubectl exec -i "$CLICKHOUSE_POD" -n "$CLICKHOUSE_NS" -- \
       clickhouse-client -d "$CLICKHOUSE_DB" --user "$CLICKHOUSE_USER" --password "$CLICKHOUSE_PASS" \
-      -q "INSERT INTO monitoring.k6_results (timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,iterations,segment_number,duration,dashboard_throughput,dashboard_error_4xx,dashboard_error_5xx,dashboard_connection_error,panel_throughput,panel_error_4xx,panel_error_5xx,panel_connection_error,panel_contribution_percent,concurrent_users,error_rate,request_rate,p95_response_time,p99_response_time) FORMAT CSV"
+      -q "INSERT INTO monitoring.k6_results (test_id,timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,iterations,segment_number,duration,dashboard_throughput,dashboard_error_4xx,dashboard_error_5xx,dashboard_connection_error,panel_throughput,panel_error_4xx,panel_error_5xx,panel_connection_error,panel_contribution_percent,concurrent_users,error_rate,request_rate,p95_response_time,p99_response_time) FORMAT CSV"
   fi
   rm -f "$temp_csv"
 }
