@@ -132,6 +132,15 @@ func RunMigrations() error {
 		}
 	}
 
+	// Add Overall_Dashboard_Load_Times column to k6_runs table if it doesn't exist
+	if !columnExists("k6_runs", "Overall_Dashboard_Load_Times") {
+		alterSQL := "ALTER TABLE k6_runs ADD COLUMN Overall_Dashboard_Load_Times TEXT;"
+		_, err = DB.Exec(alterSQL)
+		if err != nil {
+			return fmt.Errorf("failed to add Overall_Dashboard_Load_Times column to k6_runs: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -253,6 +262,8 @@ func runSchemaUpdates() error {
 		"ch1_node_mem_total":                         "REAL DEFAULT 0.0",
 		"ch2_node_cpu_total":                         "REAL DEFAULT 0.0",
 		"ch2_node_mem_total":                         "REAL DEFAULT 0.0",
+		"pods_cpu":                                   "TEXT", // JSON string for pod CPU metrics with node_name
+		"pods_memory":                                "TEXT", // JSON string for pod memory metrics with node_name
 	}
 
 	for name, def := range columnsToAdd {

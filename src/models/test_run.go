@@ -106,6 +106,8 @@ type TestRun struct {
 	PipelineInfo             string    `json:"pipeline_info,omitempty"` // JSON mapping of o11y sources to pipeline details
 	TraefikCpuAllocated      float64   `json:"traefik_cpu_allocated,omitempty"`
 	TraefikMemAllocated      float64   `json:"traefik_mem_allocated,omitempty"`
+	PodsCpu                  string    `json:"pods_cpu,omitempty"` // JSON string for pod CPU metrics
+	PodsMemory               string    `json:"pods_memory,omitempty"` // JSON string for pod memory metrics
 }
 
 // TestRunStartRequest represents the request payload for starting a test run
