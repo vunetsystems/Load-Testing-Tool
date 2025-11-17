@@ -101,6 +101,25 @@ type PodMetrics struct {
 	TraefikMemAllocated     float64
 }
 
+// PodStatWithNode represents pod resource usage data including node_name
+type PodStatWithNode struct {
+	PodName        string
+	ContainerName  string  // For pipeline pods
+	MaxUsedCPU     float64
+	MinUsedCPU     float64
+	AvgUsedCPU     float64
+	CPULimit       float64
+	MaxUsedMemory  float64
+	MinUsedMemory  float64
+	AvgUsedMemory  float64
+	MemoryLimit    float64
+	UsedCPUCores   float64 // For pipeline pods
+	UsedMemoryGB   float64 // For pipeline pods
+	CPULimitCores  float64 // For pipeline pods
+	MemoryLimitGB  float64 // For pipeline pods
+	NodeName       string  // New field for node name
+}
+
 
 
 
@@ -430,9 +449,6 @@ func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, testID str
 	}
 
 	summary, found := ComputePodStats(stats)
-	if !found {
-		return PodMetrics{}, false, nil
-	}
 
 	// Get test run to fetch o11y_sources
 	testRun, err := database.GetTestRun(testID)
@@ -475,6 +491,10 @@ func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, testID str
 						for k, v := range pipelineSummary {
 							summary[k] = v
 						}
+						// Update found if pipeline has data
+						if len(pipelineSummary) > 0 {
+							found = true
+						}
 					}
 				}
 			}
@@ -492,6 +512,15 @@ func ProcessPodResourceSummary(chClient *clickhouse.ClickHouseClient, testID str
 		traefikCpuAllocated, traefikMemAllocated := ComputeTraefikPodStats(traefikStats)
 		metrics.TraefikCpuAllocated = traefikCpuAllocated
 		metrics.TraefikMemAllocated = traefikMemAllocated
+		// Update found flag if Traefik has allocated resources
+		if traefikCpuAllocated > 0 || traefikMemAllocated > 0 {
+			found = true
+		}
+	}
+
+	// If no metrics found at all, return false
+	if !found {
+		return PodMetrics{}, false, nil
 	}
 
 	if podData, exists := summary["kafka-cluster-cp-kafka-0"]; exists {
@@ -669,6 +698,101 @@ func avgSlice(vals []float64) float64 {
 // 	}
 // }
 
+func FetchPipelinePodMetricsWithNode(chClient *clickhouse.ClickHouseClient, pipelines map[string]bool, start, end time.Time) ([]PodStatWithNode, error) {
+	if len(pipelines) == 0 {
+		return nil, nil
+	}
+
+	// Build the LIKE conditions for pipelines
+	conditions := make([]string, 0, len(pipelines))
+	for p := range pipelines {
+		conditions = append(conditions, fmt.Sprintf("pod_name LIKE '%s%%'", p))
+	}
+	pipelineCondition := strings.Join(conditions, " OR ")
+
+	query := fmt.Sprintf(`
+WITH per_container AS (
+    SELECT
+        pod_name,
+        container_name,
+        node_name,
+
+        -- Max values (include all)
+        MAX(cpu_usage_nanocores) / 1000000000. AS max_cpu,
+        MAX(resource_limits_millicpu_units) / 1000 AS cpu_limit,
+        MAX(memory_usage_bytes) / 1073741824 AS max_mem,
+        MAX(resource_limits_memory_bytes) / 1073741824 AS mem_limit,
+
+        -- Min and Avg values (ignore 0 or negative)
+        MINIf(cpu_usage_nanocores / 1000000000., cpu_usage_nanocores > 0) AS min_cpu,
+        AVGIf(cpu_usage_nanocores / 1000000000., cpu_usage_nanocores > 0) AS avg_cpu,
+        MINIf(memory_usage_bytes / 1073741824, memory_usage_bytes > 0) AS min_mem,
+        AVGIf(memory_usage_bytes / 1073741824, memory_usage_bytes > 0) AS avg_mem
+
+    FROM monitoring.kubernetes_pod_container_data
+    WHERE (%s)
+      AND pod_name NOT LIKE '%%debug%%'
+      AND timestamp >= toDateTime('%s')
+      AND timestamp <= toDateTime('%s')
+    GROUP BY pod_name, container_name, node_name
+)
+SELECT
+    pod_name,
+    node_name,
+    sum(max_cpu) AS max_used_cpu,
+    sum(min_cpu) AS min_used_cpu,
+    sum(avg_cpu) AS avg_used_cpu,
+    sum(cpu_limit) AS cpu_limit,
+    sum(max_mem) AS max_used_memory,
+    sum(min_mem) AS min_used_memory,
+    sum(avg_mem) AS avg_used_memory,
+    sum(mem_limit) AS memory_limit
+FROM per_container
+GROUP BY pod_name, node_name
+ORDER BY pod_name ASC
+`, pipelineCondition, start.Format("2006-01-02 15:04:05"), end.Format("2006-01-02 15:04:05"))
+
+	logger.LogWithNode("System", "PipelinePodFetcherWithNode", fmt.Sprintf("Running ClickHouse query:\n%s", query), "debug")
+
+	rows, err := chClient.Client.Query(context.Background(), query)
+	if err != nil {
+		return nil, fmt.Errorf("query execution failed: %w", err)
+	}
+	defer rows.Close()
+
+	var stats []PodStatWithNode
+	for rows.Next() {
+		var stat PodStatWithNode
+		if err := rows.Scan(
+			&stat.PodName,
+			&stat.NodeName,
+			&stat.MaxUsedCPU,
+			&stat.MinUsedCPU,
+			&stat.AvgUsedCPU,
+			&stat.CPULimit,
+			&stat.MaxUsedMemory,
+			&stat.MinUsedMemory,
+			&stat.AvgUsedMemory,
+			&stat.MemoryLimit,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan pipeline pod metrics with node: %w", err)
+		}
+		stats = append(stats, stat)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	if len(stats) == 0 {
+		logger.LogWithNode("System", "PipelinePodFetcherWithNode", "No pipeline pod metrics found for given time range", "warn")
+	} else {
+		logger.LogSuccess("System", "PipelinePodFetcherWithNode", fmt.Sprintf("Fetched %d pipeline pod metric rows", len(stats)))
+	}
+
+	return stats, nil
+}
+
 func FetchPipelinePodMetrics(chClient *clickhouse.ClickHouseClient, pipelines map[string]bool, start, end time.Time) ([]PodStat, error) {
 	if len(pipelines) == 0 {
 		return nil, nil
@@ -761,6 +885,87 @@ ORDER BY pod_name ASC
 	return stats, nil
 }
 
+func FetchTraefikPodMetricsWithNode(chClient *clickhouse.ClickHouseClient, start, end time.Time) ([]PodStatWithNode, error) {
+	query := fmt.Sprintf(`
+WITH per_container AS (
+	   SELECT
+	       pod_name,
+	       container_name,
+	       node_name,
+
+	       -- Max values (include all)
+	       MAX(cpu_usage_nanocores) / 1000000000. AS max_cpu,
+	       MAX(resource_limits_millicpu_units) / 1000 AS cpu_limit,
+	       MAX(memory_usage_bytes) / 1073741824 AS max_mem,
+	       MAX(resource_limits_memory_bytes) / 1073741824 AS mem_limit,
+
+	       -- Min and Avg values (ignore 0 or negative)
+	       MINIf(cpu_usage_nanocores / 1000000000., cpu_usage_nanocores > 0) AS min_cpu,
+	       AVGIf(cpu_usage_nanocores / 1000000000., cpu_usage_nanocores > 0) AS avg_cpu,
+	       MINIf(memory_usage_bytes / 1073741824, memory_usage_bytes > 0) AS min_mem,
+	       AVGIf(memory_usage_bytes / 1073741824, memory_usage_bytes > 0) AS avg_mem
+
+	   FROM monitoring.kubernetes_pod_container_data
+	   WHERE pod_name LIKE 'traefik-%%'
+	     AND timestamp >= toDateTime('%s')
+	     AND timestamp <= toDateTime('%s')
+	   GROUP BY pod_name, container_name, node_name
+)
+SELECT
+	   pod_name,
+	   node_name,
+	   sum(max_cpu) AS max_used_cpu,
+	   sum(min_cpu) AS min_used_cpu,
+	   sum(avg_cpu) AS avg_used_cpu,
+	   sum(cpu_limit) AS cpu_limit,
+	   sum(max_mem) AS max_used_memory,
+	   sum(min_mem) AS min_used_memory,
+	   sum(avg_mem) AS avg_used_memory,
+	   sum(mem_limit) AS memory_limit
+FROM per_container
+GROUP BY pod_name, node_name
+ORDER BY pod_name ASC
+`, start.Format("2006-01-02 15:04:05"), end.Format("2006-01-02 15:04:05"))
+
+	rows, err := chClient.Client.Query(context.Background(), query)
+	if err != nil {
+		return nil, fmt.Errorf("query execution failed: %w", err)
+	}
+	defer rows.Close()
+
+	var stats []PodStatWithNode
+	for rows.Next() {
+		var stat PodStatWithNode
+		if err := rows.Scan(
+			&stat.PodName,
+			&stat.NodeName,
+			&stat.MaxUsedCPU,
+			&stat.MinUsedCPU,
+			&stat.AvgUsedCPU,
+			&stat.CPULimit,
+			&stat.MaxUsedMemory,
+			&stat.MinUsedMemory,
+			&stat.AvgUsedMemory,
+			&stat.MemoryLimit,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan traefik pod metrics with node: %w", err)
+		}
+		stats = append(stats, stat)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	if len(stats) == 0 {
+		logger.LogWithNode("System", "TraefikPodFetcherWithNode", "No traefik pod metrics found for given time range", "warn")
+	} else {
+		logger.LogSuccess("System", "TraefikPodFetcherWithNode", fmt.Sprintf("Fetched %d traefik pod metric rows", len(stats)))
+	}
+
+	return stats, nil
+}
+
 func FetchTraefikPodMetrics(chClient *clickhouse.ClickHouseClient, start, end time.Time) ([]PodStat, error) {
 	query := fmt.Sprintf(`
 WITH per_container AS (
@@ -777,13 +982,13 @@ WITH per_container AS (
 )
 SELECT
 	   pod_name,
-	   0 AS max_used_cpu,
-	   0 AS min_used_cpu,
-	   0 AS avg_used_cpu,
+	   0.0 AS max_used_cpu,
+	   0.0 AS min_used_cpu,
+	   0.0 AS avg_used_cpu,
 	   sum(cpu_limit) AS cpu_limit,
-	   0 AS max_used_memory,
-	   0 AS min_used_memory,
-	   0 AS avg_used_memory,
+	   0.0 AS max_used_memory,
+	   0.0 AS min_used_memory,
+	   0.0 AS avg_used_memory,
 	   sum(mem_limit) AS memory_limit
 FROM per_container
 GROUP BY pod_name
@@ -881,4 +1086,186 @@ func ComputeTraefikPodStats(stats []PodStat) (float64, float64) {
         totalMem += stat.MemoryLimit
     }
     return totalCpu, totalMem
+}
+
+func FetchPodMetricsWithNode(chClient *clickhouse.ClickHouseClient, start, end time.Time) ([]PodStatWithNode, error) {
+	query := fmt.Sprintf(`
+WITH per_container AS (
+    SELECT
+        pod_name,
+        container_name,
+        node_name,
+
+        -- Max values (include all)
+        MAX(cpu_usage_nanocores) / 1000000000. AS max_cpu,
+        MAX(resource_limits_millicpu_units) / 1000 AS cpu_limit,
+        MAX(memory_usage_bytes) / 1073741824 AS max_mem,
+        MAX(resource_limits_memory_bytes) / 1073741824 AS mem_limit,
+
+        -- Min and Avg values (ignore 0 or negative)
+        MINIf(cpu_usage_nanocores / 1000000000., cpu_usage_nanocores > 0) AS min_cpu,
+        AVGIf(cpu_usage_nanocores / 1000000000., cpu_usage_nanocores > 0) AS avg_cpu,
+        MINIf(memory_usage_bytes / 1073741824, memory_usage_bytes > 0) AS min_mem,
+        AVGIf(memory_usage_bytes / 1073741824, memory_usage_bytes > 0) AS avg_mem
+
+    FROM monitoring.kubernetes_pod_container_data
+    WHERE pod_name IN (
+        'chi-clickhouse-vusmart-0-0-0',
+        'chi-clickhouse-vusmart-0-1-0',
+        'kafka-cluster-cp-kafka-0',
+        'kafka-cluster-cp-kafka-1',
+        'kafka-cluster-cp-kafka-2'
+    )
+      AND timestamp >= toDateTime('%s')
+      AND timestamp <= toDateTime('%s')
+    GROUP BY pod_name, container_name, node_name
+)
+SELECT
+    pod_name,
+    node_name,
+    sum(max_cpu) AS max_used_cpu,
+    sum(min_cpu) AS min_used_cpu,
+    sum(avg_cpu) AS avg_used_cpu,
+    sum(cpu_limit) AS cpu_limit,
+    sum(max_mem) AS max_used_memory,
+    sum(min_mem) AS min_used_memory,
+    sum(avg_mem) AS avg_used_memory,
+    sum(mem_limit) AS memory_limit
+FROM per_container
+GROUP BY pod_name, node_name
+ORDER BY pod_name ASC
+`, start.Format("2006-01-02 15:04:05"), end.Format("2006-01-02 15:04:05"))
+
+	rows, err := chClient.Client.Query(context.Background(), query)
+	if err != nil {
+		return nil, fmt.Errorf("query execution failed: %w", err)
+	}
+	defer rows.Close()
+
+	var stats []PodStatWithNode
+	for rows.Next() {
+		var stat PodStatWithNode
+		if err := rows.Scan(
+			&stat.PodName,
+			&stat.NodeName,
+			&stat.MaxUsedCPU,
+			&stat.MinUsedCPU,
+			&stat.AvgUsedCPU,
+			&stat.CPULimit,
+			&stat.MaxUsedMemory,
+			&stat.MinUsedMemory,
+			&stat.AvgUsedMemory,
+			&stat.MemoryLimit,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan pod metrics with node: %w", err)
+		}
+		stats = append(stats, stat)
+	}
+	return stats, nil
+}
+
+// ComputePodJSONMetrics computes pods_cpu and pods_memory as JSON-serializable maps
+func ComputePodJSONMetrics(stats []PodStatWithNode) (map[string]interface{}, map[string]interface{}, bool) {
+	if len(stats) == 0 {
+		return nil, nil, false
+	}
+
+	podsCPU := make(map[string]interface{})
+	podsMemory := make(map[string]interface{})
+
+	calcPercent := func(value, limit float64) float64 {
+		if limit == 0 {
+			return 0
+		}
+		return (value / limit) * 100
+	}
+
+	for _, s := range stats {
+		// CPU metrics with node_name
+		podsCPU[s.PodName] = map[string]interface{}{
+			"allocated": s.CPULimit,
+			"min":       calcPercent(s.MinUsedCPU, s.CPULimit),
+			"avg":       calcPercent(s.AvgUsedCPU, s.CPULimit),
+			"max":       calcPercent(s.MaxUsedCPU, s.CPULimit),
+			"node_name": s.NodeName,
+		}
+
+		// Memory metrics with node_name
+		podsMemory[s.PodName] = map[string]interface{}{
+			"allocated": s.MemoryLimit,
+			"min":       calcPercent(s.MinUsedMemory, s.MemoryLimit),
+			"avg":       calcPercent(s.AvgUsedMemory, s.MemoryLimit),
+			"max":       calcPercent(s.MaxUsedMemory, s.MemoryLimit),
+			"node_name": s.NodeName,
+		}
+	}
+
+	return podsCPU, podsMemory, true
+}
+
+// ProcessPodResourceSummaryWithNode processes pod resource metrics with node_name and returns JSON columns
+func ProcessPodResourceSummaryWithNode(chClient *clickhouse.ClickHouseClient, testID string, start, end time.Time) (map[string]interface{}, map[string]interface{}, bool, error) {
+	coreStats, err := FetchPodMetricsWithNode(chClient, start, end)
+	if err != nil {
+		return nil, nil, false, err
+	}
+
+	// Get test run to fetch o11y_sources for pipeline pods
+	testRun, err := database.GetTestRun(testID)
+	if err != nil {
+		logger.LogWarning("System", "PodResourceProcessorWithNode", fmt.Sprintf("Failed to get test run %s: %v", testID, err))
+		// Continue without pipeline pods
+	} else {
+		// Load topics_tables.yaml
+		yamlData, err := os.ReadFile("src/configs/topics_tables.yaml")
+		if err != nil {
+			logger.LogWarning("System", "PodResourceProcessorWithNode", fmt.Sprintf("Failed to read topics_tables.yaml: %v", err))
+		} else {
+			var cfg TopicsConfig
+			err = yaml.Unmarshal(yamlData, &cfg)
+			if err != nil {
+				logger.LogWarning("System", "PodResourceProcessorWithNode", fmt.Sprintf("Failed to parse YAML: %v", err))
+			} else {
+				// Map o11y_sources to pipelines
+				pipelines := make(map[string]bool)
+				for _, src := range testRun.O11ySources {
+					for _, s := range cfg.Sources {
+						if strings.ToLower(strings.ReplaceAll(s.Name, " ", "")) == strings.ToLower(strings.ReplaceAll(src, " ", "")) {
+							for _, p := range s.Pipeline {
+								pipelines[p] = true
+							}
+							break
+						}
+					}
+				}
+
+				if len(pipelines) > 0 {
+					// Fetch pipeline pod metrics with node
+					pipelineStats, err := FetchPipelinePodMetricsWithNode(chClient, pipelines, start, end)
+					if err != nil {
+						logger.LogWarning("System", "PodResourceProcessorWithNode", fmt.Sprintf("Failed to fetch pipeline pod metrics with node: %v", err))
+					} else {
+						// Merge pipeline stats with core stats for JSON computation
+						coreStats = append(coreStats, pipelineStats...)
+					}
+				}
+			}
+		}
+	}
+
+	// Fetch Traefik pod metrics with node
+	traefikStats, err := FetchTraefikPodMetricsWithNode(chClient, start, end)
+	if err != nil {
+		logger.LogWarning("System", "PodResourceProcessorWithNode", fmt.Sprintf("Failed to fetch traefik pod metrics with node: %v", err))
+	} else {
+		// Merge traefik stats with core stats for JSON computation
+		coreStats = append(coreStats, traefikStats...)
+	}
+
+	podsCPU, podsMemory, found := ComputePodJSONMetrics(coreStats)
+	if !found {
+		return nil, nil, false, nil
+	}
+
+	return podsCPU, podsMemory, true, nil
 }
