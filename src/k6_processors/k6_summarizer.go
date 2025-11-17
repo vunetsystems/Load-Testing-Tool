@@ -255,6 +255,92 @@ func QueryK6LoginMetrics(ctx context.Context, chClient clickhouse.Conn, testID s
 	return &metrics, nil
 }
 
+// QueryK6DashboardLoadTimes queries ClickHouse for dashboard load times for a specific test run
+func QueryK6DashboardLoadTimes(ctx context.Context, chClient clickhouse.Conn, testID string) (*models.K6DashboardLoadTimes, error) {
+	logger.LogWithNode("System", "K6Summarizer", fmt.Sprintf("Querying K6 dashboard load times for test run %s", testID), "info")
+
+	query := `
+		SELECT
+		    dashboard_name,
+		    segment_number AS segment,
+		    time_range,
+
+		    -- Total loads
+		    count() AS total_loads,
+
+		    -- Successful loads
+		    countIf(dashboard_status = 200) AS success_loads,
+
+		    -- Failed loads (any non-200)
+		    countIf(dashboard_status != 200) AS failed_loads,
+
+		    -- Error type counts
+		    sum(dashboard_error_4xx) AS errors_4xx,
+		    sum(dashboard_error_5xx) AS errors_5xx,
+		    sum(dashboard_connection_error) AS errors_conn,
+
+		    -- Success rate
+		    avg(dashboard_success_rate) AS success_rate,
+
+		    -- Avg load time (successful only)
+		    avgIf(dashboard_avg_response_time, dashboard_status = 200) AS avg_load_ms,
+
+		    -- P95 load time (successful only)
+		    quantileIf(0.95)(dashboard_avg_response_time, dashboard_status = 200) AS p95_load_ms
+
+		FROM monitoring.k6_results
+		WHERE panel_id = 0
+		  AND test_id = ?
+
+		GROUP BY
+		    dashboard_name,
+		    segment_number,
+		    time_range
+
+		ORDER BY
+		    dashboard_name,
+		    segment_number,
+		    time_range
+	`
+
+	rows, err := chClient.Query(ctx, query, testID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query K6 dashboard load times: %w", err)
+	}
+	defer rows.Close()
+
+	var dashboardLoadTimes models.K6DashboardLoadTimes
+	for rows.Next() {
+		var entry models.K6DashboardLoadTimeEntry
+		err := rows.Scan(
+			&entry.DashboardName,
+			&entry.Segment,
+			&entry.TimeRange,
+			&entry.TotalLoads,
+			&entry.SuccessLoads,
+			&entry.FailedLoads,
+			&entry.Errors4xx,
+			&entry.Errors5xx,
+			&entry.ErrorsConn,
+			&entry.SuccessRate,
+			&entry.AvgLoadMs,
+			&entry.P95LoadMs,
+		)
+		if err != nil {
+			logger.LogWarning("System", "K6Summarizer", fmt.Sprintf("Failed to scan dashboard load time row: %v", err))
+			continue
+		}
+		dashboardLoadTimes = append(dashboardLoadTimes, entry)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error reading dashboard load time rows: %w", err)
+	}
+
+	logger.LogWithNode("System", "K6Summarizer", fmt.Sprintf("Retrieved %d dashboard load time entries for test run %s", len(dashboardLoadTimes), testID), "info")
+	return &dashboardLoadTimes, nil
+}
+
 // ComputeK6Summary computes the summary statistics from raw segment data
 func ComputeK6Summary(testID string, startTime, endTime time.Time, segments []K6Segment) *K6Summary {
 	duration := endTime.Sub(startTime)
@@ -313,6 +399,12 @@ func GenerateK6SummaryForTestRun(db *sql.DB, chClient clickhouse.Conn, testID st
 		return fmt.Errorf("failed to query K6 login metrics: %w", err)
 	}
 
+	// Query K6 dashboard load times
+	dashboardLoadTimes, err := QueryK6DashboardLoadTimes(ctx, chClient, testID)
+	if err != nil {
+		return fmt.Errorf("failed to query K6 dashboard load times: %w", err)
+	}
+
 	// Compute summary
 	summary := ComputeK6Summary(testID, testRun.StartTime, *testRun.EndTime, segments)
 
@@ -336,6 +428,12 @@ func GenerateK6SummaryForTestRun(db *sql.DB, chClient clickhouse.Conn, testID st
 	err = database.UpdateK6RunMetrics(testID, metrics)
 	if err != nil {
 		return fmt.Errorf("failed to update test run metrics: %w", err)
+	}
+
+	// Store dashboard load times in database
+	err = database.UpdateK6RunDashboardLoadTimes(testID, dashboardLoadTimes)
+	if err != nil {
+		return fmt.Errorf("failed to update test run dashboard load times: %w", err)
 	}
 
 	logger.LogSuccess("System", "K6Summarizer", fmt.Sprintf("Generated K6 summary for test run %s", testID))

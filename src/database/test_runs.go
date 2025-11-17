@@ -88,7 +88,8 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 			   min_output_msgs_per_sec, avg_output_msgs_per_sec, max_output_msgs_per_sec,
 			   min_lag, avg_lag, max_lag,
 			   data_loss_pct, kafka_summary_generated, pod_resource_check,
-			   process_rate_summary, ingestion_summary, traefik_cpu_allocated, traefik_mem_allocated
+			   process_rate_summary, ingestion_summary, traefik_cpu_allocated, traefik_mem_allocated,
+			   pods_cpu, pods_memory
 		FROM test_runs WHERE test_id = ?`
 
 	var testRun models.TestRun
@@ -188,6 +189,8 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 		&ingestionSummary,
 		&testRun.TraefikCpuAllocated,
 		&testRun.TraefikMemAllocated,
+		&testRun.PodsCpu,
+		&testRun.PodsMemory,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -245,7 +248,8 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			   min_output_msgs_per_sec, avg_output_msgs_per_sec, max_output_msgs_per_sec,
 			   min_lag, avg_lag, max_lag,
 			   data_loss_pct, kafka_summary_generated, pod_resource_check,
-			   process_rate_summary, ingestion_summary, traefik_cpu_allocated, traefik_mem_allocated
+			   process_rate_summary, ingestion_summary, traefik_cpu_allocated, traefik_mem_allocated,
+			   pods_cpu, pods_memory
 		FROM test_runs ORDER BY start_time DESC`
 
 	rows, err := DB.Query(query)
@@ -353,6 +357,8 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			&ingestionSummary,
 			&testRun.TraefikCpuAllocated,
 			&testRun.TraefikMemAllocated,
+			&testRun.PodsCpu,
+			&testRun.PodsMemory,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan test run: %w", err)
@@ -419,5 +425,15 @@ func CompleteTimedOutTestRuns() error {
 		return fmt.Errorf("failed to complete timed out test runs: %w", err)
 	}
 
+	return nil
+}
+
+// UpdateTestRunPodMetrics updates the pods_cpu and pods_memory JSON fields for a test run
+func UpdateTestRunPodMetrics(testID string, podsCpu, podsMemory string) error {
+	query := `UPDATE test_runs SET pods_cpu = ?, pods_memory = ? WHERE test_id = ?`
+	_, err := DB.Exec(query, podsCpu, podsMemory, testID)
+	if err != nil {
+		return fmt.Errorf("failed to update test run pod metrics: %w", err)
+	}
 	return nil
 }

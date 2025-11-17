@@ -49,20 +49,40 @@ type K6LoginMetrics struct {
 	StatusCodeFailureMap map[string]int `json:"status_code_failure_map"`
 }
 
+// K6DashboardLoadTimeEntry represents a single dashboard load time entry
+type K6DashboardLoadTimeEntry struct {
+	DashboardName string  `json:"dashboard_name"`
+	Segment       uint8   `json:"segment"`
+	TimeRange     string  `json:"time_range"`
+	TotalLoads    uint64  `json:"total_loads"`
+	SuccessLoads  uint64  `json:"success_loads"`
+	FailedLoads   uint64  `json:"failed_loads"`
+	Errors4xx     uint64  `json:"errors_4xx"`
+	Errors5xx     uint64  `json:"errors_5xx"`
+	ErrorsConn    uint64  `json:"errors_conn"`
+	SuccessRate   float64 `json:"success_rate"`
+	AvgLoadMs     float64 `json:"avg_load_ms"`
+	P95LoadMs     float64 `json:"p95_load_ms"`
+}
+
+// K6DashboardLoadTimes represents dashboard load times metrics
+type K6DashboardLoadTimes []K6DashboardLoadTimeEntry
+
 // K6Run represents a K6 test run record
 type K6Run struct {
-	TestID       string          `json:"test_id"`
-	TestName     string          `json:"test_name,omitempty"`
-	StartTime    time.Time       `json:"start_time"`
-	EndTime      *time.Time      `json:"end_time,omitempty"`
-	TimeRange    string          `json:"time_range"`
-	Duration     string          `json:"duration"`
-	VUs          int             `json:"vus"`
-	Iterations   int             `json:"iterations"`
-	Interval     int             `json:"interval"`
-	O11ySources  []string        `json:"o11y_sources"`
-	Status       string          `json:"status"` // 'running', 'completed', 'stopped', 'failed'
-	MetricsLogin *K6LoginMetrics `json:"Metrics_Login,omitempty"`
+	TestID                    string                `json:"test_id"`
+	TestName                  string                `json:"test_name,omitempty"`
+	StartTime                 time.Time             `json:"start_time"`
+	EndTime                   *time.Time            `json:"end_time,omitempty"`
+	TimeRange                 string                `json:"time_range"`
+	Duration                  string                `json:"duration"`
+	VUs                       int                   `json:"vus"`
+	Iterations                int                   `json:"iterations"`
+	Interval                  int                   `json:"interval"`
+	O11ySources               []string              `json:"o11y_sources"`
+	Status                    string                `json:"status"` // 'running', 'completed', 'stopped', 'failed'
+	MetricsLogin              *K6LoginMetrics       `json:"Metrics_Login,omitempty"`
+	OverallDashboardLoadTimes *K6DashboardLoadTimes `json:"Overall_Dashboard_Load_Times,omitempty"`
 }
 
 // K6RunStartRequest represents the request payload for starting a K6 test run

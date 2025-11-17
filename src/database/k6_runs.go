@@ -64,12 +64,13 @@ func StopK6Run(testID string) error {
 // GetK6Run retrieves a specific K6 run by ID
 func GetK6Run(testID string) (*models.K6Run, error) {
 	query := `
-		SELECT test_id, test_name, start_time, end_time, time_range, duration, vus, iterations, interval, o11y_sources, status, Metrics_Login
+		SELECT test_id, test_name, start_time, end_time, time_range, duration, vus, iterations, interval, o11y_sources, status, Metrics_Login, Overall_Dashboard_Load_Times
 		FROM k6_runs WHERE test_id = ?`
 
 	var k6Run models.K6Run
 	var sourcesJSON string
 	var metricsJSON sql.NullString
+	var dashboardLoadTimesJSON sql.NullString
 	var endTime sql.NullTime
 	var duration sql.NullString
 
@@ -86,6 +87,7 @@ func GetK6Run(testID string) (*models.K6Run, error) {
 		&sourcesJSON,
 		&k6Run.Status,
 		&metricsJSON,
+		&dashboardLoadTimesJSON,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -118,13 +120,23 @@ func GetK6Run(testID string) (*models.K6Run, error) {
 		k6Run.MetricsLogin = &metrics
 	}
 
+	// Parse Overall_Dashboard_Load_Times JSON if present
+	if dashboardLoadTimesJSON.Valid && dashboardLoadTimesJSON.String != "" {
+		var dashboardLoadTimes models.K6DashboardLoadTimes
+		err = json.Unmarshal([]byte(dashboardLoadTimesJSON.String), &dashboardLoadTimes)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal Overall_Dashboard_Load_Times: %w", err)
+		}
+		k6Run.OverallDashboardLoadTimes = &dashboardLoadTimes
+	}
+
 	return &k6Run, nil
 }
 
 // GetAllK6Runs retrieves all K6 runs ordered by start time descending
 func GetAllK6Runs() ([]*models.K6Run, error) {
 	query := `
-		SELECT test_id, test_name, start_time, end_time, time_range, duration, vus, iterations, interval, o11y_sources, status, Metrics_Login
+		SELECT test_id, test_name, start_time, end_time, time_range, duration, vus, iterations, interval, o11y_sources, status, Metrics_Login, Overall_Dashboard_Load_Times
 		FROM k6_runs ORDER BY start_time DESC`
 
 	rows, err := DB.Query(query)
@@ -138,6 +150,7 @@ func GetAllK6Runs() ([]*models.K6Run, error) {
 		var k6Run models.K6Run
 		var sourcesJSON string
 		var metricsJSON sql.NullString
+		var dashboardLoadTimesJSON sql.NullString
 		var endTime sql.NullTime
 		var duration sql.NullString
 
@@ -154,6 +167,7 @@ func GetAllK6Runs() ([]*models.K6Run, error) {
 			&sourcesJSON,
 			&k6Run.Status,
 			&metricsJSON,
+			&dashboardLoadTimesJSON,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan K6 run: %w", err)
@@ -181,6 +195,16 @@ func GetAllK6Runs() ([]*models.K6Run, error) {
 				return nil, fmt.Errorf("failed to unmarshal Metrics_Login: %w", err)
 			}
 			k6Run.MetricsLogin = &metrics
+		}
+
+		// Parse Overall_Dashboard_Load_Times JSON if present
+		if dashboardLoadTimesJSON.Valid && dashboardLoadTimesJSON.String != "" {
+			var dashboardLoadTimes models.K6DashboardLoadTimes
+			err = json.Unmarshal([]byte(dashboardLoadTimesJSON.String), &dashboardLoadTimes)
+			if err != nil {
+				return nil, fmt.Errorf("failed to unmarshal Overall_Dashboard_Load_Times: %w", err)
+			}
+			k6Run.OverallDashboardLoadTimes = &dashboardLoadTimes
 		}
 
 		k6Runs = append(k6Runs, &k6Run)
@@ -236,6 +260,23 @@ func UpdateK6RunMetrics(testID string, metrics *models.K6LoginMetrics) error {
 	_, err = DB.Exec(query, string(metricsJSON), testID)
 	if err != nil {
 		return fmt.Errorf("failed to update K6 run metrics: %w", err)
+	}
+
+	return nil
+}
+
+// UpdateK6RunDashboardLoadTimes updates the Overall_Dashboard_Load_Times field for a K6 run
+func UpdateK6RunDashboardLoadTimes(testID string, dashboardLoadTimes *models.K6DashboardLoadTimes) error {
+	// Marshal dashboard load times to JSON
+	dashboardLoadTimesJSON, err := json.Marshal(dashboardLoadTimes)
+	if err != nil {
+		return fmt.Errorf("failed to marshal dashboard load times: %w", err)
+	}
+
+	query := `UPDATE k6_runs SET Overall_Dashboard_Load_Times = ? WHERE test_id = ?`
+	_, err = DB.Exec(query, string(dashboardLoadTimesJSON), testID)
+	if err != nil {
+		return fmt.Errorf("failed to update K6 run dashboard load times: %w", err)
 	}
 
 	return nil
