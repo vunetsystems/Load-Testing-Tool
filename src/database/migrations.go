@@ -141,6 +141,15 @@ func RunMigrations() error {
 		}
 	}
 
+	// Add Panel_Performance_Breakdown column to k6_runs table if it doesn't exist
+	if !columnExists("k6_runs", "Panel_Performance_Breakdown") {
+		alterSQL := "ALTER TABLE k6_runs ADD COLUMN Panel_Performance_Breakdown TEXT;"
+		_, err = DB.Exec(alterSQL)
+		if err != nil {
+			return fmt.Errorf("failed to add Panel_Performance_Breakdown column to k6_runs: %w", err)
+		}
+	}
+
 	return nil
 }
 

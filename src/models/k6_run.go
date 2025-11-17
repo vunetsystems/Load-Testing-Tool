@@ -68,6 +68,24 @@ type K6DashboardLoadTimeEntry struct {
 // K6DashboardLoadTimes represents dashboard load times metrics
 type K6DashboardLoadTimes []K6DashboardLoadTimeEntry
 
+// K6PanelPerformanceEntry represents a single panel performance entry
+type K6PanelPerformanceEntry struct {
+	Dashboard          string  `json:"dashboard"`
+	PanelNameID        string  `json:"panel_name_id"` // "panel_name (panel_id)"
+	TotalAttempts      uint64  `json:"total_attempts"`
+	FailedAttempts     uint64  `json:"failed_attempts"`
+	AvgLoadMs          float64 `json:"avg_load_ms"`
+	P95LoadMs          float64 `json:"p95_load_ms"`
+	AvgContributionPct float64 `json:"avg_contribution_pct"`
+	SuccessRate        float64 `json:"success_rate"`
+	Errors4xx          uint64  `json:"errors_4xx"`
+	Errors5xx          uint64  `json:"errors_5xx"`
+	ErrorsConn         uint64  `json:"errors_conn"`
+}
+
+// K6PanelPerformance represents panel performance breakdown metrics
+type K6PanelPerformance []K6PanelPerformanceEntry
+
 // K6Run represents a K6 test run record
 type K6Run struct {
 	TestID                    string                `json:"test_id"`
@@ -83,6 +101,7 @@ type K6Run struct {
 	Status                    string                `json:"status"` // 'running', 'completed', 'stopped', 'failed'
 	MetricsLogin              *K6LoginMetrics       `json:"Metrics_Login,omitempty"`
 	OverallDashboardLoadTimes *K6DashboardLoadTimes `json:"Overall_Dashboard_Load_Times,omitempty"`
+	PanelPerformanceBreakdown *K6PanelPerformance   `json:"Panel_Performance_Breakdown,omitempty"`
 }
 
 // K6RunStartRequest represents the request payload for starting a K6 test run
