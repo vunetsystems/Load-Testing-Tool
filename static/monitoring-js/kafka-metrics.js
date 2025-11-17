@@ -223,8 +223,11 @@ class KafkaMetricsManager {
         // Add test run options
         this.testRuns.forEach(testRun => {
             const option = document.createElement('option');
-            option.value = testRun.test_id;
-            option.textContent = `${testRun.test_id} (${testRun.duration})`;
+            // Support both snake_case and PascalCase keys from API for compatibility
+            const id = testRun.test_id || testRun.TestID || testRun.testId || testRun.TestId || '';
+            const duration = testRun.duration || testRun.Duration || testRun.duration_str || '';
+            option.value = id;
+            option.textContent = `${id} (${duration})`;
             dropdown.appendChild(option);
         });
     }

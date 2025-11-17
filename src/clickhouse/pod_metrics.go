@@ -3,6 +3,7 @@ package clickhouse
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 	"vuDataSim/src/logger"
 )
@@ -330,56 +331,158 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 		return nil, fmt.Errorf("no topics provided")
 	}
 
-	// Build dynamic query with topics list for ClickHouse compatibility
-	// Always return ALL data points within the time range for proper trend visualization
-	topicsList := ""
-	for i, topic := range topics {
-		if i > 0 {
-			topicsList += ", "
+	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Querying Kafka metrics for %d topics from %s to %s", len(topics), timeRange.From, timeRange.To), "debug")
+	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Topics: %v", topics), "debug")
+
+	// Separate input topics (consumer metrics) from output topics (producer metrics)
+	var inputTopics []string
+	var outputTopics []string
+	for _, topic := range topics {
+		if strings.Contains(topic, "-input") || topic == "mssql-telegraf" {
+			inputTopics = append(inputTopics, topic)
+		} else {
+			outputTopics = append(outputTopics, topic)
 		}
-		topicsList += "'" + topic + "'"
 	}
-
-	// Query always returns all data points for time range (no historical vs real-time distinction)
-	query := fmt.Sprintf(`
-	SELECT
-		topic,
-		timestamp,
-		OneMinuteRate
-	FROM kafka_Broker_Topic_Metrics
-	WHERE
-		name = 'MessagesInPerSec'
-		AND timestamp >= ?
-		AND timestamp <= ?
-		AND topic IN (%s)
-	ORDER BY
-		topic,
-		timestamp ASC
-	`, topicsList)
-
-	rows, err := monitoringDBClient.Client.Query(ctx, query, timeRange.From, timeRange.To)
-	if err != nil {
-		return nil, fmt.Errorf("error querying Kafka topic metrics: %v", err)
-	}
-	defer rows.Close()
 
 	var metrics []KafkaTopicMetric
 
-	for rows.Next() {
-		var m KafkaTopicMetric
-		// Scan only the three fields that are actually selected in the query
-		if err := rows.Scan(&m.Topic, &m.Timestamp, &m.OneMinuteRate); err != nil {
-			logger.LogWarning("System", "ClickHouse",
-				fmt.Sprintf("Failed to scan Kafka topic metric row: %v", err))
-			continue
+	// Query input topics from consumer metrics table (MessagesInPerSec)
+	if len(inputTopics) > 0 {
+		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Querying %d input topics from consumer metrics", len(inputTopics)), "debug")
+
+		inputTopicsList := ""
+		for i, topic := range inputTopics {
+			if i > 0 {
+				inputTopicsList += ", "
+			}
+			inputTopicsList += "'" + topic + "'"
 		}
-		// Set Count to 0 as a placeholder (not used in frontend)
-		m.Count = 0
-		metrics = append(metrics, m)
+
+		query := fmt.Sprintf(`
+		SELECT
+			topic,
+			timestamp,
+			OneMinuteRate
+		FROM kafka_Broker_Topic_Metrics
+		WHERE
+			name = 'MessagesInPerSec'
+			AND timestamp >= ?
+			AND timestamp <= ?
+			AND topic IN (%s)
+		ORDER BY
+			topic,
+			timestamp ASC
+		`, inputTopicsList)
+
+		rows, err := monitoringDBClient.Client.Query(ctx, query, timeRange.From, timeRange.To)
+		if err != nil {
+			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to query input topic metrics: %v", err))
+			// Continue to process output topics even if input fails
+		} else {
+			defer rows.Close()
+			for rows.Next() {
+				var m KafkaTopicMetric
+				if err := rows.Scan(&m.Topic, &m.Timestamp, &m.OneMinuteRate); err != nil {
+					logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan input topic row: %v", err))
+					continue
+				}
+				m.Count = 0
+				metrics = append(metrics, m)
+			}
+			if err := rows.Err(); err != nil {
+				logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Error reading input topic rows: %v", err))
+			}
+		}
+
+		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("✓ Retrieved input topic data"), "debug")
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error reading Kafka topic metrics rows: %v", err)
+	// Query output topics from producer metrics table
+	// Output topics don't have MessagesInPerSec (consumer metrics), so we use producer send rate
+	if len(outputTopics) > 0 {
+		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Querying %d output topics from producer metrics", len(outputTopics)), "debug")
+
+		outputTopicsList := ""
+		for i, topic := range outputTopics {
+			if i > 0 {
+				outputTopicsList += ", "
+			}
+			outputTopicsList += "'" + topic + "'"
+		}
+
+		// Query producer metrics for output topics
+		query := fmt.Sprintf(`
+		SELECT
+			topic,
+			timestamp,
+			"record-send-rate" as OneMinuteRate
+		FROM kafka_producer_Producer_Topic_Metrics_data
+		WHERE
+			timestamp >= ?
+			AND timestamp <= ?
+			AND topic IN (%s)
+		ORDER BY
+			topic,
+			timestamp ASC
+		`, outputTopicsList)
+
+		rows, err := monitoringDBClient.Client.Query(ctx, query, timeRange.From, timeRange.To)
+		if err != nil {
+			logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to query output topic producer metrics (will show zeros): %v", err))
+			// If producer metrics not available, add zero-value metrics so topics appear in output
+			for _, topic := range outputTopics {
+				m := KafkaTopicMetric{
+					Topic:         topic,
+					Timestamp:     timeRange.From,
+					OneMinuteRate: 0, // No data available for output topics
+					Count:         0,
+				}
+				metrics = append(metrics, m)
+			}
+		} else {
+			defer rows.Close()
+			outputMetricsCount := 0
+			for rows.Next() {
+				var m KafkaTopicMetric
+				if err := rows.Scan(&m.Topic, &m.Timestamp, &m.OneMinuteRate); err != nil {
+					logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to scan output topic row: %v", err))
+					continue
+				}
+				m.Count = 0
+				metrics = append(metrics, m)
+				outputMetricsCount++
+			}
+			if err := rows.Err(); err != nil {
+				logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Error reading output topic rows: %v", err))
+			}
+
+			// If no data found for output topics, add zero-value entries
+			if outputMetricsCount == 0 {
+				logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("⚠ No producer data found for output topics - adding zero-value entries"), "warning")
+				for _, topic := range outputTopics {
+					m := KafkaTopicMetric{
+						Topic:         topic,
+						Timestamp:     timeRange.From,
+						OneMinuteRate: 0,
+						Count:         0,
+					}
+					metrics = append(metrics, m)
+				}
+			}
+
+			logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("✓ Retrieved output topic data"), "debug")
+		}
+	}
+
+	// Note: individual query loops already check rows.Err() where appropriate.
+
+	// Note: individual query loops already check rows.Err() where appropriate.
+
+	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("✓ Total retrieved %d Kafka metric data points", len(metrics)), "debug")
+
+	if len(metrics) == 0 {
+		logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("⚠ No data points found for any requested topics in time range"), "warning")
 	}
 
 	return metrics, nil
