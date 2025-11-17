@@ -57,7 +57,7 @@ func HandleAPIStartTestRun(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create test run record
-	testRun, err := database.CreateTestRun(req.TargetEPS, req.O11ySources, req.TimeoutSeconds)
+	testRun, err := database.CreateTestRun(req.TestName, req.TargetEPS, req.O11ySources, req.TimeoutSeconds)
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,

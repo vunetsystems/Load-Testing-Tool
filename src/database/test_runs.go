@@ -12,7 +12,7 @@ import (
 )
 
 // CreateTestRun creates a new test run record
-func CreateTestRun(targetEPS int, o11ySources []string, timeoutSeconds int) (*models.TestRun, error) {
+func CreateTestRun(testName string, targetEPS int, o11ySources []string, timeoutSeconds int) (*models.TestRun, error) {
 	// Generate a new UUID for the test ID
 	testID := uuid.New().String()
 
@@ -25,16 +25,17 @@ func CreateTestRun(targetEPS int, o11ySources []string, timeoutSeconds int) (*mo
 	startTime := time.Now().UTC()
 
 	query := `
-		INSERT INTO test_runs (test_id, target_eps, start_time, o11y_sources, timeout_seconds, status)
-		VALUES (?, ?, ?, ?, ?, 'running')`
+		INSERT INTO test_runs (test_id, test_name, target_eps, start_time, o11y_sources, timeout_seconds, status)
+		VALUES (?, ?, ?, ?, ?, ?, 'running')`
 
-	_, err = DB.Exec(query, testID, targetEPS, startTime, string(sourcesJSON), timeoutSeconds)
+	_, err = DB.Exec(query, testID, testName, targetEPS, startTime, string(sourcesJSON), timeoutSeconds)
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert test run: %w", err)
 	}
 
 	return &models.TestRun{
 		TestID:         testID,
+		TestName:       testName,
 		TargetEPS:      targetEPS,
 		StartTime:      startTime,
 		O11ySources:    o11ySources,
@@ -59,7 +60,7 @@ func StopTestRun(testID string) error {
 // GetTestRun retrieves a specific test run by ID
 func GetTestRun(testID string) (*models.TestRun, error) {
 	query := `
-		SELECT test_id, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
+		SELECT test_id, test_name, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
 			   kafka_1_node_cpu_min, kafka_1_node_cpu_avg, kafka_1_node_cpu_max,
 			   kafka_1_node_mem_min, kafka_1_node_mem_avg, kafka_1_node_mem_max,
 			   kafka_2_node_cpu_min, kafka_2_node_cpu_avg, kafka_2_node_cpu_max,
@@ -97,6 +98,7 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 
 	err := DB.QueryRow(query, testID).Scan(
 		&testRun.TestID,
+		&testRun.TestName,
 		&testRun.TargetEPS,
 		&testRun.StartTime,
 		&endTime,
@@ -183,6 +185,8 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 		&testRun.PodResourceCheck,
 		&processRateSummary,
 		&ingestionSummary,
+		&testRun.TraefikCpuAllocated,
+		&testRun.TraefikMemAllocated,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -213,7 +217,7 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 // GetAllTestRuns retrieves all test runs ordered by start time descending
 func GetAllTestRuns() ([]*models.TestRun, error) {
 	query := `
-		SELECT test_id, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
+		SELECT test_id, test_name, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
 			   kafka_1_node_cpu_min, kafka_1_node_cpu_avg, kafka_1_node_cpu_max,
 			   kafka_1_node_mem_min, kafka_1_node_mem_avg, kafka_1_node_mem_max,
 			   kafka_2_node_cpu_min, kafka_2_node_cpu_avg, kafka_2_node_cpu_max,
@@ -240,7 +244,7 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			   min_output_msgs_per_sec, avg_output_msgs_per_sec, max_output_msgs_per_sec,
 			   min_lag, avg_lag, max_lag,
 			   data_loss_pct, kafka_summary_generated, pod_resource_check,
-			   process_rate_summary, ingestion_summary
+			   process_rate_summary, ingestion_summary, traefik_cpu_allocated, traefik_mem_allocated
 		FROM test_runs ORDER BY start_time DESC`
 
 	rows, err := DB.Query(query)
@@ -259,6 +263,7 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 
 		err := rows.Scan(
 			&testRun.TestID,
+			&testRun.TestName,
 			&testRun.TargetEPS,
 			&testRun.StartTime,
 			&endTime,
@@ -345,6 +350,8 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			&testRun.PodResourceCheck,
 			&processRateSummary,
 			&ingestionSummary,
+			&testRun.TraefikCpuAllocated,
+			&testRun.TraefikMemAllocated,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan test run: %w", err)

@@ -21,3 +21,47 @@ module_dashboard_mapping:
   Azure_Redis_Cache:
     dashboard_name: "Azure Redis Cache Overview"
     dashboard_slug: "Azure-Redis-Cache-Overview"        
+
+  AWS_ALB:
+    dashboard_name: "AWS ALB Overview"
+    dashboard_slug: "aws-alb-overview"
+
+  AzureStorageBlob:
+    dashboard_name: "Azure Storage Blob Overview"
+    dashboard_slug: "azure-storage-blob-overview"
+
+  Azure_API_Management:
+    dashboard_name: "Azure API Management Overview"
+    dashboard_slug: "azure-api-management-overview"
+
+  BRUM:
+    dashboard_name: "BRUM Overview"
+    dashboard_slug: "brum-overview"
+
+  CiscoIoSSwitch:
+    dashboard_name: "Cisco Switch"
+    dashboard_slug: "cisco-switch"
+
+  DNS_Monitoring:
+    dashboard_name: "DNS Overview"
+    dashboard_slug: "dns-overview"
+
+  IBMMQ:
+    dashboard_name: "IBMMQ Insights"
+    dashboard_slug: "ibmmq-insights"
+
+  K8s:
+    dashboard_name: "Kubernetes Cluster Overview"
+    dashboard_slug: "kubernetes-cluster-overview"
+
+  SyntheticBrowserMonitoring:
+    dashboard_name: "Synthetic Browser Journey Overview"
+    dashboard_slug: "synthetic-browser-journey-overview"
+
+  Tomcat:
+    dashboard_name: "Tomcat Overview"
+    dashboard_slug: "tomcat-overview"
+
+  WebLogic:
+    dashboard_name: "WebLogic Overview"
+    dashboard_slug: "weblogic-overview"

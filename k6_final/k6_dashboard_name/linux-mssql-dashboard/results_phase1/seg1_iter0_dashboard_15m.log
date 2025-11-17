@@ -1,0 +1,736 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/linux-mssql-dashboard/multi_dashboard_test.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 55s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 25s (gracefulStop: 30s)
+
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:14 | WebLogic Overview | 200 | 219.17 | 4.56 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:14 | WebLogic Overview | 200 | 311.73 | 3.21 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:14 | WebLogic Overview | 200 | 321.85 | 3.11 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:14 | WebLogic Overview | 200 | 325.94 | 3.07 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:14 | WebLogic Overview | 200 | 417.24 | 2.40 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:14 | WebLogic Overview | 200 | 417.74 | 2.39 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:14 | WebLogic Overview | 200 | 418.46 | 2.39 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:14 | WebLogic Overview | 200 | 523.66 | 1.91 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:14 | WebLogic Overview | 200 | 521.91 | 1.92 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:14+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:14 | WebLogic Overview | 200 | 607.61 | 1.65 | 0 | 0 | 0" source=console
+
+running (01.0s), 10/10 VUs, 0 complete and 0 interrupted iterations
+default   [   4% ] 10 VUs  01.0s/25s
+
+running (02.0s), 10/10 VUs, 0 complete and 0 interrupted iterations
+default   [   8% ] 10 VUs  02.0s/25s
+
+running (03.0s), 10/10 VUs, 0 complete and 0 interrupted iterations
+default   [  12% ] 10 VUs  03.0s/25s
+
+running (04.0s), 10/10 VUs, 0 complete and 0 interrupted iterations
+default   [  16% ] 10 VUs  04.0s/25s
+
+running (05.0s), 10/10 VUs, 0 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  05.0s/25s
+
+running (06.0s), 10/10 VUs, 0 complete and 0 interrupted iterations
+default   [  24% ] 10 VUs  06.0s/25s
+
+running (07.0s), 10/10 VUs, 0 complete and 0 interrupted iterations
+default   [  28% ] 10 VUs  07.0s/25s
+
+running (08.0s), 10/10 VUs, 0 complete and 0 interrupted iterations
+default   [  32% ] 10 VUs  08.0s/25s
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 56 | Untitled | 200 | 413.51 | 2.42 | 0 | 0 | 0 | 5.18" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 51 | Total Applications | 200 | 292.16 | 3.42 | 0 | 0 | 0 | 3.66" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 40 | Managed Server Count. | 200 | 301.98 | 3.31 | 0 | 0 | 0 | 3.78" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 54 | Unhealthy Applications | 200 | 295.60 | 3.38 | 0 | 0 | 0 | 3.70" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 52 | Down Servers | 200 | 300.27 | 3.33 | 0 | 0 | 0 | 3.76" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 55 | Active Alert | 200 | 398.08 | 2.51 | 0 | 0 | 0 | 4.99" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 8 | Total Transactions  | 200 | 387.61 | 2.58 | 0 | 0 | 0 | 4.86" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 13 | Active Transactions | 200 | 115.87 | 8.63 | 0 | 0 | 0 | 1.45" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 6 | Total Committed Transactions  | 200 | 398.60 | 2.51 | 0 | 0 | 0 | 4.99" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 11 | Hogging Threads | 200 | 202.58 | 4.94 | 0 | 0 | 0 | 2.54" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 10 | IdleThreads | 200 | 199.95 | 5.00 | 0 | 0 | 0 | 2.50" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 9 | Executed Threads | 200 | 204.42 | 4.89 | 0 | 0 | 0 | 2.56" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 12 | Stuck Threads | 200 | 294.90 | 3.39 | 0 | 0 | 0 | 3.69" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 5 | Total Abandoned Transactions  | 200 | 195.42 | 5.12 | 0 | 0 | 0 | 2.45" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 7 | Rolledback Transactions | 200 | 397.42 | 2.52 | 0 | 0 | 0 | 4.98" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 4 |  P95 Throughput  | 200 | 203.81 | 4.91 | 0 | 0 | 0 | 2.55" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 41 | Weblogic Server Health | 200 | 499.99 | 2.00 | 0 | 0 | 0 | 6.26" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 17 | Active Alerts | 200 | 283.69 | 3.52 | 0 | 0 | 0 | 3.55" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 43 | Server Status | 200 | 202.46 | 4.94 | 0 | 0 | 0 | 2.54" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 3 | Weblogic Application Status | 200 | 201.49 | 4.96 | 0 | 0 | 0 | 2.52" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 32 | Total Transactions Trend for Top 5 Servers | 200 | 214.40 | 4.66 | 0 | 0 | 0 | 2.69" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 34 | Total Committed Transcations for Top 5 Servers | 200 | 281.01 | 3.56 | 0 | 0 | 0 | 3.52" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 33 | Total Abandoned Transcations for Top 5 Servers | 200 | 213.50 | 4.68 | 0 | 0 | 0 | 2.67" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 24 | P95 Throughput Trend for Top 5 Servers | 200 | 201.02 | 4.97 | 0 | 0 | 0 | 2.52" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 49 | Transaction Details and Error Messages | 200 | 285.70 | 3.50 | 0 | 0 | 0 | 3.58" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 57 | Weblogic Data Source Performance | 200 | 399.50 | 2.50 | 0 | 0 | 0 | 5.00" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 58 | Weblogic Queue Details | 200 | 302.51 | 3.31 | 0 | 0 | 0 | 3.79" source=console
+time="2025-11-17T11:40:22+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 59 | Weblogic Topic Details | 200 | 295.22 | 3.39 | 0 | 0 | 0 | 3.70" source=console
+
+running (09.0s), 10/10 VUs, 0 complete and 0 interrupted iterations
+default   [  36% ] 10 VUs  09.0s/25s
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:23+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+
+running (10.0s), 10/10 VUs, 1 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  10.0s/25s
+
+running (11.0s), 10/10 VUs, 1 complete and 0 interrupted iterations
+default   [  44% ] 10 VUs  11.0s/25s
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 56 | Untitled | 200 | 382.37 | 2.62 | 0 | 0 | 0 | 3.48" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 51 | Total Applications | 200 | 213.97 | 4.67 | 0 | 0 | 0 | 1.95" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 40 | Managed Server Count. | 200 | 301.62 | 3.32 | 0 | 0 | 0 | 2.75" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 54 | Unhealthy Applications | 200 | 296.95 | 3.37 | 0 | 0 | 0 | 2.70" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 52 | Down Servers | 200 | 393.78 | 2.54 | 0 | 0 | 0 | 3.58" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 55 | Active Alert | 200 | 293.03 | 3.41 | 0 | 0 | 0 | 2.67" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 8 | Total Transactions  | 200 | 116.79 | 8.56 | 0 | 0 | 0 | 1.06" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 13 | Active Transactions | 200 | 298.30 | 3.35 | 0 | 0 | 0 | 2.71" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 6 | Total Committed Transactions  | 200 | 397.69 | 2.51 | 0 | 0 | 0 | 3.62" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 11 | Hogging Threads | 200 | 197.90 | 5.05 | 0 | 0 | 0 | 1.80" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 10 | IdleThreads | 200 | 293.89 | 3.40 | 0 | 0 | 0 | 2.67" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 9 | Executed Threads | 200 | 295.65 | 3.38 | 0 | 0 | 0 | 2.69" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 12 | Stuck Threads | 200 | 297.83 | 3.36 | 0 | 0 | 0 | 2.71" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 5 | Total Abandoned Transactions  | 200 | 313.82 | 3.19 | 0 | 0 | 0 | 2.86" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 7 | Rolledback Transactions | 200 | 297.35 | 3.36 | 0 | 0 | 0 | 2.71" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 4 |  P95 Throughput  | 200 | 400.97 | 2.49 | 0 | 0 | 0 | 3.65" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 41 | Weblogic Server Health | 200 | 284.66 | 3.51 | 0 | 0 | 0 | 2.59" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 17 | Active Alerts | 200 | 209.69 | 4.77 | 0 | 0 | 0 | 1.91" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 43 | Server Status | 200 | 197.21 | 5.07 | 0 | 0 | 0 | 1.79" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 3 | Weblogic Application Status | 200 | 297.36 | 3.36 | 0 | 0 | 0 | 2.71" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 32 | Total Transactions Trend for Top 5 Servers | 200 | 313.16 | 3.19 | 0 | 0 | 0 | 2.85" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 34 | Total Committed Transcations for Top 5 Servers | 200 | 283.02 | 3.53 | 0 | 0 | 0 | 2.58" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 33 | Total Abandoned Transcations for Top 5 Servers | 200 | 219.29 | 4.56 | 0 | 0 | 0 | 2.00" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 24 | P95 Throughput Trend for Top 5 Servers | 200 | 297.45 | 3.36 | 0 | 0 | 0 | 2.71" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 49 | Transaction Details and Error Messages | 200 | 389.96 | 2.56 | 0 | 0 | 0 | 3.55" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 57 | Weblogic Data Source Performance | 200 | 297.11 | 3.37 | 0 | 0 | 0 | 2.70" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 58 | Weblogic Queue Details | 200 | 113.61 | 8.80 | 0 | 0 | 0 | 1.03" source=console
+time="2025-11-17T11:40:25+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:25 | WebLogic Overview | 59 | Weblogic Topic Details | 200 | 3293.22 | 0.30 | 0 | 0 | 0 | 29.97" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 56 | Untitled | 200 | 403.47 | 2.48 | 0 | 0 | 0 | 3.55" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 51 | Total Applications | 200 | 378.61 | 2.64 | 0 | 0 | 0 | 3.33" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 40 | Managed Server Count. | 200 | 311.78 | 3.21 | 0 | 0 | 0 | 2.74" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 54 | Unhealthy Applications | 200 | 290.60 | 3.44 | 0 | 0 | 0 | 2.55" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 52 | Down Servers | 200 | 305.02 | 3.28 | 0 | 0 | 0 | 2.68" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 55 | Active Alert | 200 | 294.44 | 3.40 | 0 | 0 | 0 | 2.59" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 8 | Total Transactions  | 200 | 214.01 | 4.67 | 0 | 0 | 0 | 1.88" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 13 | Active Transactions | 200 | 294.14 | 3.40 | 0 | 0 | 0 | 2.59" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 6 | Total Committed Transactions  | 200 | 289.69 | 3.45 | 0 | 0 | 0 | 2.55" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 11 | Hogging Threads | 200 | 315.85 | 3.17 | 0 | 0 | 0 | 2.78" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 10 | IdleThreads | 200 | 199.95 | 5.00 | 0 | 0 | 0 | 1.76" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 9 | Executed Threads | 200 | 287.25 | 3.48 | 0 | 0 | 0 | 2.52" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 12 | Stuck Threads | 200 | 207.19 | 4.83 | 0 | 0 | 0 | 1.82" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 5 | Total Abandoned Transactions  | 200 | 199.38 | 5.02 | 0 | 0 | 0 | 1.75" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 7 | Rolledback Transactions | 200 | 412.21 | 2.43 | 0 | 0 | 0 | 3.62" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 4 |  P95 Throughput  | 200 | 487.13 | 2.05 | 0 | 0 | 0 | 4.28" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 41 | Weblogic Server Health | 200 | 287.02 | 3.48 | 0 | 0 | 0 | 2.52" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 17 | Active Alerts | 200 | 204.53 | 4.89 | 0 | 0 | 0 | 1.80" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 43 | Server Status | 200 | 294.77 | 3.39 | 0 | 0 | 0 | 2.59" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 3 | Weblogic Application Status | 200 | 114.58 | 8.73 | 0 | 0 | 0 | 1.01" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 32 | Total Transactions Trend for Top 5 Servers | 200 | 389.59 | 2.57 | 0 | 0 | 0 | 3.42" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 34 | Total Committed Transcations for Top 5 Servers | 200 | 300.87 | 3.32 | 0 | 0 | 0 | 2.64" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 33 | Total Abandoned Transcations for Top 5 Servers | 200 | 205.71 | 4.86 | 0 | 0 | 0 | 1.81" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 24 | P95 Throughput Trend for Top 5 Servers | 200 | 205.72 | 4.86 | 0 | 0 | 0 | 1.81" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 49 | Transaction Details and Error Messages | 200 | 398.14 | 2.51 | 0 | 0 | 0 | 3.50" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 57 | Weblogic Data Source Performance | 200 | 382.56 | 2.61 | 0 | 0 | 0 | 3.36" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 58 | Weblogic Queue Details | 200 | 213.62 | 4.68 | 0 | 0 | 0 | 1.88" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 59 | Weblogic Topic Details | 200 | 3489.61 | 0.29 | 0 | 0 | 0 | 30.67" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 200 | 2405.67 | 0.42 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 56 | Untitled | 200 | 383.54 | 2.61 | 0 | 0 | 0 | 3.40" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 51 | Total Applications | 200 | 214.00 | 4.67 | 0 | 0 | 0 | 1.90" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 40 | Managed Server Count. | 200 | 385.15 | 2.60 | 0 | 0 | 0 | 3.41" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 54 | Unhealthy Applications | 200 | 299.06 | 3.34 | 0 | 0 | 0 | 2.65" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 52 | Down Servers | 200 | 300.79 | 3.32 | 0 | 0 | 0 | 2.67" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 55 | Active Alert | 200 | 297.67 | 3.36 | 0 | 0 | 0 | 2.64" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 8 | Total Transactions  | 200 | 300.70 | 3.33 | 0 | 0 | 0 | 2.67" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 13 | Active Transactions | 200 | 304.97 | 3.28 | 0 | 0 | 0 | 2.70" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 6 | Total Committed Transactions  | 200 | 214.48 | 4.66 | 0 | 0 | 0 | 1.90" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 11 | Hogging Threads | 200 | 284.28 | 3.52 | 0 | 0 | 0 | 2.52" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 10 | IdleThreads | 200 | 128.07 | 7.81 | 0 | 0 | 0 | 1.14" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 9 | Executed Threads | 200 | 276.20 | 3.62 | 0 | 0 | 0 | 2.45" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 12 | Stuck Threads | 200 | 209.39 | 4.78 | 0 | 0 | 0 | 1.86" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 5 | Total Abandoned Transactions  | 200 | 297.70 | 3.36 | 0 | 0 | 0 | 2.64" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 7 | Rolledback Transactions | 200 | 385.95 | 2.59 | 0 | 0 | 0 | 3.42" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 4 |  P95 Throughput  | 200 | 408.13 | 2.45 | 0 | 0 | 0 | 3.62" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 41 | Weblogic Server Health | 200 | 294.27 | 3.40 | 0 | 0 | 0 | 2.61" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 17 | Active Alerts | 200 | 209.28 | 4.78 | 0 | 0 | 0 | 1.85" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 43 | Server Status | 200 | 288.14 | 3.47 | 0 | 0 | 0 | 2.55" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 3 | Weblogic Application Status | 200 | 194.21 | 5.15 | 0 | 0 | 0 | 1.72" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 32 | Total Transactions Trend for Top 5 Servers | 200 | 303.49 | 3.30 | 0 | 0 | 0 | 2.69" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 34 | Total Committed Transcations for Top 5 Servers | 200 | 216.95 | 4.61 | 0 | 0 | 0 | 1.92" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 33 | Total Abandoned Transcations for Top 5 Servers | 200 | 296.87 | 3.37 | 0 | 0 | 0 | 2.63" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 24 | P95 Throughput Trend for Top 5 Servers | 200 | 300.23 | 3.33 | 0 | 0 | 0 | 2.66" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 49 | Transaction Details and Error Messages | 200 | 483.16 | 2.07 | 0 | 0 | 0 | 4.28" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 57 | Weblogic Data Source Performance | 200 | 302.46 | 3.31 | 0 | 0 | 0 | 2.68" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:25 | WebLogic Overview | 58 | Weblogic Queue Details | 200 | 3402.69 | 0.29 | 0 | 0 | 0 | 30.16" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 59 | Weblogic Topic Details | 200 | 300.90 | 3.32 | 0 | 0 | 0 | 2.67" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 56 | Untitled | 200 | 494.17 | 2.02 | 0 | 0 | 0 | 4.34" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 51 | Total Applications | 200 | 209.80 | 4.77 | 0 | 0 | 0 | 1.84" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 40 | Managed Server Count. | 200 | 396.22 | 2.52 | 0 | 0 | 0 | 3.48" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 54 | Unhealthy Applications | 200 | 304.33 | 3.29 | 0 | 0 | 0 | 2.67" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 52 | Down Servers | 200 | 384.97 | 2.60 | 0 | 0 | 0 | 3.38" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 55 | Active Alert | 200 | 296.12 | 3.38 | 0 | 0 | 0 | 2.60" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 8 | Total Transactions  | 200 | 314.29 | 3.18 | 0 | 0 | 0 | 2.76" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 13 | Active Transactions | 200 | 287.75 | 3.48 | 0 | 0 | 0 | 2.52" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 6 | Total Committed Transactions  | 200 | 412.56 | 2.42 | 0 | 0 | 0 | 3.62" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 11 | Hogging Threads | 200 | 203.67 | 4.91 | 0 | 0 | 0 | 1.79" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 10 | IdleThreads | 200 | 98.09 | 10.19 | 0 | 0 | 0 | 0.86" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 9 | Executed Threads | 200 | 200.95 | 4.98 | 0 | 0 | 0 | 1.76" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 12 | Stuck Threads | 200 | 281.87 | 3.55 | 0 | 0 | 0 | 2.47" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 5 | Total Abandoned Transactions  | 200 | 311.22 | 3.21 | 0 | 0 | 0 | 2.73" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 7 | Rolledback Transactions | 200 | 295.38 | 3.39 | 0 | 0 | 0 | 2.59" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 4 |  P95 Throughput  | 200 | 497.75 | 2.01 | 0 | 0 | 0 | 4.37" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 41 | Weblogic Server Health | 200 | 205.95 | 4.86 | 0 | 0 | 0 | 1.81" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 17 | Active Alerts | 200 | 201.58 | 4.96 | 0 | 0 | 0 | 1.77" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 43 | Server Status | 200 | 484.97 | 2.06 | 0 | 0 | 0 | 4.26" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 3 | Weblogic Application Status | 200 | 118.67 | 8.43 | 0 | 0 | 0 | 1.04" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 32 | Total Transactions Trend for Top 5 Servers | 200 | 299.58 | 3.34 | 0 | 0 | 0 | 2.63" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 34 | Total Committed Transcations for Top 5 Servers | 200 | 280.56 | 3.56 | 0 | 0 | 0 | 2.46" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 33 | Total Abandoned Transcations for Top 5 Servers | 200 | 209.97 | 4.76 | 0 | 0 | 0 | 1.84" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 24 | P95 Throughput Trend for Top 5 Servers | 200 | 299.41 | 3.34 | 0 | 0 | 0 | 2.63" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 49 | Transaction Details and Error Messages | 200 | 303.46 | 3.30 | 0 | 0 | 0 | 2.66" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 57 | Weblogic Data Source Performance | 200 | 296.51 | 3.37 | 0 | 0 | 0 | 2.60" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:25 | WebLogic Overview | 58 | Weblogic Queue Details | 200 | 3408.78 | 0.29 | 0 | 0 | 0 | 29.91" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 59 | Weblogic Topic Details | 200 | 297.70 | 3.36 | 0 | 0 | 0 | 2.61" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 56 | Untitled | 200 | 400.81 | 2.49 | 0 | 0 | 0 | 3.46" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 51 | Total Applications | 200 | 293.98 | 3.40 | 0 | 0 | 0 | 2.54" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 40 | Managed Server Count. | 200 | 384.47 | 2.60 | 0 | 0 | 0 | 3.32" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 54 | Unhealthy Applications | 200 | 301.17 | 3.32 | 0 | 0 | 0 | 2.60" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 52 | Down Servers | 200 | 306.04 | 3.27 | 0 | 0 | 0 | 2.64" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 55 | Active Alert | 200 | 292.58 | 3.42 | 0 | 0 | 0 | 2.53" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 8 | Total Transactions  | 200 | 398.24 | 2.51 | 0 | 0 | 0 | 3.44" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 13 | Active Transactions | 200 | 309.74 | 3.23 | 0 | 0 | 0 | 2.68" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 6 | Total Committed Transactions  | 200 | 394.45 | 2.54 | 0 | 0 | 0 | 3.41" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 11 | Hogging Threads | 200 | 207.74 | 4.81 | 0 | 0 | 0 | 1.80" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 10 | IdleThreads | 200 | 185.94 | 5.38 | 0 | 0 | 0 | 1.61" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 9 | Executed Threads | 200 | 222.41 | 4.50 | 0 | 0 | 0 | 1.92" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 12 | Stuck Threads | 200 | 284.19 | 3.52 | 0 | 0 | 0 | 2.46" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 5 | Total Abandoned Transactions  | 200 | 315.54 | 3.17 | 0 | 0 | 0 | 2.73" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 7 | Rolledback Transactions | 200 | 290.42 | 3.44 | 0 | 0 | 0 | 2.51" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 4 |  P95 Throughput  | 200 | 496.56 | 2.01 | 0 | 0 | 0 | 4.29" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 41 | Weblogic Server Health | 200 | 207.08 | 4.83 | 0 | 0 | 0 | 1.79" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 17 | Active Alerts | 200 | 200.32 | 4.99 | 0 | 0 | 0 | 1.73" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 43 | Server Status | 200 | 294.59 | 3.39 | 0 | 0 | 0 | 2.55" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 3 | Weblogic Application Status | 200 | 304.31 | 3.29 | 0 | 0 | 0 | 2.63" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 32 | Total Transactions Trend for Top 5 Servers | 200 | 380.89 | 2.63 | 0 | 0 | 0 | 3.29" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 34 | Total Committed Transcations for Top 5 Servers | 200 | 217.86 | 4.59 | 0 | 0 | 0 | 1.88" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 33 | Total Abandoned Transcations for Top 5 Servers | 200 | 296.78 | 3.37 | 0 | 0 | 0 | 2.56" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 24 | P95 Throughput Trend for Top 5 Servers | 200 | 298.65 | 3.35 | 0 | 0 | 0 | 2.58" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 49 | Transaction Details and Error Messages | 200 | 305.19 | 3.28 | 0 | 0 | 0 | 2.64" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 57 | Weblogic Data Source Performance | 200 | 301.83 | 3.31 | 0 | 0 | 0 | 2.61" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:25 | WebLogic Overview | 58 | Weblogic Queue Details | 200 | 3400.85 | 0.29 | 0 | 0 | 0 | 29.39" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 59 | Weblogic Topic Details | 200 | 279.93 | 3.57 | 0 | 0 | 0 | 2.42" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 56 | Untitled | 200 | 491.67 | 2.03 | 0 | 0 | 0 | 4.28" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 51 | Total Applications | 200 | 309.37 | 3.23 | 0 | 0 | 0 | 2.69" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 40 | Managed Server Count. | 200 | 303.98 | 3.29 | 0 | 0 | 0 | 2.64" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 54 | Unhealthy Applications | 200 | 391.39 | 2.56 | 0 | 0 | 0 | 3.40" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 52 | Down Servers | 200 | 306.89 | 3.26 | 0 | 0 | 0 | 2.67" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 55 | Active Alert | 200 | 201.28 | 4.97 | 0 | 0 | 0 | 1.75" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 8 | Total Transactions  | 200 | 283.78 | 3.52 | 0 | 0 | 0 | 2.47" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 13 | Active Transactions | 200 | 317.01 | 3.15 | 0 | 0 | 0 | 2.76" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 6 | Total Committed Transactions  | 200 | 401.70 | 2.49 | 0 | 0 | 0 | 3.49" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 11 | Hogging Threads | 200 | 204.23 | 4.90 | 0 | 0 | 0 | 1.78" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 10 | IdleThreads | 200 | 289.02 | 3.46 | 0 | 0 | 0 | 2.51" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 9 | Executed Threads | 200 | 204.68 | 4.89 | 0 | 0 | 0 | 1.78" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 12 | Stuck Threads | 200 | 280.43 | 3.57 | 0 | 0 | 0 | 2.44" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 5 | Total Abandoned Transactions  | 200 | 324.70 | 3.08 | 0 | 0 | 0 | 2.82" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 7 | Rolledback Transactions | 200 | 485.15 | 2.06 | 0 | 0 | 0 | 4.22" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 4 |  P95 Throughput  | 200 | 295.74 | 3.38 | 0 | 0 | 0 | 2.57" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 41 | Weblogic Server Health | 200 | 214.53 | 4.66 | 0 | 0 | 0 | 1.87" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 17 | Active Alerts | 200 | 284.34 | 3.52 | 0 | 0 | 0 | 2.47" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 43 | Server Status | 200 | 115.91 | 8.63 | 0 | 0 | 0 | 1.01" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 3 | Weblogic Application Status | 200 | 381.95 | 2.62 | 0 | 0 | 0 | 3.32" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 32 | Total Transactions Trend for Top 5 Servers | 200 | 404.69 | 2.47 | 0 | 0 | 0 | 3.52" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 34 | Total Committed Transcations for Top 5 Servers | 200 | 207.20 | 4.83 | 0 | 0 | 0 | 1.80" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 33 | Total Abandoned Transcations for Top 5 Servers | 200 | 294.74 | 3.39 | 0 | 0 | 0 | 2.56" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 24 | P95 Throughput Trend for Top 5 Servers | 200 | 391.32 | 2.56 | 0 | 0 | 0 | 3.40" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 49 | Transaction Details and Error Messages | 200 | 399.44 | 2.50 | 0 | 0 | 0 | 3.47" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:25 | WebLogic Overview | 57 | Weblogic Data Source Performance | 200 | 3302.71 | 0.30 | 0 | 0 | 0 | 28.73" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 58 | Weblogic Queue Details | 200 | 208.85 | 4.79 | 0 | 0 | 0 | 1.82" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 59 | Weblogic Topic Details | 200 | 198.22 | 5.04 | 0 | 0 | 0 | 1.72" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 56 | Untitled | 200 | 488.88 | 2.05 | 0 | 0 | 0 | 4.18" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 51 | Total Applications | 200 | 309.60 | 3.23 | 0 | 0 | 0 | 2.65" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 40 | Managed Server Count. | 200 | 292.89 | 3.41 | 0 | 0 | 0 | 2.50" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 54 | Unhealthy Applications | 200 | 397.85 | 2.51 | 0 | 0 | 0 | 3.40" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 52 | Down Servers | 200 | 496.88 | 2.01 | 0 | 0 | 0 | 4.25" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 55 | Active Alert | 200 | 213.85 | 4.68 | 0 | 0 | 0 | 1.83" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 8 | Total Transactions  | 200 | 288.26 | 3.47 | 0 | 0 | 0 | 2.46" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 13 | Active Transactions | 200 | 308.74 | 3.24 | 0 | 0 | 0 | 2.64" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 6 | Total Committed Transactions  | 200 | 304.25 | 3.29 | 0 | 0 | 0 | 2.60" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 11 | Hogging Threads | 200 | 210.76 | 4.74 | 0 | 0 | 0 | 1.80" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 10 | IdleThreads | 200 | 202.80 | 4.93 | 0 | 0 | 0 | 1.73" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 9 | Executed Threads | 200 | 270.23 | 3.70 | 0 | 0 | 0 | 2.31" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 12 | Stuck Threads | 200 | 312.54 | 3.20 | 0 | 0 | 0 | 2.67" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 5 | Total Abandoned Transactions  | 200 | 397.62 | 2.51 | 0 | 0 | 0 | 3.40" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 7 | Rolledback Transactions | 200 | 327.34 | 3.05 | 0 | 0 | 0 | 2.80" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 4 |  P95 Throughput  | 200 | 374.59 | 2.67 | 0 | 0 | 0 | 3.20" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 41 | Weblogic Server Health | 200 | 202.37 | 4.94 | 0 | 0 | 0 | 1.73" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 17 | Active Alerts | 200 | 197.28 | 5.07 | 0 | 0 | 0 | 1.69" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 43 | Server Status | 200 | 488.88 | 2.05 | 0 | 0 | 0 | 4.18" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 3 | Weblogic Application Status | 200 | 397.35 | 2.52 | 0 | 0 | 0 | 3.40" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 32 | Total Transactions Trend for Top 5 Servers | 200 | 213.04 | 4.69 | 0 | 0 | 0 | 1.82" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 34 | Total Committed Transcations for Top 5 Servers | 200 | 207.07 | 4.83 | 0 | 0 | 0 | 1.77" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 33 | Total Abandoned Transcations for Top 5 Servers | 200 | 294.97 | 3.39 | 0 | 0 | 0 | 2.52" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 24 | P95 Throughput Trend for Top 5 Servers | 200 | 397.83 | 2.51 | 0 | 0 | 0 | 3.40" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 49 | Transaction Details and Error Messages | 200 | 386.65 | 2.59 | 0 | 0 | 0 | 3.31" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:25 | WebLogic Overview | 57 | Weblogic Data Source Performance | 200 | 3298.95 | 0.30 | 0 | 0 | 0 | 28.21" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 58 | Weblogic Queue Details | 200 | 215.17 | 4.65 | 0 | 0 | 0 | 1.84" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 59 | Weblogic Topic Details | 200 | 198.44 | 5.04 | 0 | 0 | 0 | 1.70" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 56 | Untitled | 200 | 400.41 | 2.50 | 0 | 0 | 0 | 3.48" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 51 | Total Applications | 200 | 295.45 | 3.38 | 0 | 0 | 0 | 2.57" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 40 | Managed Server Count. | 200 | 291.07 | 3.44 | 0 | 0 | 0 | 2.53" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 54 | Unhealthy Applications | 200 | 311.17 | 3.21 | 0 | 0 | 0 | 2.71" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 52 | Down Servers | 200 | 299.28 | 3.34 | 0 | 0 | 0 | 2.60" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 55 | Active Alert | 200 | 395.39 | 2.53 | 0 | 0 | 0 | 3.44" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 8 | Total Transactions  | 200 | 292.12 | 3.42 | 0 | 0 | 0 | 2.54" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 13 | Active Transactions | 200 | 310.47 | 3.22 | 0 | 0 | 0 | 2.70" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 6 | Total Committed Transactions  | 200 | 504.40 | 1.98 | 0 | 0 | 0 | 4.39" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 11 | Hogging Threads | 200 | 213.84 | 4.68 | 0 | 0 | 0 | 1.86" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 10 | IdleThreads | 200 | 285.66 | 3.50 | 0 | 0 | 0 | 2.48" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 9 | Executed Threads | 200 | 288.64 | 3.46 | 0 | 0 | 0 | 2.51" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 12 | Stuck Threads | 200 | 395.77 | 2.53 | 0 | 0 | 0 | 3.44" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 5 | Total Abandoned Transactions  | 200 | 213.55 | 4.68 | 0 | 0 | 0 | 1.86" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 7 | Rolledback Transactions | 200 | 482.61 | 2.07 | 0 | 0 | 0 | 4.20" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 4 |  P95 Throughput  | 200 | 217.54 | 4.60 | 0 | 0 | 0 | 1.89" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 41 | Weblogic Server Health | 200 | 287.01 | 3.48 | 0 | 0 | 0 | 2.50" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 17 | Active Alerts | 200 | 302.83 | 3.30 | 0 | 0 | 0 | 2.63" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 43 | Server Status | 200 | 291.94 | 3.43 | 0 | 0 | 0 | 2.54" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 3 | Weblogic Application Status | 200 | 207.13 | 4.83 | 0 | 0 | 0 | 1.80" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 32 | Total Transactions Trend for Top 5 Servers | 200 | 204.64 | 4.89 | 0 | 0 | 0 | 1.78" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 34 | Total Committed Transcations for Top 5 Servers | 200 | 209.11 | 4.78 | 0 | 0 | 0 | 1.82" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 33 | Total Abandoned Transcations for Top 5 Servers | 200 | 293.67 | 3.41 | 0 | 0 | 0 | 2.55" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 24 | P95 Throughput Trend for Top 5 Servers | 200 | 392.94 | 2.54 | 0 | 0 | 0 | 3.42" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 49 | Transaction Details and Error Messages | 200 | 300.64 | 3.33 | 0 | 0 | 0 | 2.61" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:25 | WebLogic Overview | 57 | Weblogic Data Source Performance | 200 | 3403.55 | 0.29 | 0 | 0 | 0 | 29.60" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 58 | Weblogic Queue Details | 200 | 294.11 | 3.40 | 0 | 0 | 0 | 2.56" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 59 | Weblogic Topic Details | 200 | 112.51 | 8.89 | 0 | 0 | 0 | 0.98" source=console
+
+running (12.0s), 10/10 VUs, 1 complete and 0 interrupted iterations
+default   [  48% ] 10 VUs  12.0s/25s
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 56 | Untitled | 200 | 300.84 | 3.32 | 0 | 0 | 0 | 2.64" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 51 | Total Applications | 200 | 307.76 | 3.25 | 0 | 0 | 0 | 2.70" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:15 | WebLogic Overview | 40 | Managed Server Count. | 200 | 210.69 | 4.75 | 0 | 0 | 0 | 1.85" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 54 | Unhealthy Applications | 200 | 396.33 | 2.52 | 0 | 0 | 0 | 3.48" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 52 | Down Servers | 200 | 384.54 | 2.60 | 0 | 0 | 0 | 3.37" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:16 | WebLogic Overview | 55 | Active Alert | 200 | 209.62 | 4.77 | 0 | 0 | 0 | 1.84" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 8 | Total Transactions  | 200 | 286.45 | 3.49 | 0 | 0 | 0 | 2.51" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 13 | Active Transactions | 200 | 311.85 | 3.21 | 0 | 0 | 0 | 2.74" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:17 | WebLogic Overview | 6 | Total Committed Transactions  | 200 | 395.34 | 2.53 | 0 | 0 | 0 | 3.47" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 11 | Hogging Threads | 200 | 308.91 | 3.24 | 0 | 0 | 0 | 2.71" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 10 | IdleThreads | 200 | 189.90 | 5.27 | 0 | 0 | 0 | 1.67" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 9 | Executed Threads | 200 | 212.62 | 4.70 | 0 | 0 | 0 | 1.87" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:18 | WebLogic Overview | 12 | Stuck Threads | 200 | 485.11 | 2.06 | 0 | 0 | 0 | 4.26" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 5 | Total Abandoned Transactions  | 200 | 296.91 | 3.37 | 0 | 0 | 0 | 2.61" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 7 | Rolledback Transactions | 200 | 414.08 | 2.41 | 0 | 0 | 0 | 3.63" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:19 | WebLogic Overview | 4 |  P95 Throughput  | 200 | 297.29 | 3.36 | 0 | 0 | 0 | 2.61" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 41 | Weblogic Server Health | 200 | 203.20 | 4.92 | 0 | 0 | 0 | 1.78" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 17 | Active Alerts | 200 | 484.32 | 2.06 | 0 | 0 | 0 | 4.25" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:20 | WebLogic Overview | 43 | Server Status | 200 | 118.31 | 8.45 | 0 | 0 | 0 | 1.04" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 3 | Weblogic Application Status | 200 | 287.30 | 3.48 | 0 | 0 | 0 | 2.52" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 32 | Total Transactions Trend for Top 5 Servers | 200 | 299.67 | 3.34 | 0 | 0 | 0 | 2.63" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 34 | Total Committed Transcations for Top 5 Servers | 200 | 197.98 | 5.05 | 0 | 0 | 0 | 1.74" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:21 | WebLogic Overview | 33 | Total Abandoned Transcations for Top 5 Servers | 200 | 302.94 | 3.30 | 0 | 0 | 0 | 2.66" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 24 | P95 Throughput Trend for Top 5 Servers | 200 | 500.82 | 2.00 | 0 | 0 | 0 | 4.39" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:22 | WebLogic Overview | 49 | Transaction Details and Error Messages | 200 | 209.71 | 4.77 | 0 | 0 | 0 | 1.84" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:25 | WebLogic Overview | 57 | Weblogic Data Source Performance | 200 | 3391.64 | 0.29 | 0 | 0 | 0 | 29.76" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 58 | Weblogic Queue Details | 200 | 204.09 | 4.90 | 0 | 0 | 0 | 1.79" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 59 | Weblogic Topic Details | 200 | 187.35 | 5.34 | 0 | 0 | 0 | 1.64" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:26+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 200 | 91.36 | 10.95 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:27 | WebLogic Overview | 200 | 105.76 | 9.46 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+
+running (13.0s), 10/10 VUs, 9 complete and 0 interrupted iterations
+default   [  52% ] 10 VUs  13.0s/25s
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:27 | WebLogic Overview | 200 | 294.84 | 3.39 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:27 | WebLogic Overview | 200 | 386.89 | 2.58 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:27 | WebLogic Overview | 200 | 400.05 | 2.50 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:27 | WebLogic Overview | 200 | 407.89 | 2.45 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:27 | WebLogic Overview | 200 | 406.68 | 2.46 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:27 | WebLogic Overview | 200 | 396.91 | 2.52 | 0 | 0 | 0" source=console
+time="2025-11-17T11:40:27+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:27 | WebLogic Overview | 200 | 497.30 | 2.01 | 0 | 0 | 0" source=console
+
+running (14.0s), 10/10 VUs, 10 complete and 0 interrupted iterations
+default   [  56% ] 10 VUs  14.0s/25s
+
+running (15.0s), 10/10 VUs, 10 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  15.0s/25s
+
+running (16.0s), 10/10 VUs, 10 complete and 0 interrupted iterations
+default   [  64% ] 10 VUs  16.0s/25s
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 56 | Untitled | 200 | 202.76 | 4.93 | 0 | 0 | 0 | 4.51" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 51 | Total Applications | 200 | 94.45 | 10.59 | 0 | 0 | 0 | 2.10" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 40 | Managed Server Count. | 200 | 22.88 | 43.70 | 0 | 0 | 0 | 0.51" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 54 | Unhealthy Applications | 200 | 72.35 | 13.82 | 0 | 0 | 0 | 1.61" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 52 | Down Servers | 200 | 100.00 | 10.00 | 0 | 0 | 0 | 2.22" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 55 | Active Alert | 200 | 20.38 | 49.08 | 0 | 0 | 0 | 0.45" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 8 | Total Transactions  | 200 | 78.99 | 12.66 | 0 | 0 | 0 | 1.76" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 13 | Active Transactions | 200 | 22.10 | 45.24 | 0 | 0 | 0 | 0.49" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 6 | Total Committed Transactions  | 200 | 78.30 | 12.77 | 0 | 0 | 0 | 1.74" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 11 | Hogging Threads | 200 | 21.31 | 46.94 | 0 | 0 | 0 | 0.47" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 10 | IdleThreads | 200 | 76.02 | 13.15 | 0 | 0 | 0 | 1.69" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 9 | Executed Threads | 200 | 23.20 | 43.10 | 0 | 0 | 0 | 0.52" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 12 | Stuck Threads | 200 | 82.50 | 12.12 | 0 | 0 | 0 | 1.83" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:26 | WebLogic Overview | 5 | Total Abandoned Transactions  | 200 | 20.07 | 49.82 | 0 | 0 | 0 | 0.45" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:27 | WebLogic Overview | 7 | Rolledback Transactions | 200 | 75.07 | 13.32 | 0 | 0 | 0 | 1.67" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:27 | WebLogic Overview | 4 |  P95 Throughput  | 200 | 27.58 | 36.26 | 0 | 0 | 0 | 0.61" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:27 | WebLogic Overview | 41 | Weblogic Server Health | 200 | 184.37 | 5.42 | 0 | 0 | 0 | 4.10" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:27 | WebLogic Overview | 17 | Active Alerts | 200 | 401.95 | 2.49 | 0 | 0 | 0 | 8.93" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:27 | WebLogic Overview | 43 | Server Status | 200 | 298.15 | 3.35 | 0 | 0 | 0 | 6.63" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:28 | WebLogic Overview | 3 | Weblogic Application Status | 200 | 301.24 | 3.32 | 0 | 0 | 0 | 6.69" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:28 | WebLogic Overview | 32 | Total Transactions Trend for Top 5 Servers | 200 | 283.81 | 3.52 | 0 | 0 | 0 | 6.31" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:28 | WebLogic Overview | 34 | Total Committed Transcations for Top 5 Servers | 200 | 213.43 | 4.69 | 0 | 0 | 0 | 4.74" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:29 | WebLogic Overview | 33 | Total Abandoned Transcations for Top 5 Servers | 200 | 392.37 | 2.55 | 0 | 0 | 0 | 8.72" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:29 | WebLogic Overview | 24 | P95 Throughput Trend for Top 5 Servers | 200 | 209.93 | 4.76 | 0 | 0 | 0 | 4.67" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:29 | WebLogic Overview | 49 | Transaction Details and Error Messages | 200 | 299.40 | 3.34 | 0 | 0 | 0 | 6.65" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:29 | WebLogic Overview | 57 | Weblogic Data Source Performance | 200 | 300.46 | 3.33 | 0 | 0 | 0 | 6.68" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:30 | WebLogic Overview | 58 | Weblogic Queue Details | 200 | 301.42 | 3.32 | 0 | 0 | 0 | 6.70" source=console
+time="2025-11-17T11:40:30+05:30" level=info msg="[PANEL_DATA] | 2025-11-17 06:10:30 | WebLogic Overview | 59 | Weblogic Topic Details | 200 | 295.50 | 3.38 | 0 | 0 | 0 | 6.57" source=console
+
+running (17.0s), 10/10 VUs, 10 complete and 0 interrupted iterations
+default   [  68% ] 10 VUs  17.0s/25s
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: MSSQL Overview Dashboard" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: Linux Server Insights" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: Apache Overview" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Firewall Insights" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: MongoDB Overview" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Redis Cache Overview" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: AWS ALB Overview" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure Storage Blob Overview" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: Azure API Management Overview" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: BRUM Overview" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: Cisco Switch" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: DNS Overview" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: IBMMQ Insights" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: Kubernetes Cluster Overview" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: Synthetic Browser Journey Overview" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="🚫 Skipping disabled dashboard: Tomcat Overview" source=console
+time="2025-11-17T11:40:31+05:30" level=info msg="[DASHBOARD_DATA] | 2025-11-17 06:10:31 | WebLogic Overview | 200 | 291.59 | 3.43 | 0 | 0 | 0" source=console
+
+running (18.0s), 10/10 VUs, 11 complete and 0 interrupted iterations
+default   [  72% ] 10 VUs  18.0s/25s
+
+running (19.0s), 10/10 VUs, 11 complete and 0 interrupted iterations
+default   [  76% ] 10 VUs  19.0s/25s
