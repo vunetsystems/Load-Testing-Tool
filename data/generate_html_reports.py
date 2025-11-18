@@ -21,23 +21,14 @@ SUMMARY_FIELDS = [
 ]
 
 POD_GROUPS = {
-    "Kafka Cluster Pods CPU": {
-        "rows": ["kafka_cluster_cp_kafka_0", "kafka_cluster_cp_kafka_1", "kafka_cluster_cp_kafka_2"],
-        "cols": ["cpu_min", "cpu_avg", "cpu_max"]
+    "Kafka Cluster Pods": {
+        "pods": ["kafka-cluster-cp-kafka-0", "kafka-cluster-cp-kafka-1", "kafka-cluster-cp-kafka-2"]
     },
-    "Kafka Cluster Pods Memory": {
-        "rows": ["kafka_cluster_cp_kafka_0", "kafka_cluster_cp_kafka_1", "kafka_cluster_cp_kafka_2"],
-        "cols": ["mem_min", "mem_avg", "mem_max"]
-    },
-    "ClickHouse Pods CPU": {
-        "rows": ["chi_clickhouse_vusmart_0_0_0", "chi_clickhouse_vusmart_0_1_0"],
-        "cols": ["cpu_min", "cpu_avg", "cpu_max"]
-    },
-    "ClickHouse Pods Memory": {
-        "rows": ["chi_clickhouse_vusmart_0_0_0", "chi_clickhouse_vusmart_0_1_0"],
-        "cols": ["mem_min", "mem_avg", "mem_max"]
+    "ClickHouse Pods": {
+        "pods": ["chi-clickhouse-vusmart-0-0-0", "chi-clickhouse-vusmart-0-1-0"]
     }
 }
+
 
 PIPELINE_GROUPS = {
     "Pipeline Pod CPU": {
@@ -144,6 +135,195 @@ def extract_pipeline_name_from_info(row):
 # HTML SECTION FORMATTERS
 # ===============================
 
+# ===============================
+# NODE-POD MAPPING TABLE
+# ===============================
+
+# ===============================
+# NODE-POD MAPPING TABLE (FIXED)
+# ===============================
+
+# ===============================
+# NODE-POD MAPPING TABLE (ROWSPAN)
+# ===============================
+
+def format_node_pod_table(row):
+    """
+    Builds a Node → Pods mapping with only one row per node using HTML rowspan.
+    Combines Pod CPU & MEM into a single column: 'X cores / Y Gi'.
+    """
+    try:
+        pods_cpu    = json.loads(safe_get(row, "pods_cpu"))
+        pods_memory = json.loads(safe_get(row, "pods_memory"))
+        nodes_cpu   = json.loads(safe_get(row, "nodes_cpu"))
+        nodes_memory = json.loads(safe_get(row, "nodes_memory"))
+    except Exception as e:
+        return html_section("⚠️ Node-Pod Table", f"<p>JSON Parsing Failed: {e}</p>")
+
+    table_html = (
+        "<table><thead><tr>"
+        "<th>Node Name</th><th>Node Resources</th>"
+        "<th>Pod</th><th>Pod Resources</th><th>Group</th>"
+        "</tr></thead><tbody>"
+    )
+
+    for node_name, node_cpu_info in nodes_cpu.items():
+        node_cpu_alloc = smart_format(node_cpu_info.get("allocated", ""))
+        node_mem_alloc = smart_format(nodes_memory.get(node_name, {}).get("allocated", ""))
+
+        node_pods = []
+        for pod_name, cpu_info in pods_cpu.items():
+            if cpu_info.get("node_name") == node_name:
+                pod_cpu_alloc = smart_format(cpu_info.get("allocated", ""))
+                pod_mem_alloc = smart_format(pods_memory.get(pod_name, {}).get("allocated", ""))
+
+                pod_lower = pod_name.lower()
+                if "kafka" in pod_lower:
+                    group = "Kafka"
+                elif "clickhouse" in pod_lower:
+                    group = "CH"
+                elif "traefik" in pod_lower:
+                    group = "Traefik"
+                else:
+                    group = "Pipeline"
+
+                node_pods.append((pod_name, pod_cpu_alloc, pod_mem_alloc, group))
+
+        if not node_pods:
+            table_html += (
+                f"<tr>"
+                f"<td>{node_name}</td>"
+                f"<td>{node_cpu_alloc} cores / {node_mem_alloc} Gi</td>"
+                f"<td colspan='3'>No pods</td>"
+                f"</tr>"
+            )
+            continue
+
+        rowspan = len(node_pods)
+        first_pod = node_pods[0]
+
+        table_html += (
+            f"<tr>"
+            f"<td rowspan='{rowspan}'>{node_name}</td>"
+            f"<td rowspan='{rowspan}'>{node_cpu_alloc} cores / {node_mem_alloc} Gi</td>"
+            f"<td>{first_pod[0]}</td>"
+            f"<td>{first_pod[1]} cores / {first_pod[2]} Gi</td>"
+            f"<td>{first_pod[3]}</td>"
+            f"</tr>"
+        )
+
+        for pod in node_pods[1:]:
+            table_html += (
+                f"<tr>"
+                f"<td>{pod[0]}</td>"
+                f"<td>{pod[1]} cores / {pod[2]} Gi</td>"
+                f"<td>{pod[3]}</td>"
+                f"</tr>"
+            )
+
+    table_html += "</tbody></table>"
+    return html_section("🧩 Node/Pod Resources", table_html)
+
+
+def add_percent_to_headers(html_table):
+    """
+    Automatically adds '%' to column names that contain Min, Avg, or Max.
+    Works on ALL tables without manual edits.
+    """
+    return (
+        html_table
+        .replace("<th>CPU Min</th>", "<th>CPU Min (%)</th>")
+        .replace("<th>CPU Avg</th>", "<th>CPU Avg (%)</th>")
+        .replace("<th>CPU Max</th>", "<th>CPU Max (%)</th>")
+        .replace("<th>MEM Min</th>", "<th>MEM Min (%)</th>")
+        .replace("<th>MEM Avg</th>", "<th>MEM Avg (%)</th>")
+        .replace("<th>MEM Max</th>", "<th>MEM Max (%)</th>")
+        .replace("<th>Min</th>", "<th>Min (%)</th>")
+        .replace("<th>Avg</th>", "<th>Avg (%)</th>")
+        .replace("<th>Max</th>", "<th>Max (%)</th>")
+    )
+
+def format_node_tables(row):
+    """
+    Builds separate Kafka & ClickHouse node tables.
+    Each row: pod_name | node_name | CPU_ALLOC | CPU_MIN | CPU_AVG | CPU_MAX | MEM_ALLOC | MEM_MIN | MEM_AVG | MEM_MAX
+    """
+    try:
+        pods_cpu    = json.loads(safe_get(row, "pods_cpu"))
+        pods_memory = json.loads(safe_get(row, "pods_memory"))
+        nodes_cpu   = json.loads(safe_get(row, "nodes_cpu"))
+        nodes_memory = json.loads(safe_get(row, "nodes_memory"))
+    except Exception as e:
+        return html_section("⚠️ Node Tables", f"<p>JSON Parsing Failed: {e}</p>")
+
+    kafka_rows = []
+    clickhouse_rows = []
+
+    for pod_name, cpu_info in pods_cpu.items():
+        node = cpu_info.get("node_name")
+        if not node:
+            continue  
+
+        cpu_stats = nodes_cpu.get(node, {})
+        mem_stats = nodes_memory.get(node, {})
+
+        row_data = {
+            "pod": pod_name,
+            "node": node,
+            "cpu_alloc": smart_format(cpu_stats.get("allocated", "")),
+            "cpu_min": smart_format(cpu_stats.get("min", "")),
+            "cpu_avg": smart_format(cpu_stats.get("avg", "")),
+            "cpu_max": smart_format(cpu_stats.get("max", "")),
+            "mem_alloc": smart_format(mem_stats.get("allocated", "")),
+            "mem_min": smart_format(mem_stats.get("min", "")),
+            "mem_avg": smart_format(mem_stats.get("avg", "")),
+            "mem_max": smart_format(mem_stats.get("max", "")),
+        }
+
+        if "kafka" in pod_name.lower():
+            kafka_rows.append(row_data)
+        elif "clickhouse" in pod_name.lower():
+            clickhouse_rows.append(row_data)
+
+    def build_table(title, rows):
+        if not rows:
+            return html_section(title, "<p>No data found.</p>")
+
+        html = (
+            f"<table><thead><tr>"
+            f"<th>Pod Name</th><th>Node Name</th>"
+            f"<th>CPU Alloc</th><th>CPU Min (%)</th><th>CPU Avg (%)</th><th>CPU Max (%)</th>"
+            f"<th>MEM Alloc</th><th>MEM Min (%)</th><th>MEM Avg (%)</th><th>MEM Max (%)</th>"
+            f"</tr></thead><tbody>"
+        )
+
+        # one row per node – using the first pod for each
+        seen_nodes = set()
+        for r in rows:
+            if r["node"] in seen_nodes:
+                continue
+            seen_nodes.add(r["node"])
+
+            html += (
+                f"<tr>"
+                f"<td>{r['pod']}</td>"
+                f"<td>{r['node']}</td>"
+                f"<td>{r['cpu_alloc']} cores</td><td>{r['cpu_min']}</td>"
+                f"<td>{r['cpu_avg']}</td><td>{r['cpu_max']}</td>"
+                f"<td>{r['mem_alloc']} Gi</td><td>{r['mem_min']}</td>"
+                f"<td>{r['mem_avg']}</td><td>{r['mem_max']}</td>"
+                f"</tr>"
+            )
+
+        return html_section(title, html + "</tbody></table>")
+
+    # Build separate tables
+    html_kafka = build_table("🐳 Kafka Node CPU + Memory", kafka_rows)
+    html_clickhouse = build_table("🏛️ ClickHouse Node CPU + Memory", clickhouse_rows)
+
+    return html_kafka + html_clickhouse
+
+
 def format_summary(row):
     html = "<ul>"
     for field in SUMMARY_FIELDS:
@@ -157,26 +337,125 @@ def format_summary(row):
                 pass
             label = "Duration"
         html += f"<li><strong>{label}</strong>: <code>{value}</code></li>"
+    avg_in = smart_format(safe_get(row, "avg_input_msgs_per_sec"))
+    avg_out = smart_format(safe_get(row, "avg_output_msgs_per_sec"))
+
+    html += f"<li><strong>Observed Avg Input Topic EPS</strong>: <code>{avg_in}</code></li>"
+    html += f"<li><strong>Observed Avg Output Topic EPS</strong>: <code>{avg_out}</code></li>"
     html += "</ul>"
     return html_section("🧾 Test Summary", html)
 
 def format_pipeline_info(row):
     info_data = safe_get(row, "pipeline_info")
     if not info_data:
-        return ""
+        return "", None  # return pipeline table + pipeline name as None
+
     try:
         info = json.loads(info_data)
         html = "<table><thead><tr><th>Source</th><th>Pipeline Name</th><th>Threads</th><th>Instances</th></tr></thead><tbody>"
+
+        pipeline_name = None
         for source, details in info.items():
+            pipeline_name = details.get('name', '')
             html += (
-                f"<tr><td>{source}</td><td>{details.get('name','')}</td>"
+                f"<tr><td>{source}</td><td>{pipeline_name}</td>"
                 f"<td>{smart_format(details.get('threads',''))}</td>"
                 f"<td>{smart_format(details.get('instances',''))}</td></tr>"
             )
+
         html += "</tbody></table>"
-        return html_section("🔧 Pipeline Info", html)
+        return html_section("🔧 Pipeline Info", html), pipeline_name
+
     except Exception:
-        return html_section("🔧 Pipeline Info", f"<p>⚠️ Could not parse JSON: {info_data}</p>")
+        return html_section("🔧 Pipeline Info", f"<p>⚠️ Could not parse JSON: {info_data}</p>"), None
+
+def format_pipeline_pods_from_json(title, pipeline_name, row):
+    if not pipeline_name:
+        return ""  # No pipeline found
+
+    try:
+        pods_cpu = json.loads(safe_get(row, "pods_cpu"))
+        pods_mem = json.loads(safe_get(row, "pods_memory"))
+    except Exception:
+        return html_section(title, "<p>⚠️ JSON parsing failed.</p>")
+
+    # Identify matching pods using partial match
+    matched_pods = [
+        pod_name for pod_name in pods_cpu.keys()
+        if pod_name.startswith(pipeline_name)
+    ]
+
+    if not matched_pods:
+        return html_section(title, "<p>⚠️ No matching pipeline pods found.</p>")
+
+    # Build table
+    html = (
+        f"<table><thead><tr>"
+        f"<th>Pod</th><th>CPU Allocated</th><th>CPU Min</th><th>CPU Avg</th><th>CPU Max</th>"
+        f"<th>MEM Allocated</th><th>MEM Min</th><th>MEM Avg</th><th>MEM Max</th>"
+        f"</tr></thead><tbody>"
+    )
+
+    for pod in matched_pods:
+        cpu = pods_cpu.get(pod, {})
+        mem = pods_mem.get(pod, {})
+
+        html += (
+            f"<tr>"
+            f"<td>{pod}</td>"
+            f"<td>{smart_format(cpu.get('allocated', ''))} cores</td>"
+            f"<td>{smart_format(cpu.get('min', ''))}</td>"
+            f"<td>{smart_format(cpu.get('avg', ''))}</td>"
+            f"<td>{smart_format(cpu.get('max', ''))}</td>"
+            f"<td>{smart_format(mem.get('allocated', ''))} Gi</td>"
+            f"<td>{smart_format(mem.get('min', ''))}</td>"
+            f"<td>{smart_format(mem.get('avg', ''))}</td>"
+            f"<td>{smart_format(mem.get('max', ''))}</td>"
+            f"</tr>"
+        )
+
+    return html_section(title, html + "</tbody></table>")
+
+
+def format_pod_group_from_json(title, pod_list, row):
+    """
+    Fetches allocated / min / avg / max values for Kafka & ClickHouse pods 
+    **ONLY from `pods_cpu` and `pods_memory` JSON**.
+    """
+    try:
+        pods_cpu = json.loads(safe_get(row, "pods_cpu"))
+        pods_mem = json.loads(safe_get(row, "pods_memory"))
+    except Exception:
+        return html_section(title, "<p>⚠️ JSON parsing failed.</p>")
+
+    html = (
+        f"<table><thead><tr>"
+        f"<th>Pod</th><th>CPU Allocated</th><th>CPU Min</th><th>CPU Avg</th><th>CPU Max</th>"
+        f"<th>MEM Allocated</th><th>MEM Min</th><th>MEM Avg</th><th>MEM Max</th>"
+        f"</tr></thead><tbody>"
+    )
+
+    for pod in pod_list:
+        cpu_data = pods_cpu.get(pod, {})
+        mem_data = pods_mem.get(pod, {})
+
+        html += (
+            f"<tr>"
+            f"<td>{pod}</td>"
+            f"<td>{smart_format(cpu_data.get('allocated', ''))} cores</td>"
+            f"<td>{smart_format(cpu_data.get('min', ''))}</td>"
+            f"<td>{smart_format(cpu_data.get('avg', ''))}</td>"
+            f"<td>{smart_format(cpu_data.get('max', ''))}</td>"
+            f"<td>{smart_format(mem_data.get('allocated', ''))} Gi</td>"
+            f"<td>{smart_format(mem_data.get('min', ''))}</td>"
+            f"<td>{smart_format(mem_data.get('avg', ''))}</td>"
+            f"<td>{smart_format(mem_data.get('max', ''))}</td>"
+            f"</tr>"
+        )
+
+    html += "</tbody></table>"
+    return html_section(title, html)
+
 
 def format_combined_topic_table(row):
     html = (
@@ -193,6 +472,7 @@ def format_combined_topic_table(row):
 
 def format_lag_table(row):
     html = (
+        "<p><strong>Note:</strong> Lag is in terms of offsets with respect Kafka and ContextStream Pipeline.</p>"  # 👈 NEW LINE
         "<table><thead><tr><th>Min Lag</th><th>Avg Lag</th><th>Max Lag</th></tr></thead><tbody>"
         f"<tr><td>{smart_format(safe_get(row,'min_lag'))}</td>"
         f"<td>{smart_format(safe_get(row,'avg_lag'))}</td>"
@@ -200,6 +480,7 @@ def format_lag_table(row):
         "</tbody></table>"
     )
     return html_section("⏱️ Lag Metrics", html)
+
 
 def format_grouped_table(title, group_def, row):
     """Handles Pods, Pipelines, and Nodes with correct allocated logic."""
@@ -236,6 +517,52 @@ def format_grouped_table(title, group_def, row):
 
     html += "</tbody></table>"
     return html_section(title, html)
+
+def format_clickhouse_ingestion_table(row):
+    """
+    Parses the `ingestion_summary` column and creates a table:
+    Table Name | Min EPS | Avg EPS | Max EPS
+    """
+    data = safe_get(row, "ingestion_summary")
+    if not data:
+        return html_section("🏭 ClickHouse Ingestion Summary", "<p>⚠️ No ingestion data found.</p>")
+
+    try:
+        ingestion = json.loads(data)   # Expecting list of dicts or dict
+    except Exception:
+        return html_section("🏭 ClickHouse Ingestion Summary", "<p>⚠️ JSON parsing failed.</p>")
+
+    # Normalize format → ALWAYS list of objects
+    if isinstance(ingestion, dict):
+        ingestion = [ingestion]
+
+    if not isinstance(ingestion, list):
+        return html_section("🏭 ClickHouse Ingestion Summary", "<p>⚠️ Unexpected data format.</p>")
+
+    html = (
+        "<table><thead><tr>"
+        "<th>Table</th><th>Min EPS</th><th>Avg EPS</th><th>Max EPS</th>"
+        "</tr></thead><tbody>"
+    )
+
+    for item in ingestion:
+        table = item.get("table", "unknown")
+        min_eps = smart_format(item.get("min_eps", ""))
+        avg_eps = smart_format(item.get("avg_eps", ""))
+        max_eps = smart_format(item.get("max_eps", ""))
+
+        html += (
+            f"<tr>"
+            f"<td>{table}</td>"
+            f"<td>{min_eps}</td>"
+            f"<td>{avg_eps}</td>"
+            f"<td>{max_eps}</td>"
+            f"</tr>"
+        )
+
+    html += "</tbody></table>"
+    return html_section("🏭 ClickHouse Ingestion Summary", html)
+
 
 def format_kafka_specs(row):
     """Parse and format kafka_specs JSON into separate Input and Output topic tables (HTML)."""
@@ -365,26 +692,45 @@ code {{
 
 def generate_html_report(row):
     html_content = (
-        f"<h1>📊 Test Report - {safe_get(row, 'test_id')}</h1>"
+        f"<h1>📊 Test Report - {safe_get(row, 'test_name')}</h1>"
         + format_summary(row)
+        + format_node_pod_table(row)
         + format_kafka_specs(row)
         + format_combined_topic_table(row)
         + format_lag_table(row)
+        + format_clickhouse_ingestion_table(row)
+
     )
 
     html_content += "<h2>🖥️ Pod Metrics</h2>"
-    for title, group in POD_GROUPS.items():
-        html_content += format_grouped_table(title, group, row)
+    html_content += format_pod_group_from_json(
+        "Kafka Cluster Pods",
+        ["kafka-cluster-cp-kafka-0", "kafka-cluster-cp-kafka-1", "kafka-cluster-cp-kafka-2"],
+        row
+    )
+    html_content += format_pod_group_from_json(
+        "ClickHouse Pods",
+        ["chi-clickhouse-vusmart-0-0-0", "chi-clickhouse-vusmart-0-1-0"],
+        row
+    )
 
-    html_content += "<h2>🔧 Pipeline Pod Metrics</h2>" + format_pipeline_info(row)
-    for title, group in PIPELINE_GROUPS.items():
-        html_content += format_grouped_table(title, group, row)
+    pipeline_table, pipeline_name = format_pipeline_info(row)
+    html_content += pipeline_table
+    html_content += format_pipeline_pods_from_json(
+        "Pipeline Pods", pipeline_name, row
+    )
 
     html_content += "<h2>💻 Node Metrics</h2>"
-    for title, group in NODE_GROUPS.items():
-        html_content += format_grouped_table(title, group, row)
+    html_content += format_node_tables(row)
+
+
+    # 👉 APPLY CHANGES HERE – AUTOMATICALLY
+    html_content = add_percent_to_headers(html_content)
 
     return wrap_html_template(html_content)
+
+
+
 
 def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)

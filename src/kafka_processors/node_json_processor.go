@@ -125,7 +125,7 @@ func FetchNodeCPUMetricsForNodes(chClient *clickhouse.ClickHouseClient, nodeName
 		    FROM monitoring.kubernetes_node_data
 		    WHERE (timestamp >= toDateTime('%s'))
 		      AND (timestamp <= toDateTime('%s'))
-		      AND (trim(BOTH ' \t\n\r\f\v' FROM node_name) IN (%s))
+		      AND (node_name IN (%s))
 		    GROUP BY node_name, ts_bucket
 		) AS node_usage
 		GROUP BY node_name
@@ -155,14 +155,6 @@ func FetchNodeCPUMetricsForNodes(chClient *clickhouse.ClickHouseClient, nodeName
 			logger.LogWarning("System", "NodeCPUProcessor", fmt.Sprintf("Failed to scan node CPU row: %v", err))
 			continue
 		}
-
-		// Trim and validate node name
-		stat.NodeName = strings.TrimSpace(stat.NodeName)
-		if stat.NodeName == "" {
-			logger.LogWarning("System", "NodeCPUProcessor", "Skipped empty or invalid node name")
-			continue
-		}
-
 		stats = append(stats, stat)
 	}
 
@@ -218,7 +210,7 @@ func FetchNodeMemoryMetricsForNodes(chClient *clickhouse.ClickHouseClient, nodeN
 		    FROM monitoring.kubernetes_node_data
 		    WHERE (timestamp >= toDateTime('%s'))
 		      AND (timestamp <= toDateTime('%s'))
-		      AND (trim(BOTH ' \t\n\r\f\v' FROM node_name) IN (%s))
+		      AND (node_name IN (%s))
 		    GROUP BY
 		        toStartOfInterval(timestamp, toIntervalMinute(5)),
 		        node_name
@@ -249,14 +241,6 @@ func FetchNodeMemoryMetricsForNodes(chClient *clickhouse.ClickHouseClient, nodeN
 			logger.LogWarning("System", "NodeMemoryProcessor", fmt.Sprintf("Failed to scan node memory row: %v", err))
 			continue
 		}
-
-		// Trim and validate node name
-		stat.NodeName = strings.TrimSpace(stat.NodeName)
-		if stat.NodeName == "" {
-			logger.LogWarning("System", "NodeMemoryProcessor", "Skipped empty or invalid node name")
-			continue
-		}
-
 		stats = append(stats, stat)
 	}
 
