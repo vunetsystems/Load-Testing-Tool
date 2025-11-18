@@ -59,7 +59,6 @@ sources:
 
   - name: "Apache"
     inputTopic:
-      - name: "apache-logs-input"
       - name: "apache-metrics-input"
     outputTopic:
       - name: "apache-logs"

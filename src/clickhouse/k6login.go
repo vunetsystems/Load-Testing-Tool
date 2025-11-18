@@ -3,6 +3,7 @@ package clickhouse
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 	"vuDataSim/src/logger"
 )
@@ -30,13 +31,24 @@ func GetK6LoginResults(ctx context.Context, testID string) ([]K6LoginResult, err
 		    test_name AS "Test Name",
 		    quantile(0.9)(avg_response_time) AS "P95 Response time"
 		FROM monitoring.k6_login
-		WHERE timestamp >= now() - toIntervalDay(1)
 	`
 
-	// Add test_id filter if provided
+	whereClause := ""
+	conditions := []string{}
+
+	// If test_id is provided, don't apply time filter to show all historical data for that test
 	if testID != "" {
-		query += fmt.Sprintf(" AND test_id = '%s'", testID)
+		conditions = append(conditions, fmt.Sprintf("test_id = '%s'", testID))
+	} else {
+		// If no test_id, apply time filter to limit results
+		conditions = append(conditions, "timestamp >= now() - toIntervalDay(1)")
 	}
+
+	if len(conditions) > 0 {
+		whereClause = "WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	query += whereClause
 
 	query += `
 		GROUP BY
