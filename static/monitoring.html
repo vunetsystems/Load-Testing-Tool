@@ -756,6 +756,28 @@ drop_in - The total number of received packets dropped by the interface">
                         <p class="text-sm text-slate-500">Last updated: <span id="k6-last-update">Never</span></p>
                     </div>
 
+                    <!-- Test Run Filter for K6 Monitoring -->
+                    <div class="flex items-center justify-between gap-4 px-4 py-3 bg-white rounded-xl border border-slate-200 mb-6 shadow-sm">
+                        <div class="relative flex-1">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">analytics</span>
+                            <select id="k6-test-run-dropdown" class="w-full h-10 pl-10 pr-4 rounded-lg bg-slate-50 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                                <option value="">Select a test run...</option>
+                            </select>
+                        </div>
+                        <button id="k6-clear-test-filter" class="px-3 py-1.5 text-sm rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors">Clear Filter</button>
+                    </div>
+
+                    <!-- Selected Test Info Display -->
+                    <div id="k6-selected-test-info" class="hidden mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="font-medium">Test: </span><span id="k6-selected-test-name"></span>
+                                <span class="text-sm text-slate-600 ml-4">Range: </span><span id="k6-selected-test-range"></span>
+                                <span class="text-sm text-slate-600 ml-4">Duration: </span><span id="k6-selected-test-duration"></span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         <div
                             class="flex flex-col gap-2 rounded-xl p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
@@ -820,6 +842,12 @@ drop_in - The total number of received packets dropped by the interface">
                                         <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
                                             <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="no_of_users" data-table="panel">
                                                 <span>Virtual Users</span>
+                                                <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                            </button>
+                                        </th>
+                                        <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                            <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="test_id" data-table="panel">
+                                                <span>Test ID</span>
                                                 <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
                                             </button>
                                         </th>
@@ -944,6 +972,12 @@ drop_in - The total number of received packets dropped by the interface">
                                                 </button>
                                             </th>
                                             <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                                <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="test_id" data-table="dashboard">
+                                                    <span>Test ID</span>
+                                                    <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                                </button>
+                                            </th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
                                                 <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="time_filter" data-table="dashboard">
                                                     <span>Time Filter</span>
                                                     <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
@@ -1026,6 +1060,12 @@ drop_in - The total number of received packets dropped by the interface">
                                             <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
                                                 <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="no_of_users" data-table="login">
                                                     <span>Virtual Users</span>
+                                                    <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
+                                                </button>
+                                            </th>
+                                            <th class="px-4 py-3 text-sm font-medium text-slate-600 uppercase text-xs tracking-wider">
+                                                <button class="sort-btn flex items-center gap-1 hover:text-slate-900 transition-colors" data-column="test_id" data-table="login">
+                                                    <span>Test ID</span>
                                                     <span class="sort-icon material-symbols-outlined text-xs opacity-0">arrow_upward</span>
                                                 </button>
                                             </th>

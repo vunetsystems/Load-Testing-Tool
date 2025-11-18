@@ -982,13 +982,13 @@ WITH per_container AS (
 )
 SELECT
 	   pod_name,
-	   0.0 AS max_used_cpu,
-	   0.0 AS min_used_cpu,
-	   0.0 AS avg_used_cpu,
+	   0 AS max_used_cpu,
+	   0 AS min_used_cpu,
+	   0 AS avg_used_cpu,
 	   sum(cpu_limit) AS cpu_limit,
-	   0.0 AS max_used_memory,
-	   0.0 AS min_used_memory,
-	   0.0 AS avg_used_memory,
+	   0 AS max_used_memory,
+	   0 AS min_used_memory,
+	   0 AS avg_used_memory,
 	   sum(mem_limit) AS memory_limit
 FROM per_container
 GROUP BY pod_name

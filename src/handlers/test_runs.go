@@ -8,16 +8,15 @@ import (
 
 	"vuDataSim/src/clickhouse"
 	"vuDataSim/src/database"
+	"vuDataSim/src/kafka_processors"
 	"vuDataSim/src/logger"
 	"vuDataSim/src/models"
+
 	"github.com/gorilla/mux"
 )
 
 // Import kafka_summary_processor for new summarization functionality
 // This is an update for Kafka summarization functionality
-import (
-	"vuDataSim/src/kafka_processors"
-)
 
 // HandleAPIStartTestRun handles POST /api/test-runs/start
 // This endpoint creates a new test run record in the database
@@ -231,6 +230,7 @@ func HandleAPIGetTestRunsForDropdown(w http.ResponseWriter, r *http.Request) {
 	// Create simplified response for dropdown
 	type TestRunOption struct {
 		TestID    string `json:"test_id"`
+		TestName  string `json:"test_name,omitempty"`
 		StartTime string `json:"start_time"`
 		EndTime   string `json:"end_time,omitempty"`
 		Duration  string `json:"duration,omitempty"`
@@ -240,8 +240,9 @@ func HandleAPIGetTestRunsForDropdown(w http.ResponseWriter, r *http.Request) {
 	var options []TestRunOption
 	for _, testRun := range testRuns {
 		option := TestRunOption{
-			TestID: testRun.TestID,
-			Status: testRun.Status,
+			TestID:   testRun.TestID,
+			TestName: testRun.TestName,
+			Status:   testRun.Status,
 		}
 
 		// Format times as RFC3339 strings

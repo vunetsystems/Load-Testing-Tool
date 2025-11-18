@@ -202,9 +202,10 @@ class PodMonitoringManager {
             option.value = testRun.test_id;
 
             // Format display text
+            const name = testRun.test_name || 'Unnamed Test';
             const startTime = new Date(testRun.start_time).toLocaleString();
             const status = testRun.status.charAt(0).toUpperCase() + testRun.status.slice(1);
-            let displayText = `${testRun.test_id} - ${status} (${startTime})`;
+            let displayText = `${name} - ${status} (${startTime})`;
 
             if (testRun.end_time) {
                 const endTime = new Date(testRun.end_time).toLocaleString();

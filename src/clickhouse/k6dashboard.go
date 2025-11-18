@@ -10,35 +10,46 @@ import (
 // K6DashboardResult represents a single k6 dashboard monitoring result
 type K6DashboardResult struct {
 	Timestamp       time.Time `json:"timestamp"`
+	TestID          string    `json:"test_id"`
 	NoOfUsers       uint16    `json:"no_of_users"`
 	TimeFilter      string    `json:"time_filter"`
-	DashboardStatus  uint16   `json:"dashboard_status"`
+	DashboardStatus uint16    `json:"dashboard_status"`
 	DashboardName   string    `json:"dashboard_name"`
 	P95ResponseTime float64   `json:"p95_response_time"`
 }
 
 // GetK6DashboardResults fetches k6 dashboard results based on the specified query
-func GetK6DashboardResults(ctx context.Context) ([]K6DashboardResult, error) {
+func GetK6DashboardResults(ctx context.Context, testID string) ([]K6DashboardResult, error) {
 	if monitoringDBClient == nil {
 		return nil, fmt.Errorf("Monitoring ClickHouse client not initialized")
 	}
 
 	query := `
 		SELECT
-    timestamp AS "Timestamp",
-    vus AS "No of Users",
-    time_range AS "Time Filter",
-    dashboard_status AS "Dashboard Status",
-    dashboard_name AS "Dashboard Name",
-    quantile(0.9)(dashboard_avg_response_time) AS "P95 Response Time"
+	   timestamp AS "Timestamp",
+	   test_id AS "Test ID",
+	   vus AS "No of Users",
+	   time_range AS "Time Filter",
+	   dashboard_status AS "Dashboard Status",
+	   dashboard_name AS "Dashboard Name",
+	   quantile(0.9)(dashboard_avg_response_time) AS "P95 Response Time"
 FROM monitoring.k6_results
-WHERE timestamp >= now() - INTERVAL 1 HOUR
+WHERE timestamp >= now() - INTERVAL 12 HOUR
+	`
+
+	// Add test_id filter if provided
+	if testID != "" {
+		query += fmt.Sprintf(" AND test_id = '%s'", testID)
+	}
+
+	query += `
 GROUP BY
-    timestamp,
-    vus,
-    time_range,
-    dashboard_status,
-    dashboard_name
+	   timestamp,
+	   test_id,
+	   vus,
+	   time_range,
+	   dashboard_status,
+	   dashboard_name
 ORDER BY timestamp ASC;
 
 
@@ -56,6 +67,7 @@ ORDER BY timestamp ASC;
 		var result K6DashboardResult
 		err := rows.Scan(
 			&result.Timestamp,
+			&result.TestID,
 			&result.NoOfUsers,
 			&result.TimeFilter,
 			&result.DashboardStatus,
