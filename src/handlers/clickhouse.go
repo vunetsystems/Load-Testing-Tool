@@ -447,7 +447,9 @@ func HandleAPIGetK6MaxVus(w http.ResponseWriter, r *http.Request) {
 
 // HandleAPIGetK6LoginResults handles GET /api/clickhouse/k6-login-results
 func HandleAPIGetK6LoginResults(w http.ResponseWriter, r *http.Request) {
-	k6LoginResults, err := clickhouse.GetK6LoginResults(r.Context())
+	testID := r.URL.Query().Get("test_id")
+
+	k6LoginResults, err := clickhouse.GetK6LoginResults(r.Context(), testID)
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
@@ -465,7 +467,9 @@ func HandleAPIGetK6LoginResults(w http.ResponseWriter, r *http.Request) {
 
 // HandleAPIGetK6DashboardResults handles GET /api/clickhouse/k6-dashboard-results
 func HandleAPIGetK6DashboardResults(w http.ResponseWriter, r *http.Request) {
-	k6DashboardResults, err := clickhouse.GetK6DashboardResults(r.Context())
+	testID := r.URL.Query().Get("test_id")
+
+	k6DashboardResults, err := clickhouse.GetK6DashboardResults(r.Context(), testID)
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
@@ -484,8 +488,9 @@ func HandleAPIGetK6DashboardResults(w http.ResponseWriter, r *http.Request) {
 // HandleAPIGetK6Results handles GET /api/clickhouse/k6-results
 func HandleAPIGetK6Results(w http.ResponseWriter, r *http.Request) {
 	dashboard := r.URL.Query().Get("dashboard")
+	testID := r.URL.Query().Get("test_id")
 
-	k6Results, err := clickhouse.GetK6Results(r.Context(), dashboard)
+	k6Results, err := clickhouse.GetK6Results(r.Context(), dashboard, testID)
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
@@ -652,5 +657,23 @@ func HandleAPIGetPodTrendData(w http.ResponseWriter, r *http.Request) {
 		Success: true,
 		Message: "Pod trend data retrieved successfully",
 		Data:    trendData,
+	})
+}
+
+// HandleAPIGetK6TestIDs handles GET /api/clickhouse/k6-test-ids
+func HandleAPIGetK6TestIDs(w http.ResponseWriter, r *http.Request) {
+	testIDs, err := clickhouse.GetK6TestIDs(r.Context())
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to get K6 test IDs: %v", err),
+		})
+		return
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: "K6 test IDs retrieved successfully",
+		Data:    testIDs,
 	})
 }

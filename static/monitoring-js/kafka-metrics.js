@@ -225,9 +225,10 @@ class KafkaMetricsManager {
             const option = document.createElement('option');
             // Support both snake_case and PascalCase keys from API for compatibility
             const id = testRun.test_id || testRun.TestID || testRun.testId || testRun.TestId || '';
+            const name = testRun.test_name || testRun.TestName || 'Unnamed Test';
             const duration = testRun.duration || testRun.Duration || testRun.duration_str || '';
             option.value = id;
-            option.textContent = `${id} (${duration})`;
+            option.textContent = `${name} (${duration})`;
             dropdown.appendChild(option);
         });
     }

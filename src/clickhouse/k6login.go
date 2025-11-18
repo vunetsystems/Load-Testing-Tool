@@ -9,14 +9,15 @@ import (
 
 // K6LoginResult represents a single k6 login test result
 type K6LoginResult struct {
-	Timestamp      time.Time `json:"timestamp"`
-	NoOfUsers      uint16    `json:"no_of_users"`
-	TestName       string    `json:"test_name"`
+	Timestamp       time.Time `json:"timestamp"`
+	TestID          string    `json:"test_id"`
+	NoOfUsers       uint16    `json:"no_of_users"`
+	TestName        string    `json:"test_name"`
 	P95ResponseTime float64   `json:"p95_response_time"`
 }
 
 // GetK6LoginResults fetches k6 login test results based on the specified query
-func GetK6LoginResults(ctx context.Context) ([]K6LoginResult, error) {
+func GetK6LoginResults(ctx context.Context, testID string) ([]K6LoginResult, error) {
 	if monitoringDBClient == nil {
 		return nil, fmt.Errorf("Monitoring ClickHouse client not initialized")
 	}
@@ -24,13 +25,22 @@ func GetK6LoginResults(ctx context.Context) ([]K6LoginResult, error) {
 	query := `
 		SELECT
 		    timestamp AS "timestamp",
+		    test_id AS "Test ID",
 		    vus AS "No of Users",
 		    test_name AS "Test Name",
 		    quantile(0.9)(avg_response_time) AS "P95 Response time"
 		FROM monitoring.k6_login
 		WHERE timestamp >= now() - toIntervalDay(1)
+	`
+
+	// Add test_id filter if provided
+	if testID != "" {
+		query += fmt.Sprintf(" AND test_id = '%s'", testID)
+	}
+
+	query += `
 		GROUP BY
-		    timestamp, vus, test_name
+		    timestamp, test_id, vus, test_name
 		ORDER BY timestamp;
 	`
 
@@ -46,6 +56,7 @@ func GetK6LoginResults(ctx context.Context) ([]K6LoginResult, error) {
 		var result K6LoginResult
 		err := rows.Scan(
 			&result.Timestamp,
+			&result.TestID,
 			&result.NoOfUsers,
 			&result.TestName,
 			&result.P95ResponseTime,

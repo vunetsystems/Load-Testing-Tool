@@ -285,28 +285,15 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 	// 9. Fetch and compute node JSON metrics
 	nodesCpuMap, nodesMemoryMap, _, err := ProcessNodeResourceSummaryJSON(chClient, startTime, endTime)
 	var nodesCpuJSON, nodesMemoryJSON string
-	//--CPU JSON ---
-	if nodesCpuMap != nil && len(nodesCpuMap) > 0 {
-		if cpuBytes, err := json.Marshal(nodesCpuMap); err == nil {
-			nodesCpuJSON = string(cpuBytes)
-		} else {
-			logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to marshal node CPU JSON: %v", err))
-			nodesCpuJSON = ""
-		}
-	} else {
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process node JSON metrics: %v", err))
 		nodesCpuJSON = ""
-	}
-
-	// --- MEMORY JSON ---
-	if nodesMemoryMap != nil && len(nodesMemoryMap) > 0 {
-		if memBytes, err := json.Marshal(nodesMemoryMap); err == nil {
-			nodesMemoryJSON = string(memBytes)
-		} else {
-			logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to marshal node Memory JSON: %v", err))
-			nodesMemoryJSON = ""
-		}
-	} else {
 		nodesMemoryJSON = ""
+	} else {
+		nodesCpuBytes, _ := json.Marshal(nodesCpuMap)
+		nodesMemoryBytes, _ := json.Marshal(nodesMemoryMap)
+		nodesCpuJSON = string(nodesCpuBytes)
+		nodesMemoryJSON = string(nodesMemoryBytes)
 	}
 
 	// 9. Store the summary back to the database

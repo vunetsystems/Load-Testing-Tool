@@ -1021,6 +1021,63 @@ func (h *K6Handler) StartK6Summarizer(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// HandleAPIGetK6RunsForDropdown handles GET /api/k6/dropdown
+// This endpoint returns simplified K6 run data for dropdown selection
+func HandleAPIGetK6RunsForDropdown(w http.ResponseWriter, r *http.Request) {
+	logger.LogWithNode("System", "K6", "Received request for K6 runs dropdown", "info")
+	k6Runs, err := database.GetAllK6Runs()
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to retrieve K6 runs: %v", err),
+		})
+		return
+	}
+
+	logger.LogWithNode("System", "K6", fmt.Sprintf("Found %d K6 runs for dropdown", len(k6Runs)), "debug")
+
+	// Create simplified response for dropdown
+	type K6RunOption struct {
+		TestID    string `json:"test_id"`
+		TestName  string `json:"test_name,omitempty"`
+		StartTime string `json:"start_time"`
+		EndTime   string `json:"end_time,omitempty"`
+		Duration  string `json:"duration,omitempty"`
+		Status    string `json:"status"`
+	}
+
+	var options []K6RunOption
+	for _, k6Run := range k6Runs {
+		option := K6RunOption{
+			TestID:   k6Run.TestID,
+			TestName: k6Run.TestName,
+			Status:   k6Run.Status,
+		}
+
+		// Format times as RFC3339 strings
+		option.StartTime = k6Run.StartTime.Format("2006-01-02T15:04:05Z07:00")
+		if k6Run.EndTime != nil {
+			option.EndTime = k6Run.EndTime.Format("2006-01-02T15:04:05Z07:00")
+
+			// Calculate duration
+			duration := k6Run.EndTime.Sub(k6Run.StartTime)
+			option.Duration = duration.String()
+		}
+
+		if k6Run.Duration != "" {
+			option.Duration = k6Run.Duration
+		}
+
+		options = append(options, option)
+	}
+
+	SendJSONResponse(w, http.StatusOK, APIResponse{
+		Success: true,
+		Message: fmt.Sprintf("Retrieved %d K6 runs", len(options)),
+		Data:    options,
+	})
+}
+
 // HandleAPIGetNextK6TestID handles GET /api/k6/next-test-id
 func HandleAPIGetNextK6TestID(w http.ResponseWriter, r *http.Request) {
 	nextID, err := database.GetNextK6TestID()

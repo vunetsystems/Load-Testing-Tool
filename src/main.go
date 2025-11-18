@@ -210,6 +210,7 @@ func main() {
 	api.HandleFunc("/clickhouse/kafka-network", handlers.HandleAPIGetKafkaNetwork).Methods("GET")
 	api.HandleFunc("/clickhouse/pod-monitoring", handlers.HandleAPIGetPodMonitoring).Methods("GET")
 	api.HandleFunc("/clickhouse/pod-trend", handlers.HandleAPIGetPodTrendData).Methods("GET")
+	api.HandleFunc("/clickhouse/k6-test-ids", handlers.HandleAPIGetK6TestIDs).Methods("GET")
 	// Removed pod-metrics endpoint
 
 	// Removed Kubernetes API endpoints
@@ -237,6 +238,7 @@ func main() {
 	api.HandleFunc("/k6/logs", handlers.HandleAPIGetK6Logs).Methods("GET")
 	api.HandleFunc("/k6/run-combined", handlers.HandleAPIRunCombinedScript).Methods("POST")
 	api.HandleFunc("/k6/start-summarizer", handlers.HandleAPIStartK6Summarizer).Methods("POST")
+	api.HandleFunc("/k6/dropdown", handlers.HandleAPIGetK6RunsForDropdown).Methods("GET")
 	api.HandleFunc("/k6/next-test-id", handlers.HandleAPIGetNextK6TestID).Methods("GET")
 
 	// Test Run Tracking API endpoints

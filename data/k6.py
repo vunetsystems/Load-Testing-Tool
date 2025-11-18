@@ -227,12 +227,12 @@ def create_login_charts(login_data):
 def format_login(login_data):
     """Generates HTML for the Login Performance section with description."""
     html = "<section><h2>1. 🔑 Login Performance</h2>"
-    html += "<p class='description'><strong style='color:#2a7ae2;'>Segment 1: Sequential</strong><br><strong>What it does:</strong> Runs login first, then dashboard tests, one after the other.<br><strong>Purpose / Intent:</strong> Simulate realistic user behavior where users log in before accessing dashboards. Captures metrics under a controlled, sequential load.<br><br><strong style='color:#2a7ae2;'>Segment 2: Parallel</strong><br><strong>What it does:</strong> Runs login and dashboard tests simultaneously for the full segment duration.<br><strong>Purpose / Intent:</strong> Apply concurrent load, stressing the system to see how it handles multiple operations at the same time. Helps identify bottlenecks under parallel traffic.</p>"
+    html += "<p class='description'><strong style='color:#2a7ae2;'>Sequential</strong><br><strong>What it does:</strong> Runs login first, then dashboard tests, one after the other.<br><strong>Purpose / Intent:</strong> Simulate realistic user behavior where users log in before accessing dashboards. Captures metrics under a controlled, sequential load.<br><br><strong style='color:#2a7ae2;'>Parallel</strong><br><strong>What it does:</strong> Runs login and dashboard tests simultaneously for the full segment duration.<br><strong>Purpose / Intent:</strong> Apply concurrent load, stressing the system to see how it handles multiple operations at the same time. Helps identify bottlenecks under parallel traffic.</p>"
 
     html += create_login_charts(login_data)
     
     html += "<table>"
-    html += "<thead><tr><th>Metric</th><th>Segment 1 (Sequential)</th><th>Segment 2 (Parallel)</th><th>Overall</th></tr></thead>"
+    html += "<thead><tr><th>Metric</th><th>Sequential Run</th><th>Parallel Run</th><th>Overall</th></tr></thead>"
     html += "<tbody>"
     html += f"<tr><td><strong>Total Attempts</strong></td><td>{smart_format(login_data.get('seg1_attempts', 'N/A'), 0)}</td><td>{smart_format(login_data.get('seg2_attempts', 'N/A'), 0)}</td><td>{smart_format(login_data.get('overall_attempts', 'N/A'), 0)}</td></tr>"
     html += f"<tr><td><strong>Success Rate (%)</strong></td><td>{smart_format(login_data.get('seg1_success_rate', 'N/A'))}%</td><td>{smart_format(login_data.get('seg2_success_rate', 'N/A'))}%</td><td>{smart_format(login_data.get('overall_success_rate', 'N/A'))}%</td></tr>"
@@ -251,7 +251,7 @@ def format_login(login_data):
 
 def format_dashboard(dashboard_data):
     """Generates HTML for the Dashboard Load Times section with description."""
-    html = "<section><h2>2. 📊 Overall Dashboard Load Times</h2>"
+    html = "<section><h2>2. 📊 Dashboard Loading Time</h2>"
     html += "<p class='description'><strong>Intent:</strong> Assess the overall performance of loading different dashboards. This metric captures the end-to-end time from initiating the dashboard load to receiving the complete response.<br><strong>Key Metric:</strong> Average Load Time (ms) and P95 Load Time.</p>"
 
     if not dashboard_data:
