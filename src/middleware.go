@@ -35,10 +35,14 @@ func corsMiddleware(next http.Handler) http.Handler {
 func authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, _ := sessionStore.Get(r, "vuDataSim-session")
-		if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		auth, ok := session.Values["authenticated"].(bool)
+		log.Printf("DEBUG: authMiddleware - URL: %s, authenticated: %v, ok: %v", r.URL.Path, auth, ok)
+		if !ok || !auth {
+			log.Printf("DEBUG: authMiddleware - Redirecting to /login because not authenticated")
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
+		log.Printf("DEBUG: authMiddleware - Allowing access to %s", r.URL.Path)
 		next.ServeHTTP(w, r)
 	})
 }
