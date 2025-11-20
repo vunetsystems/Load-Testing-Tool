@@ -58,11 +58,13 @@
             </div>
         </aside>
 
-        <main class="flex-1 overflow-y-auto p-6 lg:p-10">
-            <header class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-slate-100/80 pb-6 mb-8 backdrop-blur-sm -mx-6 lg:-mx-10 px-6 lg:px-10 pt-2">
+        <main class="flex-1 overflow-y-auto pt-0 px-6 lg:px-10">
+            <header class="sticky top-0 z-10 flex items-center justify-between 
+    border-b border-slate-200 bg-slate-100 
+    px-6 lg:px-10 py-4 mb-8 shadow-sm">
+                <div class="mt-4"></div>
                 <h2 class="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h2>
                 <div class="flex items-center gap-4">
-                    <span class="text-sm font-medium text-slate-600">Node Status:</span>
                     <div class="flex items-center gap-2" id="node-status-indicators">
                         </div>
                 </div>
@@ -826,7 +828,7 @@
     <script src="/static/clickhouse-metrics.js"></script>
     <script src="/static/o11y-sources.js"></script>
     <script src="/static/logs.js"></script>
-    <script src="/static/monitoring.js"></script>
+    <script src="/static/monitoring-js/monitoring.js"></script>></script>
     <script src="/static/main.js"></script>
 </body>
 </html>
