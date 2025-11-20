@@ -61,7 +61,7 @@
   </button>
 
   <!-- Download Button -->
-  <button 
+  <button
     id="download-pdf-btn"
     class="flex items-center justify-center gap-2 px-4 py-2.5
            rounded-xl bg-green-500 text-white font-medium
@@ -71,6 +71,19 @@
     disabled>
     <span class="material-symbols-outlined">download</span>
     <span class="hidden sm:inline">Download Report</span>
+  </button>
+
+  <!-- Analyze Bugs Button -->
+  <button
+    id="analyze-bugs-btn"
+    class="flex items-center justify-center gap-2 px-4 py-2.5
+           rounded-xl bg-orange-500 text-white font-medium
+           shadow-sm hover:bg-orange-600 hover:shadow-md
+           transition-all duration-200 disabled:bg-gray-300 disabled:text-gray-600
+           disabled:cursor-not-allowed"
+    disabled>
+    <span class="material-symbols-outlined">bug_report</span>
+    <span class="hidden sm:inline">Analyze Bugs</span>
   </button>
 </div>
 
@@ -157,6 +170,20 @@ Retry
 </div>
 
 </main>
+
+<!-- Modal for Bug Analysis -->
+<div id="bugs-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+  <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+    <div class="flex items-center justify-between p-6 border-b border-border-light dark:border-border-dark">
+      <h3 class="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">Bug Analysis Results</h3>
+      <button id="close-modal-btn" class="text-text-light-secondary dark:text-text-dark-secondary hover:text-text-light-primary dark:hover:text-text-dark-primary p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div id="modal-content" class="p-6 overflow-y-auto max-h-[75vh]">
+      <!-- Violations will be displayed here -->
+    </div>
+  </div>
 </div>
 
 <script>
@@ -248,9 +275,11 @@ function handleReportClick(e) {
     iframe.classList.remove('hidden');
     emptyState.classList.add('hidden');
 
-    // Enable download button
+    // Enable download and analyze buttons
     downloadBtn.disabled = false;
     downloadBtn.setAttribute('data-filename', filename.replace('.html', ''));
+    const analyzeBtn = document.getElementById('analyze-bugs-btn');
+    analyzeBtn.disabled = false;
 }
 
 // Retry loading reports
@@ -306,6 +335,208 @@ document.getElementById('download-pdf-btn').addEventListener('click', function (
 });
 
 
+
+// Analyze bugs in the selected report
+function analyzeBugs() {
+    const iframe = document.getElementById('report-iframe');
+    if (!iframe.src) {
+        alert('Please select a report first.');
+        return;
+    }
+
+    try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        const violations = extractViolations(doc);
+        showViolationsModal(violations);
+    } catch (error) {
+        console.error('Error analyzing report:', error);
+        alert('Failed to analyze the report. Please ensure the report is fully loaded.');
+    }
+}
+
+// Extract pod data and check for violations
+function extractViolations(doc) {
+    const violations = {
+        resources: { kafka: [], clickhouse: [], pipeline: [] },
+        restarts: { kafka: [], clickhouse: [], pipeline: [] },
+        overall: []
+    };
+
+    // Find the Pod Metrics h2
+    const podMetricsH2 = Array.from(doc.querySelectorAll('h2')).find(h2 => h2.textContent.includes('Pod Metrics'));
+    if (!podMetricsH2) return violations;
+
+    // Iterate through sibling sections
+    let sibling = podMetricsH2.nextElementSibling;
+    while (sibling) {
+        if (sibling.tagName === 'SECTION') {
+            const h2 = sibling.querySelector('h2');
+            if (h2) {
+                let component = '';
+                if (h2.textContent.includes('Kafka') && h2.textContent.includes('Pods')) {
+                    component = 'kafka';
+                } else if (h2.textContent.includes('ClickHouse') && h2.textContent.includes('Pods')) {
+                    component = 'clickhouse';
+                } else if (h2.textContent.includes('Pipeline') && h2.textContent.includes('Pods')) {
+                    component = 'pipeline';
+                }
+
+                if (component) {
+                    const table = sibling.querySelector('table');
+                    if (table) {
+                        const rows = table.querySelectorAll('tbody tr');
+                        rows.forEach(row => {
+                            const cells = row.querySelectorAll('td');
+                            if (cells.length >= 10) { // Pod, CPU Alloc, Min, Avg, Max, MEM Alloc, Min, Avg, Max, Restarts
+                                const podName = cells[0].textContent.trim();
+                                const cpuAvg = parseFloat(cells[3].textContent.trim()) || 0;
+                                const memAvg = parseFloat(cells[7].textContent.trim()) || 0;
+                                const restarts = parseInt(cells[9].textContent.trim()) || 0;
+
+                                const resourceViolations = [];
+                                if (cpuAvg > 70) {
+                                    resourceViolations.push(`CPU Avg: ${cpuAvg}%`);
+                                }
+                                if (memAvg > 70) {
+                                    resourceViolations.push(`MEM Avg: ${memAvg}%`);
+                                }
+
+                                if (resourceViolations.length > 0) {
+                                    violations.resources[component].push(`${podName} → ${resourceViolations.join(', ')}`);
+                                }
+
+                                if (restarts > 1) {
+                                    violations.restarts[component].push(`${podName} → Restarts: ${restarts}`);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        sibling = sibling.nextElementSibling;
+    }
+
+    // Check for lag violations
+    const lagH2 = Array.from(doc.querySelectorAll('h2')).find(h2 => h2.textContent.includes('Lag Metrics'));
+    if (lagH2) {
+        let lagTable = lagH2.nextElementSibling;
+        while (lagTable && lagTable.tagName !== 'TABLE') {
+            lagTable = lagTable.nextElementSibling;
+        }
+        if (lagTable) {
+            const lagRows = lagTable.querySelectorAll('tbody tr');
+            if (lagRows.length > 0) {
+                const lagCells = lagRows[0].querySelectorAll('td');
+                if (lagCells.length >= 2) {
+                    const avgLag = parseFloat(lagCells[1].textContent.trim()) || 0;
+                    if (avgLag > 1000000) {
+                        violations.overall.push(`Lag Avg: ${avgLag}`);
+                    }
+                }
+            }
+        }
+    }
+
+    return violations;
+}
+
+// Show violations in modal
+function showViolationsModal(violations) {
+    const modal = document.getElementById('bugs-modal');
+    const content = document.getElementById('modal-content');
+
+    let html = '';
+    const violationTypes = [
+        { type: 'resources', name: 'Resource Violations', data: violations.resources },
+        { type: 'restarts', name: 'Restart Issues', data: violations.restarts },
+        { type: 'overall', name: 'Lag Issues', data: violations.overall }
+    ];
+
+    let hasViolations = false;
+    violationTypes.forEach(vType => {
+        const components = ['kafka', 'clickhouse', 'pipeline'];
+        if (vType.type === 'overall') {
+            if (violations.overall.length > 0) {
+                hasViolations = true;
+                const count = violations.overall.length;
+                const compId = 'overall-details';
+                html += `
+                    <div class="bg-background-light dark:bg-background-dark p-4 rounded-lg border border-border-light dark:border-border-dark cursor-pointer hover:bg-primary/5 transition-colors" onclick="toggleComponentDetails('${compId}')">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-semibold text-text-light-primary dark:text-text-dark-primary">${vType.name}</span>
+                                <span class="ml-2 px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs rounded-full">${count} issue${count > 1 ? 's' : ''}</span>
+                            </div>
+                            <span class="material-symbols-outlined text-text-light-secondary dark:text-text-dark-secondary transition-transform" id="${compId}-icon">expand_more</span>
+                        </div>
+                        <div id="${compId}" class="hidden mt-3 space-y-2">
+                            ${violations.overall.map(v => `<div class="bg-surface-light dark:bg-surface-dark p-3 rounded border-l-4 border-red-500">${v}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        } else {
+            components.forEach(comp => {
+                if (vType.data[comp].length > 0) {
+                    hasViolations = true;
+                    const count = vType.data[comp].length;
+                    const compId = `${vType.type}-${comp}-details`;
+                    const compName = comp.charAt(0).toUpperCase() + comp.slice(1);
+                    html += `
+                        <div class="bg-background-light dark:bg-background-dark p-4 rounded-lg border border-border-light dark:border-border-dark cursor-pointer hover:bg-primary/5 transition-colors" onclick="toggleComponentDetails('${compId}')">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="font-semibold text-text-light-primary dark:text-text-dark-primary">${compName} ${vType.name}</span>
+                                    <span class="ml-2 px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs rounded-full">${count} issue${count > 1 ? 's' : ''}</span>
+                                </div>
+                                <span class="material-symbols-outlined text-text-light-secondary dark:text-text-dark-secondary transition-transform" id="${compId}-icon">expand_more</span>
+                            </div>
+                            <div id="${compId}" class="hidden mt-3 space-y-2">
+                                ${vType.data[comp].map(v => `<div class="bg-surface-light dark:bg-surface-dark p-3 rounded border-l-4 border-red-500">${v}</div>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+    });
+
+    if (!hasViolations) {
+        html = '<div class="text-center py-8"><span class="material-symbols-outlined text-4xl text-green-500 mb-2">check_circle</span><p class="text-text-light-secondary dark:text-text-dark-secondary font-medium">No violations found.</p></div>';
+    }
+
+    content.innerHTML = html;
+    modal.classList.remove('hidden');
+}
+
+// Toggle component details
+function toggleComponentDetails(compId) {
+    const details = document.getElementById(compId);
+    const icon = document.getElementById(compId + '-icon');
+    if (details.classList.contains('hidden')) {
+        details.classList.remove('hidden');
+        icon.textContent = 'expand_less';
+    } else {
+        details.classList.add('hidden');
+        icon.textContent = 'expand_more';
+    }
+}
+
+// Close modal
+document.getElementById('close-modal-btn').addEventListener('click', () => {
+    document.getElementById('bugs-modal').classList.add('hidden');
+});
+
+// Click outside to close
+document.getElementById('bugs-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'bugs-modal') {
+        document.getElementById('bugs-modal').classList.add('hidden');
+    }
+});
+
+// Analyze bugs button click
+document.getElementById('analyze-bugs-btn').addEventListener('click', analyzeBugs);
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', loadReports);
