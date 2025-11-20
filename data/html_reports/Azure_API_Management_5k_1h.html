@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Test Report</title>
+<style>
+body {
+font-family: 'Segoe UI', Arial, sans-serif;
+margin: 2rem auto;
+max-width: 1100px;
+background: #f8fafc;
+color: #333;
+line-height: 1.6;
+}
+h1, h2, h3, h4 {
+color: #1a365d;
+}
+section {
+background: #fff;
+padding: 1rem 1.5rem;
+border-radius: 10px;
+box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+margin-bottom: 1.5rem;
+}
+table {
+width: 100%;
+border-collapse: collapse;
+margin-top: 1rem;
+}
+th, td {
+border: 1px solid #ddd;
+padding: 8px;
+text-align: left;
+}
+th {
+background: #1a365d;
+color: white;
+}
+tr:nth-child(even) {
+background-color: #f2f2f2;
+}
+tr:hover {
+background-color: #e6f0ff;
+}
+ul {
+list-style-type: none;
+padding-left: 0;
+}
+li {
+margin-bottom: 5px;
+}
+code {
+background-color: #edf2f7;
+padding: 2px 6px;
+border-radius: 4px;
+}
+</style>
+</head>
+<body>
+<h1>📊 Test Report - Azure_API_Management 5K EPS vudatasim</h1><section><h2>🧾 Test Summary</h2><ul><li><strong>Test Id</strong>: <code>d6e8c24e-aa08-47c5-b0be-21e1fcad18e2</code></li><li><strong>Target Eps</strong>: <code>5000</code></li><li><strong>Start Time</strong>: <code>2025-11-17 16:45:07.111927194+00:00</code></li><li><strong>End Time</strong>: <code>2025-11-17 17:45:08.051343937+00:00</code></li><li><strong>O11Y Sources</strong>: <code>["Azure_API_Management"]</code></li><li><strong>Duration</strong>: <code>1.00 hours</code></li><li><strong>Status</strong>: <code>completed</code></li><li><strong>Observed Avg Input Topic EPS</strong>: <code>5012.86</code></li><li><strong>Observed Avg Output Topic EPS</strong>: <code>4798.45</code></li></ul></section><section><h2>🧩 Node/Pod Resources</h2><table><thead><tr><th>Node Name</th><th>Node Resources</th><th>Pod</th><th>Pod Resources</th><th>Group</th></tr></thead><tbody><tr><td rowspan='1'>e2e-108-10</td><td rowspan='1'>16 cores / 29.18 Gi</td><td>traefik-d5xht</td><td>0.50 cores / 2 Gi</td><td>Traefik</td></tr><tr><td rowspan='1'>e2e-82-158</td><td rowspan='1'>16 cores / 29.18 Gi</td><td>traefik-qsql2</td><td>0.50 cores / 2 Gi</td><td>Traefik</td></tr><tr><td rowspan='2'>e2e-82-181</td><td rowspan='2'>16 cores / 29.18 Gi</td><td>kafka-cluster-cp-kafka-2</td><td>6 cores / 16 Gi</td><td>Kafka</td></tr><tr><td>traefik-4qzxv</td><td>0.50 cores / 2 Gi</td><td>Traefik</td></tr><tr><td rowspan='2'>e2e-82-234</td><td rowspan='2'>16 cores / 29.18 Gi</td><td>kafka-cluster-cp-kafka-1</td><td>6 cores / 16 Gi</td><td>Kafka</td></tr><tr><td>traefik-jh6vd</td><td>0.50 cores / 2 Gi</td><td>Traefik</td></tr><tr><td rowspan='2'>e2e-83-134</td><td rowspan='2'>16 cores / 29.18 Gi</td><td>kafka-cluster-cp-kafka-0</td><td>6 cores / 16 Gi</td><td>Kafka</td></tr><tr><td>traefik-b6r5m</td><td>0.50 cores / 2 Gi</td><td>Traefik</td></tr><tr><td rowspan='3'>e2e-83-184</td><td rowspan='3'>20 cores / 58.47 Gi</td><td>azure-api-758c69868d-p7wxt</td><td>0.50 cores / 0.24 Gi</td><td>Pipeline</td></tr><tr><td>chi-clickhouse-vusmart-0-1-0</td><td>9 cores / 34 Gi</td><td>CH</td></tr><tr><td>traefik-tblgs</td><td>0.50 cores / 2 Gi</td><td>Traefik</td></tr><tr><td rowspan='2'>e2e-83-212</td><td rowspan='2'>20 cores / 58.47 Gi</td><td>chi-clickhouse-vusmart-0-0-0</td><td>9 cores / 34 Gi</td><td>CH</td></tr><tr><td>traefik-95z2k</td><td>0.50 cores / 2 Gi</td><td>Traefik</td></tr></tbody></table></section><section><h2>🪣 Kafka Specs</h2><h3>📥 Input Topics</h3><table><thead><tr><th>Topic Name</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody><tr><td>azure-api-input</td><td>1</td><td>2</td></tr></tbody></table><h3>📤 Output Topics</h3><table><thead><tr><th>Topic Name</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody><tr><td>azure-api-output</td><td>1</td><td>2</td></tr></tbody></table></section><section><h2>📈 Input/Output Topic Metrics</h2><table><thead><tr><th>Type</th><th>Min (msg/s)</th><th>Avg (msg/s)</th><th>Max (msg/s)</th></tr></thead><tbody><tr><td>Input</td><td>4923.66</td><td>5012.86</td><td>5994</td></tr><tr><td>Output</td><td>0</td><td>4798.45</td><td>13327.44</td></tr></tbody></table></section><section><h2>⏱️ Lag Metrics</h2><p><strong>Note:</strong> Lag is in terms of offsets with respect Kafka and ContextStream Pipeline.</p><table><thead><tr><th>Min Lag</th><th>Avg Lag</th><th>Max Lag</th></tr></thead><tbody><tr><td>284</td><td>545080.81</td><td>1774216</td></tr></tbody></table></section><section><h2>🏭 ClickHouse Ingestion Summary</h2><table><thead><tr><th>Table</th><th>Min EPS</th><th>Avg EPS</th><th>Max EPS</th></tr></thead><tbody><tr><td>vmetrics_azureapimetrics_data</td><td>790.97</td><td>5607.76</td><td>17125.18</td></tr></tbody></table></section><h2>🖥️ Pod Metrics</h2><section><h2>Kafka Cluster Pods</h2><table><thead><tr><th>Pod</th><th>CPU Allocated</th><th>CPU Min (%)</th><th>CPU Avg (%)</th><th>CPU Max (%)</th><th>MEM Allocated</th><th>MEM Min (%)</th><th>MEM Avg (%)</th><th>MEM Max (%)</th></tr></thead><tbody><tr><td>kafka-cluster-cp-kafka-0</td><td>6 cores</td><td>0.99</td><td>1.19</td><td>1.37</td><td>16 Gi</td><td>29.53</td><td>33.08</td><td>37.43</td></tr><tr><td>kafka-cluster-cp-kafka-1</td><td>6 cores</td><td>0.62</td><td>0.75</td><td>0.98</td><td>16 Gi</td><td>30.14</td><td>31.98</td><td>34.07</td></tr><tr><td>kafka-cluster-cp-kafka-2</td><td>6 cores</td><td>0.99</td><td>1.48</td><td>2.24</td><td>16 Gi</td><td>42.72</td><td>45.99</td><td>50.19</td></tr></tbody></table></section><section><h2>ClickHouse Pods</h2><table><thead><tr><th>Pod</th><th>CPU Allocated</th><th>CPU Min (%)</th><th>CPU Avg (%)</th><th>CPU Max (%)</th><th>MEM Allocated</th><th>MEM Min (%)</th><th>MEM Avg (%)</th><th>MEM Max (%)</th></tr></thead><tbody><tr><td>chi-clickhouse-vusmart-0-0-0</td><td>9 cores</td><td>3.37</td><td>5.65</td><td>13.92</td><td>34 Gi</td><td>86.14</td><td>96.03</td><td>96.85</td></tr><tr><td>chi-clickhouse-vusmart-0-1-0</td><td>9 cores</td><td>1.84</td><td>3.42</td><td>7.19</td><td>34 Gi</td><td>12.57</td><td>85.23</td><td>94.33</td></tr></tbody></table></section><section><h2>🔧 Pipeline Info</h2><table><thead><tr><th>Source</th><th>Pipeline Name</th><th>Threads</th><th>Instances</th></tr></thead><tbody><tr><td>Azure_API_Management</td><td>azure-api</td><td>1</td><td>1</td></tr></tbody></table></section><section><h2>Pipeline Pods</h2><table><thead><tr><th>Pod</th><th>CPU Allocated</th><th>CPU Min (%)</th><th>CPU Avg (%)</th><th>CPU Max (%)</th><th>MEM Allocated</th><th>MEM Min (%)</th><th>MEM Avg (%)</th><th>MEM Max (%)</th></tr></thead><tbody><tr><td>azure-api-758c69868d-p7wxt</td><td>0.50 cores</td><td>23.44</td><td>33.62</td><td>100.19</td><td>0.24 Gi</td><td>61.45</td><td>103.66</td><td>116.24</td></tr></tbody></table></section><h2>💻 Node Metrics</h2><section><h2>🐳 Kafka Node CPU + Memory</h2><table><thead><tr><th>Pod Name</th><th>Node Name</th><th>CPU Alloc</th><th>CPU Min (%)</th><th>CPU Avg (%)</th><th>CPU Max (%)</th><th>MEM Alloc</th><th>MEM Min (%)</th><th>MEM Avg (%)</th><th>MEM Max (%)</th></tr></thead><tbody><tr><td>kafka-cluster-cp-kafka-0</td><td>e2e-83-134</td><td>16 cores</td><td>1.26</td><td>7.39</td><td>9.01</td><td>29.18 Gi</td><td>48.47</td><td>50.18</td><td>52</td></tr><tr><td>kafka-cluster-cp-kafka-1</td><td>e2e-82-234</td><td>16 cores</td><td>0.98</td><td>6.58</td><td>20.49</td><td>29.18 Gi</td><td>49.32</td><td>49.70</td><td>50.16</td></tr><tr><td>kafka-cluster-cp-kafka-2</td><td>e2e-82-181</td><td>16 cores</td><td>1.56</td><td>8.42</td><td>9.70</td><td>29.18 Gi</td><td>51.73</td><td>52.40</td><td>53.14</td></tr></tbody></table></section><section><h2>🏛️ ClickHouse Node CPU + Memory</h2><table><thead><tr><th>Pod Name</th><th>Node Name</th><th>CPU Alloc</th><th>CPU Min (%)</th><th>CPU Avg (%)</th><th>CPU Max (%)</th><th>MEM Alloc</th><th>MEM Min (%)</th><th>MEM Avg (%)</th><th>MEM Max (%)</th></tr></thead><tbody><tr><td>chi-clickhouse-vusmart-0-0-0</td><td>e2e-83-212</td><td>20 cores</td><td>10.55</td><td>52.37</td><td>62.96</td><td>58.47 Gi</td><td>74.70</td><td>76.26</td><td>77.19</td></tr><tr><td>chi-clickhouse-vusmart-0-1-0</td><td>e2e-83-184</td><td>20 cores</td><td>2.43</td><td>18.92</td><td>26.03</td><td>58.47 Gi</td><td>51.24</td><td>57.06</td><td>58.76</td></tr></tbody></table></section>
+</body>
+</html>

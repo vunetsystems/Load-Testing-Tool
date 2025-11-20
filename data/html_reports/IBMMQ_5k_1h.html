@@ -6,58 +6,58 @@
 <title>Test Report</title>
 <style>
 body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  margin: 2rem auto;
-  max-width: 1100px;
-  background: #f8fafc;
-  color: #333;
-  line-height: 1.6;
+font-family: 'Segoe UI', Arial, sans-serif;
+margin: 2rem auto;
+max-width: 1100px;
+background: #f8fafc;
+color: #333;
+line-height: 1.6;
 }
 h1, h2, h3, h4 {
-  color: #1a365d;
+color: #1a365d;
 }
 section {
-  background: #fff;
-  padding: 1rem 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  margin-bottom: 1.5rem;
+background: #fff;
+padding: 1rem 1.5rem;
+border-radius: 10px;
+box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+margin-bottom: 1.5rem;
 }
 table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
+width: 100%;
+border-collapse: collapse;
+margin-top: 1rem;
 }
 th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
+border: 1px solid #ddd;
+padding: 8px;
+text-align: left;
 }
 th {
-  background: #1a365d;
-  color: white;
+background: #1a365d;
+color: white;
 }
 tr:nth-child(even) {
-  background-color: #f2f2f2;
+background-color: #f2f2f2;
 }
 tr:hover {
-  background-color: #e6f0ff;
+background-color: #e6f0ff;
 }
 ul {
-  list-style-type: none;
-  padding-left: 0;
+list-style-type: none;
+padding-left: 0;
 }
 li {
-  margin-bottom: 5px;
+margin-bottom: 5px;
 }
 code {
-  background-color: #edf2f7;
-  padding: 2px 6px;
-  border-radius: 4px;
+background-color: #edf2f7;
+padding: 2px 6px;
+border-radius: 4px;
 }
 </style>
 </head>
 <body>
-<h1>📊 Test Report - b568bea0-e2c6-4d05-acc6-c0d093fdb757</h1><section><h2>🧾 Test Summary</h2><ul><li><strong>Test Id</strong>: <code>b568bea0-e2c6-4d05-acc6-c0d093fdb757</code></li><li><strong>Target Eps</strong>: <code>5000</code></li><li><strong>Start Time</strong>: <code>2025-11-16 06:35:06.583627577+00:00</code></li><li><strong>End Time</strong>: <code>2025-11-16 07:35:10.101044637+00:00</code></li><li><strong>O11Y Sources</strong>: <code>["IBMMQ"]</code></li><li><strong>Duration</strong>: <code>1.00 hours</code></li><li><strong>Status</strong>: <code>completed</code></li></ul></section><section><h2>🪣 Kafka Specs</h2><h3>📥 Input Topics</h3><table><thead><tr><th>Topic Name</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody><tr><td>ibm-mq-metrics-input</td><td>1</td><td>2</td></tr></tbody></table><h3>📤 Output Topics</h3><table><thead><tr><th>Topic Name</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody><tr><td>ibm-mq-metrics-QueueMetrics</td><td>1</td><td>2</td></tr><tr><td>ibm-mq-metrics-ChannelMetrics</td><td>1</td><td>2</td></tr><tr><td>ibm-mq-metrics-QMGRMetrics</td><td>1</td><td>2</td></tr></tbody></table></section><section><h2>📈 Input/Output Topic Metrics</h2><table><thead><tr><th>Type</th><th>Min (msg/s)</th><th>Avg (msg/s)</th><th>Max (msg/s)</th></tr></thead><tbody><tr><td>Input</td><td>4926.91</td><td>5016.55</td><td>5997.60</td></tr><tr><td>Output</td><td>0</td><td>4953.06</td><td>5011.58</td></tr></tbody></table></section><section><h2>⏱️ Lag Metrics</h2><table><thead><tr><th>Min Lag</th><th>Avg Lag</th><th>Max Lag</th></tr></thead><tbody><tr><td>14309</td><td>20325.50</td><td>26342</td></tr></tbody></table></section><h2>🖥️ Pod Metrics</h2><section><h2>Kafka Cluster Pods CPU</h2><table><thead><tr><th>Component</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>kafka_cluster_cp_kafka_0</td><td>6</td><td>2.01</td><td>2.38</td><td>2.85</td></tr><tr><td>kafka_cluster_cp_kafka_1</td><td>6</td><td>0.96</td><td>1.34</td><td>1.64</td></tr><tr><td>kafka_cluster_cp_kafka_2</td><td>6</td><td>0.83</td><td>1.12</td><td>1.48</td></tr></tbody></table></section><section><h2>Kafka Cluster Pods Memory</h2><table><thead><tr><th>Component</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>kafka_cluster_cp_kafka_0</td><td>16</td><td>52.59</td><td>67.86</td><td>81.66</td></tr><tr><td>kafka_cluster_cp_kafka_1</td><td>16</td><td>43.48</td><td>57.29</td><td>72.66</td></tr><tr><td>kafka_cluster_cp_kafka_2</td><td>16</td><td>56.71</td><td>63.33</td><td>68.69</td></tr></tbody></table></section><section><h2>ClickHouse Pods CPU</h2><table><thead><tr><th>Component</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>chi_clickhouse_vusmart_0_0_0</td><td>9</td><td>5.26</td><td>7.32</td><td>12.66</td></tr><tr><td>chi_clickhouse_vusmart_0_1_0</td><td>9</td><td>2.20</td><td>3.59</td><td>7.07</td></tr></tbody></table></section><section><h2>ClickHouse Pods Memory</h2><table><thead><tr><th>Component</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>chi_clickhouse_vusmart_0_0_0</td><td>34</td><td>92.83</td><td>93.72</td><td>94.33</td></tr><tr><td>chi_clickhouse_vusmart_0_1_0</td><td>34</td><td>16.63</td><td>90.23</td><td>94.33</td></tr></tbody></table></section><h2>🔧 Pipeline Pod Metrics</h2><section><h2>🔧 Pipeline Info</h2><table><thead><tr><th>Source</th><th>Pipeline Name</th><th>Threads</th><th>Instances</th></tr></thead><tbody><tr><td>IBMMQ</td><td>ibm-mq-metrics</td><td>4</td><td>1</td></tr></tbody></table></section><section><h2>Pipeline Pod CPU</h2><table><thead><tr><th>Pipeline Name</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>ibm-mq-metrics</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></section><section><h2>Pipeline Pod Memory</h2><table><thead><tr><th>Pipeline Name</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>ibm-mq-metrics</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></section><h2>💻 Node Metrics</h2><section><h2>Kafka Node CPU</h2><table><thead><tr><th>Component</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>kafka_1_node</td><td>16</td><td>0</td><td>7.75</td><td>9.13</td></tr><tr><td>kafka_2_node</td><td>16</td><td>0</td><td>6.38</td><td>7.77</td></tr><tr><td>kafka_3_node</td><td>16</td><td>0</td><td>9.83</td><td>12.46</td></tr></tbody></table></section><section><h2>Kafka Node Memory</h2><table><thead><tr><th>Component</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>kafka_1_node</td><td>29.18</td><td>53.68</td><td>54.58</td><td>55.44</td></tr><tr><td>kafka_2_node</td><td>29.18</td><td>52.55</td><td>54.85</td><td>57.71</td></tr><tr><td>kafka_3_node</td><td>29.18</td><td>55.41</td><td>58.82</td><td>61.55</td></tr></tbody></table></section><section><h2>ClickHouse Node CPU</h2><table><thead><tr><th>Component</th><th>Allocated (Cores)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>ch1_node</td><td>20</td><td>0</td><td>12.47</td><td>16.50</td></tr><tr><td>ch2_node</td><td>20</td><td>0</td><td>52.21</td><td>60.56</td></tr></tbody></table></section><section><h2>ClickHouse Node Memory</h2><table><thead><tr><th>Component</th><th>Allocated (Gi)</th><th>Min (%)</th><th>Avg (%)</th><th>Max (%)</th></tr></thead><tbody><tr><td>ch1_node</td><td>58.47</td><td>53.85</td><td>57.30</td><td>57.94</td></tr><tr><td>ch2_node</td><td>58.47</td><td>78.43</td><td>78.96</td><td>79.36</td></tr></tbody></table></section>
+<h1>📊 Test Report - IBMMQ 5K EPS vudatasim</h1><section><h2>🧾 Test Summary</h2><ul><li><strong>Test Id</strong>: <code>4433140c-0cc8-49b6-89f4-cb3d620c407a</code></li><li><strong>Target Eps</strong>: <code>5000</code></li><li><strong>Start Time</strong>: <code>2025-11-17 21:55:06.804816241+00:00</code></li><li><strong>End Time</strong>: <code>2025-11-17 22:55:08.051097337+00:00</code></li><li><strong>O11Y Sources</strong>: <code>["IBMMQ"]</code></li><li><strong>Duration</strong>: <code>1.00 hours</code></li><li><strong>Status</strong>: <code>completed</code></li><li><strong>Observed Avg Input Topic EPS</strong>: <code>5016.14</code></li><li><strong>Observed Avg Output Topic EPS</strong>: <code>4987.21</code></li></ul></section><section><h2>🧩 Node/Pod Resources</h2><table><thead><tr><th>Node Name</th><th>Node Resources</th><th>Pod</th><th>Pod Resources</th><th>Group</th></tr></thead><tbody><tr><td rowspan='2'>e2e-108-10</td><td rowspan='2'>16 cores / 29.18 Gi</td><td>ibm-mq-metrics-5bf684f774-vp2dg</td><td>1 cores / 0.49 Gi</td><td>Pipeline</td></tr><tr><td>traefik-d5xht</td><td>0.50 cores / 2 Gi</td><td>Traefik</td></tr><tr><td rowspan='1'>e2e-82-158</td><td rowspan='1'>16 cores / 29.18 Gi</td><td>traefik-qsql2</td><td>0.50 cores / 2 Gi</td><td>Traefik</td></tr><tr><td rowspan='2'>e2e-82-181</td><td rowspan='2'>16 cores / 29.18 Gi</td><td>kafka-cluster-cp-kafka-2</td><td>6 cores / 16 Gi</td><td>Kafka</td></tr><tr><td>traefik-4qzxv</td><td>0.50 cores / 2 Gi</td><td>Traefik</td></tr><tr><td rowspan='2'>e2e-82-234</td><td rowspan='2'>16 cores / 29.18 Gi</td><td>kafka-cluster-cp-kafka-1</td><td>6 cores / 16 Gi</td><td>Kafka</td></tr><tr><td>traefik-jh6vd</td><td>0.50 cores / 2 Gi</td><td>Traefik</td></tr><tr><td rowspan='2'>e2e-83-134</td><td rowspan='2'>16 cores / 29.18 Gi</td><td>kafka-cluster-cp-kafka-0</td><td>6 cores / 16 Gi</td><td>Kafka</td></tr><tr><td>traefik-b6r5m</td><td>0.50 cores / 2 Gi</td><td>Traefik</td></tr><tr><td rowspan='2'>e2e-83-184</td><td rowspan='2'>20 cores / 58.47 Gi</td><td>chi-clickhouse-vusmart-0-1-0</td><td>9 cores / 34 Gi</td><td>CH</td></tr><tr><td>traefik-tblgs</td><td>0.50 cores / 2 Gi</td><td>Traefik</td></tr><tr><td rowspan='2'>e2e-83-212</td><td rowspan='2'>20 cores / 58.47 Gi</td><td>chi-clickhouse-vusmart-0-0-0</td><td>9 cores / 34 Gi</td><td>CH</td></tr><tr><td>traefik-95z2k</td><td>0.50 cores / 2 Gi</td><td>Traefik</td></tr></tbody></table></section><section><h2>🪣 Kafka Specs</h2><h3>📥 Input Topics</h3><table><thead><tr><th>Topic Name</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody><tr><td>ibm-mq-metrics-input</td><td>1</td><td>2</td></tr></tbody></table><h3>📤 Output Topics</h3><table><thead><tr><th>Topic Name</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody><tr><td>ibm-mq-metrics-QueueMetrics</td><td>1</td><td>2</td></tr><tr><td>ibm-mq-metrics-ChannelMetrics</td><td>1</td><td>2</td></tr><tr><td>ibm-mq-metrics-QMGRMetrics</td><td>1</td><td>2</td></tr></tbody></table></section><section><h2>📈 Input/Output Topic Metrics</h2><table><thead><tr><th>Type</th><th>Min (msg/s)</th><th>Avg (msg/s)</th><th>Max (msg/s)</th></tr></thead><tbody><tr><td>Input</td><td>4998</td><td>5016.14</td><td>5997.60</td></tr><tr><td>Output</td><td>2760.20</td><td>4987.21</td><td>5263.71</td></tr></tbody></table></section><section><h2>⏱️ Lag Metrics</h2><p><strong>Note:</strong> Lag is in terms of offsets with respect Kafka and ContextStream Pipeline.</p><table><thead><tr><th>Min Lag</th><th>Avg Lag</th><th>Max Lag</th></tr></thead><tbody><tr><td>42</td><td>21153</td><td>104905</td></tr></tbody></table></section><section><h2>🏭 ClickHouse Ingestion Summary</h2><table><thead><tr><th>Table</th><th>Min EPS</th><th>Avg EPS</th><th>Max EPS</th></tr></thead><tbody><tr><td>vmetrics_ibm_mq_ChannelMetrics_data</td><td>209.73</td><td>3022.75</td><td>17836.45</td></tr><tr><td>vmetrics_ibm_mq_QMGRMetrics_data</td><td>204.40</td><td>2992.01</td><td>54669.18</td></tr><tr><td>vmetrics_ibm_mq_QueueMetrics_data</td><td>860.77</td><td>2989.37</td><td>15913.28</td></tr></tbody></table></section><h2>🖥️ Pod Metrics</h2><section><h2>Kafka Cluster Pods</h2><table><thead><tr><th>Pod</th><th>CPU Allocated</th><th>CPU Min (%)</th><th>CPU Avg (%)</th><th>CPU Max (%)</th><th>MEM Allocated</th><th>MEM Min (%)</th><th>MEM Avg (%)</th><th>MEM Max (%)</th></tr></thead><tbody><tr><td>kafka-cluster-cp-kafka-0</td><td>6 cores</td><td>2.20</td><td>2.46</td><td>2.72</td><td>16 Gi</td><td>29.67</td><td>40.69</td><td>51.20</td></tr><tr><td>kafka-cluster-cp-kafka-1</td><td>6 cores</td><td>0.94</td><td>1.10</td><td>1.27</td><td>16 Gi</td><td>31.12</td><td>34.63</td><td>37.49</td></tr><tr><td>kafka-cluster-cp-kafka-2</td><td>6 cores</td><td>1.16</td><td>1.32</td><td>1.51</td><td>16 Gi</td><td>41.85</td><td>54.08</td><td>64.63</td></tr></tbody></table></section><section><h2>ClickHouse Pods</h2><table><thead><tr><th>Pod</th><th>CPU Allocated</th><th>CPU Min (%)</th><th>CPU Avg (%)</th><th>CPU Max (%)</th><th>MEM Allocated</th><th>MEM Min (%)</th><th>MEM Avg (%)</th><th>MEM Max (%)</th></tr></thead><tbody><tr><td>chi-clickhouse-vusmart-0-0-0</td><td>9 cores</td><td>4.64</td><td>8.98</td><td>22.86</td><td>34 Gi</td><td>94.20</td><td>95.74</td><td>96.38</td></tr><tr><td>chi-clickhouse-vusmart-0-1-0</td><td>9 cores</td><td>1.72</td><td>3.31</td><td>6.69</td><td>34 Gi</td><td>10.62</td><td>79.71</td><td>94.31</td></tr></tbody></table></section><section><h2>🔧 Pipeline Info</h2><table><thead><tr><th>Source</th><th>Pipeline Name</th><th>Threads</th><th>Instances</th></tr></thead><tbody><tr><td>IBMMQ</td><td>ibm-mq-metrics</td><td>4</td><td>1</td></tr></tbody></table></section><section><h2>Pipeline Pods</h2><table><thead><tr><th>Pod</th><th>CPU Allocated</th><th>CPU Min (%)</th><th>CPU Avg (%)</th><th>CPU Max (%)</th><th>MEM Allocated</th><th>MEM Min (%)</th><th>MEM Avg (%)</th><th>MEM Max (%)</th></tr></thead><tbody><tr><td>ibm-mq-metrics-5bf684f774-vp2dg</td><td>1 cores</td><td>57.81</td><td>63.75</td><td>98.89</td><td>0.49 Gi</td><td>60.36</td><td>62.34</td><td>65.45</td></tr></tbody></table></section><h2>💻 Node Metrics</h2><section><h2>🐳 Kafka Node CPU + Memory</h2><table><thead><tr><th>Pod Name</th><th>Node Name</th><th>CPU Alloc</th><th>CPU Min (%)</th><th>CPU Avg (%)</th><th>CPU Max (%)</th><th>MEM Alloc</th><th>MEM Min (%)</th><th>MEM Avg (%)</th><th>MEM Max (%)</th></tr></thead><tbody><tr><td>kafka-cluster-cp-kafka-0</td><td>e2e-83-134</td><td>16 cores</td><td>2.06</td><td>9.74</td><td>11.69</td><td>29.18 Gi</td><td>49.41</td><td>53.50</td><td>57.37</td></tr><tr><td>kafka-cluster-cp-kafka-1</td><td>e2e-82-234</td><td>16 cores</td><td>1.24</td><td>7.24</td><td>19.29</td><td>29.18 Gi</td><td>50.78</td><td>51.52</td><td>52.37</td></tr><tr><td>kafka-cluster-cp-kafka-2</td><td>e2e-82-181</td><td>16 cores</td><td>1.66</td><td>8.17</td><td>9.61</td><td>29.18 Gi</td><td>50.87</td><td>53.51</td><td>55.57</td></tr></tbody></table></section><section><h2>🏛️ ClickHouse Node CPU + Memory</h2><table><thead><tr><th>Pod Name</th><th>Node Name</th><th>CPU Alloc</th><th>CPU Min (%)</th><th>CPU Avg (%)</th><th>CPU Max (%)</th><th>MEM Alloc</th><th>MEM Min (%)</th><th>MEM Avg (%)</th><th>MEM Max (%)</th></tr></thead><tbody><tr><td>chi-clickhouse-vusmart-0-0-0</td><td>e2e-83-212</td><td>20 cores</td><td>10.57</td><td>60.28</td><td>84.15</td><td>58.47 Gi</td><td>74.06</td><td>75.65</td><td>76.43</td></tr><tr><td>chi-clickhouse-vusmart-0-1-0</td><td>e2e-83-184</td><td>20 cores</td><td>2.02</td><td>11.88</td><td>16.71</td><td>58.47 Gi</td><td>49.22</td><td>55.42</td><td>57.70</td></tr></tbody></table></section>
 </body>
 </html>
