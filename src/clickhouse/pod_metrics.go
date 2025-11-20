@@ -3,9 +3,11 @@ package clickhouse
 import (
 	"context"
 	"fmt"
-	"strings"
+	"os"
 	"time"
 	"vuDataSim/src/logger"
+
+	"gopkg.in/yaml.v3"
 )
 
 // TimeRange represents a time window for metrics queries
@@ -76,6 +78,7 @@ type KafkaTopicMetric struct {
 	Topic         string    `json:"topic"`
 	OneMinuteRate float64   `json:"oneMinuteRate"`
 	Count         float64   `json:"count"`
+	IsInput       bool      `json:"isInput"` // Whether this is an input topic (for frontend display)
 }
 
 // getKafkaProducerMetrics retrieves latest Kafka producer metrics
@@ -321,6 +324,61 @@ func (ch *ClickHouseClient) getContainerMetrics(ctx context.Context, limit int) 
 // 	return metrics, nil
 // }
 
+// TopicConfig represents the structure of topics_tables.yaml
+type TopicConfig struct {
+	Sources []SourceConfig `yaml:"sources"`
+}
+
+// SourceConfig represents a single O11y source in topics_tables.yaml
+type SourceConfig struct {
+	Name        string      `yaml:"name"`
+	InputTopic  []TopicItem `yaml:"inputTopic"`
+	OutputTopic []TopicItem `yaml:"outputTopic"`
+}
+
+// TopicItem represents a topic in the config
+type TopicItem struct {
+	Name string `yaml:"name"`
+}
+
+// loadTopicConfig loads the topic configuration from YAML file
+func loadTopicConfig() (*TopicConfig, error) {
+	configPath := "src/configs/topics_tables.yaml"
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read topics config file: %v", err)
+	}
+
+	var config TopicConfig
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse topics config: %v", err)
+	}
+
+	return &config, nil
+}
+
+// getInputTopicsFromConfig reads the topics_tables.yaml config and returns a set of all input topic names
+func getInputTopicsFromConfig() map[string]bool {
+	inputTopicSet := make(map[string]bool)
+
+	config, err := loadTopicConfig()
+	if err != nil {
+		// If config fails, log error and return empty map
+		logger.LogWarning("System", "ClickHouse", fmt.Sprintf("Failed to load topic config for input topic detection: %v", err))
+		return inputTopicSet
+	}
+
+	// Extract all input topics from config
+	for _, source := range config.Sources {
+		for _, inputTopic := range source.InputTopic {
+			inputTopicSet[inputTopic.Name] = true
+		}
+	}
+
+	return inputTopicSet
+}
+
 func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRange) ([]KafkaTopicMetric, error) {
 	if monitoringDBClient == nil {
 		return nil, fmt.Errorf("monitoring DB client not initialized")
@@ -335,10 +393,13 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 	logger.LogWithNode("System", "ClickHouse", fmt.Sprintf("Topics: %v", topics), "debug")
 
 	// Separate input topics (consumer metrics) from output topics (producer metrics)
+	// Use config file to determine which topics are input vs output
+	inputTopicSet := getInputTopicsFromConfig()
+
 	var inputTopics []string
 	var outputTopics []string
 	for _, topic := range topics {
-		if strings.Contains(topic, "-input") || topic == "mssql-telegraf" {
+		if inputTopicSet[topic] {
 			inputTopics = append(inputTopics, topic)
 		} else {
 			outputTopics = append(outputTopics, topic)
@@ -388,6 +449,7 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 					continue
 				}
 				m.Count = 0
+				m.IsInput = true // Mark as input topic
 				metrics = append(metrics, m)
 			}
 			if err := rows.Err(); err != nil {
@@ -450,6 +512,7 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 					continue
 				}
 				m.Count = 0
+				m.IsInput = false // Mark as output topic
 				metrics = append(metrics, m)
 				outputMetricsCount++
 			}
@@ -466,6 +529,7 @@ func GetKafkaTopicMetrics(ctx context.Context, topics []string, timeRange TimeRa
 						Timestamp:     timeRange.From,
 						OneMinuteRate: 0,
 						Count:         0,
+						IsInput:       false, // Mark as output topic
 					}
 					metrics = append(metrics, m)
 				}

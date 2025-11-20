@@ -21,12 +21,18 @@ type ClickHouseConfig struct {
 	Password string `yaml:"password"`
 }
 
+// KubernetesConfig holds Kubernetes-related configuration
+type KubernetesConfig struct {
+	DefaultNamespace string `yaml:"default_namespace"`
+}
+
 // AppConfig holds the entire application configuration
 type AppConfig struct {
 	ClickHouse      ClickHouseConfig `yaml:"clickhouse"`
 	MonitoredNodes  []string         `yaml:"monitored_nodes"`
 	MonitoringDB    ClickHouseConfig `yaml:"monitoring_db"`
 	ClickHouseAdmin ClickHouseConfig `yaml:"truncate_db"`
+	Kubernetes      KubernetesConfig `yaml:"kubernetes"`
 }
 
 // ClickHouseClient wraps the ClickHouse connection and config
@@ -97,6 +103,7 @@ var monitoringDBConfig ClickHouseConfig
 var clickHouseAdminClient *ClickHouseClient
 var clickHouseAdminConfig ClickHouseConfig
 var monitoredNodes []string
+var kubernetesConfig KubernetesConfig
 
 // LoadConfig loads configuration from YAML file
 func LoadConfig(configPath string) error {
@@ -115,6 +122,7 @@ func LoadConfig(configPath string) error {
 	monitoringDBConfig = config.MonitoringDB
 	clickHouseAdminConfig = config.ClickHouseAdmin
 	monitoredNodes = config.MonitoredNodes
+	kubernetesConfig = config.Kubernetes
 
 	logger.LogWithNode("System", "ClickHouse", "Configuration loaded successfully", "info")
 	return nil
@@ -201,4 +209,12 @@ func GetClickHouseAdminClient() *ClickHouseClient {
 // GetMonitoringDBClient returns the global monitoring DB client
 func GetMonitoringDBClient() *ClickHouseClient {
 	return monitoringDBClient
+}
+
+// GetDefaultNamespace returns the default Kubernetes namespace from config
+func GetDefaultNamespace() string {
+	if kubernetesConfig.DefaultNamespace != "" {
+		return kubernetesConfig.DefaultNamespace
+	}
+	return "default" // fallback if not configured
 }

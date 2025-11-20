@@ -248,17 +248,20 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 	}
 
 	// 5. Fetch and compute pod JSON metrics with node
-	podsCpuMap, podsMemoryMap, _, err := pod_processors.ProcessPodResourceSummaryWithNode(chClient, testID, startTime, endTime)
-	var podsCpuJSON, podsMemoryJSON string
+	podsCpuMap, podsMemoryMap, podRestartsMap, _, err := pod_processors.ProcessPodResourceSummaryWithNode(chClient, testID, startTime, endTime)
+	var podsCpuJSON, podsMemoryJSON, podRestartsJSON string
 	if err != nil {
 		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process pod JSON metrics: %v", err))
 		podsCpuJSON = ""
 		podsMemoryJSON = ""
+		podRestartsJSON = ""
 	} else {
 		podsCpuBytes, _ := json.Marshal(podsCpuMap)
 		podsMemoryBytes, _ := json.Marshal(podsMemoryMap)
+		podRestartsBytes, _ := json.Marshal(podRestartsMap)
 		podsCpuJSON = string(podsCpuBytes)
 		podsMemoryJSON = string(podsMemoryBytes)
+		podRestartsJSON = string(podRestartsBytes)
 	}
 
 	// 6. Fetch and compute node memory metrics
@@ -364,7 +367,7 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		    pipeline_pod_cpu_min = ?, pipeline_pod_cpu_avg = ?, pipeline_pod_cpu_max = ?,
 		    pipeline_pod_mem_min = ?, pipeline_pod_mem_avg = ?, pipeline_pod_mem_max = ?,
 		    pipeline_pod_cpu_allocated = ?, pipeline_pod_mem_allocated = ?,
-		    process_rate_summary = ?, ingestion_summary = ?, pipeline_info = ?, pods_cpu = ?, pods_memory = ?, nodes_cpu = ?, nodes_memory = ?, -- Added for pod and node JSON metrics
+		    process_rate_summary = ?, ingestion_summary = ?, pipeline_info = ?, pods_cpu = ?, pods_memory = ?, pod_restarts = ?, nodes_cpu = ?, nodes_memory = ?, -- Added for pod and node JSON metrics
 		    kafka_1_node_mem_min = ?, kafka_1_node_mem_avg = ?, kafka_1_node_mem_max = ?,
 		    kafka_2_node_mem_min = ?, kafka_2_node_mem_avg = ?, kafka_2_node_mem_max = ?,
 		    kafka_3_node_mem_min = ?, kafka_3_node_mem_avg = ?, kafka_3_node_mem_max = ?,
@@ -402,7 +405,7 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		podMetrics.PipelinePodCpuMin, podMetrics.PipelinePodCpuAvg, podMetrics.PipelinePodCpuMax,
 		podMetrics.PipelinePodMemMin, podMetrics.PipelinePodMemAvg, podMetrics.PipelinePodMemMax,
 		podMetrics.PipelinePodCpuAllocated, podMetrics.PipelinePodMemAllocated,
-		string(processRateSummaryJSON), string(ingestionSummaryJSON), pipelineInfoJSON, podsCpuJSON, podsMemoryJSON, nodesCpuJSON, nodesMemoryJSON,
+		string(processRateSummaryJSON), string(ingestionSummaryJSON), pipelineInfoJSON, podsCpuJSON, podsMemoryJSON, podRestartsJSON, nodesCpuJSON, nodesMemoryJSON,
 		nodeMemoryResult.Kafka1Min, nodeMemoryResult.Kafka1Avg, nodeMemoryResult.Kafka1Max,
 		nodeMemoryResult.Kafka2Min, nodeMemoryResult.Kafka2Avg, nodeMemoryResult.Kafka2Max,
 		nodeMemoryResult.Kafka3Min, nodeMemoryResult.Kafka3Avg, nodeMemoryResult.Kafka3Max,

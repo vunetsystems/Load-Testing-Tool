@@ -35,12 +35,14 @@ func corsMiddleware(next http.Handler) http.Handler {
 func serveStatic(w http.ResponseWriter, r *http.Request) {
 	// Serve index.html for root path
 	if r.URL.Path == "/" {
+		log.Printf("Serving index.html from %s", handlers.StaticDir+"/index.html")
 		http.ServeFile(w, r, handlers.StaticDir+"/index.html")
 		return
 	}
 
 	// Serve other static files with proper MIME types
 	staticPath := handlers.StaticDir + r.URL.Path
+	log.Printf("Serving static file: %s", staticPath)
 
 	const contentTypeHeader = "Content-Type"
 

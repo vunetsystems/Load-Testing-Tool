@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Load Test Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+              "text-light-primary": "#101922",
+              "text-dark-primary": "#f6f7f8",
+              "text-light-secondary": "#606a74",
+              "text-dark-secondary": "#9aa6b3",
+              "border-light": "#e3e7ec",
+              "border-dark": "#2a3641",
+              "surface-light": "#ffffff",
+              "surface-dark": "#1a2530",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary">
+<div class="relative flex flex-col h-screen w-full overflow-hidden">
+<!-- Sticky Header -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-border-light dark:border-border-dark px-6 py-3 bg-surface-light dark:bg-surface-dark shadow-sm z-20 shrink-0">
+<div class="flex items-center gap-3">
+<div class="text-primary size-6">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h1 class="text-lg font-bold tracking-tight">Load Test Dashboard</h1>
+</div>
+<div class="flex gap-2">
+<button id="back-to-dashboard-btn" class="flex items-center justify-center gap-2 rounded-lg border border-slate-300 py-2.5 text-slate-700 font-semibold transition-colors hover:bg-slate-50">
+<span class="material-symbols-outlined">arrow_back</span>
+<span class="hidden sm:inline">Back to Dashboard</span>
+</button>
+<button id="view-reports-btn" class="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-medium leading-normal shadow-sm hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined text-xl">list</span>
+<span class="truncate hidden sm:inline">View Reports</span>
+</button>
+<button id="download-pdf-btn" class="flex items-center justify-center gap-2 rounded-lg border border-slate-300 py-2.5 text-slate-700 font-semibold transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+<span class="material-symbols-outlined">download</span>
+<span class="hidden sm:inline">Download PDF</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex flex-1 overflow-hidden">
+<div class="flex-1 flex flex-col items-center justify-center p-4 md:p-8 overflow-y-auto" id="main-content">
+<!-- Empty State -->
+<div class="flex flex-col items-center gap-4 text-center" id="empty-state">
+<div class="flex items-center justify-center size-24 bg-primary/10 rounded-full text-primary">
+<span class="material-symbols-outlined !text-5xl">description</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<p class="text-lg font-bold tracking-tight">Select a report to view its details</p>
+<p class="text-sm text-text-light-secondary dark:text-text-dark-secondary max-w-sm">Choose a report from the side panel to begin. The selected HTML report will be displayed here.</p>
+</div>
+</div>
+<!-- Iframe for report -->
+<iframe class="w-full h-full border-0 hidden" id="report-iframe" src=""></iframe>
+</div>
+<!-- Slide-in Drawer (Right Side) - Active State -->
+<aside class="absolute inset-y-0 right-0 z-30 flex h-full w-full max-w-sm flex-col border-l border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-xl transition-transform duration-300 ease-in-out translate-x-0" id="reports-drawer">
+<div class="flex flex-col h-full">
+<!-- Drawer Header -->
+<div class="flex items-center justify-between p-4 border-b border-border-light dark:border-border-dark">
+<div class="flex flex-col">
+<h2 class="text-base font-medium">Reports</h2>
+<p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Select a report to view</p>
+</div>
+<div class="flex gap-1">
+<button class="p-2 text-text-light-secondary dark:text-text-dark-secondary rounded-lg hover:bg-primary/10 hover:text-primary transition-colors" id="pin-btn">
+<span class="material-symbols-outlined">push_pin</span>
+</button>
+<button class="p-2 text-text-light-secondary dark:text-text-dark-secondary rounded-lg hover:bg-primary/10 hover:text-primary transition-colors" id="close-drawer-btn">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</div>
+<!-- Search Bar -->
+<div class="p-4 border-b border-border-light dark:border-border-dark">
+<label class="flex flex-col w-full">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-11 bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus-within:ring-2 focus-within:ring-primary">
+<div class="text-text-light-secondary dark:text-text-dark-secondary flex items-center justify-center pl-3">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden text-sm font-normal text-text-light-primary dark:text-text-dark-primary focus:outline-0 focus:ring-0 border-none bg-transparent h-full placeholder:text-text-light-secondary dark:placeholder:text-text-dark-secondary px-2" placeholder="Search reports..." id="search-input" value=""/>
+</div>
+</label>
+</div>
+<!-- Scrollable List of Reports -->
+<div class="flex-1 overflow-y-auto p-2" id="reports-list">
+<!-- Loading state -->
+<div id="reports-loading" class="flex flex-col items-center justify-center py-8">
+<div class="flex items-center gap-3">
+<div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+<span class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Loading reports...</span>
+</div>
+</div>
+<!-- Error state -->
+<div id="reports-error" class="hidden flex flex-col items-center justify-center py-8">
+<span class="material-symbols-outlined text-4xl text-red-500 mb-2">error</span>
+<p class="text-sm text-red-600 mb-2">Failed to load reports</p>
+<button id="retry-load-reports" class="px-3 py-1.5 text-xs rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors">
+Retry
+</button>
+</div>
+<!-- Reports container -->
+<nav id="reports-nav" class="flex flex-col gap-1 hidden">
+<!-- Reports will be loaded dynamically here -->
+</nav>
+</div>
+</div>
+</aside>
+</main>
+</div>
+
+<script>
+// Global variables
+let allReports = [];
+
+// Load reports dynamically from API
+async function loadReports() {
+    const loadingEl = document.getElementById('reports-loading');
+    const errorEl = document.getElementById('reports-error');
+    const navEl = document.getElementById('reports-nav');
+
+    // Show loading state
+    loadingEl.classList.remove('hidden');
+    errorEl.classList.add('hidden');
+    navEl.classList.add('hidden');
+
+    try {
+        const response = await fetch('/api/reports/combined');
+        const data = await response.json();
+
+        if (data.success && data.reports) {
+            allReports = data.reports;
+            renderReports(data.reports);
+
+            // Hide loading, show nav
+            loadingEl.classList.add('hidden');
+            navEl.classList.remove('hidden');
+        } else {
+            throw new Error('Invalid response format');
+        }
+    } catch (error) {
+        console.error('Failed to load reports:', error);
+        loadingEl.classList.add('hidden');
+        errorEl.classList.remove('hidden');
+    }
+}
+
+// Render reports in the navigation
+function renderReports(reports) {
+    const navEl = document.getElementById('reports-nav');
+    navEl.innerHTML = '';
+
+    if (reports.length === 0) {
+        navEl.innerHTML = '<p class="text-sm text-text-light-secondary dark:text-text-dark-secondary p-3">No reports found</p>';
+        return;
+    }
+
+    reports.forEach(report => {
+        const link = document.createElement('a');
+        link.className = 'flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors report-link';
+        link.href = '#';
+        link.setAttribute('data-file', report.filename);
+        link.innerHTML = `
+            <span class="material-symbols-outlined">description</span>
+            <p class="text-sm font-medium">${report.displayName}</p>
+        `;
+
+        link.addEventListener('click', handleReportClick);
+        navEl.appendChild(link);
+    });
+}
+
+// Search functionality
+document.getElementById('search-input').addEventListener('input', function() {
+    const query = this.value.toLowerCase();
+    const filteredReports = allReports.filter(report =>
+        report.displayName.toLowerCase().includes(query) ||
+        report.filename.toLowerCase().includes(query)
+    );
+    renderReports(filteredReports);
+});
+
+// Handle report link clicks
+function handleReportClick(e) {
+    e.preventDefault();
+    const filename = this.getAttribute('data-file');
+    const iframe = document.getElementById('report-iframe');
+    const emptyState = document.getElementById('empty-state');
+    const downloadBtn = document.getElementById('download-pdf-btn');
+
+    // Remove active class from all links
+    document.querySelectorAll('.report-link').forEach(l => l.classList.remove('bg-primary/10', 'text-primary'));
+    // Add active class to clicked link
+    this.classList.add('bg-primary/10', 'text-primary');
+
+    // Load report in iframe
+    iframe.src = `/data/combined_reports/${filename}`;
+    iframe.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+
+    // Enable download button
+    downloadBtn.disabled = false;
+    downloadBtn.setAttribute('data-filename', filename.replace('.html', ''));
+}
+
+// Retry loading reports
+document.getElementById('retry-load-reports').addEventListener('click', loadReports);
+
+// Back to dashboard
+document.getElementById('back-to-dashboard-btn').addEventListener('click', function() {
+    window.location.href = '/static/index.html';
+});
+
+// Toggle drawer
+document.getElementById('view-reports-btn').addEventListener('click', function() {
+    const drawer = document.getElementById('reports-drawer');
+    drawer.classList.toggle('translate-x-full');
+});
+
+// Close drawer
+document.getElementById('close-drawer-btn').addEventListener('click', function() {
+    const drawer = document.getElementById('reports-drawer');
+    drawer.classList.add('translate-x-full');
+});
+
+// Download PDF
+document.getElementById('download-pdf-btn').addEventListener('click', function() {
+    const iframe = document.getElementById('report-iframe');
+    const filename = this.getAttribute('data-filename') || 'report';
+
+    if (iframe.contentDocument) {
+        const element = iframe.contentDocument.body;
+        const opt = {
+            margin: 1,
+            filename: `${filename}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    } else {
+        alert('Report not loaded yet. Please wait for the report to load completely.');
+    }
+});
+
+// Pin button (placeholder)
+document.getElementById('pin-btn').addEventListener('click', function() {
+    // Implement pin functionality if needed
+});
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', loadReports);
+</script>
+
+</body></html>

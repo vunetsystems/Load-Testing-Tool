@@ -127,7 +127,7 @@ class K6MonitoringManager {
                     this.currentPage--;
                     this.displayCurrentPage();
                     this.updateChart(); // Update chart when page changes
-                }
+                }   
             });
         }
 

@@ -45,6 +45,12 @@ func getTopicConfig() (*TopicConfig, error) {
 		return nil, fmt.Errorf("failed to parse topics config: %v", err)
 	}
 
+	// Debug: Log the parsed config
+	logger.LogWithNode("System", "Kafka", fmt.Sprintf("Loaded %d sources from config", len(config.Sources)), "info")
+	for _, src := range config.Sources {
+		logger.LogWithNode("System", "Kafka", fmt.Sprintf("Source '%s': InputTopic=%d, OutputTopic=%d", src.Name, len(src.InputTopic), len(src.OutputTopic)), "debug")
+	}
+
 	return &config, nil
 }
 
@@ -66,14 +72,20 @@ func getTopicsForSource(source string) ([]string, error) {
 		if srcNameNormalized == sourceNormalized {
 			var topics []string
 
+			// Debug: Log the parsed input and output topics
+			logger.LogWithNode("System", "Kafka", fmt.Sprintf("Parsed InputTopic for '%s': %+v", src.Name, src.InputTopic), "debug")
+			logger.LogWithNode("System", "Kafka", fmt.Sprintf("Parsed OutputTopic for '%s': %+v", src.Name, src.OutputTopic), "debug")
+
 			// Add input topics
 			for _, topic := range src.InputTopic {
 				topics = append(topics, topic.Name)
+				logger.LogWithNode("System", "Kafka", fmt.Sprintf("Added input topic: %s", topic.Name), "debug")
 			}
 
 			// Add output topics
 			for _, topic := range src.OutputTopic {
 				topics = append(topics, topic.Name)
+				logger.LogWithNode("System", "Kafka", fmt.Sprintf("Added output topic: %s", topic.Name), "debug")
 			}
 
 			logger.LogWithNode("System", "Kafka", fmt.Sprintf("✓ Matched source '%s' (config name: '%s') with %d topics: %v", source, src.Name, len(topics), topics), "debug")
@@ -88,6 +100,38 @@ func getTopicsForSource(source string) ([]string, error) {
 	}
 	logger.LogWithNode("System", "Kafka", fmt.Sprintf("✗ Source '%s' not found in config. Available sources: %v", source, availableSources), "warning")
 	return []string{}, nil
+}
+
+// getAllTopics returns all input and output topics from the config file
+func getAllTopics() ([]string, error) {
+	config, err := getTopicConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	var allTopics []string
+	topicSet := make(map[string]bool) // Use map to avoid duplicates
+
+	for _, src := range config.Sources {
+		// Add input topics
+		for _, topic := range src.InputTopic {
+			if !topicSet[topic.Name] {
+				topicSet[topic.Name] = true
+				allTopics = append(allTopics, topic.Name)
+			}
+		}
+
+		// Add output topics
+		for _, topic := range src.OutputTopic {
+			if !topicSet[topic.Name] {
+				topicSet[topic.Name] = true
+				allTopics = append(allTopics, topic.Name)
+			}
+		}
+	}
+
+	logger.LogWithNode("System", "Kafka", fmt.Sprintf("Loaded %d unique topics from config", len(allTopics)), "info")
+	return allTopics, nil
 }
 
 // contains checks if a slice contains a string
@@ -200,22 +244,15 @@ func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Define Kafka topics to monitor - default to all topics (input + output)
-	topics := []string{
-		// Input topics
-		"apache-metrics-input", "apache-logs-input",
-		"azure-firewall-input", "azure-redis-cache-input", "vuazure-storage-blob-input",
-		"linux-monitor-input", "mongo-metrics-input", "mssql-telegraf",
-
-		// Output topics
-		"apache-logs", "apache-metrics",
-		"mongo-metrics", "mongo-top-stats", "mongo-shard-stats", "mongo-col-stats", "mongo-db-stats",
-		"mssql-memory-clerks", "mssql-database-io", "mssql-net-response", "mssql-hadr-replica",
-		"mssql-schedulers", "mssql-requests", "mssql-server-properties", "mssql-performance",
-		"mssql-hadr-dbreplica", "mssql-session", "mssql-telegraf-health", "mssql-volume-space",
-		"mssql-cpu", "mssql-waitstats", "mssql-cluster", "mssql-recentbackup",
-		"linux-monitor-additional-metrics", "linux-monitor-process-metrics",
-		"linux-monitor-resource-metrics", "linux-monitor-storage-metrics",
+	// Load all Kafka topics from config file
+	var err error
+	topics, err := getAllTopics()
+	if err != nil {
+		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to load topics from config: %v", err),
+		})
+		return
 	}
 
 	// If test_id is provided, filter topics based on the test run's O11y sources using config
@@ -233,6 +270,11 @@ func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 		filteredTopics := []string{}
 		unmatchedSources := []string{}
 		logger.LogWithNode("System", "Kafka", fmt.Sprintf("Processing test run %s with O11y sources: %v", testIDStr, testRun.O11ySources), "info")
+
+		// Debug: Log each source being processed
+		for i, source := range testRun.O11ySources {
+			logger.LogWithNode("System", "Kafka", fmt.Sprintf("Processing O11y source %d: '%s'", i+1, source), "debug")
+		}
 
 		for _, source := range testRun.O11ySources {
 			sourceTopics, err := getTopicsForSource(source)
@@ -282,11 +324,17 @@ func HandleAPIGetKafkaTopicMetrics(w http.ResponseWriter, r *http.Request) {
 
 	kafkaMetrics, err := clickhouse.GetKafkaTopicMetrics(r.Context(), topics, timeRange)
 	if err != nil {
+		logger.LogWithNode("System", "Kafka", fmt.Sprintf("Failed to get Kafka topic metrics: %v", err), "error")
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Failed to get Kafka topic metrics: %v", err),
 		})
 		return
+	}
+
+	logger.LogWithNode("System", "Kafka", fmt.Sprintf("Retrieved %d Kafka topic metrics for topics: %v", len(kafkaMetrics), topics), "info")
+	if len(kafkaMetrics) == 0 {
+		logger.LogWithNode("System", "Kafka", "No Kafka metrics data found - ClickHouse may have no data or connection issue", "warning")
 	}
 
 	SendJSONResponse(w, http.StatusOK, APIResponse{
@@ -373,7 +421,7 @@ func HandleAPIGetK6SuccessRate(w http.ResponseWriter, r *http.Request) {
 func HandleAPIGetPodLogs(w http.ResponseWriter, r *http.Request) {
 	namespace := r.URL.Query().Get("namespace")
 	if namespace == "" {
-		namespace = "vsmaps" // default namespace
+		namespace = clickhouse.GetDefaultNamespace() // default namespace from config
 	}
 
 	logs, err := clickhouse.GetPodLogs(r.Context(), namespace)
@@ -398,7 +446,7 @@ func HandleAPIGetPodEvents(w http.ResponseWriter, r *http.Request) {
 	podName := r.URL.Query().Get("pod")
 
 	if namespace == "" {
-		namespace = "vsmaps" // default namespace
+		namespace = clickhouse.GetDefaultNamespace() // default namespace from config
 	}
 
 	var events []clickhouse.PodEventEntry
@@ -508,7 +556,55 @@ func HandleAPIGetK6Results(w http.ResponseWriter, r *http.Request) {
 
 // HandleAPIGetKafkaPodMemory handles GET /api/clickhouse/kafka-pod-memory
 func HandleAPIGetKafkaPodMemory(w http.ResponseWriter, r *http.Request) {
-	data, err := clickhouse.GetKafkaPodMemoryData(r.Context())
+	// Get time range from query parameters
+	startStr := r.URL.Query().Get("start")
+	endStr := r.URL.Query().Get("end")
+	testIDStr := r.URL.Query().Get("test_id")
+
+	var timeRange *clickhouse.TimeRange
+	if startStr != "" && endStr != "" {
+		var err error
+		from, err := time.Parse(time.RFC3339, startStr)
+		if err != nil {
+			SendJSONResponse(w, http.StatusBadRequest, APIResponse{
+				Success: false,
+				Message: fmt.Sprintf("Invalid start time format: %v", err),
+			})
+			return
+		}
+		to, err := time.Parse(time.RFC3339, endStr)
+		if err != nil {
+			SendJSONResponse(w, http.StatusBadRequest, APIResponse{
+				Success: false,
+				Message: fmt.Sprintf("Invalid end time format: %v", err),
+			})
+			return
+		}
+		timeRange = &clickhouse.TimeRange{From: from, To: to}
+	} else if testIDStr != "" {
+		// If test_id is provided, get the time range from test_runs
+		testRun, err := database.GetTestRun(testIDStr)
+		if err != nil {
+			SendJSONResponse(w, http.StatusBadRequest, APIResponse{
+				Success: false,
+				Message: fmt.Sprintf("Invalid test_id or test run not found: %v", err),
+			})
+			return
+		}
+
+		// Set time range from test run
+		timeRange = &clickhouse.TimeRange{
+			From: testRun.StartTime,
+		}
+		if testRun.EndTime != nil {
+			timeRange.To = *testRun.EndTime
+		} else {
+			// If test is still running, use current time
+			timeRange.To = time.Now()
+		}
+	}
+
+	data, err := clickhouse.GetKafkaPodMemoryData(r.Context(), timeRange)
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
@@ -602,7 +698,7 @@ func HandleAPIGetPodTrendData(w http.ResponseWriter, r *http.Request) {
 	testID := r.URL.Query().Get("test_id")
 
 	if namespace == "" {
-		namespace = "vsmaps" // default namespace
+		namespace = clickhouse.GetDefaultNamespace() // default namespace from config
 	}
 
 	if podName == "" {

@@ -147,6 +147,8 @@ func main() {
 
 		http.ServeFile(w, r, handlers.StaticDir+"/"+r.URL.Path)
 	})))
+	// Data file serving
+	router.PathPrefix("/data/").Handler(http.StripPrefix("/data/", http.FileServer(http.Dir("./data/"))))
 	router.HandleFunc("/", serveStatic)
 
 	// WebSocket endpoint
@@ -250,6 +252,9 @@ func main() {
 	api.HandleFunc("/test-runs/next-id", handlers.HandleAPIGetNextTestID).Methods("GET")
 	// Kafka summarization API endpoint - this is an update for Kafka summarization functionality
 	api.HandleFunc("/test-runs/{id}/kafka-summary", handlers.HandleAPITriggerKafkaSummarization).Methods("POST")
+
+	// Reports API endpoints
+	api.HandleFunc("/reports/combined", handlers.HandleAPIListCombinedReports).Methods("GET")
 
 	// Proxy endpoint for node metrics API - now includes both system and process metrics
 	api.HandleFunc("/proxy/metrics/{name}", handlers.HandleProxyMetrics).Methods("GET")

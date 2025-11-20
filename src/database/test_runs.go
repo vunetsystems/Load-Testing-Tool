@@ -89,7 +89,7 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 			   min_lag, avg_lag, max_lag,
 			   data_loss_pct, kafka_summary_generated, pod_resource_check,
 			   process_rate_summary, ingestion_summary, traefik_cpu_allocated, traefik_mem_allocated,
-			   pods_cpu, pods_memory
+			   pods_cpu, pods_memory, pod_restarts
 		FROM test_runs WHERE test_id = ?`
 
 	var testRun models.TestRun
@@ -191,6 +191,7 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 		&testRun.TraefikMemAllocated,
 		&testRun.PodsCpu,
 		&testRun.PodsMemory,
+		&testRun.PodRestarts,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -249,7 +250,7 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			   min_lag, avg_lag, max_lag,
 			   data_loss_pct, kafka_summary_generated, pod_resource_check,
 			   process_rate_summary, ingestion_summary, traefik_cpu_allocated, traefik_mem_allocated,
-			   pods_cpu, pods_memory
+			   pods_cpu, pods_memory, pod_restarts
 		FROM test_runs ORDER BY start_time DESC`
 
 	rows, err := DB.Query(query)
@@ -267,6 +268,7 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		var ingestionSummary sql.NullString   // Ingestion summary JSON
 		var podsCpu sql.NullString
 		var podsMemory sql.NullString
+		var podRestarts sql.NullString
 
 		err := rows.Scan(
 			&testRun.TestID,
@@ -361,6 +363,7 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			&testRun.TraefikMemAllocated,
 			&podsCpu,
 			&podsMemory,
+			&podRestarts,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan test run: %w", err)
@@ -380,6 +383,9 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		}
 		if podsMemory.Valid {
 			testRun.PodsMemory = podsMemory.String
+		}
+		if podRestarts.Valid {
+			testRun.PodRestarts = podRestarts.String
 		}
 
 		// Parse JSON sources
@@ -436,10 +442,10 @@ func CompleteTimedOutTestRuns() error {
 	return nil
 }
 
-// UpdateTestRunPodMetrics updates the pods_cpu and pods_memory JSON fields for a test run
-func UpdateTestRunPodMetrics(testID string, podsCpu, podsMemory string) error {
-	query := `UPDATE test_runs SET pods_cpu = ?, pods_memory = ? WHERE test_id = ?`
-	_, err := DB.Exec(query, podsCpu, podsMemory, testID)
+// UpdateTestRunPodMetrics updates the pods_cpu, pods_memory, and pod_restarts JSON fields for a test run
+func UpdateTestRunPodMetrics(testID string, podsCpu, podsMemory, podRestarts string) error {
+	query := `UPDATE test_runs SET pods_cpu = ?, pods_memory = ?, pod_restarts = ? WHERE test_id = ?`
+	_, err := DB.Exec(query, podsCpu, podsMemory, podRestarts, testID)
 	if err != nil {
 		return fmt.Errorf("failed to update test run pod metrics: %w", err)
 	}
