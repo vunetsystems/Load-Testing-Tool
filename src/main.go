@@ -34,7 +34,7 @@ func startTestRunCompletionChecker() {
 	for {
 		select {
 		case <-ticker.C:
-			if err := database.CompleteTimedOutTestRuns(); err != nil {
+			if err := database.CompleteTimedOutTestRuns(handlers.BinaryControl); err != nil {
 				logger.Error().Err(err).Msg("Failed to complete timed out test runs")
 			} else {
 				logger.Debug().Msg("Checked for timed out test runs")
