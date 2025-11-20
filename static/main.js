@@ -20,6 +20,7 @@ class VuDataSimManager {
 
         this.initializeComponents();
         this.bindEvents();
+        this.checkAuth(); // Check authentication status
         this.dashboard.loadNodes(); // Load nodes from API
         this.startRealTimeUpdates();
         this.logsManager.populateNodeFilters(); // Populate filter dropdowns with real node names
@@ -239,6 +240,10 @@ class VuDataSimManager {
 
     bindEvents() {
         // Button event listeners
+
+        // Auth button event listeners
+        document.getElementById('login-btn')?.addEventListener('click', () => this.login());
+        document.getElementById('logout-btn')?.addEventListener('click', () => this.logout());
 
         // Add All Cluster Nodes button event listener
         this.elements.addAllClusterNodesBtn?.addEventListener('click', () => this.addAllClusterNodes());
@@ -1208,6 +1213,37 @@ class VuDataSimManager {
                 this.elements.k6TestIdDisplay.value = fallbackUUID;
             }
         }
+    }
+
+    // Authentication methods
+    async checkAuth() {
+        try {
+            const response = await this.callAPI('/api/auth/user', 'GET');
+            if (response.authenticated) {
+                document.getElementById('login-btn').style.display = 'none';
+                document.getElementById('logout-btn').style.display = 'inline';
+                document.getElementById('user-info').innerText = `Logged in as ${response.name} (${response.email})`;
+                document.getElementById('user-info').style.display = 'inline';
+            } else {
+                document.getElementById('login-btn').style.display = 'inline';
+                document.getElementById('logout-btn').style.display = 'none';
+                document.getElementById('user-info').style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error checking auth:', error);
+            // If auth check fails, show login
+            document.getElementById('login-btn').style.display = 'inline';
+            document.getElementById('logout-btn').style.display = 'none';
+            document.getElementById('user-info').style.display = 'none';
+        }
+    }
+
+    login() {
+        window.location = '/auth/login';
+    }
+
+    logout() {
+        window.location = '/auth/logout';
     }
 }
 

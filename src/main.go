@@ -17,6 +17,7 @@ import (
 	"vuDataSim/src/node_control"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 // Kafka summarization functionality is now handled via API
@@ -82,6 +83,14 @@ func initDatabase() error {
 	return nil
 }
 
+// maskSecret masks a secret for logging (shows first 4 and last 4 chars)
+func maskSecret(secret string) string {
+	if len(secret) <= 8 {
+		return strings.Repeat("*", len(secret))
+	}
+	return secret[:4] + strings.Repeat("*", len(secret)-8) + secret[len(secret)-4:]
+}
+
 func init() {
 	// Initialize node data using the node_control package
 	node_control.InitNodeData(handlers.NodeManager, handlers.AppState)
@@ -95,8 +104,34 @@ func init() {
 }
 
 func main() {
+	// Load .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Printf("Warning: Error loading .env file: %v", err)
+	}
+
+	// Debug: Log environment variables
+	log.Printf("DEBUG: OAUTH_CLIENT_ID loaded: %s", maskSecret(os.Getenv("OAUTH_CLIENT_ID")))
+	log.Printf("DEBUG: OAUTH_CLIENT_SECRET loaded: %s", maskSecret(os.Getenv("OAUTH_CLIENT_SECRET")))
+	log.Printf("DEBUG: SESSION_SECRET loaded: %s", maskSecret(os.Getenv("SESSION_SECRET")))
+	log.Printf("DEBUG: APP_PORT: %s", os.Getenv("APP_PORT"))
+	log.Printf("DEBUG: STATIC_DIR: %s", os.Getenv("STATIC_DIR"))
+
+	// Set env-based configs
+	handlers.Port = os.Getenv("APP_PORT")
+	if handlers.Port == "" {
+		handlers.Port = "216.48.191.10:8086"
+	}
+	handlers.StaticDir = os.Getenv("STATIC_DIR")
+	if handlers.StaticDir == "" {
+		handlers.StaticDir = "./static"
+	}
+
 	// Initialize logger
-	logFilePath := "logs/vuDataSim.log"
+	logFilePath := os.Getenv("LOG_FILE")
+	if logFilePath == "" {
+		logFilePath = "logs/vuDataSim.log"
+	}
 	if err := logger.InitLogger(logFilePath); err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
@@ -105,7 +140,7 @@ func main() {
 	handlers.AppState.StartTime = time.Now()
 
 	// Initialize node manager
-	err := handlers.NodeManager.LoadNodesConfig()
+	err = handlers.NodeManager.LoadNodesConfig()
 	if err != nil {
 		logger.Warn().Err(err).Msg("Failed to load nodes config")
 		logger.Warn().Msg("Node management features may not be available")
@@ -134,8 +169,18 @@ func main() {
 	router.Use(loggingMiddleware)
 	router.Use(corsMiddleware)
 
+	// Public routes
+	router.HandleFunc("/login", serveLoginPage).Methods("GET")
+	router.HandleFunc("/auth/login", handleAuthLogin).Methods("GET")
+	router.HandleFunc("/auth/callback", handleAuthCallback).Methods("GET")
+	router.HandleFunc("/auth/logout", handleAuthLogout).Methods("GET")
+
+	// Protected routes (apply authMiddleware)
+	protected := router.PathPrefix("/").Subrouter()
+	protected.Use(authMiddleware)
+
 	// Static file serving with proper MIME types
-	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	protected.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Set proper MIME types for static files
 		if strings.HasSuffix(r.URL.Path, ".css") {
 			w.Header().Set("Content-Type", "text/css")
@@ -148,14 +193,15 @@ func main() {
 		http.ServeFile(w, r, handlers.StaticDir+"/"+r.URL.Path)
 	})))
 	// Data file serving
-	router.PathPrefix("/data/").Handler(http.StripPrefix("/data/", http.FileServer(http.Dir("./data/"))))
-	router.HandleFunc("/", serveStatic)
+	protected.PathPrefix("/data/").Handler(http.StripPrefix("/data/", http.FileServer(http.Dir("./data/"))))
+	protected.HandleFunc("/", serveStatic)
 
 	// WebSocket endpoint
-	router.HandleFunc("/ws", handleWebSocket)
+	protected.HandleFunc("/ws", handleWebSocket)
 
 	// API endpoints
-	api := router.PathPrefix("/api").Subrouter()
+	api := protected.PathPrefix("/api").Subrouter()
+	api.HandleFunc("/auth/user", handleAuthUser).Methods("GET")
 	api.HandleFunc("/dashboard", handlers.GetDashboardData).Methods("GET")
 	api.HandleFunc("/simulation/start", handlers.StartSimulation).Methods("POST")
 	api.HandleFunc("/simulation/stop", handlers.StopSimulation).Methods("POST")
