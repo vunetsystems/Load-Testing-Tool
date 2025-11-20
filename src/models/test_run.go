@@ -108,6 +108,7 @@ type TestRun struct {
 	TraefikMemAllocated      float64   `json:"traefik_mem_allocated,omitempty"`
 	PodsCpu                  string    `json:"pods_cpu,omitempty"` // JSON string for pod CPU metrics
 	PodsMemory               string    `json:"pods_memory,omitempty"` // JSON string for pod memory metrics
+	PodRestarts              string    `json:"pod_restarts,omitempty"` // JSON string for pod restart metrics
 }
 
 // TestRunStartRequest represents the request payload for starting a test run

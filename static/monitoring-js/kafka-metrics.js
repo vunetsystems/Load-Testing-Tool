@@ -329,12 +329,24 @@ class KafkaMetricsManager {
                 apiUrl += `?start=${encodeURIComponent(startTime)}&end=${encodeURIComponent(endTime)}&test_id=${encodeURIComponent(this.selectedTestRun.test_id)}`;
             }
 
-            const response = await fetch(apiUrl);
+            // Add timeout to prevent infinite loading
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+            const response = await fetch(apiUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            console.log('Kafka metrics fetch response status:', response.status);
+            console.log('Kafka metrics fetch response ok:', response.ok);
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const result = await response.json();
+            console.log('Kafka metrics API result:', result);
+            console.log('Kafka metrics data length:', result.data ? result.data.length : 'no data');
+
             if (result.success && result.data) {
                 // Store data in buffer for historical tracking
                 this.storeDataInBuffer(result.data);
@@ -349,11 +361,15 @@ class KafkaMetricsManager {
                 }
             } else {
                 console.error('Failed to fetch Kafka metrics:', result.message);
-                this.showApiError('Failed to fetch Kafka metrics from server');
+                this.showApiError('Failed to fetch Kafka metrics from server: ' + (result.message || 'Unknown error'));
             }
         } catch (error) {
             console.error('Error fetching Kafka metrics:', error);
-            this.showApiError('Network error while fetching Kafka metrics');
+            if (error.name === 'AbortError') {
+                this.showApiError('Request timed out. ClickHouse may not be responding. Please check server logs.');
+            } else {
+                this.showApiError('Network error while fetching Kafka metrics: ' + error.message);
+            }
         } finally {
             this.isUpdating = false;
         }
@@ -743,7 +759,7 @@ class KafkaMetricsManager {
         if (this.isTestFiltered && this.selectedTestRun && this.kafkaData) {
             // Use API response data for filtered test view (historical data)
             this.kafkaData.forEach(metric => {
-                if (metric.topic.includes('-input') || metric.topic === 'mssql-telegraf') {
+                if (metric.isInput) { // Use backend-provided flag
                     if (!inputTopicData[metric.topic]) {
                         inputTopicData[metric.topic] = [];
                     }
@@ -759,7 +775,7 @@ class KafkaMetricsManager {
 
             // Get data from buffer for input topics only
             for (const [topic, dataPoints] of this.dataBuffer.entries()) {
-                if (topic.includes('-input') || topic === 'mssql-telegraf') {
+                if (dataPoints.length > 0 && dataPoints[0].rawData.isInput) { // Use backend-provided flag
                     inputTopicData[topic] = dataPoints.map(point => ({
                         timestamp: point.timestamp,
                         rate: point.oneMinuteRate
@@ -770,7 +786,7 @@ class KafkaMetricsManager {
             // If no buffer data, fall back to current data
             if (Object.keys(inputTopicData).length === 0 && this.kafkaData) {
                 this.kafkaData.forEach(metric => {
-                    if (metric.topic.includes('-input') || metric.topic === 'mssql-telegraf') {
+                    if (metric.isInput) { // Use backend-provided flag
                         if (!inputTopicData[metric.topic]) {
                             inputTopicData[metric.topic] = [];
                         }
@@ -893,7 +909,7 @@ class KafkaMetricsManager {
         if (this.isTestFiltered && this.selectedTestRun && this.kafkaData) {
             // Use API response data for filtered test view (historical data)
             this.kafkaData.forEach(metric => {
-                if (!metric.topic.includes('-input') && metric.topic !== 'mssql-telegraf') {
+                if (!metric.isInput) { // Use backend-provided flag
                     if (!outputTopicData[metric.topic]) {
                         outputTopicData[metric.topic] = [];
                     }
@@ -909,7 +925,7 @@ class KafkaMetricsManager {
 
             // Get data from buffer for output topics only
             for (const [topic, dataPoints] of this.dataBuffer.entries()) {
-                if (!topic.includes('-input') && topic !== 'mssql-telegraf') {
+                if (dataPoints.length > 0 && !dataPoints[0].rawData.isInput) { // Use backend-provided flag
                     outputTopicData[topic] = dataPoints.map(point => ({
                         timestamp: point.timestamp,
                         rate: point.oneMinuteRate
@@ -920,7 +936,7 @@ class KafkaMetricsManager {
             // If no buffer data, fall back to current data
             if (Object.keys(outputTopicData).length === 0 && this.kafkaData) {
                 this.kafkaData.forEach(metric => {
-                    if (!metric.topic.includes('-input') && metric.topic !== 'mssql-telegraf') {
+                    if (!metric.isInput) { // Use backend-provided flag
                         if (!outputTopicData[metric.topic]) {
                             outputTopicData[metric.topic] = [];
                         }

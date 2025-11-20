@@ -243,6 +243,22 @@ def add_percent_to_headers(html_table):
         .replace("<th>Max</th>", "<th>Max (%)</th>")
     )
 
+def get_pod_restarts(pod_name, pod_restarts_dict):
+    """
+    Fetch restart value(s) from pod_restarts JSON.
+    If multiple matches (for pipeline prefixes), sum them.
+    Example: 'pipeline-prod' → pipeline-prod-0, pipeline-prod-1 ...
+    """
+    restarts = 0
+    for key, val in pod_restarts_dict.items():
+        if key.startswith(pod_name):  # prefix match
+            try:
+                restarts += int(val)
+            except:
+                pass
+    return restarts
+
+
 def format_node_tables(row):
     """
     Builds separate Kafka & ClickHouse node tables.
@@ -378,6 +394,11 @@ def format_pipeline_pods_from_json(title, pipeline_name, row):
         pods_mem = json.loads(safe_get(row, "pods_memory"))
     except Exception:
         return html_section(title, "<p>⚠️ JSON parsing failed.</p>")
+    try:
+        pod_restarts = json.loads(safe_get(row, "pod_restarts"))
+    except Exception:
+        pod_restarts = {}   # fallback
+
 
     # Identify matching pods using partial match
     matched_pods = [
@@ -392,13 +413,15 @@ def format_pipeline_pods_from_json(title, pipeline_name, row):
     html = (
         f"<table><thead><tr>"
         f"<th>Pod</th><th>CPU Allocated</th><th>CPU Min</th><th>CPU Avg</th><th>CPU Max</th>"
-        f"<th>MEM Allocated</th><th>MEM Min</th><th>MEM Avg</th><th>MEM Max</th>"
+        f"<th>MEM Allocated</th><th>MEM Min</th><th>MEM Avg</th><th>MEM Max</th><th>Restarts</th>"
         f"</tr></thead><tbody>"
     )
 
     for pod in matched_pods:
         cpu = pods_cpu.get(pod, {})
         mem = pods_mem.get(pod, {})
+
+        restarts = get_pod_restarts(pod, pod_restarts)
 
         html += (
             f"<tr>"
@@ -411,8 +434,11 @@ def format_pipeline_pods_from_json(title, pipeline_name, row):
             f"<td>{smart_format(mem.get('min', ''))}</td>"
             f"<td>{smart_format(mem.get('avg', ''))}</td>"
             f"<td>{smart_format(mem.get('max', ''))}</td>"
+            f"<td>{restarts}</td>"
             f"</tr>"
         )
+
+
 
     return html_section(title, html + "</tbody></table>")
 
@@ -427,17 +453,24 @@ def format_pod_group_from_json(title, pod_list, row):
         pods_mem = json.loads(safe_get(row, "pods_memory"))
     except Exception:
         return html_section(title, "<p>⚠️ JSON parsing failed.</p>")
+    try:
+        pod_restarts = json.loads(safe_get(row, "pod_restarts"))
+    except Exception:
+        pod_restarts = {}   # fallback
+
 
     html = (
         f"<table><thead><tr>"
         f"<th>Pod</th><th>CPU Allocated</th><th>CPU Min</th><th>CPU Avg</th><th>CPU Max</th>"
-        f"<th>MEM Allocated</th><th>MEM Min</th><th>MEM Avg</th><th>MEM Max</th>"
+        f"<th>MEM Allocated</th><th>MEM Min</th><th>MEM Avg</th><th>MEM Max</th><th>Restarts</th>"
         f"</tr></thead><tbody>"
     )
 
     for pod in pod_list:
         cpu_data = pods_cpu.get(pod, {})
         mem_data = pods_mem.get(pod, {})
+
+        restarts = get_pod_restarts(pod, pod_restarts)
 
         html += (
             f"<tr>"
@@ -450,8 +483,10 @@ def format_pod_group_from_json(title, pod_list, row):
             f"<td>{smart_format(mem_data.get('min', ''))}</td>"
             f"<td>{smart_format(mem_data.get('avg', ''))}</td>"
             f"<td>{smart_format(mem_data.get('max', ''))}</td>"
+            f"<td>{restarts}</td>"
             f"</tr>"
         )
+
 
     html += "</tbody></table>"
     return html_section(title, html)
@@ -633,54 +668,54 @@ def wrap_html_template(content):
 <title>Test Report</title>
 <style>
 body {{
-  font-family: 'Segoe UI', Arial, sans-serif;
-  margin: 2rem auto;
-  max-width: 1100px;
-  background: #f8fafc;
-  color: #333;
-  line-height: 1.6;
+font-family: 'Segoe UI', Arial, sans-serif;
+margin: 2rem auto;
+max-width: 1100px;
+background: #f8fafc;
+color: #333;
+line-height: 1.6;
 }}
 h1, h2, h3, h4 {{
-  color: #1a365d;
+color: #1a365d;
 }}
 section {{
-  background: #fff;
-  padding: 1rem 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  margin-bottom: 1.5rem;
+background: #fff;
+padding: 1rem 1.5rem;
+border-radius: 10px;
+box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+margin-bottom: 1.5rem;
 }}
 table {{
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
+width: 100%;
+border-collapse: collapse;
+margin-top: 1rem;
 }}
 th, td {{
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
+border: 1px solid #ddd;
+padding: 8px;
+text-align: left;
 }}
 th {{
-  background: #1a365d;
-  color: white;
+background: #1a365d;
+color: white;
 }}
 tr:nth-child(even) {{
-  background-color: #f2f2f2;
+background-color: #f2f2f2;
 }}
 tr:hover {{
-  background-color: #e6f0ff;
+background-color: #e6f0ff;
 }}
 ul {{
-  list-style-type: none;
-  padding-left: 0;
+list-style-type: none;
+padding-left: 0;
 }}
 li {{
-  margin-bottom: 5px;
+margin-bottom: 5px;
 }}
 code {{
-  background-color: #edf2f7;
-  padding: 2px 6px;
-  border-radius: 4px;
+background-color: #edf2f7;
+padding: 2px 6px;
+border-radius: 4px;
 }}
 </style>
 </head>
@@ -692,8 +727,7 @@ code {{
 
 def generate_html_report(row):
     html_content = (
-        f"<h1>📊 Test Report - {safe_get(row, 'test_name')}</h1>"
-        + format_summary(row)
+        format_summary(row)
         + format_node_pod_table(row)
         + format_kafka_specs(row)
         + format_combined_topic_table(row)
@@ -735,7 +769,7 @@ def generate_html_report(row):
 def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
-    df = pd.read_sql_query(f"SELECT * FROM {TABLE_NAME}", conn)
+    df = pd.read_sql_query(f"SELECT * FROM {TABLE_NAME} WHERE report_generated = 0", conn)
     conn.close()
     print(f"✅ Loaded {len(df)} rows from database.\n")
 
@@ -750,6 +784,12 @@ def main():
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(html_content)
         print(f"📝 Generated: {file_path}")
+
+        # Update report_generated to 1
+        update_conn = sqlite3.connect(DB_PATH)
+        update_conn.execute("UPDATE test_runs SET report_generated = 1 WHERE test_id = ?", (row['test_id'],))
+        update_conn.commit()
+        update_conn.close()
 
     print("\n✅ All HTML reports generated successfully in 'html_reports' folder.")
 

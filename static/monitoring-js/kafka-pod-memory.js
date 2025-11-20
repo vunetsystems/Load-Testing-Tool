@@ -11,14 +11,41 @@ class KafkaPodMemoryManager {
             light: ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6', '#06b6d4'],
             dark: ['#60a5fa', '#f87171', '#4ade80', '#fbbf24', '#a78bfa', '#22d3ee']
         };
+
+        // Test run filtering (reuse from KafkaMetricsManager)
+        this.selectedTestRun = null;
+        this.isTestFiltered = false;
+
+        // Chart initialization state
+        this.chartsInitialized = false;
     }
 
     // Initialize the chart
     async initialize() {
         console.log('Initializing Kafka pod memory chart...');
+
+        // Wait for kafka manager to be ready before attaching listeners
+        await this.waitForKafkaManager();
+
         this.attachEventListeners();
         await this.fetchData();
         this.startAutoUpdate();
+    }
+
+    // Wait for the Kafka manager to be initialized
+    async waitForKafkaManager() {
+        return new Promise((resolve) => {
+            const checkKafkaManager = () => {
+                if (window.realtimeManager && window.realtimeManager.kafkaManager && window.realtimeManager.kafkaManager.testRuns) {
+                    console.log('KafkaPodMemoryManager: Kafka manager is ready');
+                    resolve();
+                } else {
+                    console.log('KafkaPodMemoryManager: Waiting for kafka manager...');
+                    setTimeout(checkKafkaManager, 100);
+                }
+            };
+            checkKafkaManager();
+        });
     }
 
     // Attach event listeners
@@ -28,6 +55,22 @@ class KafkaPodMemoryManager {
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => {
                 this.refresh();
+            });
+        }
+
+        // Listen to the shared test run dropdown from Kafka metrics
+        const testRunDropdown = document.getElementById('kafka-test-run-dropdown');
+        if (testRunDropdown) {
+            testRunDropdown.addEventListener('change', (event) => {
+                this.onTestRunChange(event.target.value);
+            });
+        }
+
+        // Listen to the clear filter button
+        const clearBtn = document.getElementById('kafka-clear-test-filter');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                this.clearTestFilter();
             });
         }
     }
@@ -40,7 +83,16 @@ class KafkaPodMemoryManager {
         try {
             this.showLoading();
 
-            const response = await fetch('/api/clickhouse/kafka-pod-memory');
+            // Build API URL with optional time range and test_id parameters
+            let apiUrl = '/api/clickhouse/kafka-pod-memory';
+
+            if (this.isTestFiltered && this.selectedTestRun) {
+                const startTime = new Date(this.selectedTestRun.start_time).toISOString();
+                const endTime = new Date(this.selectedTestRun.end_time).toISOString();
+                apiUrl += `?start=${encodeURIComponent(startTime)}&end=${encodeURIComponent(endTime)}&test_id=${encodeURIComponent(this.selectedTestRun.test_id)}`;
+            }
+
+            const response = await fetch(apiUrl);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -49,7 +101,7 @@ class KafkaPodMemoryManager {
             if (result.success && result.data) {
                 this.data = result.data;
                 this.lastUpdate = new Date();
-                console.log('Kafka pod memory data updated:', this.data.length, 'data points');
+                console.log('Kafka pod memory data updated:', this.data.length, 'data points, isTestFiltered:', this.isTestFiltered);
                 this.updateChart();
                 this.hideLoading();
             } else {
@@ -64,6 +116,49 @@ class KafkaPodMemoryManager {
         }
     }
 
+    // Handle test run selection
+    onTestRunChange(testId) {
+        console.log('KafkaPodMemoryManager: onTestRunChange called with testId:', testId);
+
+        // Get test run data from the KafkaMetricsManager via realtimeManager
+        if (window.realtimeManager && window.realtimeManager.kafkaManager) {
+            const kafkaManager = window.realtimeManager.kafkaManager;
+
+            // If test runs haven't loaded yet, wait a bit and try again
+            if (!kafkaManager.testRuns || kafkaManager.testRuns.length === 0) {
+                console.log('KafkaPodMemoryManager: Test runs not loaded yet, waiting...');
+                setTimeout(() => this.onTestRunChange(testId), 500);
+                return;
+            }
+
+            if (testId) {
+                const selectedTest = kafkaManager.testRuns.find(test => test.test_id === testId || test.TestID === testId || test.testId === testId || test.TestId === testId);
+                if (selectedTest) {
+                    this.selectedTestRun = selectedTest;
+                    this.isTestFiltered = true;
+                    console.log('KafkaPodMemoryManager: Test run selected:', selectedTest.test_id || selectedTest.TestID);
+                    this.fetchData();
+                } else {
+                    console.error('KafkaPodMemoryManager: Test run not found for ID:', testId);
+                    console.log('Available test runs:', kafkaManager.testRuns.map(t => t.test_id || t.TestID || t.testId || t.TestId));
+                }
+            } else {
+                this.clearTestFilter();
+            }
+        } else {
+            console.error('KafkaPodMemoryManager: realtimeManager or kafkaManager not available');
+        }
+    }
+
+    // Clear test filter
+    clearTestFilter() {
+        this.selectedTestRun = null;
+        this.isTestFiltered = false;
+        console.log('KafkaPodMemoryManager: Test filter cleared');
+        this.fetchData();
+        this.startAutoUpdate();
+    }
+
     // Initialize ECharts instance
     initializeChart() {
         const chartContainer = document.getElementById('kafka-pod-memory-chart');
@@ -73,6 +168,7 @@ class KafkaPodMemoryManager {
         }
 
         this.chartInstance = echarts.init(chartContainer);
+        this.chartsInitialized = true;
         console.log('Kafka pod memory chart initialized');
     }
 
@@ -119,9 +215,51 @@ class KafkaPodMemoryManager {
             };
         });
 
+        // Configure X-axis based on data mode
+        let xAxisConfig = {
+            type: 'time',
+            name: 'Time (IST)',
+            nameLocation: 'middle',
+            nameGap: 30
+        };
+
+        // For filtered test data, set proper time range and granularity
+        if (this.isTestFiltered && this.selectedTestRun) {
+            const testStart = new Date(this.selectedTestRun.start_time).getTime();
+            const testEnd = new Date(this.selectedTestRun.end_time).getTime();
+
+            xAxisConfig.min = testStart;
+            xAxisConfig.max = testEnd;
+
+            xAxisConfig.axisLabel = {
+                formatter: (value) => {
+                    const date = new Date(value);
+                    const testDuration = testEnd - testStart;
+
+                    // For short tests (< 1 hour), show HH:MM:SS
+                    if (testDuration < 60 * 60 * 1000) {
+                        return date.toLocaleTimeString('en-US', {
+                            hour12: false,
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                        });
+                    }
+                    // For longer tests, show HH:MM
+                    return date.toLocaleTimeString('en-US', {
+                        hour12: false,
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+            };
+        }
+
         const option = {
             title: {
-                text: 'Kafka Pod Memory Usage (Last 6 Hours)',
+                text: this.isTestFiltered && this.selectedTestRun
+                    ? `Kafka Pod Memory Usage (Test: ${this.selectedTestRun.test_name || 'Unnamed Test'})`
+                    : 'Kafka Pod Memory Usage (Last 6 Hours)',
                 left: 'center',
                 textStyle: { fontSize: 16, fontWeight: 'normal' }
             },
@@ -148,15 +286,7 @@ class KafkaPodMemoryManager {
                 top: '10%',
                 containLabel: true
             },
-            xAxis: {
-                type: 'time',
-                name: 'Time (IST)',
-                nameLocation: 'middle',
-                nameGap: 30,
-                axisLabel: {
-                    formatter: (value) => new Date(value).toLocaleTimeString()
-                }
-            },
+            xAxis: xAxisConfig,
             yAxis: {
                 type: 'value',
                 name: 'Memory Usage (GB)',
@@ -239,9 +369,17 @@ class KafkaPodMemoryManager {
 
     // Start auto-update
     startAutoUpdate() {
-        setInterval(() => {
-            this.fetchData();
-        }, this.updateInterval);
+        // Clear any existing interval
+        if (this.updateIntervalId) {
+            clearInterval(this.updateIntervalId);
+        }
+
+        // Only start auto-update if not in test filter mode
+        if (!this.isTestFiltered) {
+            this.updateIntervalId = setInterval(() => {
+                this.fetchData();
+            }, this.updateInterval);
+        }
     }
 
     // Manual refresh
@@ -253,6 +391,32 @@ class KafkaPodMemoryManager {
     handleResize() {
         if (this.chartInstance) {
             this.chartInstance.resize();
+        }
+    }
+
+    // Initialize charts when section becomes visible
+    onSectionVisible() {
+        console.log('KafkaPodMemoryManager: onSectionVisible called, chartsInitialized:', this.chartsInitialized, 'isInitialized:', this.isInitialized);
+        if (!this.chartsInitialized && this.isInitialized) {
+            console.log('KafkaPodMemoryManager: Performance section became visible, initializing chart...');
+
+            // Show loading state immediately
+            setTimeout(() => {
+                this.initializeChart();
+
+                // Update display with current data
+                if (this.data) {
+                    console.log('KafkaPodMemoryManager: Updating display with existing data after chart initialization');
+                    this.updateChart();
+                } else {
+                    // If no data yet, show loading state
+                    console.log('KafkaPodMemoryManager: No data available, showing loading state');
+                    this.showLoading();
+                }
+            }, 100); // Small delay to ensure DOM is ready
+        } else if (this.chartsInitialized && this.data) {
+            console.log('KafkaPodMemoryManager: Charts already initialized, updating with current data');
+            this.updateChart();
         }
     }
 
