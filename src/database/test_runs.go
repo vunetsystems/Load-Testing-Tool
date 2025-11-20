@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"vuDataSim/src/bin_control"
 	"vuDataSim/src/models"
 
 	"github.com/google/uuid"
@@ -423,20 +424,50 @@ func UpdateTestRunStatus(testID string, status string) error {
 }
 
 // CompleteTimedOutTestRuns checks for running test runs that have exceeded their timeout
-// and marks them as completed
-func CompleteTimedOutTestRuns() error {
+// or where no binaries are running, and marks them as completed
+func CompleteTimedOutTestRuns(bc *bin_control.BinaryControl) error {
 	currentTime := time.Now().UTC()
 
-	query := `
-		UPDATE test_runs
-		SET end_time = ?, status = 'completed'
-		WHERE status = 'running'
-		AND datetime(start_time, '+' || timeout_seconds || ' seconds') <= ?
-	`
-
-	_, err := DB.Exec(query, currentTime, currentTime)
+	// Check if any binaries are running
+	statusResp, err := bc.GetAllBinaryStatuses()
 	if err != nil {
-		return fmt.Errorf("failed to complete timed out test runs: %w", err)
+		return fmt.Errorf("failed to get binary statuses: %w", err)
+	}
+
+	anyBinaryRunning := false
+	if statusResp.Success && statusResp.Data != nil {
+		statuses, ok := statusResp.Data.([]bin_control.BinaryStatus)
+		if ok {
+			for _, status := range statuses {
+				if status.Status == "running" {
+					anyBinaryRunning = true
+					break
+				}
+			}
+		}
+	}
+
+	var query string
+	var args []interface{}
+
+	if !anyBinaryRunning {
+		// No binaries running - complete ALL running test runs
+		query = `UPDATE test_runs SET end_time = ?, status = 'completed' WHERE status = 'running'`
+		args = []interface{}{currentTime}
+	} else {
+		// Binaries running - complete only timed-out runs
+		query = `
+			UPDATE test_runs
+			SET end_time = ?, status = 'completed'
+			WHERE status = 'running'
+			AND datetime(start_time, '+' || timeout_seconds || ' seconds') <= ?
+		`
+		args = []interface{}{currentTime, currentTime}
+	}
+
+	_, err = DB.Exec(query, args...)
+	if err != nil {
+		return fmt.Errorf("failed to complete test runs: %w", err)
 	}
 
 	return nil

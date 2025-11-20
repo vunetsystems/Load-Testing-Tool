@@ -199,8 +199,8 @@ class VuDataSimManager {
             addAllClusterNodesBtn: document.getElementById('add-all-cluster-nodes-btn'),
 
             // ClickHouse metrics elements
-            clickHouseMetricsBtn: document.getElementById('clickhouse-metrics-btn'),
-            clickHouseMetricsModal: document.getElementById('clickhouse-metrics-modal'),
+            // clickHouseMetricsBtn: document.getElementById('clickhouse-metrics-btn'),
+            // clickHouseMetricsModal: document.getElementById('clickhouse-metrics-modal'),
             clickHouseModalBackdrop: document.getElementById('clickhouse-modal-backdrop'),
             closeClickHouseModal: document.getElementById('close-clickhouse-modal'),
             refreshClickHouseMetricsBtn: document.getElementById('refresh-clickhouse-metrics-btn'),
@@ -217,7 +217,7 @@ class VuDataSimManager {
             nodeFilterSelect: document.getElementById('node-filter-select'),
 
             // Monitoring button
-            monitoringBtn: document.getElementById('monitoring-btn'),
+            // monitoringBtn: document.getElementById('monitoring-btn'),
 
             // Real-time status
         };
@@ -310,29 +310,29 @@ class VuDataSimManager {
 
 
         // ClickHouse metrics event listeners
-        console.log('ClickHouse Metrics Button element:', this.elements.clickHouseMetricsBtn);
-        console.log('ClickHouse Metrics Modal element:', this.elements.clickHouseMetricsModal);
+        // console.log('ClickHouse Metrics Button element:', this.elements.clickHouseMetricsBtn);
+        // console.log('ClickHouse Metrics Modal element:', this.elements.clickHouseMetricsModal);
 
-        if (this.elements.clickHouseMetricsBtn) {
-            this.elements.clickHouseMetricsBtn.addEventListener('click', () => {
-                console.log('ClickHouse Metrics button clicked!');
-                this.clickHouseMetrics.openClickHouseMetricsModal();
-            });
-        } else {
-            console.error('ClickHouse Metrics button not found!');
-        }
+        // if (this.elements.clickHouseMetricsBtn) {
+        //     this.elements.clickHouseMetricsBtn.addEventListener('click', () => {
+        //         console.log('ClickHouse Metrics button clicked!');
+        //         this.clickHouseMetrics.openClickHouseMetricsModal();
+        //     });
+        // } else {
+        //     console.error('ClickHouse Metrics button not found!');
+        // }
 
-        // Monitoring button event listeners
-        console.log('Monitoring Button element:', this.elements.monitoringBtn);
+        // // Monitoring button event listeners
+        // console.log('Monitoring Button element:', this.elements.monitoringBtn);
 
-        if (this.elements.monitoringBtn) {
-            this.elements.monitoringBtn.addEventListener('click', () => {
-                console.log('Monitoring button clicked!');
-                window.location.href = '/static/monitoring.html';
-            });
-        } else {
-            console.error('Monitoring button not found!');
-        }
+        // if (this.elements.monitoringBtn) {
+        //     this.elements.monitoringBtn.addEventListener('click', () => {
+        //         console.log('Monitoring button clicked!');
+        //         window.location.href = '/static/monitoring.html';
+        //     });
+        // } else {
+        //     console.error('Monitoring button not found!');
+        // }
 
         // Modal event listeners
         this.elements.closeNodeModal?.addEventListener('click', () => this.nodeManagement.closeNodeManagementModal());
