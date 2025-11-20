@@ -17,6 +17,7 @@ import (
 	"vuDataSim/src/node_control"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
 )
 
@@ -117,6 +118,17 @@ func main() {
 	log.Printf("DEBUG: APP_PORT: %s", os.Getenv("APP_PORT"))
 	log.Printf("DEBUG: STATIC_DIR: %s", os.Getenv("STATIC_DIR"))
 
+	// Initialize session store after loading env
+	sessionStore = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
+	host := strings.Split(os.Getenv("APP_PORT"), ":")[0]
+	sessionStore.Options = &sessions.Options{
+		Path:     "/",
+		Domain:   host,
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+		Secure:   false,
+	}
+
 	// Set env-based configs
 	handlers.Port = os.Getenv("APP_PORT")
 	if handlers.Port == "" {
@@ -174,6 +186,7 @@ func main() {
 	router.HandleFunc("/auth/login", handleAuthLogin).Methods("GET")
 	router.HandleFunc("/auth/callback", handleAuthCallback).Methods("GET")
 	router.HandleFunc("/auth/logout", handleAuthLogout).Methods("GET")
+	router.HandleFunc("/api/auth/user", handleAuthUser).Methods("GET")
 
 	// Protected routes (apply authMiddleware)
 	protected := router.PathPrefix("/").Subrouter()
@@ -201,7 +214,6 @@ func main() {
 
 	// API endpoints
 	api := protected.PathPrefix("/api").Subrouter()
-	api.HandleFunc("/auth/user", handleAuthUser).Methods("GET")
 	api.HandleFunc("/dashboard", handlers.GetDashboardData).Methods("GET")
 	api.HandleFunc("/simulation/start", handlers.StartSimulation).Methods("POST")
 	api.HandleFunc("/simulation/stop", handlers.StopSimulation).Methods("POST")
