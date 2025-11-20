@@ -31,6 +31,18 @@ func corsMiddleware(next http.Handler) http.Handler {
 	return c.Handler(next)
 }
 
+// AuthMiddleware checks for authentication
+func authMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		session, _ := sessionStore.Get(r, "vuDataSim-session")
+		if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 // Serve static files with proper MIME types
 func serveStatic(w http.ResponseWriter, r *http.Request) {
 	// Serve index.html for root path
@@ -68,4 +80,10 @@ func serveStatic(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.ServeFile(w, r, staticPath)
+}
+
+// Serve login page
+func serveLoginPage(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Serving login.html from %s", handlers.StaticDir+"/login.html")
+	http.ServeFile(w, r, handlers.StaticDir+"/login.html")
 }
