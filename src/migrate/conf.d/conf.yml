@@ -1,11 +1,25 @@
 data_generation_time:
   type: real-time
 include_module_dirs:
+  AWS_ALB:
+    enabled: false
   Apache:
+    enabled: false
+  Azure_API_Management:
     enabled: false
   Azure_Firewall:
     enabled: false
   Azure_Redis_Cache:
+    enabled: false
+  AzureStorageBlob:
+    enabled: false
+  BRUM:
+    enabled: false
+  CiscoIoSSwitch:
+    enabled: false
+  DNS_Monitoring:
+    enabled: false
+  IBMMQ:
     enabled: false
   K8s:
     enabled: false
@@ -14,9 +28,17 @@ include_module_dirs:
   MongoDB:
     enabled: false
   Mssql:
-    enabled: true
+    enabled: false
+  ServiceMonitor:
+    enabled: false
+  SyntheticBrowserMonitoring:
+    enabled: false
+  Tomcat:
+    enabled: false
   Traces:
     enabled: false
+  WebLogic:
+    enabled: true
 logging:
   console: false
   directory: /home/vunet/vuDataSim/vuDataSim/logs/

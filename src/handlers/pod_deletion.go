@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"errors"
 	"time"
 	"vuDataSim/src/kafka_ch_reset"
 	"vuDataSim/src/logger"
@@ -40,6 +41,17 @@ func SchedulePodDeletionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	scheduledTime, err := km.SchedulePodDeletion(req.TimeoutSeconds, req.O11ySources)
 	if err != nil {
+		if errors.Is(err, kafka_ch_reset.ErrNoPipelinesFound) {
+			// Return success message, but no scheduling happened
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"status": "no_pipelines_found",
+				"message": "No pipelines found in YAML for given sources, nothing to schedule.",
+				"o11y_sources": req.O11ySources,
+			})
+			return
+		}
+
 		logger.Error().Err(err).Msg("Failed to schedule pod deletion")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

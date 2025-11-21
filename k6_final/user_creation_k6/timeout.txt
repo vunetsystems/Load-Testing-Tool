@@ -1,5 +1,5 @@
-Script started at: 2025-11-13 19:28:14
-Target number of users: 50
+Script started at: 2025-11-17 10:56:03
+Target number of users: 25
 
 
-🎉 All 50/50 users created successfully at 2025-11-13 19:31:18!
+🎉 All 25/25 users created successfully at 2025-11-17 10:57:40!

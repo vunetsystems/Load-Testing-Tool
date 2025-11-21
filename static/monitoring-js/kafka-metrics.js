@@ -175,8 +175,8 @@ class KafkaMetricsManager {
 
     // Attach event listeners for test run dropdown
     attachTestRunEventListeners() {
-        const dropdown = document.getElementById('test-run-dropdown');
-        const clearBtn = document.getElementById('clear-test-filter');
+        const dropdown = document.getElementById('kafka-test-run-dropdown');
+        const clearBtn = document.getElementById('kafka-clear-test-filter');
 
         if (dropdown) {
             dropdown.addEventListener('change', (event) => {
@@ -214,7 +214,7 @@ class KafkaMetricsManager {
 
     // Populate dropdown with test runs
     populateTestRunDropdown() {
-        const dropdown = document.getElementById('test-run-dropdown');
+        const dropdown = document.getElementById('kafka-test-run-dropdown');
         if (!dropdown) return;
 
         // Clear existing options except the first one
@@ -223,8 +223,12 @@ class KafkaMetricsManager {
         // Add test run options
         this.testRuns.forEach(testRun => {
             const option = document.createElement('option');
-            option.value = testRun.test_id;
-            option.textContent = `${testRun.test_id.substring(0, 8)}... - ${testRun.test_name || 'Unnamed Test'} (${testRun.duration})`;
+            // Support both snake_case and PascalCase keys from API for compatibility
+            const id = testRun.test_id || testRun.TestID || testRun.testId || testRun.TestId || '';
+            const name = testRun.test_name || testRun.TestName || 'Unnamed Test';
+            const duration = testRun.duration || testRun.Duration || testRun.duration_str || '';
+            option.value = id;
+            option.textContent = `${name} (${duration})`;
             dropdown.appendChild(option);
         });
     }
@@ -264,13 +268,13 @@ class KafkaMetricsManager {
         this.isTestFiltered = false;
 
         // Reset dropdown
-        const dropdown = document.getElementById('test-run-dropdown');
+        const dropdown = document.getElementById('kafka-test-run-dropdown');
         if (dropdown) {
             dropdown.value = '';
         }
 
         // Hide test info
-        const infoDiv = document.getElementById('selected-test-info');
+        const infoDiv = document.getElementById('kafka-selected-test-info');
         if (infoDiv) {
             infoDiv.classList.add('hidden');
         }
@@ -284,10 +288,10 @@ class KafkaMetricsManager {
 
     // Update selected test info display
     updateSelectedTestInfo() {
-        const infoDiv = document.getElementById('selected-test-info');
-        const nameSpan = document.getElementById('selected-test-name');
-        const rangeSpan = document.getElementById('selected-test-range');
-        const durationSpan = document.getElementById('selected-test-duration');
+        const infoDiv = document.getElementById('kafka-selected-test-info');
+        const nameSpan = document.getElementById('kafka-selected-test-name');
+        const rangeSpan = document.getElementById('kafka-selected-test-range');
+        const durationSpan = document.getElementById('kafka-selected-test-duration');
 
         if (!infoDiv || !this.selectedTestRun) return;
 
@@ -325,12 +329,24 @@ class KafkaMetricsManager {
                 apiUrl += `?start=${encodeURIComponent(startTime)}&end=${encodeURIComponent(endTime)}&test_id=${encodeURIComponent(this.selectedTestRun.test_id)}`;
             }
 
-            const response = await fetch(apiUrl);
+            // Add timeout to prevent infinite loading
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+            const response = await fetch(apiUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            console.log('Kafka metrics fetch response status:', response.status);
+            console.log('Kafka metrics fetch response ok:', response.ok);
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const result = await response.json();
+            console.log('Kafka metrics API result:', result);
+            console.log('Kafka metrics data length:', result.data ? result.data.length : 'no data');
+
             if (result.success && result.data) {
                 // Store data in buffer for historical tracking
                 this.storeDataInBuffer(result.data);
@@ -345,11 +361,15 @@ class KafkaMetricsManager {
                 }
             } else {
                 console.error('Failed to fetch Kafka metrics:', result.message);
-                this.showApiError('Failed to fetch Kafka metrics from server');
+                this.showApiError('Failed to fetch Kafka metrics from server: ' + (result.message || 'Unknown error'));
             }
         } catch (error) {
             console.error('Error fetching Kafka metrics:', error);
-            this.showApiError('Network error while fetching Kafka metrics');
+            if (error.name === 'AbortError') {
+                this.showApiError('Request timed out. ClickHouse may not be responding. Please check server logs.');
+            } else {
+                this.showApiError('Network error while fetching Kafka metrics: ' + error.message);
+            }
         } finally {
             this.isUpdating = false;
         }
@@ -369,6 +389,7 @@ class KafkaMetricsManager {
             const dataPoint = {
                 timestamp: now,
                 oneMinuteRate: metric.oneMinuteRate,
+                count: metric.count,
                 rawData: metric
             };
 
@@ -738,7 +759,7 @@ class KafkaMetricsManager {
         if (this.isTestFiltered && this.selectedTestRun && this.kafkaData) {
             // Use API response data for filtered test view (historical data)
             this.kafkaData.forEach(metric => {
-                if (metric.topic.includes('-input') || metric.topic === 'mssql-telegraf') {
+                if (metric.isInput) { // Use backend-provided flag
                     if (!inputTopicData[metric.topic]) {
                         inputTopicData[metric.topic] = [];
                     }
@@ -754,7 +775,7 @@ class KafkaMetricsManager {
 
             // Get data from buffer for input topics only
             for (const [topic, dataPoints] of this.dataBuffer.entries()) {
-                if (topic.includes('-input') || topic === 'mssql-telegraf') {
+                if (dataPoints.length > 0 && dataPoints[0].rawData.isInput) { // Use backend-provided flag
                     inputTopicData[topic] = dataPoints.map(point => ({
                         timestamp: point.timestamp,
                         rate: point.oneMinuteRate
@@ -765,7 +786,7 @@ class KafkaMetricsManager {
             // If no buffer data, fall back to current data
             if (Object.keys(inputTopicData).length === 0 && this.kafkaData) {
                 this.kafkaData.forEach(metric => {
-                    if (metric.topic.includes('-input') || metric.topic === 'mssql-telegraf') {
+                    if (metric.isInput) { // Use backend-provided flag
                         if (!inputTopicData[metric.topic]) {
                             inputTopicData[metric.topic] = [];
                         }
@@ -869,7 +890,7 @@ class KafkaMetricsManager {
             xAxis: xAxisConfig,
             yAxis: {
                 type: 'value',
-                name: 'Messages/sec',
+                name: 'Total Messages',
                 nameLocation: 'middle',
                 nameGap: 30
             },
@@ -888,7 +909,7 @@ class KafkaMetricsManager {
         if (this.isTestFiltered && this.selectedTestRun && this.kafkaData) {
             // Use API response data for filtered test view (historical data)
             this.kafkaData.forEach(metric => {
-                if (!metric.topic.includes('-input') && metric.topic !== 'mssql-telegraf') {
+                if (!metric.isInput) { // Use backend-provided flag
                     if (!outputTopicData[metric.topic]) {
                         outputTopicData[metric.topic] = [];
                     }
@@ -904,7 +925,7 @@ class KafkaMetricsManager {
 
             // Get data from buffer for output topics only
             for (const [topic, dataPoints] of this.dataBuffer.entries()) {
-                if (!topic.includes('-input') && topic !== 'mssql-telegraf') {
+                if (dataPoints.length > 0 && !dataPoints[0].rawData.isInput) { // Use backend-provided flag
                     outputTopicData[topic] = dataPoints.map(point => ({
                         timestamp: point.timestamp,
                         rate: point.oneMinuteRate
@@ -915,7 +936,7 @@ class KafkaMetricsManager {
             // If no buffer data, fall back to current data
             if (Object.keys(outputTopicData).length === 0 && this.kafkaData) {
                 this.kafkaData.forEach(metric => {
-                    if (!metric.topic.includes('-input') && metric.topic !== 'mssql-telegraf') {
+                    if (!metric.isInput) { // Use backend-provided flag
                         if (!outputTopicData[metric.topic]) {
                             outputTopicData[metric.topic] = [];
                         }
@@ -999,7 +1020,7 @@ class KafkaMetricsManager {
                     let result = date.toLocaleTimeString() + '<br/>';
                     params.forEach(param => {
                         const cleanName = param.seriesName.replace(/^📤\s*/, '');
-                        result += `Output: ${cleanName}<br/>${param.value[1].toFixed(2)} msg/sec<br/>`;
+                        result += `Output: ${cleanName}<br/>${param.value[1].toLocaleString()} messages<br/>`;
                     });
                     return result;
                 }

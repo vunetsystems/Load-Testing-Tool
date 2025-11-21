@@ -8,11 +8,12 @@ import (
 	"time"
 
 	"vuDataSim/src/models"
+
 	"github.com/google/uuid"
 )
 
 // CreateK6Run creates a new K6 run record
-func CreateK6Run(timeRange string, vus, iterations, interval int, o11ySources []string) (*models.K6Run, error) {
+func CreateK6Run(testName, timeRange, duration string, vus, iterations, interval int, o11ySources []string) (*models.K6Run, error) {
 	// Generate a new UUID for the test ID
 	testID := uuid.New().String()
 
@@ -25,18 +26,20 @@ func CreateK6Run(timeRange string, vus, iterations, interval int, o11ySources []
 	startTime := time.Now().UTC()
 
 	query := `
-		INSERT INTO k6_runs (test_id, start_time, time_range, vus, iterations, interval, o11y_sources, status)
-		VALUES (?, ?, ?, ?, ?, ?, ?, 'running')`
+		INSERT INTO k6_runs (test_id, test_name, start_time, time_range, duration, vus, iterations, interval, o11y_sources, status)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'running')`
 
-	_, err = DB.Exec(query, testID, startTime, timeRange, vus, iterations, interval, string(sourcesJSON))
+	_, err = DB.Exec(query, testID, testName, startTime, timeRange, duration, vus, iterations, interval, string(sourcesJSON))
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert K6 run: %w", err)
 	}
 
 	return &models.K6Run{
 		TestID:      testID,
+		TestName:    testName,
 		StartTime:   startTime,
 		TimeRange:   timeRange,
+		Duration:    duration,
 		VUs:         vus,
 		Iterations:  iterations,
 		Interval:    interval,
@@ -61,23 +64,32 @@ func StopK6Run(testID string) error {
 // GetK6Run retrieves a specific K6 run by ID
 func GetK6Run(testID string) (*models.K6Run, error) {
 	query := `
-		SELECT test_id, start_time, end_time, time_range, vus, iterations, interval, o11y_sources, status
+		SELECT test_id, test_name, start_time, end_time, time_range, duration, vus, iterations, interval, o11y_sources, status, Metrics_Login, Overall_Dashboard_Load_Times, Panel_Performance_Breakdown
 		FROM k6_runs WHERE test_id = ?`
 
 	var k6Run models.K6Run
 	var sourcesJSON string
+	var metricsJSON sql.NullString
+	var dashboardLoadTimesJSON sql.NullString
+	var panelPerformanceJSON sql.NullString
 	var endTime sql.NullTime
+	var duration sql.NullString
 
 	err := DB.QueryRow(query, testID).Scan(
 		&k6Run.TestID,
+		&k6Run.TestName,
 		&k6Run.StartTime,
 		&endTime,
 		&k6Run.TimeRange,
+		&duration,
 		&k6Run.VUs,
 		&k6Run.Iterations,
 		&k6Run.Interval,
 		&sourcesJSON,
 		&k6Run.Status,
+		&metricsJSON,
+		&dashboardLoadTimesJSON,
+		&panelPerformanceJSON,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -90,10 +102,44 @@ func GetK6Run(testID string) (*models.K6Run, error) {
 		k6Run.EndTime = &endTime.Time
 	}
 
+	if duration.Valid {
+		k6Run.Duration = duration.String
+	}
+
 	// Parse JSON sources
 	err = json.Unmarshal([]byte(sourcesJSON), &k6Run.O11ySources)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal o11y sources: %w", err)
+	}
+
+	// Parse Metrics_Login JSON if present
+	if metricsJSON.Valid && metricsJSON.String != "" {
+		var metrics models.K6LoginMetrics
+		err = json.Unmarshal([]byte(metricsJSON.String), &metrics)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal Metrics_Login: %w", err)
+		}
+		k6Run.MetricsLogin = &metrics
+	}
+
+	// Parse Overall_Dashboard_Load_Times JSON if present
+	if dashboardLoadTimesJSON.Valid && dashboardLoadTimesJSON.String != "" {
+		var dashboardLoadTimes models.K6DashboardLoadTimes
+		err = json.Unmarshal([]byte(dashboardLoadTimesJSON.String), &dashboardLoadTimes)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal Overall_Dashboard_Load_Times: %w", err)
+		}
+		k6Run.OverallDashboardLoadTimes = &dashboardLoadTimes
+	}
+
+	// Parse Panel_Performance_Breakdown JSON if present
+	if panelPerformanceJSON.Valid && panelPerformanceJSON.String != "" {
+		var panelPerformance models.K6PanelPerformance
+		err = json.Unmarshal([]byte(panelPerformanceJSON.String), &panelPerformance)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal Panel_Performance_Breakdown: %w", err)
+		}
+		k6Run.PanelPerformanceBreakdown = &panelPerformance
 	}
 
 	return &k6Run, nil
@@ -102,7 +148,7 @@ func GetK6Run(testID string) (*models.K6Run, error) {
 // GetAllK6Runs retrieves all K6 runs ordered by start time descending
 func GetAllK6Runs() ([]*models.K6Run, error) {
 	query := `
-		SELECT test_id, start_time, end_time, time_range, vus, iterations, interval, o11y_sources, status
+		SELECT test_id, test_name, start_time, end_time, time_range, duration, vus, iterations, interval, o11y_sources, status, Metrics_Login, Overall_Dashboard_Load_Times, Panel_Performance_Breakdown
 		FROM k6_runs ORDER BY start_time DESC`
 
 	rows, err := DB.Query(query)
@@ -115,18 +161,27 @@ func GetAllK6Runs() ([]*models.K6Run, error) {
 	for rows.Next() {
 		var k6Run models.K6Run
 		var sourcesJSON string
+		var metricsJSON sql.NullString
+		var dashboardLoadTimesJSON sql.NullString
+		var panelPerformanceJSON sql.NullString
 		var endTime sql.NullTime
+		var duration sql.NullString
 
 		err := rows.Scan(
 			&k6Run.TestID,
+			&k6Run.TestName,
 			&k6Run.StartTime,
 			&endTime,
 			&k6Run.TimeRange,
+			&duration,
 			&k6Run.VUs,
 			&k6Run.Iterations,
 			&k6Run.Interval,
 			&sourcesJSON,
 			&k6Run.Status,
+			&metricsJSON,
+			&dashboardLoadTimesJSON,
+			&panelPerformanceJSON,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan K6 run: %w", err)
@@ -136,10 +191,44 @@ func GetAllK6Runs() ([]*models.K6Run, error) {
 			k6Run.EndTime = &endTime.Time
 		}
 
+		if duration.Valid {
+			k6Run.Duration = duration.String
+		}
+
 		// Parse JSON sources
 		err = json.Unmarshal([]byte(sourcesJSON), &k6Run.O11ySources)
 		if err != nil {
 			return nil, fmt.Errorf("failed to unmarshal o11y sources: %w", err)
+		}
+
+		// Parse Metrics_Login JSON if present
+		if metricsJSON.Valid && metricsJSON.String != "" {
+			var metrics models.K6LoginMetrics
+			err = json.Unmarshal([]byte(metricsJSON.String), &metrics)
+			if err != nil {
+				return nil, fmt.Errorf("failed to unmarshal Metrics_Login: %w", err)
+			}
+			k6Run.MetricsLogin = &metrics
+		}
+
+		// Parse Overall_Dashboard_Load_Times JSON if present
+		if dashboardLoadTimesJSON.Valid && dashboardLoadTimesJSON.String != "" {
+			var dashboardLoadTimes models.K6DashboardLoadTimes
+			err = json.Unmarshal([]byte(dashboardLoadTimesJSON.String), &dashboardLoadTimes)
+			if err != nil {
+				return nil, fmt.Errorf("failed to unmarshal Overall_Dashboard_Load_Times: %w", err)
+			}
+			k6Run.OverallDashboardLoadTimes = &dashboardLoadTimes
+		}
+
+		// Parse Panel_Performance_Breakdown JSON if present
+		if panelPerformanceJSON.Valid && panelPerformanceJSON.String != "" {
+			var panelPerformance models.K6PanelPerformance
+			err = json.Unmarshal([]byte(panelPerformanceJSON.String), &panelPerformance)
+			if err != nil {
+				return nil, fmt.Errorf("failed to unmarshal Panel_Performance_Breakdown: %w", err)
+			}
+			k6Run.PanelPerformanceBreakdown = &panelPerformance
 		}
 
 		k6Runs = append(k6Runs, &k6Run)
@@ -178,6 +267,57 @@ func CompleteK6Run(testID string) error {
 	_, err := DB.Exec(query, endTime, testID)
 	if err != nil {
 		return fmt.Errorf("failed to complete K6 run: %w", err)
+	}
+
+	return nil
+}
+
+// UpdateK6RunMetrics updates the Metrics_Login field for a K6 run
+func UpdateK6RunMetrics(testID string, metrics *models.K6LoginMetrics) error {
+	// Marshal metrics to JSON
+	metricsJSON, err := json.Marshal(metrics)
+	if err != nil {
+		return fmt.Errorf("failed to marshal metrics: %w", err)
+	}
+
+	query := `UPDATE k6_runs SET Metrics_Login = ? WHERE test_id = ?`
+	_, err = DB.Exec(query, string(metricsJSON), testID)
+	if err != nil {
+		return fmt.Errorf("failed to update K6 run metrics: %w", err)
+	}
+
+	return nil
+}
+
+// UpdateK6RunDashboardLoadTimes updates the Overall_Dashboard_Load_Times field for a K6 run
+func UpdateK6RunDashboardLoadTimes(testID string, dashboardLoadTimes *models.K6DashboardLoadTimes) error {
+	// Marshal dashboard load times to JSON
+	dashboardLoadTimesJSON, err := json.Marshal(dashboardLoadTimes)
+	if err != nil {
+		return fmt.Errorf("failed to marshal dashboard load times: %w", err)
+	}
+
+	query := `UPDATE k6_runs SET Overall_Dashboard_Load_Times = ? WHERE test_id = ?`
+	_, err = DB.Exec(query, string(dashboardLoadTimesJSON), testID)
+	if err != nil {
+		return fmt.Errorf("failed to update K6 run dashboard load times: %w", err)
+	}
+
+	return nil
+}
+
+// UpdateK6RunPanelPerformance updates the Panel_Performance_Breakdown field for a K6 run
+func UpdateK6RunPanelPerformance(testID string, panelPerformance *models.K6PanelPerformance) error {
+	// Marshal panel performance to JSON
+	panelPerformanceJSON, err := json.Marshal(panelPerformance)
+	if err != nil {
+		return fmt.Errorf("failed to marshal panel performance: %w", err)
+	}
+
+	query := `UPDATE k6_runs SET Panel_Performance_Breakdown = ? WHERE test_id = ?`
+	_, err = DB.Exec(query, string(panelPerformanceJSON), testID)
+	if err != nil {
+		return fmt.Errorf("failed to update K6 run panel performance: %w", err)
 	}
 
 	return nil

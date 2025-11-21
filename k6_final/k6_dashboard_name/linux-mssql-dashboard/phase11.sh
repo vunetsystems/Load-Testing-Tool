@@ -5,21 +5,22 @@ set -euo pipefail
 # Usage
 # ======================================
 usage() {
-  echo "Usage: $0 [grafana_time_ranges_csv] [vus] [total_ingestion_duration]"
-  echo "Example: $0 \"15m,30m,5m\" 30 60m"
+  echo "Usage: $0 [grafana_time_ranges_csv] [vus] [total_ingestion_duration] [test_id]"
+  echo "Example: $0 \"15m,30m,5m\" 30 60m \"test-123\""
   exit 1
 }
 
-if [ $# -ne 3 ]; then
+if [ $# -ne 4 ]; then
   usage
 fi
 
 # ----------------------
 # Inputs
 # ----------------------
-TIME_RANGES_CSV="$1"        # "15m,30m,5m"
-VUS="$2"                    # integer
-TOTAL_DURATION_RAW="$3"     # e.g. 60m
+TIME_RANGES_CSV="$1"       # "15m,30m,5m"
+VUS="$2"                   # integer
+TOTAL_DURATION_RAW="$3"    # e.g. 60m
+TEST_ID="$4"               # test identifier, e.g. "test-123"
 
 # ----------------------
 # Paths & ClickHouse
@@ -54,8 +55,8 @@ else
   exit 1
 fi
 
-# 1. Total Segment Duration (Total / 3)
-SEGMENT_SECONDS=$(( TOTAL_SECONDS / 3 ))
+# 1. Total Segment Duration (Total / 2) - NEW: 2 SEGMENTS
+SEGMENT_SECONDS=$(( TOTAL_SECONDS / 2 ))
 
 if [ "$SEGMENT_SECONDS" -lt 10 ]; then
   echo "Error: Segment duration is too short ($SEGMENT_SECONDS sec). Increase Total Duration."
@@ -64,37 +65,34 @@ fi
 
 # 2. Calculate Run Durations based on specific Phase Logic
 
-# Segment 1 Duration: Segment / 4 (e.g., 2m / 4 = 30s)
-DUR_SEG1=$(( SEGMENT_SECONDS / 4 ))
-[ "$DUR_SEG1" -lt 1 ] && DUR_SEG1=1
+# Segment 1 Duration (Sequential): Segment / 2 (e.g., 30m / 2 = 15m)
+DUR_SEQUENTIAL_RUN=$(( SEGMENT_SECONDS / 2 ))
+[ "$DUR_SEQUENTIAL_RUN" -lt 1 ] && DUR_SEQUENTIAL_RUN=1
 
-# Segment 2 Duration: Full Segment (Parallel run takes the whole slot)
-# e.g. 2m
-DUR_SEG2=$(( SEGMENT_SECONDS ))
+# Segment 2 Duration (Parallel): Full Segment (Parallel run takes the whole slot)
+# e.g. 30m
+DUR_PARALLEL_RUN=$(( SEGMENT_SECONDS ))
 
-# Segment 3 Duration: Segment / 2 (e.g., 2m / 2 = 1m)
-DUR_SEG3=$(( SEGMENT_SECONDS / 2 ))
-[ "$DUR_SEG3" -lt 1 ] && DUR_SEG3=1
 
 echo "============================================="
-echo "Phase-1 Plan Configuration"
+echo "Phase-1 Plan Configuration (2-Segment Plan)"
 echo "---------------------------------------------"
-echo "TIME RANGES     : ${TIME_RANGES[*]}"
-echo "VUS             : $VUS"
-echo "TOTAL DURATION  : ${TOTAL_MINUTES}m ($TOTAL_SECONDS s)"
-echo "SEGMENT DURATION: $(( SEGMENT_SECONDS / 60 ))m ($SEGMENT_SECONDS s)"
+echo "TIME RANGES      : ${TIME_RANGES[*]}"
+echo "VUS              : $VUS"
+echo "TOTAL DURATION   : ${TOTAL_MINUTES}m ($TOTAL_SECONDS s)"
+echo "SEGMENT DURATION : $(( SEGMENT_SECONDS / 60 ))m ($SEGMENT_SECONDS s) (Total/2)"
 echo "---------------------------------------------"
 echo "Run Durations:"
-echo "  - Seg 1 (Alt) : ${DUR_SEG1}s (Seg/4)"
-echo "  - Seg 2 (Par) : ${DUR_SEG2}s (Seg)"
-echo "  - Seg 3 (Seq) : ${DUR_SEG3}s (Seg/2)"
+echo "  - Seg 1 (Seq) : ${DUR_SEQUENTIAL_RUN}s (Seg/2)"
+echo "  - Seg 2 (Par) : ${DUR_PARALLEL_RUN}s (Seg)"
 echo "============================================="
 
 # ----------------------
 # Create CSV headers (if missing)
 # ----------------------
-[ -f "$LOGIN_CSV" ] || echo "timestamp,test_name,avg_response_time,status_code,success_rate,vus,vus_max,duration,segment_number,iterations" > "$LOGIN_CSV"
-[ -f "$DASHBOARD_CSV" ] || echo "timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,duration,segment_number,iterations" > "$DASHBOARD_CSV"
+# UPDATED: dashboard_panel_metrics.csv now matches all 31 columns (added test_id)
+[ -f "$LOGIN_CSV" ] || echo "test_id,timestamp,test_name,avg_response_time,status_code,success_rate,vus,vus_max,duration,segment_number,iterations" > "$LOGIN_CSV"
+[ -f "$DASHBOARD_CSV" ] || echo "test_id,timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,iterations,segment_number,duration,dashboard_throughput,dashboard_error_4xx,dashboard_error_5xx,dashboard_connection_error,panel_throughput,panel_error_4xx,panel_error_5xx,panel_connection_error,panel_contribution_percent,concurrent_users,error_rate,request_rate,p95_response_time,p99_response_time" > "$DASHBOARD_CSV"
 [ -f "$SUMMARY_FILE" ] || echo -e "DASHBOARD PERFORMANCE SUMMARY\n" > "$SUMMARY_FILE"
 
 # ----------------------
@@ -117,16 +115,24 @@ kubectl exec -i "$CLICKHOUSE_POD" -n "$CLICKHOUSE_NS" -- \
   clickhouse-client -d "$CLICKHOUSE_DB" --user "$CLICKHOUSE_USER" --password "$CLICKHOUSE_PASS" -q \
   "ALTER TABLE monitoring.k6_results ADD COLUMN IF NOT EXISTS iterations UInt64 DEFAULT 0;"
 
+kubectl exec -i "$CLICKHOUSE_POD" -n "$CLICKHOUSE_NS" -- \
+  clickhouse-client -d "$CLICKHOUSE_DB" --user "$CLICKHOUSE_USER" --password "$CLICKHOUSE_PASS" -q \
+  "ALTER TABLE monitoring.k6_login ADD COLUMN IF NOT EXISTS test_id String DEFAULT '';"
+
+kubectl exec -i "$CLICKHOUSE_POD" -n "$CLICKHOUSE_NS" -- \
+  clickhouse-client -d "$CLICKHOUSE_DB" --user "$CLICKHOUSE_USER" --password "$CLICKHOUSE_PASS" -q \
+  "ALTER TABLE monitoring.k6_results ADD COLUMN IF NOT EXISTS test_id String DEFAULT '';"
+
 # ----------------------
 # Helper: run k6
 # ----------------------
 run_k6() {
-  local script_name="$1"    # "login.js" or "multi_dashboard_test.js"
-  local time_range="$2"     # e.g. 15m
+  local script_name="$1"     # "login.js" or "multi_dashboard_test.js"
+  local time_range="$2"      # e.g. 15m
   local vus="$3"
-  local duration_sec="$4"   # seconds
-  local label="$5"          # descriptive label
-  local segnum="$6"         # segment number
+  local duration_sec="$4"    # seconds
+  local label="$5"           # descriptive label
+  local segnum="$6"          # segment number
   local out="${RESULT_DIR}/${label}_${time_range}.log"
   local K6_JSON="${RESULT_DIR}/${label}_${time_range}.json"
 
@@ -154,9 +160,9 @@ run_k6() {
 
   # Parse and insert immediately
   if [[ "$script_name" == "login.js" ]]; then
-    parse_and_insert_login "$out" "$vus" "${duration_sec}s" "$segnum" "$K6_JSON"
+    parse_and_insert_login "$out" "$vus" "${duration_sec}s" "$segnum" "$K6_JSON" "$TEST_ID"
   else
-    parse_and_insert_dashboard "$out" "$time_range" "$vus" "${duration_sec}s" "$segnum" "$K6_JSON"
+    parse_and_insert_dashboard "$out" "$time_range" "$vus" "${duration_sec}s" "$segnum" "$K6_JSON" "$TEST_ID"
   fi
 }
 
@@ -169,26 +175,28 @@ parse_and_insert_login() {
   local duration_str="$3"
   local segnum="$4"
   local K6_JSON="$5"
+  local test_id="$6"
 
   # Get total iterations and req/sec from JSON
   iterations=0
   reqs_total=0
   if [ -f "$K6_JSON" ]; then
-    iterations=$(jq '.metrics.iterations.count' "$K6_JSON")
-    reqs_total=$(jq '.metrics.http_reqs.count' "$K6_JSON")  # k6 total HTTP requests
+    iterations=$(jq '.metrics.iterations.count // 0' "$K6_JSON")
+    reqs_total=$(jq '.metrics.http_reqs.count // 0' "$K6_JSON") # k6 total HTTP requests
   fi
 
   # Temp file for THIS run only
   local temp_csv="${RESULT_DIR}/temp_login_$(date +%s%N).csv"
-  echo "timestamp,test_name,avg_response_time,status_code,success_rate,throughput_rps,error_4xx,error_5xx,error_connection,response_size_bytes,vus,vus_max,duration,segment_number,iterations" > "$temp_csv"
+  # This header matches the k6_login table + new columns
+  echo "test_id,timestamp,test_name,avg_response_time,status_code,success_rate,throughput_rps,error_4xx,error_5xx,error_connection,response_size_bytes,vus,vus_max,duration,segment_number,iterations" > "$temp_csv"
 
-  # Reset counters per iteration
-  local error_4xx=0
-  local error_5xx=0
-  local error_connection=0
-
+  # Read log line by line
   grep -E "Login (successful|failed)" "$login_output" | while IFS= read -r line; do
     local timestamp RESPONSE_TIME STATUS SUCCESS_RATE RESPONSE_SIZE THROUGHPUT
+    local error_4xx=0
+    local error_5xx=0
+    local error_connection=0
+
     if [[ "$line" =~ \[([^\]]+)\][[:space:]]✅[[:space:]]Login[[:space:]]successful[[:space:]]\|[[:space:]]User:[[:space:]]([^|]+)[[:space:]]\|[[:space:]]Response[[:space:]]Time:[[:space:]]([^|]+)[[:space:]]ms ]]; then
       timestamp="${BASH_REMATCH[1]}"
       timestamp=$(date -d "${timestamp}" "+%Y-%m-%d %H:%M:%S")
@@ -204,15 +212,13 @@ parse_and_insert_login() {
       RESPONSE_TIME="${BASH_REMATCH[4]}"
       SUCCESS_RATE=0
 
-      # classify errors
       if [ "$STATUS" -ge 400 ] && [ "$STATUS" -lt 500 ]; then
-        ((error_4xx++))
+        error_4xx=1
       elif [ "$STATUS" -ge 500 ]; then
-        ((error_5xx++))
+        error_5xx=1
       fi
     else
-      # assume network/connection error
-      ((error_connection++))
+      # could not parse, skip
       continue
     fi
 
@@ -223,26 +229,28 @@ parse_and_insert_login() {
       THROUGHPUT=0
     fi
 
-    # Response size — optionally parse from log if available, otherwise -1
-    RESPONSE_SIZE=-1
+    RESPONSE_SIZE=-1 # Not captured
 
-    row="\"$timestamp\",login,$RESPONSE_TIME,$STATUS,$SUCCESS_RATE,$THROUGHPUT,$error_4xx,$error_5xx,$error_connection,$RESPONSE_SIZE,$vus,$vus,$duration_str,$segnum,$iterations"
+    row="\"$test_id\",\"$timestamp\",login,$RESPONSE_TIME,$STATUS,$SUCCESS_RATE,$THROUGHPUT,$error_4xx,$error_5xx,$error_connection,$RESPONSE_SIZE,$vus,$vus,\"$duration_str\",$segnum,$iterations"
     echo "$row" >> "$temp_csv"
     echo "$row" >> "$LOGIN_CSV"
   done
 
   # Insert ONLY the temp file
-  if [ -s "$temp_csv" ]; then
+  if [ -s "$temp_csv" ] && [ $(wc -l < "$temp_csv") -gt 1 ]; then
     echo "Inserting login data to ClickHouse..."
     tail -n +2 "$temp_csv" | \
       kubectl exec -i "$CLICKHOUSE_POD" -n "$CLICKHOUSE_NS" -- \
       clickhouse-client -d "$CLICKHOUSE_DB" --user "$CLICKHOUSE_USER" --password "$CLICKHOUSE_PASS" \
-      -q "INSERT INTO monitoring.k6_login (timestamp,test_name,avg_response_time,status_code,success_rate,throughput_rps,error_4xx,error_5xx,error_connection,response_size_bytes,vus,vus_max,duration,segment_number,iterations) FORMAT CSV"
+      -q "INSERT INTO monitoring.k6_login (test_id,timestamp,test_name,avg_response_time,status_code,success_rate,throughput_rps,error_4xx,error_5xx,error_connection,response_size_bytes,vus,vus_max,duration,segment_number,iterations) FORMAT CSV"
   fi
   rm -f "$temp_csv"
 }
 
 
+# =========================================================================
+# === EDITED parse_and_insert_dashboard FUNCTION ===
+# =========================================================================
 parse_and_insert_dashboard() {
   local dash_output="$1"
   local time_range="$2"
@@ -250,83 +258,133 @@ parse_and_insert_dashboard() {
   local duration_str="$4"
   local segnum="$5"
   local K6_JSON="$6"
+  local test_id="$7"
 
   # Get total iterations from JSON
   iterations=0
   if [ -f "$K6_JSON" ]; then
-    iterations=$(jq '.metrics.iterations.count' "$K6_JSON")
+    iterations=$(jq '.metrics.iterations.count // 0' "$K6_JSON")
   fi
 
   # Temp file for THIS run only
   local temp_csv="${RESULT_DIR}/temp_dash_$(date +%s%N).csv"
-  echo "timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,duration,segment_number,iterations,dashboard_throughput,dashboard_error_4xx,dashboard_error_5xx,dashboard_connection_error,panel_throughput,panel_error_4xx,panel_error_5xx,panel_connection_error,panel_contribution_percent" > "$temp_csv"
+  
+  # This header MUST match the 31 columns in the printf statements below
+  echo "test_id,timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,iterations,segment_number,duration,dashboard_throughput,dashboard_error_4xx,dashboard_error_5xx,dashboard_connection_error,panel_throughput,panel_error_4xx,panel_error_5xx,panel_connection_error,panel_contribution_percent,concurrent_users,error_rate,request_rate,p95_response_time,p99_response_time" > "$temp_csv"
 
-  local row=""
-  local dashboard_response_time=""
-
-  # Read the log file line by line to capture dashboard and panel data
+  # These variables will hold the data from the [DASHBOARD_DATA] line
+  # to be used by subsequent [PANEL_DATA] lines
+  local current_dash_name=""
+  local current_dash_response_time=0
+  local current_dash_status=0
+  local current_dash_success_rate=0
+  local current_dash_throughput=0
+  local current_dash_err4xx=0
+  local current_dash_err5xx=0
+  local current_dash_conn_err=0
+  
+  # Read the log file line by line
   while IFS= read -r line; do
 
-    # --- Dashboard ---
-    if [[ "$line" == *"[DASHBOARD_DATA]"* ]]; then
-      timestamp=$(echo "$line" | sed -E 's/.*time="([^"]+)".*/\1/')
-      timestamp=$(date -d "${timestamp}" "+%Y-%m-%d %H:%M:%S")
-      dashboard_name=$(echo "$line" | sed -E 's/.*name=([^|]+).*/\1/' | xargs)
-      status=$(echo "$line" | sed -E 's/.*status=([0-9]+).*/\1/')
-      response_time=$(echo "$line" | sed -E 's/.*response_time=([0-9.]+)ms.*/\1/')
-      throughput=$(echo "$line" | sed -E 's/.*throughput=([0-9.]+)req\/sec.*/\1/')
-      error_4xx=$(echo "$line" | sed -E 's/.*error_4xx=([0-9]+).*/\1/')
-      error_5xx=$(echo "$line" | sed -E 's/.*error_5xx=([0-9]+).*/\1/')
-      local success_rate=0
-      if [ "$status" -eq 200 ]; then
-        success_rate=100
-      fi
-      dashboard_response_time="$response_time"
+    # Skip lines that are not our custom logs
+    if [[ "$line" != *"[DASHBOARD_DATA]"* ]] && [[ "$line" != *"[PANEL_DATA]"* ]]; then
+      continue
+    fi
 
-      row="\"$timestamp\",$dashboard_name,$response_time,,,'$status',$success_rate,,,,"$time_range",$vus,$vus,$duration_str,$segnum,$iterations,$throughput,$error_4xx,$error_5xx,0,,,,,"
+    # Extract the msg content from K6 log format
+    msg_content=$(echo "$line" | sed 's/.*msg="//; s/".*//')
+
+    # --- Dashboard ---
+    # Format: [DASHBOARD_DATA] | Timestamp | Dashboard Name | Status | Resp Time | Throughput | 4xx | 5xx | Conn Err
+    if [[ "$msg_content" == *"[DASHBOARD_DATA]"* ]]; then
+      # Use | as the delimiter
+      IFS='|' read -r _ timestamp dash_name status resp_time throughput err4xx err5xx conn_err <<< "$msg_content"
+      
+      # Clean whitespace
+      current_dash_name=$(echo "$dash_name" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//') # Clean whitespace
+      current_dash_status=$(echo "$status" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      current_dash_response_time=$(echo "$resp_time" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      current_dash_throughput=$(echo "$throughput" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      current_dash_err4xx=$(echo "$err4xx" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      current_dash_err5xx=$(echo "$err5xx" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      current_dash_conn_err=$(echo "$conn_err" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      timestamp=$(echo "$timestamp" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+      if [ "$current_dash_status" -eq 200 ]; then
+        current_dash_success_rate=100
+      else
+        current_dash_success_rate=0
+      fi
+      
+      # Write the DASHBOARD-ONLY row
+      # All panel-specific fields are 0 or ''
+      # All aggregate fields (26-30) are 0
+      local row
+      row=$(printf "\"%s\",\"%s\",\"%s\",%s,%s,\"%s\",%s,%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" \
+        "$test_id" "$timestamp" "$current_dash_name" "$current_dash_response_time" \
+        0 "" "$current_dash_status" "$current_dash_success_rate" \
+        0 0 0 \
+        "$time_range" "$vus" "$vus" "$iterations" "$segnum" "$duration_str" \
+        "$current_dash_throughput" "$current_dash_err4xx" "$current_dash_err5xx" "$current_dash_conn_err" \
+        0 0 0 0 0 \
+        0 0 0 0 0
+      )
+      
       echo "$row" >> "$temp_csv"
       echo "$row" >> "$DASHBOARD_CSV"
-      echo "🔹 Dashboard: $dashboard_name — ${response_time}ms (status=$status)" >> "$SUMMARY_FILE"
+      echo "🔹 Dashboard: $current_dash_name — ${current_dash_response_time}ms (status=$current_dash_status)" >> "$SUMMARY_FILE"
 
     # --- Panel ---
-    elif [[ "$line" == *"[PANEL_DATA]"* ]]; then
-      timestamp=$(echo "$line" | sed -E 's/.*time="([^"]+)".*/\1/')
-      timestamp=$(date -d "${timestamp}" "+%Y-%m-%d %H:%M:%S")
-      dashboard_name=$(echo "$line" | sed -E 's/.*dashboard=([^|]+).*/\1/' | xargs)
-      panel_id=$(echo "$line" | sed -E 's/.*panel_id=([0-9]+).*/\1/')
-      panel_name=$(echo "$line" | sed -E 's/.*panel_name=([^|]+).*/\1/' | xargs)
-      status=$(echo "$line" | sed -E 's/.*status=([0-9]+).*/\1/')
-      response_time=$(echo "$line" | sed -E 's/.*response_time=([0-9.]+)ms.*/\1/')
-      panel_throughput=$(echo "$line" | sed -E 's/.*throughput=([0-9.]+)req\/sec.*/\1/')
-      panel_error_4xx=$(echo "$line" | sed -E 's/.*error_4xx=([0-9]+).*/\1/')
-      panel_error_5xx=$(echo "$line" | sed -E 's/.*error_5xx=([0-9]+).*/\1/')
-      contribution=$(echo "$line" | sed -E 's/.*contribution=([0-9.]+)%.*/\1/')
+    # Format: [PANEL_DATA] | Timestamp | Dashboard Name | Panel ID | Panel Name | Status | Resp Time | Throughput | 4xx | 5xx | Conn Err | Contribution %
+    elif [[ "$msg_content" == *"[PANEL_DATA]"* ]]; then
+      IFS='|' read -r _ timestamp dash_name panel_id panel_name status resp_time throughput err4xx err5xx conn_err contribution <<< "$msg_content"
 
+      # Clean variables
+      local panel_id=$(echo "$panel_id" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      local panel_name=$(echo "$panel_name" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//') # Clean whitespace
+      local panel_status=$(echo "$status" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      local panel_resp_time=$(echo "$resp_time" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      local panel_throughput=$(echo "$throughput" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      local panel_err4xx=$(echo "$err4xx" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      local panel_err5xx=$(echo "$err5xx" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      local panel_conn_err=$(echo "$conn_err" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      local panel_contribution=$(echo "$contribution" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      local timestamp=$(echo "$timestamp" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      
       local panel_success_rate=0
-      if [ "$status" -eq 200 ]; then
+      if [ "$panel_status" -eq 200 ]; then
         panel_success_rate=100
       fi
-
-      row=$(printf "\"%s\",%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" \
-        "$timestamp" "$dashboard_name" "$dashboard_response_time" "$panel_id" "$panel_name" \
-        "" "" "$status" "$panel_success_rate" "$response_time" "$time_range" "$vus" "$vus" "$duration_str" "$segnum" "$iterations" \
-        "" "" "" "" "$panel_throughput" "$panel_error_4xx" "$panel_error_5xx" "0" "$contribution")
-
+      
+      # Write the PANEL row
+      # We use the 'current_dash_*' variables saved from the last dashboard line
+      # All aggregate fields (26-30) are 0
+      local row
+      row=$(printf "\"%s\",\"%s\",\"%s\",%s,%s,\"%s\",%s,%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,\"%s\",%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s" \
+        "$test_id" "$timestamp" "$current_dash_name" "$current_dash_response_time" \
+        "$panel_id" "$panel_name" "$current_dash_status" "$current_dash_success_rate" \
+        "$panel_status" "$panel_success_rate" "$panel_resp_time" \
+        "$time_range" "$vus" "$vus" "$iterations" "$segnum" "$duration_str" \
+        "$current_dash_throughput" "$current_dash_err4xx" "$current_dash_err5xx" "$current_dash_conn_err" \
+        "$panel_throughput" "$panel_err4xx" "$panel_err5xx" "$panel_conn_err" "$panel_contribution" \
+        0 0 0 0 0
+      )
+      
       echo "$row" >> "$temp_csv"
       echo "$row" >> "$DASHBOARD_CSV"
-      printf "  - Panel %-3s %-40s: %6.2fms (status: %s)\n" "$panel_id" "$panel_name" "$response_time" "$status" >> "$SUMMARY_FILE"
-
+      printf "   - Panel %-3s %-40s: %6.2fms (status: %s)\n" "$panel_id" "$panel_name" "$panel_resp_time" "$panel_status" >> "$SUMMARY_FILE"
+    
     fi
   done < "$dash_output" # Read from the log file
 
-  # Insert ONLY the temp file
-  if [ -s "$temp_csv" ]; then
+  # Insert ONLY the temp file (if it has data)
+  if [ -s "$temp_csv" ] && [ $(wc -l < "$temp_csv") -gt 1 ]; then
     echo "Inserting dashboard data to ClickHouse..."
     # Read from temp_csv, skipping header
     tail -n +2 "$temp_csv" | \
       kubectl exec -i "$CLICKHOUSE_POD" -n "$CLICKHOUSE_NS" -- \
       clickhouse-client -d "$CLICKHOUSE_DB" --user "$CLICKHOUSE_USER" --password "$CLICKHOUSE_PASS" \
-      -q "INSERT INTO monitoring.k6_results (timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,duration,segment_number,iterations) FORMAT CSV"
+      -q "INSERT INTO monitoring.k6_results (test_id,timestamp,dashboard_name,dashboard_avg_response_time,panel_id,panel_name,dashboard_status,dashboard_success_rate,panel_status,panel_success_rate,panel_avg_response_time,time_range,vus,vus_max,iterations,segment_number,duration,dashboard_throughput,dashboard_error_4xx,dashboard_error_5xx,dashboard_connection_error,panel_throughput,panel_error_4xx,panel_error_5xx,panel_connection_error,panel_contribution_percent,concurrent_users,error_rate,request_rate,p95_response_time,p99_response_time) FORMAT CSV"
   fi
   rm -f "$temp_csv"
 }
@@ -335,28 +393,27 @@ parse_and_insert_dashboard() {
 # EXECUTION START
 # ======================================
 
-# --- SEGMENT 1: Alternate (Login -> Dashboard) ---
-# Logic: Each run is SEGMENT/4.
-# If Seg=2m, Run=30s. (Login 30s -> Dash 30s -> Login 30s -> Dash 30s)
-echo -e "\n=== SEGMENT 1 (Alternate) ==="
-echo "Duration: ${SEGMENT_SECONDS}s | Sub-run: ${DUR_SEG1}s"
+# --- SEGMENT 1: Sequential (Login -> Dashboard) ---
+# Logic: Each run is SEGMENT/2.
+# If Seg=30m, Run=15m. (Login 15m -> Dash 15m)
+echo -e "\n=== SEGMENT 1 (Sequential) ==="
+echo "Duration: ${SEGMENT_SECONDS}s | Sub-run: ${DUR_SEQUENTIAL_RUN}s"
 seg=1
 seg_start=$(date +%s)
 elapsed=0
 iter=0
 
 while [ "$elapsed" -lt "$SEGMENT_SECONDS" ]; do
-  # Safety check: if remaining time is less than sub-run duration, break
   remaining=$(( SEGMENT_SECONDS - elapsed ))
-  if [ "$remaining" -lt "$DUR_SEG1" ]; then
-    echo "Segment 1 time ending, moving to next segment."
+  if [ "$remaining" -lt "$DUR_SEQUENTIAL_RUN" ]; then
+    echo "Segment 1 time ending."
     break
   fi
 
   tr="${TIME_RANGES[$(( iter % ${#TIME_RANGES[@]} ))]}"
-  
-  run_k6 "login.js" "$tr" "$VUS" "$DUR_SEG1" "seg${seg}_iter${iter}_login" "$seg"
-  run_k6 "multi_dashboard_test.js" "$tr" "$VUS" "$DUR_SEG1" "seg${seg}_iter${iter}_dashboard" "$seg"
+
+  run_k6 "login.js" "$tr" "$VUS" "$DUR_SEQUENTIAL_RUN" "seg${seg}_iter${iter}_login_seq" "$seg"
+  run_k6 "multi_dashboard_test.js" "$tr" "$VUS" "$DUR_SEQUENTIAL_RUN" "seg${seg}_iter${iter}_dash_seq" "$seg"
 
   iter=$((iter + 1))
   elapsed=$(( $(date +%s) - seg_start ))
@@ -364,9 +421,9 @@ done
 
 # --- SEGMENT 2: Parallel (Login + Dashboard) ---
 # Logic: Run parallely for the FULL segment duration.
-# If Seg=2m, we run 2m Parallel.
+# If Seg=30m, we run 30m Parallel.
 echo -e "\n=== SEGMENT 2 (Parallel) ==="
-echo "Duration: ${SEGMENT_SECONDS}s | Sub-run: ${DUR_SEG2}s"
+echo "Duration: ${SEGMENT_SECONDS}s | Sub-run: ${DUR_PARALLEL_RUN}s"
 seg=2
 seg_start=$(date +%s)
 elapsed=0
@@ -385,9 +442,9 @@ while [ "$elapsed" -lt "$SEGMENT_SECONDS" ]; do
   tr="${TIME_RANGES[$(( iter % ${#TIME_RANGES[@]} ))]}"
   
   echo "Launching Parallel Tests..."
-  run_k6 "login.js" "$tr" "$PAR_VUS" "$DUR_SEG2" "seg${seg}_iter${iter}_login_par" "$seg" &
+  run_k6 "login.js" "$tr" "$PAR_VUS" "$DUR_PARALLEL_RUN" "seg${seg}_iter${iter}_login_par" "$seg" &
   pid1=$!
-  run_k6 "multi_dashboard_test.js" "$tr" "$PAR_VUS" "$DUR_SEG2" "seg${seg}_iter${iter}_dash_par" "$seg" &
+  run_k6 "multi_dashboard_test.js" "$tr" "$PAR_VUS" "$DUR_PARALLEL_RUN" "seg${seg}_iter${iter}_dash_par" "$seg" &
   pid2=$!
   
   wait "$pid1" "$pid2"
@@ -396,31 +453,6 @@ while [ "$elapsed" -lt "$SEGMENT_SECONDS" ]; do
   elapsed=$(( $(date +%s) - seg_start ))
 done
 
-# --- SEGMENT 3: Sequential (Login -> Dashboard) ---
-# Logic: Each run is SEGMENT/2.
-# If Seg=2m, Run=1m. (Login 1m -> Dash 1m)
-echo -e "\n=== SEGMENT 3 (Sequential) ==="
-echo "Duration: ${SEGMENT_SECONDS}s | Sub-run: ${DUR_SEG3}s"
-seg=3
-seg_start=$(date +%s)
-elapsed=0
-iter=0
-
-while [ "$elapsed" -lt "$SEGMENT_SECONDS" ]; do
-  remaining=$(( SEGMENT_SECONDS - elapsed ))
-  if [ "$remaining" -lt "$DUR_SEG3" ]; then
-    echo "Segment 3 time ending."
-    break
-  fi
-
-  tr="${TIME_RANGES[$(( iter % ${#TIME_RANGES[@]} ))]}"
-
-  run_k6 "login.js" "$tr" "$VUS" "$DUR_SEG3" "seg${seg}_iter${iter}_login" "$seg"
-  run_k6 "multi_dashboard_test.js" "$tr" "$VUS" "$DUR_SEG3" "seg${seg}_iter${iter}_dashboard" "$seg"
-
-  iter=$((iter + 1))
-  elapsed=$(( $(date +%s) - seg_start ))
-done
 
 echo -e "\n✅ PHASE 1 COMPLETE."
 echo "Logs: $RESULT_DIR"

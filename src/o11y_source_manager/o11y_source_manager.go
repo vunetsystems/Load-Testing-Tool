@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"vuDataSim/src/node_control"
@@ -39,6 +40,7 @@ type O11ySourceManager struct {
 	configsDir   string
 	maxEPSConfig MaxEPSConfig
 	mainConfig   MainConfig
+	mu           sync.RWMutex
 }
 
 // MaxEPSConfig represents the maximum EPS configuration for each o11y source
@@ -252,6 +254,9 @@ func (osm *O11ySourceManager) LoadMaxEPSConfig() error {
 
 // LoadMainConfig loads the main configuration from conf.d/conf.yml
 func (osm *O11ySourceManager) LoadMainConfig() error {
+	osm.mu.Lock()
+	defer osm.mu.Unlock()
+
 	configPath := "src/migrate/conf.d/conf.yml"
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		return fmt.Errorf("main config file not found: %s", configPath)
@@ -283,6 +288,9 @@ func (osm *O11ySourceManager) GetAvailableSources() []string {
 
 // GetEnabledSources returns a list of currently enabled o11y sources
 func (osm *O11ySourceManager) GetEnabledSources() []string {
+	osm.mu.RLock()
+	defer osm.mu.RUnlock()
+
 	var sources []string
 	for sourceName, config := range osm.mainConfig.IncludeModuleDirs {
 		if config.Enabled {
@@ -436,6 +444,9 @@ func (osm *O11ySourceManager) calculateProportionalDistribution(selectedSources 
 // applyEPSDistribution applies the calculated EPS distribution to source configurations
 // applyEPSDistribution applies the calculated EPS distribution to source configurations
 func (osm *O11ySourceManager) applyEPSDistribution(sourceEPSMap map[string]int) error {
+	osm.mu.Lock()
+	defer osm.mu.Unlock()
+
 	log.Printf("DEBUG: Starting applyEPSDistribution with %d sources", len(sourceEPSMap))
 	log.Printf("DEBUG: Current IncludeModuleDirs before processing has %d entries", len(osm.mainConfig.IncludeModuleDirs))
 
@@ -604,6 +615,7 @@ func (osm *O11ySourceManager) updateSourceConfig(sourceName string, numUniqKey i
 
 // saveMainConfig saves the main configuration to its YAML file.
 // NOTE: This approach is more robust but will remove comments and reformat the file.
+// NOTE: This method assumes the caller has already acquired the appropriate lock.
 func (osm *O11ySourceManager) saveMainConfig() error {
 	configPath := "src/migrate/conf.d/conf.yml"
 	log.Printf("DEBUG: Attempting to save main config to %s", configPath)
@@ -665,6 +677,9 @@ func (osm *O11ySourceManager) saveMainConfig() error {
 
 // calculateCurrentEPS calculates the current total EPS across all enabled sources
 func (osm *O11ySourceManager) calculateCurrentEPS() int {
+	osm.mu.RLock()
+	defer osm.mu.RUnlock()
+
 	totalEPS := 0
 	for sourceName, config := range osm.mainConfig.IncludeModuleDirs {
 		if config.Enabled {
@@ -710,6 +725,9 @@ func (osm *O11ySourceManager) loadSourceConfig(sourceName string) (*SourceConfig
 
 // getSourceEPSBreakdown returns detailed EPS breakdown for all sources
 func (osm *O11ySourceManager) getSourceEPSBreakdown() map[string]SourceEPSInfo {
+	osm.mu.RLock()
+	defer osm.mu.RUnlock()
+
 	breakdown := make(map[string]SourceEPSInfo)
 
 	for sourceName, config := range osm.mainConfig.IncludeModuleDirs {
@@ -840,6 +858,9 @@ func (osm *O11ySourceManager) GetSourceDetails(sourceName string) (*SourceEPSInf
 
 // EnableSource enables a specific o11y source
 func (osm *O11ySourceManager) EnableSource(sourceName string) error {
+	osm.mu.Lock()
+	defer osm.mu.Unlock()
+
 	if _, exists := osm.maxEPSConfig.MaxEPS[sourceName]; !exists {
 		return fmt.Errorf("source not found: %s", sourceName)
 	}
@@ -854,6 +875,9 @@ func (osm *O11ySourceManager) EnableSource(sourceName string) error {
 
 // DisableSource disables a specific o11y source
 func (osm *O11ySourceManager) DisableSource(sourceName string) error {
+	osm.mu.Lock()
+	defer osm.mu.Unlock()
+
 	if _, exists := osm.maxEPSConfig.MaxEPS[sourceName]; !exists {
 		return fmt.Errorf("source not found: %s", sourceName)
 	}
@@ -873,11 +897,17 @@ func (osm *O11ySourceManager) GetMaxEPSConfig() map[string]int {
 
 // GetSourceEPSBreakdown returns detailed EPS breakdown for all sources (public method)
 func (osm *O11ySourceManager) GetSourceEPSBreakdown() map[string]SourceEPSInfo {
+	osm.mu.RLock()
+	defer osm.mu.RUnlock()
+
 	return osm.getSourceEPSBreakdown()
 }
 
 // CalculateCurrentEPS calculates the current total EPS across all enabled sources (public method)
 func (osm *O11ySourceManager) CalculateCurrentEPS() int {
+	osm.mu.RLock()
+	defer osm.mu.RUnlock()
+
 	return osm.calculateCurrentEPS()
 }
 

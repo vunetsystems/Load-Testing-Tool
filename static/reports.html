@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Load Test Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+              "text-light-primary": "#101922",
+              "text-dark-primary": "#f6f7f8",
+              "text-light-secondary": "#606a74",
+              "text-dark-secondary": "#9aa6b3",
+              "border-light": "#e3e7ec",
+              "border-dark": "#2a3641",
+              "surface-light": "#ffffff",
+              "surface-dark": "#1a2530",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary">
+<div class="relative flex flex-col h-screen w-full overflow-hidden">
+<!-- Sticky Header -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-border-light dark:border-border-dark px-6 py-3 bg-surface-light dark:bg-surface-dark shadow-sm z-20 shrink-0">
+<div class="flex items-center gap-3">
+<div class="text-primary size-6">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h1 class="text-lg font-bold tracking-tight">Load Test Dashboard</h1>
+</div>
+<div class="flex gap-2">
+<div class="flex gap-3">
+  <!-- Back Button -->
+  <button 
+    id="back-to-dashboard-btn" 
+    class="flex items-center justify-center gap-2 px-4 py-2.5
+           rounded-xl bg-primary/10 text-primary font-medium
+           border border-primary/20 shadow-sm
+           hover:bg-primary hover:text-white hover:shadow-md
+           transition-all duration-200">
+    <span class="material-symbols-outlined">arrow_back</span>
+    <span class="hidden sm:inline">Back to Dashboard</span>
+  </button>
+
+  <!-- Download Button -->
+  <button
+    id="download-pdf-btn"
+    class="flex items-center justify-center gap-2 px-4 py-2.5
+           rounded-xl bg-green-500 text-white font-medium
+           shadow-sm hover:bg-green-600 hover:shadow-md
+           transition-all duration-200 disabled:bg-gray-300 disabled:text-gray-600
+           disabled:cursor-not-allowed"
+    disabled>
+    <span class="material-symbols-outlined">download</span>
+    <span class="hidden sm:inline">Download Report</span>
+  </button>
+
+  <!-- Analyze Bugs Button -->
+  <button
+    id="analyze-bugs-btn"
+    class="flex items-center justify-center gap-2 px-4 py-2.5
+           rounded-xl bg-orange-500 text-white font-medium
+           shadow-sm hover:bg-orange-600 hover:shadow-md
+           transition-all duration-200 disabled:bg-gray-300 disabled:text-gray-600
+           disabled:cursor-not-allowed"
+    disabled>
+    <span class="material-symbols-outlined">bug_report</span>
+    <span class="hidden sm:inline">Analyze Bugs</span>
+  </button>
+</div>
+
+</div>
+</header>
+<!-- Slide Toggle Tab -->
+
+<!-- Main Content Area -->
+<main class="flex flex-1 overflow-hidden">
+<div class="flex-1 flex flex-col items-center justify-center p-4 md:p-8 overflow-y-auto" id="main-content">
+<!-- Empty State -->
+<div class="flex flex-col items-center gap-4 text-center" id="empty-state">
+<div class="flex items-center justify-center size-24 bg-primary/10 rounded-full text-primary">
+<span class="material-symbols-outlined !text-5xl">description</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<p class="text-lg font-bold tracking-tight">Select a report to view its details</p>
+<p class="text-sm text-text-light-secondary dark:text-text-dark-secondary max-w-sm">Choose a report from the side panel to begin. The selected HTML report will be displayed here.</p>
+</div>
+</div>
+<!-- Iframe for report -->
+<iframe class="w-full h-full border-0 hidden" id="report-iframe" src=""></iframe>
+</div>
+<!-- Slide-in Drawer (Right Side) - Active State -->
+<aside id="reports-drawer"
+       class="absolute inset-y-0 left-0 z-30 flex h-full w-full max-w-sm
+              flex-col border-r border-border-light dark:border-border-dark 
+              bg-surface-light dark:bg-surface-dark shadow-xl
+              transition-transform duration-300 ease-in-out
+              -translate-x-full pointer-events-auto">
+                 <!-- Keep it hidden initially -->
+ 
+<div class="flex flex-col h-full">
+<!-- Drawer Header -->
+<div class="flex items-center justify-between p-4 border-b border-border-light dark:border-border-dark">
+<div class="flex flex-col">
+<h2 class="text-base font-medium">Reports</h2>
+<p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Select a report to view</p>
+</div>
+
+
+</div>
+<!-- Search Bar -->
+<div class="p-4 border-b border-border-light dark:border-border-dark">
+<label class="flex flex-col w-full">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-11 bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus-within:ring-2 focus-within:ring-primary">
+<div class="text-text-light-secondary dark:text-text-dark-secondary flex items-center justify-center pl-3">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden text-sm font-normal text-text-light-primary dark:text-text-dark-primary focus:outline-0 focus:ring-0 border-none bg-transparent h-full placeholder:text-text-light-secondary dark:placeholder:text-text-dark-secondary px-2" placeholder="Search reports..." id="search-input" value=""/>
+</div>
+</label>
+</div>
+<!-- Scrollable List of Reports -->
+<div class="flex-1 overflow-y-auto p-2" id="reports-list">
+<!-- Loading state -->
+<div id="reports-loading" class="flex flex-col items-center justify-center py-8">
+<div class="flex items-center gap-3">
+<div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+<span class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Loading reports...</span>
+</div>
+</div>
+<!-- Error state -->
+<div id="reports-error" class="hidden flex flex-col items-center justify-center py-8">
+<span class="material-symbols-outlined text-4xl text-red-500 mb-2">error</span>
+<p class="text-sm text-red-600 mb-2">Failed to load reports</p>
+<button id="retry-load-reports" class="px-3 py-1.5 text-xs rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors">
+Retry
+</button>
+</div>
+<!-- Reports container -->
+<nav id="reports-nav" class="flex flex-col gap-1 hidden">
+<!-- Reports will be loaded dynamically here -->
+</nav>
+</div>
+</div>
+</aside>
+<!-- Arrow always stays outside drawer -->
+<div id="drawer-toggle-tab"
+     class="fixed top-1/2 -translate-y-1/2 pointer-events-auto
+            bg-primary text-white px-2 py-3 rounded-r-lg shadow-md
+            cursor-pointer z-50 flex items-center transition-all duration-300">
+    <span class="material-symbols-outlined">chevron_right</span>
+</div>
+
+</main>
+
+<!-- Modal for Bug Analysis -->
+<div id="bugs-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+  <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+    <div class="flex items-center justify-between p-6 border-b border-border-light dark:border-border-dark">
+      <h3 class="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">Bug Analysis Results</h3>
+      <button id="close-modal-btn" class="text-text-light-secondary dark:text-text-dark-secondary hover:text-text-light-primary dark:hover:text-text-dark-primary p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div id="modal-content" class="p-6 overflow-y-auto max-h-[75vh]">
+      <!-- Violations will be displayed here -->
+    </div>
+  </div>
+</div>
+
+<script>
+// Global variables
+let allReports = [];
+
+// Load reports dynamically from API
+async function loadReports() {
+    const loadingEl = document.getElementById('reports-loading');
+    const errorEl = document.getElementById('reports-error');
+    const navEl = document.getElementById('reports-nav');
+
+    // Show loading state
+    loadingEl.classList.remove('hidden');
+    errorEl.classList.add('hidden');
+    navEl.classList.add('hidden');
+
+    try {
+        const response = await fetch('/api/reports/combined');
+        const data = await response.json();
+
+        if (data.success && data.reports) {
+            allReports = data.reports;
+            renderReports(data.reports);
+
+            // Hide loading, show nav
+            loadingEl.classList.add('hidden');
+            navEl.classList.remove('hidden');
+        } else {
+            throw new Error('Invalid response format');
+        }
+    } catch (error) {
+        console.error('Failed to load reports:', error);
+        loadingEl.classList.add('hidden');
+        errorEl.classList.remove('hidden');
+    }
+}
+
+// Render reports in the navigation
+function renderReports(reports) {
+    const navEl = document.getElementById('reports-nav');
+    navEl.innerHTML = '';
+
+    if (reports.length === 0) {
+        navEl.innerHTML = '<p class="text-sm text-text-light-secondary dark:text-text-dark-secondary p-3">No reports found</p>';
+        return;
+    }
+
+    reports.forEach(report => {
+        const link = document.createElement('a');
+        link.className = 'flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors report-link';
+        link.href = '#';
+        link.setAttribute('data-file', report.filename);
+        link.innerHTML = `
+            <span class="material-symbols-outlined">description</span>
+            <p class="text-sm font-medium">${report.displayName}</p>
+        `;
+
+        link.addEventListener('click', handleReportClick);
+        navEl.appendChild(link);
+    });
+}
+
+// Search functionality
+document.getElementById('search-input').addEventListener('input', function() {
+    const query = this.value.toLowerCase();
+    const filteredReports = allReports.filter(report =>
+        report.displayName.toLowerCase().includes(query) ||
+        report.filename.toLowerCase().includes(query)
+    );
+    renderReports(filteredReports);
+});
+
+// Handle report link clicks
+function handleReportClick(e) {
+    e.preventDefault();
+    const filename = this.getAttribute('data-file');
+    const iframe = document.getElementById('report-iframe');
+    const emptyState = document.getElementById('empty-state');
+    const downloadBtn = document.getElementById('download-pdf-btn');
+
+    // Remove active class from all links
+    document.querySelectorAll('.report-link').forEach(l => l.classList.remove('bg-primary/10', 'text-primary'));
+    // Add active class to clicked link
+    this.classList.add('bg-primary/10', 'text-primary');
+
+    // Load report in iframe
+    iframe.src = `/data/combined_reports/${filename}`;
+    iframe.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+
+    // Enable download and analyze buttons
+    downloadBtn.disabled = false;
+    downloadBtn.setAttribute('data-filename', filename.replace('.html', ''));
+    const analyzeBtn = document.getElementById('analyze-bugs-btn');
+    analyzeBtn.disabled = false;
+}
+
+// Retry loading reports
+document.getElementById('retry-load-reports').addEventListener('click', loadReports);
+
+// Back to dashboard
+document.getElementById('back-to-dashboard-btn').addEventListener('click', function() {
+    window.location.href = '/static/index.html';
+});
+
+const drawer = document.getElementById('reports-drawer');
+const tab = document.getElementById('drawer-toggle-tab');
+
+tab.addEventListener('click', function () {
+    drawer.classList.toggle('-translate-x-full');
+
+    const icon = tab.querySelector('span');
+
+    // Check if drawer is hidden
+    const drawerWidth = drawer.offsetWidth;
+
+    if (drawer.classList.contains('-translate-x-full')) {
+        icon.textContent = 'chevron_right';
+        tab.style.left = "0px";
+    } else {
+        icon.textContent = 'chevron_left';
+        tab.style.left = `${drawerWidth}px`;  // Correct width always
+    }
+
+});
+
+
+
+
+// Download HTML Report Directly
+document.getElementById('download-pdf-btn').addEventListener('click', function () {
+    const filename = this.getAttribute('data-filename') || 'report';
+    const iframe = document.getElementById('report-iframe');
+    const reportUrl = iframe.src;
+
+    if (!reportUrl) {
+        alert("Report not loaded yet. Please select a report.");
+        return;
+    }
+
+    // Create a temporary hidden link and trigger download
+    const link = document.createElement('a');
+    link.href = reportUrl;
+    link.download = `${filename}.html`;  // Force HTML download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
+
+
+
+// Analyze bugs in the selected report
+function analyzeBugs() {
+    const iframe = document.getElementById('report-iframe');
+    if (!iframe.src) {
+        alert('Please select a report first.');
+        return;
+    }
+
+    try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        const violations = extractViolations(doc);
+        showViolationsModal(violations);
+    } catch (error) {
+        console.error('Error analyzing report:', error);
+        alert('Failed to analyze the report. Please ensure the report is fully loaded.');
+    }
+}
+
+// Extract pod data and check for violations
+function extractViolations(doc) {
+    const violations = {
+        resources: { kafka: [], clickhouse: [], pipeline: [] },
+        restarts: { kafka: [], clickhouse: [], pipeline: [] },
+        overall: []
+    };
+
+    // Find the Pod Metrics h2
+    const podMetricsH2 = Array.from(doc.querySelectorAll('h2')).find(h2 => h2.textContent.includes('Pod Metrics'));
+    if (!podMetricsH2) return violations;
+
+    // Iterate through sibling sections
+    let sibling = podMetricsH2.nextElementSibling;
+    while (sibling) {
+        if (sibling.tagName === 'SECTION') {
+            const h2 = sibling.querySelector('h2');
+            if (h2) {
+                let component = '';
+                if (h2.textContent.includes('Kafka') && h2.textContent.includes('Pods')) {
+                    component = 'kafka';
+                } else if (h2.textContent.includes('ClickHouse') && h2.textContent.includes('Pods')) {
+                    component = 'clickhouse';
+                } else if (h2.textContent.includes('Pipeline') && h2.textContent.includes('Pods')) {
+                    component = 'pipeline';
+                }
+
+                if (component) {
+                    const table = sibling.querySelector('table');
+                    if (table) {
+                        const rows = table.querySelectorAll('tbody tr');
+                        rows.forEach(row => {
+                            const cells = row.querySelectorAll('td');
+                            if (cells.length >= 10) { // Pod, CPU Alloc, Min, Avg, Max, MEM Alloc, Min, Avg, Max, Restarts
+                                const podName = cells[0].textContent.trim();
+                                const cpuAvg = parseFloat(cells[3].textContent.trim()) || 0;
+                                const memAvg = parseFloat(cells[7].textContent.trim()) || 0;
+                                const restarts = parseInt(cells[9].textContent.trim()) || 0;
+
+                                const resourceViolations = [];
+                                if (cpuAvg > 70) {
+                                    resourceViolations.push(`CPU Avg: ${cpuAvg}%`);
+                                }
+                                if (memAvg > 70) {
+                                    resourceViolations.push(`MEM Avg: ${memAvg}%`);
+                                }
+
+                                if (resourceViolations.length > 0) {
+                                    violations.resources[component].push(`${podName} → ${resourceViolations.join(', ')}`);
+                                }
+
+                                if (restarts > 1) {
+                                    violations.restarts[component].push(`${podName} → Restarts: ${restarts}`);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        sibling = sibling.nextElementSibling;
+    }
+
+    // Check for lag violations
+    const lagH2 = Array.from(doc.querySelectorAll('h2')).find(h2 => h2.textContent.includes('Lag Metrics'));
+    if (lagH2) {
+        let lagTable = lagH2.nextElementSibling;
+        while (lagTable && lagTable.tagName !== 'TABLE') {
+            lagTable = lagTable.nextElementSibling;
+        }
+        if (lagTable) {
+            const lagRows = lagTable.querySelectorAll('tbody tr');
+            if (lagRows.length > 0) {
+                const lagCells = lagRows[0].querySelectorAll('td');
+                if (lagCells.length >= 2) {
+                    const avgLag = parseFloat(lagCells[1].textContent.trim()) || 0;
+                    if (avgLag > 1000000) {
+                        violations.overall.push(`Lag Avg: ${avgLag}`);
+                    }
+                }
+            }
+        }
+    }
+
+    return violations;
+}
+
+// Show violations in modal
+function showViolationsModal(violations) {
+    const modal = document.getElementById('bugs-modal');
+    const content = document.getElementById('modal-content');
+
+    let html = '';
+    const violationTypes = [
+        { type: 'resources', name: 'Resource Violations', data: violations.resources },
+        { type: 'restarts', name: 'Restart Issues', data: violations.restarts },
+        { type: 'overall', name: 'Lag Issues', data: violations.overall }
+    ];
+
+    let hasViolations = false;
+    violationTypes.forEach(vType => {
+        const components = ['kafka', 'clickhouse', 'pipeline'];
+        if (vType.type === 'overall') {
+            if (violations.overall.length > 0) {
+                hasViolations = true;
+                const count = violations.overall.length;
+                const compId = 'overall-details';
+                html += `
+                    <div class="bg-background-light dark:bg-background-dark p-4 rounded-lg border border-border-light dark:border-border-dark cursor-pointer hover:bg-primary/5 transition-colors" onclick="toggleComponentDetails('${compId}')">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-semibold text-text-light-primary dark:text-text-dark-primary">${vType.name}</span>
+                                <span class="ml-2 px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs rounded-full">${count} issue${count > 1 ? 's' : ''}</span>
+                            </div>
+                            <span class="material-symbols-outlined text-text-light-secondary dark:text-text-dark-secondary transition-transform" id="${compId}-icon">expand_more</span>
+                        </div>
+                        <div id="${compId}" class="hidden mt-3 space-y-2">
+                            ${violations.overall.map(v => `<div class="bg-surface-light dark:bg-surface-dark p-3 rounded border-l-4 border-red-500">${v}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        } else {
+            components.forEach(comp => {
+                if (vType.data[comp].length > 0) {
+                    hasViolations = true;
+                    const count = vType.data[comp].length;
+                    const compId = `${vType.type}-${comp}-details`;
+                    const compName = comp.charAt(0).toUpperCase() + comp.slice(1);
+                    html += `
+                        <div class="bg-background-light dark:bg-background-dark p-4 rounded-lg border border-border-light dark:border-border-dark cursor-pointer hover:bg-primary/5 transition-colors" onclick="toggleComponentDetails('${compId}')">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="font-semibold text-text-light-primary dark:text-text-dark-primary">${compName} ${vType.name}</span>
+                                    <span class="ml-2 px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs rounded-full">${count} issue${count > 1 ? 's' : ''}</span>
+                                </div>
+                                <span class="material-symbols-outlined text-text-light-secondary dark:text-text-dark-secondary transition-transform" id="${compId}-icon">expand_more</span>
+                            </div>
+                            <div id="${compId}" class="hidden mt-3 space-y-2">
+                                ${vType.data[comp].map(v => `<div class="bg-surface-light dark:bg-surface-dark p-3 rounded border-l-4 border-red-500">${v}</div>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+    });
+
+    if (!hasViolations) {
+        html = '<div class="text-center py-8"><span class="material-symbols-outlined text-4xl text-green-500 mb-2">check_circle</span><p class="text-text-light-secondary dark:text-text-dark-secondary font-medium">No violations found.</p></div>';
+    }
+
+    content.innerHTML = html;
+    modal.classList.remove('hidden');
+}
+
+// Toggle component details
+function toggleComponentDetails(compId) {
+    const details = document.getElementById(compId);
+    const icon = document.getElementById(compId + '-icon');
+    if (details.classList.contains('hidden')) {
+        details.classList.remove('hidden');
+        icon.textContent = 'expand_less';
+    } else {
+        details.classList.add('hidden');
+        icon.textContent = 'expand_more';
+    }
+}
+
+// Close modal
+document.getElementById('close-modal-btn').addEventListener('click', () => {
+    document.getElementById('bugs-modal').classList.add('hidden');
+});
+
+// Click outside to close
+document.getElementById('bugs-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'bugs-modal') {
+        document.getElementById('bugs-modal').classList.add('hidden');
+    }
+});
+
+// Analyze bugs button click
+document.getElementById('analyze-bugs-btn').addEventListener('click', analyzeBugs);
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', loadReports);
+
+</script>
+
+</body></html>

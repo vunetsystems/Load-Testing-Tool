@@ -34,7 +34,7 @@ func startTestRunCompletionChecker() {
 	for {
 		select {
 		case <-ticker.C:
-			if err := database.CompleteTimedOutTestRuns(); err != nil {
+			if err := database.CompleteTimedOutTestRuns(handlers.BinaryControl); err != nil {
 				logger.Error().Err(err).Msg("Failed to complete timed out test runs")
 			} else {
 				logger.Debug().Msg("Checked for timed out test runs")
@@ -147,6 +147,8 @@ func main() {
 
 		http.ServeFile(w, r, handlers.StaticDir+"/"+r.URL.Path)
 	})))
+	// Data file serving
+	router.PathPrefix("/data/").Handler(http.StripPrefix("/data/", http.FileServer(http.Dir("./data/"))))
 	router.HandleFunc("/", serveStatic)
 
 	// WebSocket endpoint
@@ -210,6 +212,7 @@ func main() {
 	api.HandleFunc("/clickhouse/kafka-network", handlers.HandleAPIGetKafkaNetwork).Methods("GET")
 	api.HandleFunc("/clickhouse/pod-monitoring", handlers.HandleAPIGetPodMonitoring).Methods("GET")
 	api.HandleFunc("/clickhouse/pod-trend", handlers.HandleAPIGetPodTrendData).Methods("GET")
+	api.HandleFunc("/clickhouse/k6-test-ids", handlers.HandleAPIGetK6TestIDs).Methods("GET")
 	// Removed pod-metrics endpoint
 
 	// Removed Kubernetes API endpoints
@@ -236,6 +239,8 @@ func main() {
 	api.HandleFunc("/k6/stop", handlers.HandleAPIStopK6Test).Methods("POST")
 	api.HandleFunc("/k6/logs", handlers.HandleAPIGetK6Logs).Methods("GET")
 	api.HandleFunc("/k6/run-combined", handlers.HandleAPIRunCombinedScript).Methods("POST")
+	api.HandleFunc("/k6/start-summarizer", handlers.HandleAPIStartK6Summarizer).Methods("POST")
+	api.HandleFunc("/k6/dropdown", handlers.HandleAPIGetK6RunsForDropdown).Methods("GET")
 	api.HandleFunc("/k6/next-test-id", handlers.HandleAPIGetNextK6TestID).Methods("GET")
 
 	// Test Run Tracking API endpoints
@@ -247,6 +252,9 @@ func main() {
 	api.HandleFunc("/test-runs/next-id", handlers.HandleAPIGetNextTestID).Methods("GET")
 	// Kafka summarization API endpoint - this is an update for Kafka summarization functionality
 	api.HandleFunc("/test-runs/{id}/kafka-summary", handlers.HandleAPITriggerKafkaSummarization).Methods("POST")
+
+	// Reports API endpoints
+	api.HandleFunc("/reports/combined", handlers.HandleAPIListCombinedReports).Methods("GET")
 
 	// Proxy endpoint for node metrics API - now includes both system and process metrics
 	api.HandleFunc("/proxy/metrics/{name}", handlers.HandleProxyMetrics).Methods("GET")

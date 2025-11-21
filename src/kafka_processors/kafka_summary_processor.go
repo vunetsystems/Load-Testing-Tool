@@ -19,8 +19,8 @@ import (
 	"vuDataSim/src/logger"
 	"vuDataSim/src/pod_processors"
 
-	"gopkg.in/yaml.v3"
 	_ "github.com/mattn/go-sqlite3"
+	"gopkg.in/yaml.v3"
 )
 
 // KafkaStat represents a single Kafka metric data point from ClickHouse
@@ -39,7 +39,6 @@ type ProcessRateStat struct {
 	MinProcessRate float64 `json:"min_process_rate"`
 	AvgProcessRate float64 `json:"avg_process_rate"`
 }
-
 
 // type TopicEntry struct {
 // 	Name string `yaml:"name"`
@@ -248,6 +247,23 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		podDataFound = false
 	}
 
+	// 5. Fetch and compute pod JSON metrics with node
+	podsCpuMap, podsMemoryMap, podRestartsMap, _, err := pod_processors.ProcessPodResourceSummaryWithNode(chClient, testID, startTime, endTime)
+	var podsCpuJSON, podsMemoryJSON, podRestartsJSON string
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process pod JSON metrics: %v", err))
+		podsCpuJSON = ""
+		podsMemoryJSON = ""
+		podRestartsJSON = ""
+	} else {
+		podsCpuBytes, _ := json.Marshal(podsCpuMap)
+		podsMemoryBytes, _ := json.Marshal(podsMemoryMap)
+		podRestartsBytes, _ := json.Marshal(podRestartsMap)
+		podsCpuJSON = string(podsCpuBytes)
+		podsMemoryJSON = string(podsMemoryBytes)
+		podRestartsJSON = string(podRestartsBytes)
+	}
+
 	// 6. Fetch and compute node memory metrics
 	nodeMemoryResult, err := ProcessNodeMemorySummary(chClient, startTime, endTime)
 	if err != nil {
@@ -269,9 +285,23 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		minLag, avgLag, maxLag = 0.0, 0.0, 0.0
 	}
 
+	// 9. Fetch and compute node JSON metrics
+	nodesCpuMap, nodesMemoryMap, _, err := ProcessNodeResourceSummaryJSON(chClient, startTime, endTime)
+	var nodesCpuJSON, nodesMemoryJSON string
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process node JSON metrics: %v", err))
+		nodesCpuJSON = ""
+		nodesMemoryJSON = ""
+	} else {
+		nodesCpuBytes, _ := json.Marshal(nodesCpuMap)
+		nodesMemoryBytes, _ := json.Marshal(nodesMemoryMap)
+		nodesCpuJSON = string(nodesCpuBytes)
+		nodesMemoryJSON = string(nodesMemoryBytes)
+	}
+
 	// 9. Store the summary back to the database
 	processRateSummaryJSON, _ := json.Marshal(processRateSummary) // Added for process rate summary - store in separate column
-	ingestionSummaryJSON, _ := json.Marshal(ingestionEntries) // Added for ingestion summary - store EPS data for ClickHouse tables
+	ingestionSummaryJSON, _ := json.Marshal(ingestionEntries)     // Added for ingestion summary - store EPS data for ClickHouse tables
 
 	// Calculate averages across all sources
 	var avgInputRate, avgOutputRate, peakInputRate, peakOutputRate, minInputRate, minOutputRate float64
@@ -337,7 +367,7 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		    pipeline_pod_cpu_min = ?, pipeline_pod_cpu_avg = ?, pipeline_pod_cpu_max = ?,
 		    pipeline_pod_mem_min = ?, pipeline_pod_mem_avg = ?, pipeline_pod_mem_max = ?,
 		    pipeline_pod_cpu_allocated = ?, pipeline_pod_mem_allocated = ?,
-		    process_rate_summary = ?, ingestion_summary = ?, pipeline_info = ?, -- Added for pipeline info
+		    process_rate_summary = ?, ingestion_summary = ?, pipeline_info = ?, pods_cpu = ?, pods_memory = ?, pod_restarts = ?, nodes_cpu = ?, nodes_memory = ?, -- Added for pod and node JSON metrics
 		    kafka_1_node_mem_min = ?, kafka_1_node_mem_avg = ?, kafka_1_node_mem_max = ?,
 		    kafka_2_node_mem_min = ?, kafka_2_node_mem_avg = ?, kafka_2_node_mem_max = ?,
 		    kafka_3_node_mem_min = ?, kafka_3_node_mem_avg = ?, kafka_3_node_mem_max = ?,
@@ -375,7 +405,7 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		podMetrics.PipelinePodCpuMin, podMetrics.PipelinePodCpuAvg, podMetrics.PipelinePodCpuMax,
 		podMetrics.PipelinePodMemMin, podMetrics.PipelinePodMemAvg, podMetrics.PipelinePodMemMax,
 		podMetrics.PipelinePodCpuAllocated, podMetrics.PipelinePodMemAllocated,
-		string(processRateSummaryJSON), string(ingestionSummaryJSON), pipelineInfoJSON,
+		string(processRateSummaryJSON), string(ingestionSummaryJSON), pipelineInfoJSON, podsCpuJSON, podsMemoryJSON, podRestartsJSON, nodesCpuJSON, nodesMemoryJSON,
 		nodeMemoryResult.Kafka1Min, nodeMemoryResult.Kafka1Avg, nodeMemoryResult.Kafka1Max,
 		nodeMemoryResult.Kafka2Min, nodeMemoryResult.Kafka2Avg, nodeMemoryResult.Kafka2Max,
 		nodeMemoryResult.Kafka3Min, nodeMemoryResult.Kafka3Avg, nodeMemoryResult.Kafka3Max,
@@ -472,8 +502,10 @@ func fetchKafkaMetrics(chClient *clickhouse.ClickHouseClient, topics []string, s
 // IngestionEPSEntry represents a single ingestion EPS entry for a table
 // Added for ingestion summary functionality
 type IngestionEPSEntry struct {
-	Table string  `json:"table"`
+	Table  string  `json:"table"`
 	AvgEPS float64 `json:"avg_eps"`
+	MinEPS float64 `json:"min_eps"`
+	MaxEPS float64 `json:"max_eps"`
 }
 
 // fetchIngestionEPS fetches ingestion EPS metrics from ClickHouse system.part_log for given tables and time range
@@ -493,7 +525,9 @@ func fetchIngestionEPS(chClient *clickhouse.ClickHouseClient, tables []string, s
 	query := fmt.Sprintf(`
 		SELECT
 			`+"`table`"+`,
-			avg(eps) AS avg_eps
+			avg(eps) AS avg_eps,
+			min(eps) AS min_eps,
+			max(eps) AS max_eps
 		FROM
 		(
 			SELECT
@@ -528,7 +562,7 @@ func fetchIngestionEPS(chClient *clickhouse.ClickHouseClient, tables []string, s
 	for rows.Next() {
 		var entry IngestionEPSEntry
 
-		if err := rows.Scan(&entry.Table, &entry.AvgEPS); err != nil {
+		if err := rows.Scan(&entry.Table, &entry.AvgEPS, &entry.MinEPS, &entry.MaxEPS); err != nil {
 			logger.LogWarning("System", "IngestionEPSFetcher", fmt.Sprintf("Failed to scan ingestion EPS row: %v", err))
 			continue
 		}
@@ -618,19 +652,18 @@ ORDER BY `+"`app-id`"+``, appIDStr, start.Format("2006-01-02 15:04:05.000000000"
 	return processRates, nil
 }
 
-
 // computeKafkaStats computes statistics for a single topic
 // This is an update for Kafka summarization functionality
 func computeKafkaStats(stats []KafkaStat, topicName string) map[string]interface{} {
 	if len(stats) == 0 {
 		return map[string]interface{}{
-			"topic":               topicName,
-			"avg_msgs_per_sec":    0.0,
-			"max_msgs_per_sec":    0.0,
-			"min_msgs_per_sec":    0.0,
-			"stdev_msgs_per_sec":  0.0,
-			"anomaly_spikes":      0,
-			"total_messages":      0.0,
+			"topic":              topicName,
+			"avg_msgs_per_sec":   0.0,
+			"max_msgs_per_sec":   0.0,
+			"min_msgs_per_sec":   0.0,
+			"stdev_msgs_per_sec": 0.0,
+			"anomaly_spikes":     0,
+			"total_messages":     0.0,
 		}
 	}
 
@@ -674,13 +707,13 @@ func computeKafkaStats(stats []KafkaStat, topicName string) map[string]interface
 	totalMessages := maxCount
 
 	return map[string]interface{}{
-		"topic":               topicName,
-		"avg_msgs_per_sec":    mean,
-		"max_msgs_per_sec":    max,
-		"min_msgs_per_sec":    min,
-		"stdev_msgs_per_sec":  stdev,
-		"anomaly_spikes":      anomalies,
-		"total_messages":      totalMessages,
+		"topic":              topicName,
+		"avg_msgs_per_sec":   mean,
+		"max_msgs_per_sec":   max,
+		"min_msgs_per_sec":   min,
+		"stdev_msgs_per_sec": stdev,
+		"anomaly_spikes":     anomalies,
+		"total_messages":     totalMessages,
 	}
 }
 
@@ -778,7 +811,6 @@ func computeKafkaStatsMulti(stats []KafkaStat, topicNames []string) map[string]i
 		"output_efficiency_pct": 0.0, // will be computed by caller
 	}
 }
-
 
 // ifaceToFloat64 safely converts a variety of numeric interface{} values to float64
 func ifaceToFloat64(v interface{}) float64 {

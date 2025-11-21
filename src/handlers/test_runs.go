@@ -8,15 +8,15 @@ import (
 
 	"vuDataSim/src/clickhouse"
 	"vuDataSim/src/database"
+	"vuDataSim/src/kafka_processors"
+	"vuDataSim/src/logger"
 	"vuDataSim/src/models"
+
 	"github.com/gorilla/mux"
 )
 
 // Import kafka_summary_processor for new summarization functionality
 // This is an update for Kafka summarization functionality
-import (
-	"vuDataSim/src/kafka_processors"
-)
 
 // HandleAPIStartTestRun handles POST /api/test-runs/start
 // This endpoint creates a new test run record in the database
@@ -57,7 +57,7 @@ func HandleAPIStartTestRun(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create test run record
-	testRun, err := database.CreateTestRun(req.TargetEPS, req.O11ySources, req.TimeoutSeconds)
+	testRun, err := database.CreateTestRun(req.TestName, req.TargetEPS, req.O11ySources, req.TimeoutSeconds)
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
 			Success: false,
@@ -215,6 +215,7 @@ func HandleAPIGetNextTestID(w http.ResponseWriter, r *http.Request) {
 // HandleAPIGetTestRunsForDropdown handles GET /api/test-runs/dropdown
 // This endpoint returns simplified test run data for dropdown selection
 func HandleAPIGetTestRunsForDropdown(w http.ResponseWriter, r *http.Request) {
+	logger.LogWithNode("System", "TestRuns", "Received request for test runs dropdown", "info")
 	testRuns, err := database.GetAllTestRuns()
 	if err != nil {
 		SendJSONResponse(w, http.StatusInternalServerError, APIResponse{
@@ -224,9 +225,12 @@ func HandleAPIGetTestRunsForDropdown(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logger.LogWithNode("System", "TestRuns", fmt.Sprintf("Found %d test runs for dropdown", len(testRuns)), "debug")
+
 	// Create simplified response for dropdown
 	type TestRunOption struct {
 		TestID    string `json:"test_id"`
+		TestName  string `json:"test_name,omitempty"`
 		StartTime string `json:"start_time"`
 		EndTime   string `json:"end_time,omitempty"`
 		Duration  string `json:"duration,omitempty"`
@@ -236,8 +240,9 @@ func HandleAPIGetTestRunsForDropdown(w http.ResponseWriter, r *http.Request) {
 	var options []TestRunOption
 	for _, testRun := range testRuns {
 		option := TestRunOption{
-			TestID: testRun.TestID,
-			Status: testRun.Status,
+			TestID:   testRun.TestID,
+			TestName: testRun.TestName,
+			Status:   testRun.Status,
 		}
 
 		// Format times as RFC3339 strings

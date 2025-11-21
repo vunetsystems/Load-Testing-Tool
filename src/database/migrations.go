@@ -11,7 +11,7 @@ func RunMigrations() error {
 	createTableSQL := `
 	CREATE TABLE IF NOT EXISTS test_runs (
 		test_id TEXT PRIMARY KEY,
-		test_id TEXT PRIMARY KEY,
+		test_name TEXT,
 		target_eps INTEGER NOT NULL,
 		start_time DATETIME NOT NULL,
 		end_time DATETIME NULL,
@@ -57,6 +57,7 @@ func RunMigrations() error {
 	createK6RunsTableSQL := `
 	CREATE TABLE IF NOT EXISTS k6_runs (
 		test_id TEXT PRIMARY KEY,
+		test_name TEXT,
 		start_time DATETIME NOT NULL,
 		end_time DATETIME NULL,
 		time_range TEXT NOT NULL,
@@ -86,6 +87,69 @@ func RunMigrations() error {
 		return fmt.Errorf("failed to create k6_runs start_time index: %w", err)
 	}
 
+	// Add test_name column to k6_runs table if it doesn't exist
+	if !columnExists("k6_runs", "test_name") {
+		alterSQL := "ALTER TABLE k6_runs ADD COLUMN test_name TEXT;"
+		_, err = DB.Exec(alterSQL)
+		if err != nil {
+			return fmt.Errorf("failed to add test_name column to k6_runs: %w", err)
+		}
+	}
+
+	// Add duration column to k6_runs table if it doesn't exist
+	if !columnExists("k6_runs", "duration") {
+		alterSQL := "ALTER TABLE k6_runs ADD COLUMN duration TEXT;"
+		_, err = DB.Exec(alterSQL)
+		if err != nil {
+			return fmt.Errorf("failed to add duration column to k6_runs: %w", err)
+		}
+	}
+
+	// Add summarised column to k6_runs table if it doesn't exist
+	if !columnExists("k6_runs", "summarised") {
+		alterSQL := "ALTER TABLE k6_runs ADD COLUMN summarised BOOLEAN DEFAULT FALSE;"
+		_, err = DB.Exec(alterSQL)
+		if err != nil {
+			return fmt.Errorf("failed to add summarised column to k6_runs: %w", err)
+		}
+	}
+
+	// Add k6_summary column to k6_runs table if it doesn't exist
+	if !columnExists("k6_runs", "k6_summary") {
+		alterSQL := "ALTER TABLE k6_runs ADD COLUMN k6_summary TEXT;"
+		_, err = DB.Exec(alterSQL)
+		if err != nil {
+			return fmt.Errorf("failed to add k6_summary column to k6_runs: %w", err)
+		}
+	}
+
+	// Add Metrics_Login column to k6_runs table if it doesn't exist
+	if !columnExists("k6_runs", "Metrics_Login") {
+		alterSQL := "ALTER TABLE k6_runs ADD COLUMN Metrics_Login TEXT;"
+		_, err = DB.Exec(alterSQL)
+		if err != nil {
+			return fmt.Errorf("failed to add Metrics_Login column to k6_runs: %w", err)
+		}
+	}
+
+	// Add Overall_Dashboard_Load_Times column to k6_runs table if it doesn't exist
+	if !columnExists("k6_runs", "Overall_Dashboard_Load_Times") {
+		alterSQL := "ALTER TABLE k6_runs ADD COLUMN Overall_Dashboard_Load_Times TEXT;"
+		_, err = DB.Exec(alterSQL)
+		if err != nil {
+			return fmt.Errorf("failed to add Overall_Dashboard_Load_Times column to k6_runs: %w", err)
+		}
+	}
+
+	// Add Panel_Performance_Breakdown column to k6_runs table if it doesn't exist
+	if !columnExists("k6_runs", "Panel_Performance_Breakdown") {
+		alterSQL := "ALTER TABLE k6_runs ADD COLUMN Panel_Performance_Breakdown TEXT;"
+		_, err = DB.Exec(alterSQL)
+		if err != nil {
+			return fmt.Errorf("failed to add Panel_Performance_Breakdown column to k6_runs: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -99,111 +163,119 @@ func runSchemaUpdates() error {
 
 	// Define columns to add with their definitions
 	columnsToAdd := map[string]string{
-		"avg_input_msgs_per_sec":     "REAL DEFAULT 0.0",
-		"avg_output_msgs_per_sec":    "REAL DEFAULT 0.0",
-		"max_input_msgs_per_sec":     "REAL DEFAULT 0.0",
-		"max_output_msgs_per_sec":    "REAL DEFAULT 0.0",
-		"min_input_msgs_per_sec":     "REAL DEFAULT 0.0",
-		"min_output_msgs_per_sec":    "REAL DEFAULT 0.0",
-		"data_loss_pct":              "REAL DEFAULT 0.0",
-		"kafka_summary_generated":    "BOOLEAN DEFAULT FALSE",
-		"pod_resource_check":         "BOOLEAN DEFAULT FALSE",
-		"pod_metrics":                "TEXT",
-		"process_rate_summary":       "TEXT", // JSON summary of process rates per o11y source
-		"ingestion_summary":          "TEXT", // JSON summary of hyperscale ingestion table-wise EPS data
-		"pipeline_info":              "TEXT", // JSON mapping of o11y sources to pipeline details
-		"kafka_1_node_mem_min":       "REAL DEFAULT 0.0",
-		"kafka_1_node_mem_avg":       "REAL DEFAULT 0.0",
-		"kafka_1_node_mem_max":       "REAL DEFAULT 0.0",
-		"kafka_2_node_mem_min":       "REAL DEFAULT 0.0",
-		"kafka_2_node_mem_avg":       "REAL DEFAULT 0.0",
-		"kafka_2_node_mem_max":       "REAL DEFAULT 0.0",
-		"kafka_3_node_mem_min":       "REAL DEFAULT 0.0",
-		"kafka_3_node_mem_avg":       "REAL DEFAULT 0.0",
-		"kafka_3_node_mem_max":       "REAL DEFAULT 0.0",
-		"ch1_node_mem_min":           "REAL DEFAULT 0.0",
-		"ch1_node_mem_avg":           "REAL DEFAULT 0.0",
-		"ch1_node_mem_max":           "REAL DEFAULT 0.0",
-		"ch2_node_mem_min":           "REAL DEFAULT 0.0",
-		"ch2_node_mem_avg":           "REAL DEFAULT 0.0",
-		"ch2_node_mem_max":           "REAL DEFAULT 0.0",
-		"kafka_1_node_cpu_min":       "REAL DEFAULT 0.0",
-		"kafka_1_node_cpu_avg":       "REAL DEFAULT 0.0",
-		"kafka_1_node_cpu_max":       "REAL DEFAULT 0.0",
-		"kafka_2_node_cpu_min":       "REAL DEFAULT 0.0",
-		"kafka_2_node_cpu_avg":       "REAL DEFAULT 0.0",
-		"kafka_2_node_cpu_max":       "REAL DEFAULT 0.0",
-		"kafka_3_node_cpu_min":       "REAL DEFAULT 0.0",
-		"kafka_3_node_cpu_avg":       "REAL DEFAULT 0.0",
-		"kafka_3_node_cpu_max":       "REAL DEFAULT 0.0",
-		"ch1_node_cpu_min":           "REAL DEFAULT 0.0",
-		"ch1_node_cpu_avg":           "REAL DEFAULT 0.0",
-		"ch1_node_cpu_max":           "REAL DEFAULT 0.0",
-		"ch2_node_cpu_min":           "REAL DEFAULT 0.0",
-		"ch2_node_cpu_avg":           "REAL DEFAULT 0.0",
-		"ch2_node_cpu_max":           "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_0_cpu_min": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_0_cpu_avg": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_0_cpu_max": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_0_mem_min": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_0_mem_avg": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_0_mem_max": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_1_cpu_min": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_1_cpu_avg": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_1_cpu_max": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_1_mem_min": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_1_mem_avg": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_1_mem_max": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_2_cpu_min": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_2_cpu_avg": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_2_cpu_max": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_2_mem_min": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_2_mem_avg": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_2_mem_max": "REAL DEFAULT 0.0",
-		"chi_clickhouse_vusmart_0_0_0_cpu_min": "REAL DEFAULT 0.0",
-		"chi_clickhouse_vusmart_0_0_0_cpu_avg": "REAL DEFAULT 0.0",
-		"chi_clickhouse_vusmart_0_0_0_cpu_max": "REAL DEFAULT 0.0",
-		"chi_clickhouse_vusmart_0_0_0_mem_min": "REAL DEFAULT 0.0",
-		"chi_clickhouse_vusmart_0_0_0_mem_avg": "REAL DEFAULT 0.0",
-		"chi_clickhouse_vusmart_0_0_0_mem_max": "REAL DEFAULT 0.0",
-		"chi_clickhouse_vusmart_0_1_0_cpu_min": "REAL DEFAULT 0.0",
-		"chi_clickhouse_vusmart_0_1_0_cpu_avg": "REAL DEFAULT 0.0",
-		"chi_clickhouse_vusmart_0_1_0_cpu_max": "REAL DEFAULT 0.0",
-		"chi_clickhouse_vusmart_0_1_0_mem_min": "REAL DEFAULT 0.0",
-		"chi_clickhouse_vusmart_0_1_0_mem_avg": "REAL DEFAULT 0.0",
-		"chi_clickhouse_vusmart_0_1_0_mem_max": "REAL DEFAULT 0.0",
-		"pipeline_pod_cpu_min": "REAL DEFAULT 0.0",
-		"pipeline_pod_cpu_avg": "REAL DEFAULT 0.0",
-		"pipeline_pod_cpu_max": "REAL DEFAULT 0.0",
-		"pipeline_pod_mem_min": "REAL DEFAULT 0.0",
-		"pipeline_pod_mem_avg": "REAL DEFAULT 0.0",
-		"pipeline_pod_mem_max": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_0_cpu_allocated": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_0_mem_allocated": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_1_cpu_allocated": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_1_mem_allocated": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_2_cpu_allocated": "REAL DEFAULT 0.0",
-		"kafka_cluster_cp_kafka_2_mem_allocated": "REAL DEFAULT 0.0",
+		"test_name":                                  "TEXT",
+		"avg_input_msgs_per_sec":                     "REAL DEFAULT 0.0",
+		"avg_output_msgs_per_sec":                    "REAL DEFAULT 0.0",
+		"max_input_msgs_per_sec":                     "REAL DEFAULT 0.0",
+		"max_output_msgs_per_sec":                    "REAL DEFAULT 0.0",
+		"min_input_msgs_per_sec":                     "REAL DEFAULT 0.0",
+		"min_output_msgs_per_sec":                    "REAL DEFAULT 0.0",
+		"data_loss_pct":                              "REAL DEFAULT 0.0",
+		"kafka_summary_generated":                    "BOOLEAN DEFAULT FALSE",
+		"pod_resource_check":                         "BOOLEAN DEFAULT FALSE",
+		"pod_metrics":                                "TEXT",
+		"process_rate_summary":                       "TEXT", // JSON summary of process rates per o11y source
+		"ingestion_summary":                          "TEXT", // JSON summary of hyperscale ingestion table-wise EPS data
+		"pipeline_info":                              "TEXT", // JSON mapping of o11y sources to pipeline details
+		"kafka_1_node_mem_min":                       "REAL DEFAULT 0.0",
+		"kafka_1_node_mem_avg":                       "REAL DEFAULT 0.0",
+		"kafka_1_node_mem_max":                       "REAL DEFAULT 0.0",
+		"kafka_2_node_mem_min":                       "REAL DEFAULT 0.0",
+		"kafka_2_node_mem_avg":                       "REAL DEFAULT 0.0",
+		"kafka_2_node_mem_max":                       "REAL DEFAULT 0.0",
+		"kafka_3_node_mem_min":                       "REAL DEFAULT 0.0",
+		"kafka_3_node_mem_avg":                       "REAL DEFAULT 0.0",
+		"kafka_3_node_mem_max":                       "REAL DEFAULT 0.0",
+		"ch1_node_mem_min":                           "REAL DEFAULT 0.0",
+		"ch1_node_mem_avg":                           "REAL DEFAULT 0.0",
+		"ch1_node_mem_max":                           "REAL DEFAULT 0.0",
+		"ch2_node_mem_min":                           "REAL DEFAULT 0.0",
+		"ch2_node_mem_avg":                           "REAL DEFAULT 0.0",
+		"ch2_node_mem_max":                           "REAL DEFAULT 0.0",
+		"kafka_1_node_cpu_min":                       "REAL DEFAULT 0.0",
+		"kafka_1_node_cpu_avg":                       "REAL DEFAULT 0.0",
+		"kafka_1_node_cpu_max":                       "REAL DEFAULT 0.0",
+		"kafka_2_node_cpu_min":                       "REAL DEFAULT 0.0",
+		"kafka_2_node_cpu_avg":                       "REAL DEFAULT 0.0",
+		"kafka_2_node_cpu_max":                       "REAL DEFAULT 0.0",
+		"kafka_3_node_cpu_min":                       "REAL DEFAULT 0.0",
+		"kafka_3_node_cpu_avg":                       "REAL DEFAULT 0.0",
+		"kafka_3_node_cpu_max":                       "REAL DEFAULT 0.0",
+		"ch1_node_cpu_min":                           "REAL DEFAULT 0.0",
+		"ch1_node_cpu_avg":                           "REAL DEFAULT 0.0",
+		"ch1_node_cpu_max":                           "REAL DEFAULT 0.0",
+		"ch2_node_cpu_min":                           "REAL DEFAULT 0.0",
+		"ch2_node_cpu_avg":                           "REAL DEFAULT 0.0",
+		"ch2_node_cpu_max":                           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_0_cpu_min":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_0_cpu_avg":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_0_cpu_max":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_0_mem_min":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_0_mem_avg":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_0_mem_max":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_1_cpu_min":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_1_cpu_avg":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_1_cpu_max":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_1_mem_min":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_1_mem_avg":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_1_mem_max":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_2_cpu_min":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_2_cpu_avg":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_2_cpu_max":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_2_mem_min":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_2_mem_avg":           "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_2_mem_max":           "REAL DEFAULT 0.0",
+		"chi_clickhouse_vusmart_0_0_0_cpu_min":       "REAL DEFAULT 0.0",
+		"chi_clickhouse_vusmart_0_0_0_cpu_avg":       "REAL DEFAULT 0.0",
+		"chi_clickhouse_vusmart_0_0_0_cpu_max":       "REAL DEFAULT 0.0",
+		"chi_clickhouse_vusmart_0_0_0_mem_min":       "REAL DEFAULT 0.0",
+		"chi_clickhouse_vusmart_0_0_0_mem_avg":       "REAL DEFAULT 0.0",
+		"chi_clickhouse_vusmart_0_0_0_mem_max":       "REAL DEFAULT 0.0",
+		"chi_clickhouse_vusmart_0_1_0_cpu_min":       "REAL DEFAULT 0.0",
+		"chi_clickhouse_vusmart_0_1_0_cpu_avg":       "REAL DEFAULT 0.0",
+		"chi_clickhouse_vusmart_0_1_0_cpu_max":       "REAL DEFAULT 0.0",
+		"chi_clickhouse_vusmart_0_1_0_mem_min":       "REAL DEFAULT 0.0",
+		"chi_clickhouse_vusmart_0_1_0_mem_avg":       "REAL DEFAULT 0.0",
+		"chi_clickhouse_vusmart_0_1_0_mem_max":       "REAL DEFAULT 0.0",
+		"pipeline_pod_cpu_min":                       "REAL DEFAULT 0.0",
+		"pipeline_pod_cpu_avg":                       "REAL DEFAULT 0.0",
+		"pipeline_pod_cpu_max":                       "REAL DEFAULT 0.0",
+		"pipeline_pod_mem_min":                       "REAL DEFAULT 0.0",
+		"pipeline_pod_mem_avg":                       "REAL DEFAULT 0.0",
+		"pipeline_pod_mem_max":                       "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_0_cpu_allocated":     "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_0_mem_allocated":     "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_1_cpu_allocated":     "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_1_mem_allocated":     "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_2_cpu_allocated":     "REAL DEFAULT 0.0",
+		"kafka_cluster_cp_kafka_2_mem_allocated":     "REAL DEFAULT 0.0",
 		"chi_clickhouse_vusmart_0_0_0_cpu_allocated": "REAL DEFAULT 0.0",
 		"chi_clickhouse_vusmart_0_0_0_mem_allocated": "REAL DEFAULT 0.0",
 		"chi_clickhouse_vusmart_0_1_0_cpu_allocated": "REAL DEFAULT 0.0",
 		"chi_clickhouse_vusmart_0_1_0_mem_allocated": "REAL DEFAULT 0.0",
-		"pipeline_pod_cpu_allocated": "REAL DEFAULT 0.0",
-		"pipeline_pod_mem_allocated": "REAL DEFAULT 0.0",
-		"min_lag":              "REAL DEFAULT 0.0",
-		"avg_lag":              "REAL DEFAULT 0.0",
-		"max_lag":              "REAL DEFAULT 0.0",
-		"kafka_specs":          "TEXT", // JSON specs of input/output topic partitions and replication factors
-		"kafka_1_node_cpu_total": "REAL DEFAULT 0.0",
-		"kafka_1_node_mem_total": "REAL DEFAULT 0.0",
-		"kafka_2_node_cpu_total": "REAL DEFAULT 0.0",
-		"kafka_2_node_mem_total": "REAL DEFAULT 0.0",
-		"kafka_3_node_cpu_total": "REAL DEFAULT 0.0",
-		"kafka_3_node_mem_total": "REAL DEFAULT 0.0",
-		"ch1_node_cpu_total":   "REAL DEFAULT 0.0",
-		"ch1_node_mem_total":   "REAL DEFAULT 0.0",
-		"ch2_node_cpu_total":   "REAL DEFAULT 0.0",
-		"ch2_node_mem_total":   "REAL DEFAULT 0.0",
+		"pipeline_pod_cpu_allocated":                 "REAL DEFAULT 0.0",
+		"pipeline_pod_mem_allocated":                 "REAL DEFAULT 0.0",
+		"traefik_cpu_allocated":                      "REAL DEFAULT 0.0",
+		"traefik_mem_allocated":                      "REAL DEFAULT 0.0",
+		"min_lag":                                    "REAL DEFAULT 0.0",
+		"avg_lag":                                    "REAL DEFAULT 0.0",
+		"max_lag":                                    "REAL DEFAULT 0.0",
+		"kafka_specs":                                "TEXT", // JSON specs of input/output topic partitions and replication factors
+		"kafka_1_node_cpu_total":                     "REAL DEFAULT 0.0",
+		"kafka_1_node_mem_total":                     "REAL DEFAULT 0.0",
+		"kafka_2_node_cpu_total":                     "REAL DEFAULT 0.0",
+		"kafka_2_node_mem_total":                     "REAL DEFAULT 0.0",
+		"kafka_3_node_cpu_total":                     "REAL DEFAULT 0.0",
+		"kafka_3_node_mem_total":                     "REAL DEFAULT 0.0",
+		"ch1_node_cpu_total":                         "REAL DEFAULT 0.0",
+		"ch1_node_mem_total":                         "REAL DEFAULT 0.0",
+		"ch2_node_cpu_total":                         "REAL DEFAULT 0.0",
+		"ch2_node_mem_total":                         "REAL DEFAULT 0.0",
+		"pods_cpu":                                   "TEXT", // JSON string for pod CPU metrics with node_name
+		"pods_memory":                                "TEXT", // JSON string for pod memory metrics with node_name
+		"pod_restarts":                               "TEXT", // JSON string for pod restart metrics
+		"nodes_cpu":                                  "JSON", // JSON data for node CPU metrics
+		"nodes_memory":                               "JSON", // JSON data for node memory metrics
 	}
 
 	for name, def := range columnsToAdd {
@@ -232,7 +304,6 @@ func runSchemaUpdates() error {
 
 	// Drop removed columns if they exist
 	columnsToDrop := []string{
-		"test_name",
 		"total_input_msgs",
 		"total_output_msgs",
 		"lag_ms_avg",

@@ -202,9 +202,10 @@ class PodMonitoringManager {
             option.value = testRun.test_id;
 
             // Format display text
+            const name = testRun.test_name || 'Unnamed Test';
             const startTime = new Date(testRun.start_time).toLocaleString();
             const status = testRun.status.charAt(0).toUpperCase() + testRun.status.slice(1);
-            let displayText = `${testRun.test_id} - ${status} (${startTime})`;
+            let displayText = `${name} - ${status} (${startTime})`;
 
             if (testRun.end_time) {
                 const endTime = new Date(testRun.end_time).toLocaleString();
@@ -545,10 +546,15 @@ renderPodTable(pods) {
             this.showTrendLoading();
             console.log('Fetching trend data for pod:', this.selectedPodForTrend, 'in namespace:', this.selectedNamespace, 'test_id:', this.selectedTestID);
 
-            let url = `/api/clickhouse/pod-trend?namespace=${this.selectedNamespace}&pod=${this.selectedPodForTrend}&hours=24`;
+            const params = new URLSearchParams({
+                namespace: this.selectedNamespace,
+                pod: this.selectedPodForTrend,
+                hours: 24
+            });
             if (this.selectedTestID) {
-                url += `&test_id=${this.selectedTestID}`;
+                params.append('test_id', this.selectedTestID);
             }
+            const url = `/api/clickhouse/pod-trend?${params.toString()}`;
 
             const response = await fetch(url);
             console.log('Trend API response status:', response.status);

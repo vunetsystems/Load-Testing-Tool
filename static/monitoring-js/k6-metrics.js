@@ -29,12 +29,20 @@ class K6MonitoringManager {
         // Sorting properties for login table
         this.loginSortColumn = null;
         this.loginSortDirection = 'asc';
+        // Test run filtering
+        this.testRuns = [];
+        this.selectedTestRun = null;
+        this.isTestFiltered = false;
     }
 
     // Initialize K6 monitoring
     async initialize() {
         console.log('Initializing K6 monitoring...');
         this.attachEventListeners();
+
+        // Load test runs for dropdown
+        await this.fetchTestRuns();
+
         await this.fetchK6MaxVus();
         await this.fetchK6Data();
         await this.fetchK6DashboardData();
@@ -93,6 +101,22 @@ class K6MonitoringManager {
             });
         }
 
+        // Test run dropdown event listeners
+        const testRunDropdown = document.getElementById('k6-test-run-dropdown');
+        const clearTestFilterBtn = document.getElementById('k6-clear-test-filter');
+
+        if (testRunDropdown) {
+            testRunDropdown.addEventListener('change', (event) => {
+                this.onTestRunChange(event.target.value);
+            });
+        }
+
+        if (clearTestFilterBtn) {
+            clearTestFilterBtn.addEventListener('click', () => {
+                this.clearTestFilter();
+            });
+        }
+
         // Pagination buttons
         const prevBtn = document.getElementById('k6-prev-btn');
         const nextBtn = document.getElementById('k6-next-btn');
@@ -103,7 +127,7 @@ class K6MonitoringManager {
                     this.currentPage--;
                     this.displayCurrentPage();
                     this.updateChart(); // Update chart when page changes
-                }
+                }   
             });
         }
 
@@ -194,6 +218,9 @@ class K6MonitoringManager {
             if (this.currentDashboardFilter && this.currentDashboardFilter !== 'all') {
                 params.append('dashboard', this.currentDashboardFilter);
             }
+            if (this.isTestFiltered && this.selectedTestRun) {
+                params.append('test_id', this.selectedTestRun.test_id);
+            }
             const url = `/api/clickhouse/k6-results${params.toString() ? '?' + params.toString() : ''}`;
             const response = await fetch(url);
             if (!response.ok) {
@@ -204,7 +231,7 @@ class K6MonitoringManager {
             if (result.success && result.data) {
                 this.k6Data = result.data;
                 this.lastUpdate = new Date();
-                console.log('K6 monitoring data updated:', this.k6Data.length, 'items');
+                console.log('K6 monitoring data updated:', this.k6Data.length, 'items, isTestFiltered:', this.isTestFiltered);
                 console.log('Dashboard filter:', this.currentDashboardFilter);
                 console.log('API URL:', url);
                 this.updateLastUpdateTime();
@@ -606,7 +633,7 @@ class K6MonitoringManager {
         if (!this.filteredData.length) {
             const emptyRow = document.createElement('tr');
             emptyRow.innerHTML = `
-                <td colspan="7" class="px-4 py-8 text-center text-text-secondary-light dark:text-text-secondary-dark">
+                <td colspan="8" class="px-4 py-8 text-center text-text-secondary-light dark:text-text-secondary-dark">
                     No results match the current filters
                 </td>
             `;
@@ -633,6 +660,7 @@ class K6MonitoringManager {
             row.innerHTML = `
                 <td class="px-4 py-3 text-sm">${timestamp}</td>
                 <td class="px-4 py-3 text-sm font-medium">${item.no_of_users}</td>
+                <td class="px-4 py-3 text-sm">${item.test_id || 'N/A'}</td>
                 <td class="px-4 py-3 text-sm">${item.time_filter}</td>
                 <td class="px-4 py-3 text-sm">${item.panel_name}</td>
                 <td class="px-4 py-3 text-sm">${item.dashboard_name}</td>
@@ -752,7 +780,12 @@ class K6MonitoringManager {
         try {
             this.showDashboardLoading();
 
-            const response = await fetch('/api/clickhouse/k6-dashboard-results');
+            let apiUrl = '/api/clickhouse/k6-dashboard-results';
+            if (this.isTestFiltered && this.selectedTestRun) {
+                apiUrl += `?test_id=${encodeURIComponent(this.selectedTestRun.test_id)}`;
+            }
+
+            const response = await fetch(apiUrl);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -760,7 +793,7 @@ class K6MonitoringManager {
             const result = await response.json();
             if (result.success && result.data) {
                 this.k6DashboardData = result.data;
-                console.log('K6 dashboard data updated:', this.k6DashboardData);
+                console.log('K6 dashboard data updated:', this.k6DashboardData, 'isTestFiltered:', this.isTestFiltered);
                 this.renderDashboardTable();
                 this.hideDashboardLoading();
             } else {
@@ -785,7 +818,7 @@ class K6MonitoringManager {
         if (!this.k6DashboardData.length) {
             const emptyRow = document.createElement('tr');
             emptyRow.innerHTML = `
-                <td colspan="6" class="px-4 py-8 text-center text-text-secondary-light dark:text-text-secondary-dark">
+                <td colspan="7" class="px-4 py-8 text-center text-text-secondary-light dark:text-text-secondary-dark">
                     No dashboard results available
                 </td>
             `;
@@ -815,6 +848,7 @@ class K6MonitoringManager {
             row.innerHTML = `
                 <td class="px-4 py-3 text-sm">${timestamp}</td>
                 <td class="px-4 py-3 text-sm font-medium">${item.no_of_users}</td>
+                <td class="px-4 py-3 text-sm">${item.test_id || 'N/A'}</td>
                 <td class="px-4 py-3 text-sm">${item.time_filter}</td>
                 <td class="px-4 py-3 text-sm">${item.dashboard_status}</td>
                 <td class="px-4 py-3 text-sm">${item.dashboard_name}</td>
@@ -935,7 +969,12 @@ class K6MonitoringManager {
         try {
             this.showLoginLoading();
 
-            const response = await fetch('/api/clickhouse/k6-login-results');
+            let apiUrl = '/api/clickhouse/k6-login-results';
+            if (this.isTestFiltered && this.selectedTestRun) {
+                apiUrl += `?test_id=${encodeURIComponent(this.selectedTestRun.test_id)}`;
+            }
+
+            const response = await fetch(apiUrl);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -943,7 +982,7 @@ class K6MonitoringManager {
             const result = await response.json();
             if (result.success && result.data) {
                 this.k6LoginData = result.data;
-                console.log('K6 login data updated:', this.k6LoginData);
+                console.log('K6 login data updated:', this.k6LoginData, 'isTestFiltered:', this.isTestFiltered);
                 this.renderLoginTable();
                 this.hideLoginLoading();
             } else {
@@ -968,7 +1007,7 @@ class K6MonitoringManager {
         if (!this.k6LoginData.length) {
             const emptyRow = document.createElement('tr');
             emptyRow.innerHTML = `
-                <td colspan="4" class="px-4 py-8 text-center text-text-secondary-light dark:text-text-secondary-dark">
+                <td colspan="5" class="px-4 py-8 text-center text-text-secondary-light dark:text-text-secondary-dark">
                     No login test results available
                 </td>
             `;
@@ -998,6 +1037,7 @@ class K6MonitoringManager {
             row.innerHTML = `
                 <td class="px-4 py-3 text-sm">${timestamp}</td>
                 <td class="px-4 py-3 text-sm font-medium">${item.no_of_users}</td>
+                <td class="px-4 py-3 text-sm">${item.test_id || 'N/A'}</td>
                 <td class="px-4 py-3 text-sm">${item.test_name}</td>
                 <td class="px-4 py-3 text-sm">
                     <span class="font-medium ${responseTimeClass}">
@@ -1282,6 +1322,109 @@ class K6MonitoringManager {
                 }
             }
         }
+    }
+
+    // Fetch K6 runs for dropdown
+    async fetchTestRuns() {
+        try {
+            const response = await fetch('/api/k6/dropdown');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.success && result.data) {
+                this.testRuns = result.data;
+                this.populateTestRunDropdown();
+                console.log('K6 runs loaded for K6:', this.testRuns.length);
+            } else {
+                console.error('Failed to fetch K6 runs:', result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching K6 runs:', error);
+        }
+    }
+
+    // Populate dropdown with test runs
+    populateTestRunDropdown() {
+        const dropdown = document.getElementById('k6-test-run-dropdown');
+        if (!dropdown) return;
+
+        // Clear existing options except the first one
+        dropdown.innerHTML = '<option value="">Select a test run...</option>';
+
+        // Add test run options
+        this.testRuns.forEach(testRun => {
+            const option = document.createElement('option');
+            option.value = testRun.test_id;
+            option.textContent = `${testRun.test_id} (${testRun.duration})`;
+            dropdown.appendChild(option);
+        });
+    }
+
+    // Handle test run selection
+    onTestRunChange(testId) {
+        console.log('K6 onTestRunChange called with testId:', testId);
+        if (!testId) {
+            this.clearTestFilter();
+            return;
+        }
+
+        const selectedTest = this.testRuns.find(test => test.test_id === testId);
+        if (selectedTest) {
+            this.selectedTestRun = selectedTest;
+            this.isTestFiltered = true;
+
+            // Update UI
+            this.updateSelectedTestInfo();
+
+            // Refresh data with test_id filter
+            console.log('Fetching K6 data for test run:', selectedTest.test_id);
+            this.refresh();
+
+            console.log('Test run selected for K6:', selectedTest);
+        } else {
+            console.error('Test run not found for ID:', testId);
+        }
+    }
+
+    // Clear test filter
+    clearTestFilter() {
+        this.selectedTestRun = null;
+        this.isTestFiltered = false;
+
+        // Reset dropdown
+        const dropdown = document.getElementById('k6-test-run-dropdown');
+        if (dropdown) {
+            dropdown.value = '';
+        }
+
+        // Hide test info
+        const infoDiv = document.getElementById('k6-selected-test-info');
+        if (infoDiv) {
+            infoDiv.classList.add('hidden');
+        }
+
+        // Refresh data without filter
+        this.refresh();
+
+        console.log('Test filter cleared for K6');
+    }
+
+    // Update selected test info display
+    updateSelectedTestInfo() {
+        const infoDiv = document.getElementById('k6-selected-test-info');
+        const nameSpan = document.getElementById('k6-selected-test-name');
+        const rangeSpan = document.getElementById('k6-selected-test-range');
+        const durationSpan = document.getElementById('k6-selected-test-duration');
+
+        if (!infoDiv || !this.selectedTestRun) return;
+
+        nameSpan.textContent = this.selectedTestRun.test_name || 'Unnamed Test';
+        rangeSpan.textContent = `${new Date(this.selectedTestRun.start_time).toLocaleString()} - ${new Date(this.selectedTestRun.end_time).toLocaleString()}`;
+        durationSpan.textContent = this.selectedTestRun.duration;
+
+        infoDiv.classList.remove('hidden');
     }
 
     // Get current data

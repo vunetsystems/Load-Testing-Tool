@@ -14,13 +14,22 @@ type KafkaPodMemoryData struct {
 	PodName     string    `json:"pod_name"`
 }
 
-// GetKafkaPodMemoryData fetches Kafka pod memory usage data from the last 6 hours
-func GetKafkaPodMemoryData(ctx context.Context) ([]KafkaPodMemoryData, error) {
+// GetKafkaPodMemoryData fetches Kafka pod memory usage data from the last 6 hours or specified time range
+func GetKafkaPodMemoryData(ctx context.Context, timeRange *TimeRange) ([]KafkaPodMemoryData, error) {
 	if monitoringDBClient == nil {
 		return nil, fmt.Errorf("Monitoring ClickHouse client not initialized")
 	}
 
-	query := `
+	var timeCondition string
+	if timeRange != nil {
+		timeCondition = fmt.Sprintf("timestamp >= '%s' AND timestamp <= '%s'",
+			timeRange.From.Format("2006-01-02 15:04:05"),
+			timeRange.To.Format("2006-01-02 15:04:05"))
+	} else {
+		timeCondition = "timestamp >= now() - toIntervalHour(6)"
+	}
+
+	query := fmt.Sprintf(`
 		SELECT
 			toTimeZone(timestamp, 'Asia/Kolkata') AS "Timestamp (IST)",
 			memory_working_set_bytes AS "Memory Usage",
@@ -28,12 +37,12 @@ func GetKafkaPodMemoryData(ctx context.Context) ([]KafkaPodMemoryData, error) {
 		FROM
 			kubernetes_pod_container_data
 		WHERE
-			timestamp >= now() - toIntervalHour(6)
-			AND pod_name LIKE 'kafka-cluster-cp-kafka-%'
-			AND pod_name NOT LIKE 'kafka-cluster-cp-kafka-connect-%'
+			%s
+			AND pod_name LIKE 'kafka-cluster-cp-kafka-%%'
+			AND pod_name NOT LIKE 'kafka-cluster-cp-kafka-connect-%%'
 			AND memory_working_set_bytes > 100031104
 		ORDER BY "Timestamp (IST)", pod_name
-	`
+	`, timeCondition)
 
 	rows, err := monitoringDBClient.Client.Query(ctx, query)
 	if err != nil {

@@ -7,12 +7,14 @@ import (
 	"fmt"
 	"time"
 
+	"vuDataSim/src/bin_control"
 	"vuDataSim/src/models"
+
 	"github.com/google/uuid"
 )
 
 // CreateTestRun creates a new test run record
-func CreateTestRun(targetEPS int, o11ySources []string, timeoutSeconds int) (*models.TestRun, error) {
+func CreateTestRun(testName string, targetEPS int, o11ySources []string, timeoutSeconds int) (*models.TestRun, error) {
 	// Generate a new UUID for the test ID
 	testID := uuid.New().String()
 
@@ -25,16 +27,17 @@ func CreateTestRun(targetEPS int, o11ySources []string, timeoutSeconds int) (*mo
 	startTime := time.Now().UTC()
 
 	query := `
-		INSERT INTO test_runs (test_id, target_eps, start_time, o11y_sources, timeout_seconds, status)
-		VALUES (?, ?, ?, ?, ?, 'running')`
+		INSERT INTO test_runs (test_id, test_name, target_eps, start_time, o11y_sources, timeout_seconds, status)
+		VALUES (?, ?, ?, ?, ?, ?, 'running')`
 
-	_, err = DB.Exec(query, testID, targetEPS, startTime, string(sourcesJSON), timeoutSeconds)
+	_, err = DB.Exec(query, testID, testName, targetEPS, startTime, string(sourcesJSON), timeoutSeconds)
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert test run: %w", err)
 	}
 
 	return &models.TestRun{
 		TestID:         testID,
+		TestName:       testName,
 		TargetEPS:      targetEPS,
 		StartTime:      startTime,
 		O11ySources:    o11ySources,
@@ -59,7 +62,7 @@ func StopTestRun(testID string) error {
 // GetTestRun retrieves a specific test run by ID
 func GetTestRun(testID string) (*models.TestRun, error) {
 	query := `
-		SELECT test_id, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
+		SELECT test_id, test_name, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
 			   kafka_1_node_cpu_min, kafka_1_node_cpu_avg, kafka_1_node_cpu_max,
 			   kafka_1_node_mem_min, kafka_1_node_mem_avg, kafka_1_node_mem_max,
 			   kafka_2_node_cpu_min, kafka_2_node_cpu_avg, kafka_2_node_cpu_max,
@@ -86,7 +89,8 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 			   min_output_msgs_per_sec, avg_output_msgs_per_sec, max_output_msgs_per_sec,
 			   min_lag, avg_lag, max_lag,
 			   data_loss_pct, kafka_summary_generated, pod_resource_check,
-			   process_rate_summary, ingestion_summary
+			   process_rate_summary, ingestion_summary, traefik_cpu_allocated, traefik_mem_allocated,
+			   pods_cpu, pods_memory, pod_restarts
 		FROM test_runs WHERE test_id = ?`
 
 	var testRun models.TestRun
@@ -97,6 +101,7 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 
 	err := DB.QueryRow(query, testID).Scan(
 		&testRun.TestID,
+		&testRun.TestName,
 		&testRun.TargetEPS,
 		&testRun.StartTime,
 		&endTime,
@@ -183,6 +188,11 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 		&testRun.PodResourceCheck,
 		&processRateSummary,
 		&ingestionSummary,
+		&testRun.TraefikCpuAllocated,
+		&testRun.TraefikMemAllocated,
+		&testRun.PodsCpu,
+		&testRun.PodsMemory,
+		&testRun.PodRestarts,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -213,7 +223,7 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 // GetAllTestRuns retrieves all test runs ordered by start time descending
 func GetAllTestRuns() ([]*models.TestRun, error) {
 	query := `
-		SELECT test_id, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
+		SELECT test_id, test_name, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
 			   kafka_1_node_cpu_min, kafka_1_node_cpu_avg, kafka_1_node_cpu_max,
 			   kafka_1_node_mem_min, kafka_1_node_mem_avg, kafka_1_node_mem_max,
 			   kafka_2_node_cpu_min, kafka_2_node_cpu_avg, kafka_2_node_cpu_max,
@@ -240,7 +250,8 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			   min_output_msgs_per_sec, avg_output_msgs_per_sec, max_output_msgs_per_sec,
 			   min_lag, avg_lag, max_lag,
 			   data_loss_pct, kafka_summary_generated, pod_resource_check,
-			   process_rate_summary, ingestion_summary
+			   process_rate_summary, ingestion_summary, traefik_cpu_allocated, traefik_mem_allocated,
+			   pods_cpu, pods_memory, pod_restarts
 		FROM test_runs ORDER BY start_time DESC`
 
 	rows, err := DB.Query(query)
@@ -255,10 +266,14 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		var sourcesJSON string
 		var endTime sql.NullTime
 		var processRateSummary sql.NullString // Process rate summary JSON
-		var ingestionSummary sql.NullString // Ingestion summary JSON
+		var ingestionSummary sql.NullString   // Ingestion summary JSON
+		var podsCpu sql.NullString
+		var podsMemory sql.NullString
+		var podRestarts sql.NullString
 
 		err := rows.Scan(
 			&testRun.TestID,
+			&testRun.TestName,
 			&testRun.TargetEPS,
 			&testRun.StartTime,
 			&endTime,
@@ -345,6 +360,11 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			&testRun.PodResourceCheck,
 			&processRateSummary,
 			&ingestionSummary,
+			&testRun.TraefikCpuAllocated,
+			&testRun.TraefikMemAllocated,
+			&podsCpu,
+			&podsMemory,
+			&podRestarts,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan test run: %w", err)
@@ -358,6 +378,15 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		}
 		if ingestionSummary.Valid {
 			testRun.IngestionSummary = ingestionSummary.String // Assign ingestion summary JSON
+		}
+		if podsCpu.Valid {
+			testRun.PodsCpu = podsCpu.String
+		}
+		if podsMemory.Valid {
+			testRun.PodsMemory = podsMemory.String
+		}
+		if podRestarts.Valid {
+			testRun.PodRestarts = podRestarts.String
 		}
 
 		// Parse JSON sources
@@ -395,21 +424,61 @@ func UpdateTestRunStatus(testID string, status string) error {
 }
 
 // CompleteTimedOutTestRuns checks for running test runs that have exceeded their timeout
-// and marks them as completed
-func CompleteTimedOutTestRuns() error {
+// or where no binaries are running, and marks them as completed
+func CompleteTimedOutTestRuns(bc *bin_control.BinaryControl) error {
 	currentTime := time.Now().UTC()
 
-	query := `
-		UPDATE test_runs
-		SET end_time = ?, status = 'completed'
-		WHERE status = 'running'
-		AND datetime(start_time, '+' || timeout_seconds || ' seconds') <= ?
-	`
-
-	_, err := DB.Exec(query, currentTime, currentTime)
+	// Check if any binaries are running
+	statusResp, err := bc.GetAllBinaryStatuses()
 	if err != nil {
-		return fmt.Errorf("failed to complete timed out test runs: %w", err)
+		return fmt.Errorf("failed to get binary statuses: %w", err)
 	}
 
+	anyBinaryRunning := false
+	if statusResp.Success && statusResp.Data != nil {
+		statuses, ok := statusResp.Data.([]bin_control.BinaryStatus)
+		if ok {
+			for _, status := range statuses {
+				if status.Status == "running" {
+					anyBinaryRunning = true
+					break
+				}
+			}
+		}
+	}
+
+	var query string
+	var args []interface{}
+
+	if !anyBinaryRunning {
+		// No binaries running - complete ALL running test runs
+		query = `UPDATE test_runs SET end_time = ?, status = 'completed' WHERE status = 'running'`
+		args = []interface{}{currentTime}
+	} else {
+		// Binaries running - complete only timed-out runs
+		query = `
+			UPDATE test_runs
+			SET end_time = ?, status = 'completed'
+			WHERE status = 'running'
+			AND datetime(start_time, '+' || timeout_seconds || ' seconds') <= ?
+		`
+		args = []interface{}{currentTime, currentTime}
+	}
+
+	_, err = DB.Exec(query, args...)
+	if err != nil {
+		return fmt.Errorf("failed to complete test runs: %w", err)
+	}
+
+	return nil
+}
+
+// UpdateTestRunPodMetrics updates the pods_cpu, pods_memory, and pod_restarts JSON fields for a test run
+func UpdateTestRunPodMetrics(testID string, podsCpu, podsMemory, podRestarts string) error {
+	query := `UPDATE test_runs SET pods_cpu = ?, pods_memory = ?, pod_restarts = ? WHERE test_id = ?`
+	_, err := DB.Exec(query, podsCpu, podsMemory, podRestarts, testID)
+	if err != nil {
+		return fmt.Errorf("failed to update test run pod metrics: %w", err)
+	}
 	return nil
 }

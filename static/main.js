@@ -68,6 +68,7 @@ class VuDataSimManager {
             k6O11ySourcesSelectAll: document.getElementById('k6-o11y-sources-select-all'),
             k6O11ySourcesClearAll: document.getElementById('k6-o11y-sources-clear-all'),
             k6O11ySourcesCount: document.getElementById('k6-o11y-sources-count'),
+            k6TestNameInput: document.getElementById('k6-test-name-input'),
             k6TimeRanges: document.getElementById('k6-time-ranges'),
             k6Vus: document.getElementById('k6-vus'),
             k6Duration: document.getElementById('k6-duration'),
@@ -137,6 +138,7 @@ class VuDataSimManager {
             epsMode: document.getElementById('eps-mode'),
             epsCustomInput: document.getElementById('eps-custom-input'),
             testIdDisplay: document.getElementById('test-id-display'),
+            testNameInput: document.getElementById('test-name-input'),
 
 
             // Node management elements
@@ -197,8 +199,8 @@ class VuDataSimManager {
             addAllClusterNodesBtn: document.getElementById('add-all-cluster-nodes-btn'),
 
             // ClickHouse metrics elements
-            clickHouseMetricsBtn: document.getElementById('clickhouse-metrics-btn'),
-            clickHouseMetricsModal: document.getElementById('clickhouse-metrics-modal'),
+            // clickHouseMetricsBtn: document.getElementById('clickhouse-metrics-btn'),
+            // clickHouseMetricsModal: document.getElementById('clickhouse-metrics-modal'),
             clickHouseModalBackdrop: document.getElementById('clickhouse-modal-backdrop'),
             closeClickHouseModal: document.getElementById('close-clickhouse-modal'),
             refreshClickHouseMetricsBtn: document.getElementById('refresh-clickhouse-metrics-btn'),
@@ -215,7 +217,7 @@ class VuDataSimManager {
             nodeFilterSelect: document.getElementById('node-filter-select'),
 
             // Monitoring button
-            monitoringBtn: document.getElementById('monitoring-btn'),
+            // monitoringBtn: document.getElementById('monitoring-btn'),
 
             // Real-time status
         };
@@ -308,29 +310,29 @@ class VuDataSimManager {
 
 
         // ClickHouse metrics event listeners
-        console.log('ClickHouse Metrics Button element:', this.elements.clickHouseMetricsBtn);
-        console.log('ClickHouse Metrics Modal element:', this.elements.clickHouseMetricsModal);
+        // console.log('ClickHouse Metrics Button element:', this.elements.clickHouseMetricsBtn);
+        // console.log('ClickHouse Metrics Modal element:', this.elements.clickHouseMetricsModal);
 
-        if (this.elements.clickHouseMetricsBtn) {
-            this.elements.clickHouseMetricsBtn.addEventListener('click', () => {
-                console.log('ClickHouse Metrics button clicked!');
-                this.clickHouseMetrics.openClickHouseMetricsModal();
-            });
-        } else {
-            console.error('ClickHouse Metrics button not found!');
-        }
+        // if (this.elements.clickHouseMetricsBtn) {
+        //     this.elements.clickHouseMetricsBtn.addEventListener('click', () => {
+        //         console.log('ClickHouse Metrics button clicked!');
+        //         this.clickHouseMetrics.openClickHouseMetricsModal();
+        //     });
+        // } else {
+        //     console.error('ClickHouse Metrics button not found!');
+        // }
 
-        // Monitoring button event listeners
-        console.log('Monitoring Button element:', this.elements.monitoringBtn);
+        // // Monitoring button event listeners
+        // console.log('Monitoring Button element:', this.elements.monitoringBtn);
 
-        if (this.elements.monitoringBtn) {
-            this.elements.monitoringBtn.addEventListener('click', () => {
-                console.log('Monitoring button clicked!');
-                window.location.href = '/static/monitoring.html';
-            });
-        } else {
-            console.error('Monitoring button not found!');
-        }
+        // if (this.elements.monitoringBtn) {
+        //     this.elements.monitoringBtn.addEventListener('click', () => {
+        //         console.log('Monitoring button clicked!');
+        //         window.location.href = '/static/monitoring.html';
+        //     });
+        // } else {
+        //     console.error('Monitoring button not found!');
+        // }
 
         // Modal event listeners
         this.elements.closeNodeModal?.addEventListener('click', () => this.nodeManagement.closeNodeManagementModal());
@@ -432,6 +434,16 @@ class VuDataSimManager {
             }
         }, 30000); // 30 seconds
 
+        // K6 status updates for button state - Update every 5 seconds
+        setInterval(async () => {
+            try {
+                console.log('Periodic K6 status check for button state...');
+                await this.updateK6ButtonState();
+            } catch (error) {
+                console.error('Error in periodic K6 status check:', error);
+            }
+        }, 5000); // 5 seconds
+
 
         // SSH status updates - Update every hour
         setInterval(() => {
@@ -463,6 +475,8 @@ class VuDataSimManager {
         // Set up WebSocket connection for real-time updates
         this.setupWebSocket();
 
+        // Initial K6 button state update
+        this.updateK6ButtonState();
 
         setInterval(() => {
             this.dashboard.fetchFinalVuDataSimMetrics();
@@ -575,6 +589,33 @@ class VuDataSimManager {
         });
     }
 
+    async updateK6ButtonState() {
+        try {
+            console.log('Checking K6 status for button update...');
+            const response = await this.callAPI('/api/k6/status', 'GET');
+            if (response.success && response.data) {
+                const isRunning = response.data.isRunning;
+                console.log('K6 status received - isRunning:', isRunning);
+                const button = this.elements.startK6TestBtn;
+                if (button) {
+                    if (isRunning) {
+                        button.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Running...</span>';
+                        button.disabled = true;
+                        console.log('K6 button set to running state');
+                    } else {
+                        button.innerHTML = '<span class="material-symbols-outlined">play_arrow</span><span>Start K6 Test</span>';
+                        button.disabled = false;
+                        console.log('K6 button set to ready state');
+                    }
+                }
+            } else {
+                console.warn('K6 status API call failed or returned invalid data');
+            }
+        } catch (error) {
+            console.error('Error updating K6 button state:', error);
+        }
+    }
+
     showNotification(message, type = 'info') {
         // Create notification element
         const notification = document.createElement('div');
@@ -638,6 +679,7 @@ class VuDataSimManager {
     async startK6Test() {
         try {
             // Get values from input fields
+            const testName = this.elements.k6TestNameInput?.value?.trim() || '';
             const timeRangesCsv = this.elements.k6TimeRanges?.value?.trim() || '15m,30m,5m';
             const vus = parseInt(this.elements.k6Vus?.value) || 10;
             const duration = this.elements.k6Duration?.value?.trim() || '60m';
@@ -667,10 +709,11 @@ class VuDataSimManager {
             button.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Running...</span>';
             button.disabled = true;
 
-            console.log('Starting K6 test with parameters:', { timeRangesCsv, vus, duration, o11ySources });
+            console.log('Starting K6 test with parameters:', { testName, timeRangesCsv, vus, duration, o11ySources });
 
             // Call the API to start K6 test (no timeout)
             const response = await this.callAPI('/api/k6/run-combined', 'POST', {
+                testName,
                 timeRangesCsv,
                 vus,
                 duration,
@@ -699,10 +742,8 @@ class VuDataSimManager {
             this.showNotification(`Failed to start K6 test: ${error.message}`, 'error');
 
         } finally {
-            // Re-enable the button and restore original text
-            const button = this.elements.startK6TestBtn;
-            button.innerHTML = '<span class="material-symbols-outlined">play_arrow</span><span>Start K6 Test</span>';
-            button.disabled = false;
+            // Button state will be updated by periodic polling based on actual status
+            // Don't re-enable here as the test might still be running
         }
     }
 
@@ -759,23 +800,16 @@ class VuDataSimManager {
 
             console.log('Starting vuDataSim with sources:', selectedSources, 'EPS:', selectedEPS, 'Timeout:', timeoutSeconds, 'Skip CH Truncate:', skipChTruncate);
 
-            const sourceNameTranslation = {
-                "LinuxMonitor": "Linux Monitor",
-                "MongoDB": "MongoDB",
-                "Mssql": "MSSQL",
-                "Apache": "Apache",
-                "Azure_Firewall": "Azure Firewall",
-                "Azure_Redis_Cache": "Azure Redis Cache",
-                "Traces": "Traces",
-                "K8s": "Kubernetes"
-            };
-            const translatedSources = selectedSources.map(src => sourceNameTranslation[src] || src);
+
+
 
             // Create test run record first - belongs to the test run tracking process
             console.log('Creating test run record...');
+            const testName = this.elements.testNameInput?.value?.trim() || '';
             const testRunData = {
+                test_name: testName,
                 target_eps: selectedEPS,
-                o11y_sources: translatedSources,
+                o11y_sources: selectedSources,
                 timeout_seconds: timeoutSeconds
             };
 

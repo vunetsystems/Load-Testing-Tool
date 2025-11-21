@@ -29,6 +29,7 @@ console.log('initializeMonitoring: KafkaNetworkManager created, calling initiali
 await kafkaNetworkManager.initialize();
 console.log('initializeMonitoring: KafkaNetworkManager initialized');
     realtimeManager = new RealtimeUpdatesManager();
+    window.realtimeManager = realtimeManager;  // Make it globally accessible
     console.log('initializeMonitoring: RealtimeUpdatesManager created, calling initialize...');
     await realtimeManager.initialize();
     console.log('initializeMonitoring: RealtimeUpdatesManager initialized');
@@ -68,7 +69,7 @@ console.log('initializeMonitoring: KafkaNetworkManager initialized');
         if (kafkaButton) {
             kafkaButton.click();
         }
-    }, 100);
+    }, 2000);
 
     console.log('initializeMonitoring: Monitoring dashboard initialized successfully');
 }
@@ -117,6 +118,11 @@ function setupSectionNavigation() {
                 if (realtimeManager && realtimeManager.kafkaManager) {
                     realtimeManager.kafkaManager.onSectionVisible();
                 }
+
+                // Initialize Kafka pod memory chart when performance section becomes visible
+                if (kafkaPodMemoryManager) {
+                    kafkaPodMemoryManager.onSectionVisible();
+                }
             }
 
             // Handle pod monitoring section
@@ -130,12 +136,6 @@ function setupSectionNavigation() {
 
             // Handle k6 monitoring section
             if (section === 'k6-monitoring') {
-            // Handle performance section (Kafka metrics)
-            if (section === 'performance') {
-                if (kafkaPodMemoryManager) {
-                    kafkaPodMemoryManager.refresh();
-                }
-            }
                 if (k6MonitoringManager) {
                     k6MonitoringManager.refresh();
                 } else {
