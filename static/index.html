@@ -67,7 +67,10 @@
                <div class="flex items-center gap-4">
                    <div id="auth-section" class="flex items-center gap-2">
                        <button id="login-btn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Login</button>
-                       <button id="logout-btn" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 hidden">Logout</button>
+                       <button id="logout-btn" class="group flex items-center gap-2 rounded-lg bg-red-500 px-3 py-2 text-white font-medium transition-transform hover:scale-105 active:scale-100 hover:bg-red-600 hidden">
+                           <span class="material-symbols-outlined text-base">logout</span>
+                           <span>Logout</span>
+                       </button>
                        <span id="user-info" class="text-sm text-slate-700 hidden"></span>
                    </div>
                    <div class="flex items-center gap-2" id="node-status-indicators">

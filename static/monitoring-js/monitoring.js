@@ -29,7 +29,7 @@ console.log('initializeMonitoring: KafkaNetworkManager created, calling initiali
 await kafkaNetworkManager.initialize();
 console.log('initializeMonitoring: KafkaNetworkManager initialized');
     realtimeManager = new RealtimeUpdatesManager();
-    window.realtimeManager = realtimeManager;  // Make it globally accessible
+    //window.realtimeManager = realtimeManager;  // Make it globally accessible
     console.log('initializeMonitoring: RealtimeUpdatesManager created, calling initialize...');
     await realtimeManager.initialize();
     console.log('initializeMonitoring: RealtimeUpdatesManager initialized');

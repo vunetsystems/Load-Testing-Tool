@@ -106,7 +106,7 @@ func handleAuthLogout(w http.ResponseWriter, r *http.Request) {
 	delete(session.Values, "user_email")
 	delete(session.Values, "user_name")
 	session.Save(r, w)
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 }
 
 // HandleAuthUser returns current user info (for frontend)
