@@ -1222,7 +1222,7 @@ class VuDataSimManager {
             if (response.authenticated) {
                 document.getElementById('login-btn').style.display = 'none';
                 document.getElementById('logout-btn').style.display = 'inline';
-                document.getElementById('user-info').innerText = `Logged in as ${response.name} (${response.email})`;
+                document.getElementById('user-info').innerText = response.name;
                 document.getElementById('user-info').style.display = 'inline';
             } else {
                 document.getElementById('login-btn').style.display = 'inline';
