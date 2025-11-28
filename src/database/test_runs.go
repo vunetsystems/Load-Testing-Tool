@@ -451,9 +451,9 @@ func CompleteTimedOutTestRuns(bc *bin_control.BinaryControl) error {
 	var args []interface{}
 
 	if !anyBinaryRunning {
-		// No binaries running - complete ALL running test runs
-		query = `UPDATE test_runs SET end_time = ?, status = 'completed' WHERE status = 'running'`
-		args = []interface{}{currentTime}
+		// No binaries running - complete ALL running test runs that have been running for at least 30 seconds
+		query = `UPDATE test_runs SET end_time = ?, status = 'completed' WHERE status = 'running' AND datetime(start_time, '+30 seconds') <= ?`
+		args = []interface{}{currentTime, currentTime}
 	} else {
 		// Binaries running - complete only timed-out runs
 		query = `
