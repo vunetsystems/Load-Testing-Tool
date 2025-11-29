@@ -34,13 +34,23 @@ class KafkaPodMemoryManager {
 
     // Wait for the Kafka manager to be initialized
     async waitForKafkaManager() {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
+            const maxAttempts = 50; // 5 seconds max (50 * 100ms)
+            let attempts = 0;
+
             const checkKafkaManager = () => {
+                attempts++;
+
                 if (window.realtimeManager && window.realtimeManager.kafkaManager && window.realtimeManager.kafkaManager.testRuns) {
                     console.log('KafkaPodMemoryManager: Kafka manager is ready');
                     resolve();
+                } else if (attempts >= maxAttempts) {
+                    console.warn('KafkaPodMemoryManager: Timeout waiting for kafka manager. Continuing without test run dropdown sync.');
+                    resolve(); // Resolve anyway to not block initialization
                 } else {
-                    console.log('KafkaPodMemoryManager: Waiting for kafka manager...');
+                    if (attempts === 1 || attempts % 10 === 0) {
+                        console.log(`KafkaPodMemoryManager: Waiting for kafka manager... (attempt ${attempts}/${maxAttempts})`);
+                    }
                     setTimeout(checkKafkaManager, 100);
                 }
             };
@@ -80,6 +90,9 @@ class KafkaPodMemoryManager {
         if (this.isUpdating) return;
 
         this.isUpdating = true;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
         try {
             this.showLoading();
 
@@ -92,25 +105,40 @@ class KafkaPodMemoryManager {
                 apiUrl += `?start=${encodeURIComponent(startTime)}&end=${encodeURIComponent(endTime)}&test_id=${encodeURIComponent(this.selectedTestRun.test_id)}`;
             }
 
-            const response = await fetch(apiUrl);
+            const response = await fetch(apiUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const result = await response.json();
-            if (result.success && result.data) {
-                this.data = result.data;
+            if (result.success) {
+                // Handle both cases: data present or empty array
+                this.data = result.data || [];
                 this.lastUpdate = new Date();
                 console.log('Kafka pod memory data updated:', this.data.length, 'data points, isTestFiltered:', this.isTestFiltered);
-                this.updateChart();
+
+                if (this.data.length > 0) {
+                    this.updateChart();
+                } else {
+                    console.log('No pod memory data available for selected time range');
+                    this.showEmptyChart();
+                }
                 this.hideLoading();
             } else {
                 console.error('Failed to fetch Kafka pod memory data:', result.message);
-                this.showError('Failed to fetch data from server');
+                this.showError('Failed to fetch data from server: ' + (result.message || 'Unknown error'));
             }
         } catch (error) {
-            console.error('Error fetching Kafka pod memory data:', error);
-            this.showError('Network error while fetching data');
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                console.error('Kafka pod memory fetch timed out after 15 seconds');
+                this.showError('Request timed out. Server may be slow or unreachable.');
+            } else {
+                console.error('Error fetching Kafka pod memory data:', error);
+                this.showError('Network error while fetching data');
+            }
         } finally {
             this.isUpdating = false;
         }
@@ -136,6 +164,20 @@ class KafkaPodMemoryManager {
                 if (selectedTest) {
                     this.selectedTestRun = selectedTest;
                     this.isTestFiltered = true;
+
+                    // Stop auto-update when filtering by test
+                    if (this.updateIntervalId) {
+                        clearInterval(this.updateIntervalId);
+                        this.updateIntervalId = null;
+                        console.log('KafkaPodMemoryManager: Auto-update stopped for test filtering');
+                    }
+
+                    // Initialize chart if not already done
+                    if (!this.chartInstance) {
+                        console.log('KafkaPodMemoryManager: Chart not initialized, initializing now...');
+                        this.initializeChart();
+                    }
+
                     console.log('KafkaPodMemoryManager: Test run selected:', selectedTest.test_id || selectedTest.TestID);
                     this.fetchData();
                 } else {
@@ -372,6 +414,7 @@ class KafkaPodMemoryManager {
         // Clear any existing interval
         if (this.updateIntervalId) {
             clearInterval(this.updateIntervalId);
+            this.updateIntervalId = null;
         }
 
         // Only start auto-update if not in test filter mode
@@ -385,6 +428,19 @@ class KafkaPodMemoryManager {
     // Manual refresh
     async refresh() {
         await this.fetchData();
+    }
+
+    // Cleanup resources
+    destroy() {
+        if (this.updateIntervalId) {
+            clearInterval(this.updateIntervalId);
+            this.updateIntervalId = null;
+        }
+        if (this.chartInstance) {
+            this.chartInstance.dispose();
+            this.chartInstance = null;
+        }
+        console.log('KafkaPodMemoryManager destroyed');
     }
 
     // Handle window resize

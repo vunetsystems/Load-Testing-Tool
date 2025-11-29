@@ -30,7 +30,10 @@ var kafkaHandler, _ = handlers.NewKafkaHandler()
 func startTestRunCompletionChecker() {
 	logger.Info().Msg("Starting test run completion checker")
 
-	ticker := time.NewTicker(10 * time.Second) // Check every 30 seconds
+	// Delay the first check by 30 seconds to allow binaries to start properly
+	time.Sleep(30 * time.Second)
+
+	ticker := time.NewTicker(10 * time.Second) // Check every 10 seconds
 	defer ticker.Stop()
 
 	for {
@@ -117,6 +120,7 @@ func main() {
 	log.Printf("DEBUG: SESSION_SECRET loaded: %s", maskSecret(os.Getenv("SESSION_SECRET")))
 	log.Printf("DEBUG: APP_PORT: %s", os.Getenv("APP_PORT"))
 	log.Printf("DEBUG: STATIC_DIR: %s", os.Getenv("STATIC_DIR"))
+	log.Printf("DEBUG: DISABLE_AUTH: %s", os.Getenv("DISABLE_AUTH"))
 
 	// Initialize session store after loading env
 	sessionStore = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))

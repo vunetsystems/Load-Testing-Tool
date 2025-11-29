@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"time"
 	"vuDataSim/src/handlers"
@@ -31,9 +32,18 @@ func corsMiddleware(next http.Handler) http.Handler {
 	return c.Handler(next)
 }
 
-// AuthMiddleware checks for authentication
+// AuthMiddleware checks for authentication (conditionally based on config)
 func authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check if auth is disabled via environment variable
+		disableAuth := os.Getenv("DISABLE_AUTH")
+		log.Printf("DEBUG: authMiddleware - DISABLE_AUTH env var: '%s'", disableAuth)
+		if disableAuth == "true" {
+			log.Printf("DEBUG: Auth disabled, allowing access to %s", r.URL.Path)
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		session, _ := sessionStore.Get(r, "vuDataSim-session")
 		auth, ok := session.Values["authenticated"].(bool)
 		log.Printf("DEBUG: authMiddleware - URL: %s, authenticated: %v, ok: %v", r.URL.Path, auth, ok)

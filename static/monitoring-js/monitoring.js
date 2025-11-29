@@ -20,39 +20,74 @@ document.addEventListener('DOMContentLoaded', function() {
 async function initializeMonitoring() {
     console.log('initializeMonitoring: Starting monitoring dashboard initialization...');
 
-    // Initialize the real-time updates manager
-    console.log('initializeMonitoring: Creating RealtimeUpdatesManager...');
-// Initialize Kafka network manager
-console.log('initializeMonitoring: Creating KafkaNetworkManager...');
-kafkaNetworkManager = new KafkaNetworkManager();
-console.log('initializeMonitoring: KafkaNetworkManager created, calling initialize...');
-await kafkaNetworkManager.initialize();
-console.log('initializeMonitoring: KafkaNetworkManager initialized');
-    realtimeManager = new RealtimeUpdatesManager();
-    //window.realtimeManager = realtimeManager;  // Make it globally accessible
-    console.log('initializeMonitoring: RealtimeUpdatesManager created, calling initialize...');
-    await realtimeManager.initialize();
-    console.log('initializeMonitoring: RealtimeUpdatesManager initialized');
+    // Initialize the real-time updates manager (CRITICAL - wrap in try-catch)
+    try {
+        console.log('initializeMonitoring: Creating RealtimeUpdatesManager...');
+        realtimeManager = new RealtimeUpdatesManager();
+        window.realtimeManager = realtimeManager;  // Make it globally accessible IMMEDIATELY
+        console.log('initializeMonitoring: RealtimeUpdatesManager created, calling initialize...');
+        await realtimeManager.initialize();
+        console.log('initializeMonitoring: RealtimeUpdatesManager initialized');
 
-    // Initialize pod monitoring manager
-    console.log('initializeMonitoring: Creating PodMonitoringManager...');
-    podMonitoringManager = new PodMonitoringManager();
-    console.log('initializeMonitoring: PodMonitoringManager created, calling initialize...');
-    await podMonitoringManager.initialize();
-    console.log('initializeMonitoring: PodMonitoringManager initialized');
+        // Wait for Kafka manager test runs to load (needed by KafkaPodMemoryManager)
+        if (realtimeManager.kafkaManager) {
+            console.log('initializeMonitoring: Waiting for Kafka test runs to load...');
+            await realtimeManager.kafkaManager.fetchTestRuns();
+            console.log('initializeMonitoring: Kafka test runs loaded');
+        }
+    } catch (error) {
+        console.error('CRITICAL: Failed to initialize realtime manager:', error);
+        showInitializationError('Core monitoring features failed to load. Please refresh the page.');
+        return; // Stop initialization - realtime manager is critical
+    }
 
-    // Initialize K6 monitoring manager
-    console.log('initializeMonitoring: Creating K6MonitoringManager...');
-    k6MonitoringManager = new K6MonitoringManager();
-    console.log('initializeMonitoring: K6MonitoringManager created, calling initialize...');
-    // Initialize Kafka pod memory manager
-    console.log('initializeMonitoring: Creating KafkaPodMemoryManager...');
-    kafkaPodMemoryManager = new KafkaPodMemoryManager();
-    console.log('initializeMonitoring: KafkaPodMemoryManager created, calling initialize...');
-    await kafkaPodMemoryManager.initialize();
-    console.log('initializeMonitoring: KafkaPodMemoryManager initialized');
-    await k6MonitoringManager.initialize();
-    console.log('initializeMonitoring: K6MonitoringManager initialized');
+    // Initialize Kafka network manager (graceful degradation)
+    try {
+        console.log('initializeMonitoring: Creating KafkaNetworkManager...');
+        kafkaNetworkManager = new KafkaNetworkManager();
+        console.log('initializeMonitoring: KafkaNetworkManager created, calling initialize...');
+        await kafkaNetworkManager.initialize();
+        console.log('initializeMonitoring: KafkaNetworkManager initialized');
+    } catch (error) {
+        console.error('Failed to initialize Kafka network manager:', error);
+        // Continue - this is not critical
+    }
+
+    // Initialize Kafka pod memory manager (graceful degradation)
+    try {
+        console.log('initializeMonitoring: Creating KafkaPodMemoryManager...');
+        kafkaPodMemoryManager = new KafkaPodMemoryManager();
+        console.log('initializeMonitoring: KafkaPodMemoryManager created, calling initialize...');
+        await kafkaPodMemoryManager.initialize();
+        console.log('initializeMonitoring: KafkaPodMemoryManager initialized');
+    } catch (error) {
+        console.error('Failed to initialize Kafka pod memory manager:', error);
+        // Continue - this is not critical
+    }
+
+    // Initialize pod monitoring manager (graceful degradation)
+    try {
+        console.log('initializeMonitoring: Creating PodMonitoringManager...');
+        podMonitoringManager = new PodMonitoringManager();
+        console.log('initializeMonitoring: PodMonitoringManager created, calling initialize...');
+        await podMonitoringManager.initialize();
+        console.log('initializeMonitoring: PodMonitoringManager initialized');
+    } catch (error) {
+        console.error('Failed to initialize pod monitoring manager:', error);
+        // Continue - this is not critical
+    }
+
+    // Initialize K6 monitoring manager (graceful degradation)
+    try {
+        console.log('initializeMonitoring: Creating K6MonitoringManager...');
+        k6MonitoringManager = new K6MonitoringManager();
+        console.log('initializeMonitoring: K6MonitoringManager created, calling initialize...');
+        await k6MonitoringManager.initialize();
+        console.log('initializeMonitoring: K6MonitoringManager initialized');
+    } catch (error) {
+        console.error('Failed to initialize K6 monitoring manager:', error);
+        // Continue - this is not critical
+    }
 
     // Update last update timestamp
     updateLastUpdateTime();
@@ -72,6 +107,26 @@ console.log('initializeMonitoring: KafkaNetworkManager initialized');
     }, 2000);
 
     console.log('initializeMonitoring: Monitoring dashboard initialized successfully');
+}
+
+// Show initialization error to user
+function showInitializationError(message) {
+    const mainContent = document.querySelector('main') || document.body;
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg z-50';
+    errorDiv.innerHTML = `
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined">error</span>
+            <div>
+                <div class="font-semibold">Initialization Failed</div>
+                <div class="text-sm">${message}</div>
+            </div>
+        </div>
+    `;
+    mainContent.appendChild(errorDiv);
+
+    // Auto-remove after 10 seconds
+    setTimeout(() => errorDiv.remove(), 10000);
 }
 
 function setupNavigation() {
