@@ -318,6 +318,9 @@ func main() {
 	// Reports API endpoints
 	api.HandleFunc("/reports/combined", handlers.HandleAPIListCombinedReports).Methods("GET")
 
+	// Single API endpoint for starting vuDataSim
+	api.HandleFunc("/start-vudatasim", handlers.HandleAPIStartVuDataSim).Methods("POST")
+
 	// Proxy endpoint for node metrics API - now includes both system and process metrics
 	api.HandleFunc("/proxy/metrics/{name}", handlers.HandleProxyMetrics).Methods("GET")
 
