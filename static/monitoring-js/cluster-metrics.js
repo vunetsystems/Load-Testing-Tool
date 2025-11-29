@@ -6,6 +6,7 @@ class ClusterMetricsManager {
         this.lastUpdate = null;
         this.updateInterval = 30000; // 30 seconds
         this.isUpdating = false;
+        this.updateIntervalId = null; // Track interval ID for cleanup
     }
 
     // Initialize cluster metrics
@@ -20,8 +21,15 @@ class ClusterMetricsManager {
         if (this.isUpdating) return;
 
         this.isUpdating = true;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
         try {
-            const response = await fetch('/api/clickhouse/cluster-metrics');
+            const response = await fetch('/api/clickhouse/cluster-metrics', {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -36,7 +44,12 @@ class ClusterMetricsManager {
                 console.error('Failed to fetch cluster metrics:', result.message);
             }
         } catch (error) {
-            console.error('Error fetching cluster metrics:', error);
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                console.error('Cluster metrics fetch timed out after 15 seconds');
+            } else {
+                console.error('Error fetching cluster metrics:', error);
+            }
         } finally {
             this.isUpdating = false;
         }
@@ -229,7 +242,14 @@ class ClusterMetricsManager {
 
     // Start automatic updates
     startAutoUpdate() {
-        setInterval(() => {
+        // Clear any existing interval
+        if (this.updateIntervalId) {
+            clearInterval(this.updateIntervalId);
+            this.updateIntervalId = null;
+        }
+
+        // Start new interval
+        this.updateIntervalId = setInterval(() => {
             this.fetchClusterMetrics();
         }, this.updateInterval);
     }
@@ -237,6 +257,15 @@ class ClusterMetricsManager {
     // Manual refresh
     async refresh() {
         await this.fetchClusterMetrics();
+    }
+
+    // Cleanup resources
+    destroy() {
+        if (this.updateIntervalId) {
+            clearInterval(this.updateIntervalId);
+            this.updateIntervalId = null;
+        }
+        console.log('ClusterMetricsManager destroyed');
     }
 
     // Get current metrics data

@@ -4,13 +4,14 @@ class KafkaMetricsManager {
     constructor() {
         this.kafkaData = null;
         this.lastUpdate = null;
-        this.updateInterval = 10000; // 10 seconds
+        this.updateInterval = 30000; // 30 seconds (reduced from 10s for production stability)
         this.isUpdating = false;
 
         // In-memory data storage for last 5 minutes
         this.dataBuffer = new Map(); // topic -> array of data points
         this.maxDataAge = 5 * 60 * 1000; // 5 minutes in milliseconds
-        this.maxDataPoints = 100; // Maximum points per topic to prevent memory issues
+        this.maxDataPoints = 50; // Reduced from 100 to 50 to limit memory usage
+        this.maxBufferSize = 1000; // NEW: Max total points across all topics
 
         // ECharts instances
         this.charts = {
@@ -45,6 +46,11 @@ class KafkaMetricsManager {
 
         // Auto-update tracking
         this.updateIntervalId = null;
+
+        // Event listener tracking for cleanup
+        this.boundHandleResize = null;
+        this.boundDocumentClickHandler = null;
+        this.eventListenersAttached = false;
     }
 
     // Initialize Kafka metrics
@@ -59,8 +65,9 @@ class KafkaMetricsManager {
         this.attachChartEventListeners();
         this.attachTestRunEventListeners();
 
-        // Add resize listener for responsive charts
-        window.addEventListener('resize', this.handleResize.bind(this));
+        // Add resize listener for responsive charts - store bound reference
+        this.boundHandleResize = this.handleResize.bind(this);
+        window.addEventListener('resize', this.boundHandleResize);
 
         await this.fetchKafkaMetrics();
         this.startAutoUpdate();
@@ -153,7 +160,13 @@ class KafkaMetricsManager {
 
     // Attach event listeners for chart type buttons
     attachChartEventListeners() {
-        document.addEventListener('click', (event) => {
+        // Prevent duplicate attachment
+        if (this.eventListenersAttached) {
+            return;
+        }
+
+        // Store bound handler for cleanup
+        this.boundDocumentClickHandler = (event) => {
             if (event.target.classList.contains('kafka-chart-type-btn')) {
                 const chartType = event.target.getAttribute('data-chart');
                 const newType = event.target.getAttribute('data-type');
@@ -170,7 +183,10 @@ class KafkaMetricsManager {
                     }
                 });
             }
-        });
+        };
+
+        document.addEventListener('click', this.boundDocumentClickHandler);
+        this.eventListenersAttached = true;
     }
 
     // Attach event listeners for test run dropdown
@@ -193,8 +209,15 @@ class KafkaMetricsManager {
 
     // Fetch test runs for dropdown
     async fetchTestRuns() {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
         try {
-            const response = await fetch('/api/test-runs/dropdown');
+            const response = await fetch('/api/test-runs/dropdown', {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -208,7 +231,12 @@ class KafkaMetricsManager {
                 console.error('Failed to fetch test runs:', result.message);
             }
         } catch (error) {
-            console.error('Error fetching test runs:', error);
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                console.error('Test runs fetch timed out after 15 seconds');
+            } else {
+                console.error('Error fetching test runs:', error);
+            }
         }
     }
 
@@ -246,11 +274,24 @@ class KafkaMetricsManager {
             this.selectedTestRun = selectedTest;
             this.isTestFiltered = true;
 
+            // Stop auto-update when filtering by test
+            if (this.updateIntervalId) {
+                clearInterval(this.updateIntervalId);
+                this.updateIntervalId = null;
+                console.log('Auto-update stopped for test filtering');
+            }
+
             // Clear real-time buffer to avoid mixing with historical data
             this.dataBuffer.clear();
 
             // Update UI
             this.updateSelectedTestInfo();
+
+            // Initialize charts if not already done
+            if (!this.chartsInitialized) {
+                console.log('Charts not initialized, initializing now...');
+                this.initializeCharts();
+            }
 
             // Refresh data with time filter
             console.log('Fetching Kafka metrics for test run:', selectedTest.test_id);
@@ -347,17 +388,26 @@ class KafkaMetricsManager {
             console.log('Kafka metrics API result:', result);
             console.log('Kafka metrics data length:', result.data ? result.data.length : 'no data');
 
-            if (result.success && result.data) {
-                // Store data in buffer for historical tracking
-                this.storeDataInBuffer(result.data);
+            if (result.success) {
+                // Handle both cases: data present or empty array
+                this.kafkaData = result.data || [];
 
-                this.kafkaData = result.data;
+                // Store data in buffer for historical tracking (only if we have data)
+                if (this.kafkaData.length > 0) {
+                    this.storeDataInBuffer(this.kafkaData);
+                }
+
                 this.lastUpdate = new Date();
                 console.log('Kafka metrics updated:', this.kafkaData.length, 'records, isTestFiltered:', this.isTestFiltered);
 
                 // Only update display if charts are initialized (section is visible)
                 if (this.chartsInitialized) {
-                    this.updateKafkaDisplay();
+                    if (this.kafkaData.length > 0) {
+                        this.updateKafkaDisplay();
+                    } else {
+                        console.log('No Kafka metrics data available for selected time range');
+                        this.showEmptyCharts();
+                    }
                 }
             } else {
                 console.error('Failed to fetch Kafka metrics:', result.message);
@@ -407,8 +457,15 @@ class KafkaMetricsManager {
             this.dataBuffer.set(topic, filteredData);
         });
 
-        // Clean up old data periodically (every 100 data points)
-        if (this.dataBuffer.size > 0 && Math.random() < 0.01) {
+        // NEW: Check total buffer size and cleanup if needed
+        let totalPoints = 0;
+        for (const data of this.dataBuffer.values()) {
+            totalPoints += data.length;
+        }
+
+        // If over limit, cleanup immediately (deterministic, not probabilistic)
+        if (totalPoints > this.maxBufferSize) {
+            console.log(`Buffer size ${totalPoints} exceeds limit ${this.maxBufferSize}, cleaning up...`);
             this.cleanupOldData();
         }
     }
@@ -1269,8 +1326,15 @@ class KafkaMetricsManager {
         });
     }
 
-    // Cleanup charts
+    // Cleanup charts and resources
     destroy() {
+        // Clear auto-update interval
+        if (this.updateIntervalId) {
+            clearInterval(this.updateIntervalId);
+            this.updateIntervalId = null;
+        }
+
+        // Dispose all charts
         Object.values(this.charts).forEach(chart => {
             if (chart) {
                 chart.dispose();
@@ -1278,8 +1342,24 @@ class KafkaMetricsManager {
         });
         this.charts = {};
 
-        // Remove resize listener
-        window.removeEventListener('resize', this.handleResize.bind(this));
+        // Remove resize listener using stored reference
+        if (this.boundHandleResize) {
+            window.removeEventListener('resize', this.boundHandleResize);
+            this.boundHandleResize = null;
+        }
+
+        // Remove document click handler
+        if (this.boundDocumentClickHandler) {
+            document.removeEventListener('click', this.boundDocumentClickHandler);
+            this.boundDocumentClickHandler = null;
+            this.eventListenersAttached = false;
+        }
+
+        // Clear data buffers
+        this.dataBuffer.clear();
+        this.kafkaData = null;
+
+        console.log('KafkaMetricsManager destroyed and cleaned up');
     }
 
     // Get current metrics data

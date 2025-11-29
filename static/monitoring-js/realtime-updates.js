@@ -8,6 +8,7 @@ class RealtimeUpdatesManager {
         this.isInitialized = false;
         this.updateInterval = 30000; // 30 seconds
         this.lastUpdate = null;
+        this.updateIntervalId = null; // Track interval ID for cleanup
     }
 
     // Initialize all managers
@@ -99,8 +100,14 @@ class RealtimeUpdatesManager {
             this.initialize();
         }
 
+        // Clear any existing interval
+        if (this.updateIntervalId) {
+            clearInterval(this.updateIntervalId);
+            this.updateIntervalId = null;
+        }
+
         // Set up periodic refresh
-        setInterval(() => {
+        this.updateIntervalId = setInterval(() => {
             this.refreshAll();
         }, this.updateInterval);
     }
@@ -135,30 +142,47 @@ class RealtimeUpdatesManager {
     handleVisibilityChange() {
         if (document.hidden) {
             console.log('Tab hidden, pausing updates');
-            // In a real implementation, you might want to pause updates
+            // Actually pause updates to save resources
+            if (this.updateIntervalId) {
+                clearInterval(this.updateIntervalId);
+                this.updateIntervalId = null;
+            }
         } else {
             console.log('Tab visible, resuming updates');
-            // Refresh data when tab becomes visible
+            // Refresh data immediately when tab becomes visible
             if (this.isInitialized) {
                 this.refreshAll();
+                // Restart periodic updates
+                this.startPeriodicUpdates();
             }
         }
     }
 
     // Clean up resources
     destroy() {
-        if (this.clusterManager) {
-            // Clean up cluster manager if needed
-        }
-        if (this.kafkaManager) {
-            // Clean up kafka manager if needed
-        }
-        if (this.systemHealthManager) {
-            // Clean up system health manager if needed
+        // Clear periodic update interval
+        if (this.updateIntervalId) {
+            clearInterval(this.updateIntervalId);
+            this.updateIntervalId = null;
         }
 
+        // Clean up child managers
+        if (this.clusterManager && typeof this.clusterManager.destroy === 'function') {
+            this.clusterManager.destroy();
+        }
+        if (this.kafkaManager && typeof this.kafkaManager.destroy === 'function') {
+            this.kafkaManager.destroy();
+        }
+        if (this.systemHealthManager && typeof this.systemHealthManager.destroy === 'function') {
+            this.systemHealthManager.destroy();
+        }
+
+        this.clusterManager = null;
+        this.kafkaManager = null;
+        this.systemHealthManager = null;
         this.isInitialized = false;
-        console.log('Real-time monitoring destroyed');
+
+        console.log('Real-time monitoring destroyed and cleaned up');
     }
 }
 
