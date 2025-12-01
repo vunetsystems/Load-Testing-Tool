@@ -276,6 +276,18 @@ func runSchemaUpdates() error {
 		"pod_restarts":                               "TEXT", // JSON string for pod restart metrics
 		"nodes_cpu":                                  "JSON", // JSON data for node CPU metrics
 		"nodes_memory":                               "JSON", // JSON data for node memory metrics
+		"min_input_bytes_out_per_sec":                "REAL DEFAULT 0.0",
+		"max_input_bytes_out_per_sec":                "REAL DEFAULT 0.0",
+		"avg_input_bytes_out_per_sec":                "REAL DEFAULT 0.0",
+		"min_output_bytes_out_per_sec":               "REAL DEFAULT 0.0",
+		"max_output_bytes_out_per_sec":               "REAL DEFAULT 0.0",
+		"avg_output_bytes_out_per_sec":               "REAL DEFAULT 0.0",
+		"min_input_bytes_in_per_sec":                 "REAL DEFAULT 0.0",
+		"max_input_bytes_in_per_sec":                 "REAL DEFAULT 0.0",
+		"avg_input_bytes_in_per_sec":                 "REAL DEFAULT 0.0",
+		"min_output_bytes_in_per_sec":                "REAL DEFAULT 0.0",
+		"max_output_bytes_in_per_sec":                "REAL DEFAULT 0.0",
+		"avg_output_bytes_in_per_sec":                "REAL DEFAULT 0.0",
 	}
 
 	for name, def := range columnsToAdd {
