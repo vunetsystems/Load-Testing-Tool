@@ -299,6 +299,13 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		nodesMemoryJSON = string(nodesMemoryBytes)
 	}
 
+	// 10. Fetch and compute Kafka bytes metrics
+	bytesResult, err := ProcessKafkaBytesSummary(chClient, o11ySources, startTime, endTime)
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process Kafka bytes metrics: %v", err))
+		bytesResult = KafkaBytesResult{} // default to zeros
+	}
+
 	// 9. Store the summary back to the database
 	processRateSummaryJSON, _ := json.Marshal(processRateSummary) // Added for process rate summary - store in separate column
 	ingestionSummaryJSON, _ := json.Marshal(ingestionEntries)     // Added for ingestion summary - store EPS data for ClickHouse tables
@@ -382,7 +389,11 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		    ch1_node_cpu_total = ?, ch2_node_cpu_total = ?,
 		    kafka_1_node_mem_total = ?, kafka_2_node_mem_total = ?, kafka_3_node_mem_total = ?,
 		    ch1_node_mem_total = ?, ch2_node_mem_total = ?,
-		    min_lag = ?, avg_lag = ?, max_lag = ?
+		    min_lag = ?, avg_lag = ?, max_lag = ?,
+		    min_input_bytes_out_per_sec = ?, max_input_bytes_out_per_sec = ?, avg_input_bytes_out_per_sec = ?,
+		    min_output_bytes_out_per_sec = ?, max_output_bytes_out_per_sec = ?, avg_output_bytes_out_per_sec = ?,
+		    min_input_bytes_in_per_sec = ?, max_input_bytes_in_per_sec = ?, avg_input_bytes_in_per_sec = ?,
+		    min_output_bytes_in_per_sec = ?, max_output_bytes_in_per_sec = ?, avg_output_bytes_in_per_sec = ?
 		WHERE test_id = ?;
 	`, avgInputRate, avgOutputRate,
 		peakInputRate, peakOutputRate, minInputRate, minOutputRate,
@@ -421,6 +432,10 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		nodeMemoryResult.Kafka1Total, nodeMemoryResult.Kafka2Total, nodeMemoryResult.Kafka3Total,
 		nodeMemoryResult.Ch1Total, nodeMemoryResult.Ch2Total,
 		minLag, avgLag, maxLag,
+		bytesResult.MinInputBytesOutPerSec, bytesResult.MaxInputBytesOutPerSec, bytesResult.AvgInputBytesOutPerSec,
+		bytesResult.MinOutputBytesOutPerSec, bytesResult.MaxOutputBytesOutPerSec, bytesResult.AvgOutputBytesOutPerSec,
+		bytesResult.MinInputBytesInPerSec, bytesResult.MaxInputBytesInPerSec, bytesResult.AvgInputBytesInPerSec,
+		bytesResult.MinOutputBytesInPerSec, bytesResult.MaxOutputBytesInPerSec, bytesResult.AvgOutputBytesInPerSec,
 		testID)
 	if err != nil {
 		return fmt.Errorf("failed to update test run with summary: %w", err)
