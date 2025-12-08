@@ -33,19 +33,19 @@ process:
   graceful_shutdown_timeout: 10
   remote_timeout: 300
 clickhouse:
-  host: "10.32.6.121"
+  host: "e2e-83-212"
   port: 9000
   database: "vusmart"
   username: "monitoring_read"
   password: "StrongP@assword123"
 monitoring_db:
-  host: "10.32.6.121"
+  host: "e2e-83-212"
   port: 9000
   database: "monitoring"
   username: "monitoring_read"
   password: "StrongP@assword123"
 truncate_db:
-  host: "10.32.6.121"
+  host: "e2e-83-212"
   port: 9000
   database: "vusmart"
   username: "truncate_db"
@@ -64,6 +64,9 @@ truncate_db:
 #   - "164.52.213.181"
 #   - "164.52.213.158"
 #   - "216.48.191.10"
+kubernetes:
+  default_namespace: "vsmaps"
+
 database:
   path: "./data/vudatasim.db"
   max_connections: 10

@@ -3,15 +3,18 @@ import sqlite3
 import pandas as pd
 import json
 import re
+import argparse
 from pathlib import Path
 
 # ===============================
 # CONFIGURATION
 # ===============================
-VUDATASIM_DB = "vudatasim.db"
+# Resolve database path relative to the script's location
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+VUDATASIM_DB = os.path.join(SCRIPT_DIR, "vudatasim.db")
 VUDATASIM_TABLE = "test_runs"
 K6_TABLE = "k6_runs"
-OUTPUT_DIR = "combined_reports"
+OUTPUT_DIR = os.path.join(SCRIPT_DIR, "combined_reports")
 
 # Import the existing report generators
 # Script names: generate_html_reports.py and k6.py
@@ -45,32 +48,68 @@ def normalize_test_name(name):
     
     return name.strip()
 
-def get_test_pairs():
+def get_test_pairs(test_id=None, filter_table='test_runs'):
     """
     Match vudatasim and k6 tests based on normalized names.
     Returns list of tuples: (normalized_name, vudatasim_row, k6_row)
     """
     conn = sqlite3.connect(VUDATASIM_DB)
-    
-    # Load vudatasim tests
-    vuda_df = pd.read_sql_query(f"SELECT * FROM {VUDATASIM_TABLE} WHERE report_generated = 0", conn)
 
-    # Load k6 tests with required fields
-    k6_query = f"""
-        SELECT
-            test_id, test_name, status, duration, o11y_sources,
-            start_time, end_time, vus,
-            summarised,
-            Metrics_Login,
-            Overall_Dashboard_Load_Times,
-            Panel_Performance_Breakdown
-        FROM {K6_TABLE}
-        WHERE
-            summarised IS NOT NULL AND summarised != '' AND
-            Metrics_Login IS NOT NULL AND Metrics_Login != '' AND
-            report_generated = 0
-    """
-    k6_df = pd.read_sql_query(k6_query, conn)
+    # Build queries based on whether test_id is provided
+    if test_id and filter_table == 'test_runs':
+        vuda_query = f"SELECT * FROM {VUDATASIM_TABLE} WHERE test_id = ?"
+        vuda_params = (test_id,)
+        k6_query_base = f"""
+            SELECT
+                test_id, test_name, status, duration, o11y_sources,
+                start_time, end_time, vus,
+                summarised,
+                Metrics_Login,
+                Overall_Dashboard_Load_Times,
+                Panel_Performance_Breakdown
+            FROM {K6_TABLE}
+            WHERE
+                summarised IS NOT NULL AND summarised != '' AND
+                Metrics_Login IS NOT NULL AND Metrics_Login != '' AND
+                report_generated = 0
+        """
+        k6_params = ()
+    elif test_id and filter_table == 'k6_runs':
+        vuda_query = f"SELECT * FROM {VUDATASIM_TABLE} WHERE report_generated = 0"
+        vuda_params = ()
+        k6_query_base = f"""
+            SELECT
+                test_id, test_name, status, duration, o11y_sources,
+                start_time, end_time, vus,
+                summarised,
+                Metrics_Login,
+                Overall_Dashboard_Load_Times,
+                Panel_Performance_Breakdown
+            FROM {K6_TABLE}
+            WHERE test_id = ?
+        """
+        k6_params = (test_id,)
+    else:
+        vuda_query = f"SELECT * FROM {VUDATASIM_TABLE} WHERE report_generated = 0"
+        vuda_params = ()
+        k6_query_base = f"""
+            SELECT
+                test_id, test_name, status, duration, o11y_sources,
+                start_time, end_time, vus,
+                summarised,
+                Metrics_Login,
+                Overall_Dashboard_Load_Times,
+                Panel_Performance_Breakdown
+            FROM {K6_TABLE}
+            WHERE
+                summarised IS NOT NULL AND summarised != '' AND
+                Metrics_Login IS NOT NULL AND Metrics_Login != '' AND
+                report_generated = 0
+        """
+        k6_params = ()
+
+    vuda_df = pd.read_sql_query(vuda_query, conn, params=vuda_params)
+    k6_df = pd.read_sql_query(k6_query_base, conn, params=k6_params)
     conn.close()
     
     # Create lookup dictionaries
@@ -380,13 +419,19 @@ function showReport(reportType) {{
 # ===============================
 
 def main():
+    parser = argparse.ArgumentParser(description="Generate combined performance reports.")
+    parser.add_argument("--test-id", type=str, help="Specific test_id to generate report for (optional)")
+    parser.add_argument("--table", type=str, choices=['test_runs', 'k6_runs'], default='test_runs',
+                        help="Table where test_id belongs (default: test_runs)")
+    args = parser.parse_args()
+
     print("🚀 Starting Combined Report Generator\n")
-    
+
     # Create output directory
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    
-    # Get matched test pairs
-    test_pairs = get_test_pairs()
+
+    # Get matched test pairs (filtered if test_id provided)
+    test_pairs = get_test_pairs(args.test_id, args.table)
 
     if not test_pairs:
         print("⚠️ No unprocessed test pairs found. Make sure both databases have matching test names with report_generated = 0.")

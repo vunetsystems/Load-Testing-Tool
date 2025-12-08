@@ -838,34 +838,35 @@ class VuDataSimManager {
             await this.o11ySources.syncConfigs(timeoutSeconds,selectedEPS, skipChTruncate);
 
             // Schedule pod deletion
-            let podDeletionSuccess = false;
-            try {
-                const podDeletionResponse = await this.callAPI('/api/schedule-pod-deletion', 'POST', {
-                    timeout_seconds: timeoutSeconds,
-                    o11y_sources: selectedSources
-                });
-                console.log('Pod deletion scheduled:', podDeletionResponse);
-                podDeletionSuccess = true;
-            } catch (error) {
-                console.error('Error scheduling pod deletion:', error);
-                this.showNotification('Scheduled pod deletion failed', 'error');
-                // Stop all binaries to cancel the running process
-                try {
-                    await this.callAPI('/api/binary/stop-all', 'POST');
-                    console.log('All binaries stopped due to pod deletion failure');
-                } catch (stopError) {
-                    console.error('Error stopping binaries:', stopError);
-                }
-            }
+            // let podDeletionSuccess = false;
+            // try {
+            //     const podDeletionResponse = await this.callAPI('/api/schedule-pod-deletion', 'POST', {
+            //         timeout_seconds: timeoutSeconds,
+            //         o11y_sources: selectedSources
+            //     });
+            //     console.log('Pod deletion scheduled:', podDeletionResponse);
+            //     podDeletionSuccess = true;
+            // } catch (error) {
+            //     console.error('Error scheduling pod deletion:', error);
+            //     this.showNotification('Scheduled pod deletion failed', 'error');
+            //     // Stop all binaries to cancel the running process
+            //     try {
+            //         await this.callAPI('/api/binary/stop-all', 'POST');
+            //         console.log('All binaries stopped due to pod deletion failure');
+            //     } catch (stopError) {
+            //         console.error('Error stopping binaries:', stopError);
+            //     }
+            // }
 
             // Show success notification only if pod deletion succeeded
-            if (podDeletionSuccess) {
-                this.showNotification('vuDataSim started successfully!', 'success');
-            }
+            // if (podDeletionSuccess) {
+            //     this.showNotification('vuDataSim started successfully!', 'success');
+            // }
 
 
-            // // Show success notification only if syncConfigs completed without throwing an error
-            // this.showNotification('vuDataSim started successfully!', 'success');
+
+            // Show success notification only if syncConfigs completed without throwing an error
+            this.showNotification('vuDataSim started successfully!', 'success');
 
         } catch (error) {
             console.error('Error starting vuDataSim:', error);
