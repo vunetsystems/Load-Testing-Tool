@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 import json
 import math
+import argparse
 
 # ===============================
 # CONFIGURATION
@@ -338,6 +339,35 @@ def format_node_tables(row):
     html_clickhouse = build_table("🏛️ ClickHouse Node CPU + Memory", clickhouse_rows)
 
     return html_kafka + html_clickhouse
+
+def format_process_rate_table(row):
+    data = safe_get(row, "process_rate_summary")
+    if not data:
+        return html_section("⚙️ Process Rate Metrics", "<p>⚠️ No process rate data found.</p>")
+
+    try:
+        pr = json.loads(data)
+    except Exception:
+        return html_section("⚙️ Process Rate Metrics", "<p>⚠️ JSON parsing failed.</p>")
+
+    # Expecting only one key e.g: "K8s"
+    key = list(pr.keys())[0]
+    values = pr[key]
+
+    min_rate = smart_format(values.get("min_process_rate", ""))
+    avg_rate = smart_format(values.get("avg_process_rate", ""))
+    max_rate = smart_format(values.get("max_process_rate", ""))
+
+    html = (
+        "<table><thead>"
+        "<tr><th>Type</th><th>Min (msg/s)</th><th>Avg (msg/s)</th><th>Max (msg/s)</th></tr>"
+        "</thead><tbody>"
+        f"<tr><td>Process Rate</td><td>{min_rate}</td><td>{avg_rate}</td><td>{max_rate}</td></tr>"
+        "</tbody></table>"
+    )
+
+    return html_section("⚙️ Process Rate Metrics", html)
+
 
 
 def format_summary(row):
@@ -731,6 +761,7 @@ def generate_html_report(row):
         + format_node_pod_table(row)
         + format_kafka_specs(row)
         + format_combined_topic_table(row)
+        + format_process_rate_table(row)   # 👈 NEWLY ADDED
         + format_lag_table(row)
         + format_clickhouse_ingestion_table(row)
 
@@ -767,9 +798,18 @@ def generate_html_report(row):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Generate HTML reports.")
+    parser.add_argument("--test-id", type=str, help="Specific test_id to generate report for (optional)")
+    args = parser.parse_args()
+
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
-    df = pd.read_sql_query(f"SELECT * FROM {TABLE_NAME} WHERE report_generated = 0", conn)
+
+    if args.test_id:
+        df = pd.read_sql_query(f"SELECT * FROM {TABLE_NAME} WHERE test_id = ?", conn, params=(args.test_id,))
+    else:
+        df = pd.read_sql_query(f"SELECT * FROM {TABLE_NAME} WHERE report_generated = 0", conn)
+
     conn.close()
     print(f"✅ Loaded {len(df)} rows from database.\n")
 

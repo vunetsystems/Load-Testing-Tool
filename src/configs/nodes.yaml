@@ -13,7 +13,7 @@ nodes:
         binary_dir: /home/vunet/OCT_29_DELETE_THIS/bin
         metrics_port: 0
         description: control-plane,master
-        enabled: true
+        enabled: false
     e2e-82-181:
         host: 164.52.213.181
         user: vunet
@@ -58,4 +58,4 @@ nodes:
         binary_dir: /home/vunet/OCT_29_DELETE_THIS/bin
         metrics_port: 0
         description: <none>
-        enabled: false
+        enabled: true
