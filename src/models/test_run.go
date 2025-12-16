@@ -29,7 +29,6 @@ type TestRun struct {
 	ProcessRateSummary     string          `json:"process_rate_summary,omitempty"` // JSON summary of process rates per o11y source
 	IngestionSummary       string          `json:"ingestion_summary,omitempty"`    // JSON summary of hyperscale ingestion table-wise EPS data
 	PipelineInfo           string          `json:"pipeline_info,omitempty"`        // JSON mapping of o11y sources to pipeline details
-	TraefikMemAllocated    sql.NullFloat64 `json:"traefik_mem_allocated,omitempty"`
 	PodsCpu                string          `json:"pods_cpu,omitempty"`             // JSON string for pod CPU metrics
 	PodsMemory             string          `json:"pods_memory,omitempty"`          // JSON string for pod memory metrics
 	PodRestarts            string          `json:"pod_restarts,omitempty"`         // JSON string for pod restart metrics

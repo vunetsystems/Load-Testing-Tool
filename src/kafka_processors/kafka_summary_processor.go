@@ -312,16 +312,7 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("Final JSON strings - CPU len: %d, Memory len: %d, Restarts len: %d", len(podsCpuJSON), len(podsMemoryJSON), len(podRestartsJSON)), "info")
 	}
 
-	// 5. Fetch Traefik memory allocated
-	traefikMemAllocated := 0.0
-	traefikStats, err := pod_processors.FetchTraefikPodMetrics(chClient, startTime, endTime)
-	if err != nil {
-		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to fetch Traefik metrics: %v", err))
-	} else {
-		traefikMemAllocated, _ = pod_processors.ComputeTraefikPodStats(traefikStats)
-	}
-
-	// 6. Fetch and compute consumer lag metrics
+	// 5. Fetch and compute consumer lag metrics
 	minLag, avgLag, maxLag, err := ProcessConsumerLagSummary(chClient, inputTopics, startTime, endTime)
 	if err != nil {
 		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process consumer lag metrics: %v", err))
@@ -391,7 +382,6 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		    process_rate_summary = ?, ingestion_summary = ?, pipeline_info = ?,
 		    pods_cpu = ?, pods_memory = ?, pod_restarts = ?,
 		    nodes_cpu = ?, nodes_memory = ?,
-		    traefik_mem_allocated = ?,
 		    min_lag = ?, avg_lag = ?, max_lag = ?
 		WHERE test_id = ?;
 	`, avgInputRate, avgOutputRate,
@@ -399,7 +389,6 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		string(processRateSummaryJSON), string(ingestionSummaryJSON), pipelineInfoJSON,
 		podsCpuJSON, podsMemoryJSON, podRestartsJSON,
 		nodesCpuJSON, nodesMemoryJSON,
-		traefikMemAllocated,
 		minLag, avgLag, maxLag,
 		testID)
 	if err != nil {

@@ -121,7 +121,6 @@ func (nm *NodeManager) copyFilesToNode(nodeName string, nodeConfig NodeConfig) e
 	return nil
 }
 
-
 func (nm *NodeManager) cleanupNodeFiles(nodeName string) error {
 	nodeSnapshotDir := filepath.Join(nm.snapshotsDir, nodeName)
 	nodeBackupDir := filepath.Join(nm.backupsDir, nodeName)

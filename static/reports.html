@@ -85,6 +85,19 @@
     <span class="material-symbols-outlined">bug_report</span>
     <span class="hidden sm:inline">Analyze Bugs</span>
   </button>
+
+  <!-- Share Report Button -->
+  <button
+    id="share-report-btn"
+    class="flex items-center justify-center gap-2 px-4 py-2.5
+           rounded-xl bg-blue-500 text-white font-medium
+           shadow-sm hover:bg-blue-600 hover:shadow-md
+           transition-all duration-200 disabled:bg-gray-300 disabled:text-gray-600
+           disabled:cursor-not-allowed"
+    disabled>
+    <span class="material-symbols-outlined">share</span>
+    <span class="hidden sm:inline">Share Report</span>
+  </button>
 </div>
 
 </div>
@@ -205,6 +218,12 @@ Retry
 // Global variables
 let allReports = [];
 
+// URL parameter parsing utility
+function getUrlParameter(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
 // Load reports dynamically from API
 async function loadReports() {
     const loadingEl = document.getElementById('reports-loading');
@@ -250,7 +269,7 @@ function renderReports(reports) {
     reports.forEach(report => {
         const link = document.createElement('a');
         link.className = 'flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors report-link';
-        link.href = '#';
+        link.href = `?report=${encodeURIComponent(report.filename)}`;
         link.setAttribute('data-file', report.filename);
         link.innerHTML = `
             <span class="material-symbols-outlined">description</span>
@@ -276,25 +295,41 @@ document.getElementById('search-input').addEventListener('input', function() {
 function handleReportClick(e) {
     e.preventDefault();
     const filename = this.getAttribute('data-file');
+
+    // Update URL without page reload
+    const newUrl = `${window.location.pathname}?report=${encodeURIComponent(filename)}`;
+    window.history.pushState({ report: filename }, '', newUrl);
+
+    loadReport(filename);
+}
+
+// Load a specific report
+function loadReport(filename) {
     const iframe = document.getElementById('report-iframe');
     const emptyState = document.getElementById('empty-state');
     const downloadBtn = document.getElementById('download-pdf-btn');
 
     // Remove active class from all links
     document.querySelectorAll('.report-link').forEach(l => l.classList.remove('bg-primary/10', 'text-primary'));
-    // Add active class to clicked link
-    this.classList.add('bg-primary/10', 'text-primary');
+
+    // Add active class to the current report link
+    const currentLink = document.querySelector(`.report-link[data-file="${filename}"]`);
+    if (currentLink) {
+        currentLink.classList.add('bg-primary/10', 'text-primary');
+    }
 
     // Load report in iframe
     iframe.src = `/data/combined_reports/${filename}`;
     iframe.classList.remove('hidden');
     emptyState.classList.add('hidden');
 
-    // Enable download and analyze buttons
+    // Enable download, analyze, and share buttons
     downloadBtn.disabled = false;
     downloadBtn.setAttribute('data-filename', filename.replace('.html', ''));
     const analyzeBtn = document.getElementById('analyze-bugs-btn');
     analyzeBtn.disabled = false;
+    const shareBtn = document.getElementById('share-report-btn');
+    shareBtn.disabled = false;
 }
 
 // Retry loading reports
@@ -559,6 +594,49 @@ document.getElementById('bugs-modal').addEventListener('click', (e) => {
 // Analyze bugs button click
 document.getElementById('analyze-bugs-btn').addEventListener('click', analyzeBugs);
 
+// Share report button click
+document.getElementById('share-report-btn').addEventListener('click', async function() {
+    const currentUrl = window.location.href;
+
+    try {
+        await navigator.clipboard.writeText(currentUrl);
+
+        // Show success feedback
+        const originalText = this.innerHTML;
+        this.innerHTML = '<span class="material-symbols-outlined">check</span><span class="hidden sm:inline">Copied!</span>';
+        this.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+        this.classList.add('bg-green-500', 'hover:bg-green-600');
+
+        // Reset after 2 seconds
+        setTimeout(() => {
+            this.innerHTML = originalText;
+            this.classList.remove('bg-green-500', 'hover:bg-green-600');
+            this.classList.add('bg-blue-500', 'hover:bg-blue-600');
+        }, 2000);
+    } catch (error) {
+        console.error('Failed to copy URL:', error);
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = currentUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+
+        // Show success feedback
+        const originalText = this.innerHTML;
+        this.innerHTML = '<span class="material-symbols-outlined">check</span><span class="hidden sm:inline">Copied!</span>';
+        this.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+        this.classList.add('bg-green-500', 'hover:bg-green-600');
+
+        setTimeout(() => {
+            this.innerHTML = originalText;
+            this.classList.remove('bg-green-500', 'hover:bg-green-600');
+            this.classList.add('bg-blue-500', 'hover:bg-blue-600');
+        }, 2000);
+    }
+});
+
 // JIRA modal functionality
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('jira-btn')) {
@@ -767,8 +845,30 @@ document.addEventListener('submit', function(e) {
     }
 });
 
+// Handle browser back/forward navigation
+window.addEventListener('popstate', (e) => {
+    const reportParam = getUrlParameter('report');
+    if (reportParam) {
+        loadReport(reportParam);
+    } else {
+        // Clear selection if no report parameter
+        document.querySelectorAll('.report-link').forEach(l => l.classList.remove('bg-primary/10', 'text-primary'));
+        document.getElementById('report-iframe').classList.add('hidden');
+        document.getElementById('empty-state').classList.remove('hidden');
+        document.getElementById('download-pdf-btn').disabled = true;
+        document.getElementById('analyze-bugs-btn').disabled = true;
+        document.getElementById('share-report-btn').disabled = true;
+    }
+});
+
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', loadReports);
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadReports();
+    const reportParam = getUrlParameter('report');
+    if (reportParam) {
+        loadReport(reportParam);
+    }
+});
 
 </script>
 

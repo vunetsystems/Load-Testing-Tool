@@ -68,7 +68,6 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 			   min_lag, avg_lag, max_lag,
 			   kafka_summary_generated,
 			   process_rate_summary, ingestion_summary,
-			   traefik_mem_allocated,
 			   pods_cpu, pods_memory, pod_restarts
 		FROM test_runs WHERE test_id = ?`
 
@@ -100,7 +99,6 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 		&testRun.KafkaSummaryGenerated,
 		&processRateSummary,
 		&ingestionSummary,
-		&testRun.TraefikMemAllocated,
 		&testRun.PodsCpu,
 		&testRun.PodsMemory,
 		&testRun.PodRestarts,
@@ -158,7 +156,6 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			   min_lag, avg_lag, max_lag,
 			   kafka_summary_generated,
 			   process_rate_summary, ingestion_summary,
-			   traefik_mem_allocated,
 			   pods_cpu, pods_memory, pod_restarts
 		FROM test_runs ORDER BY start_time DESC`
 
@@ -201,7 +198,6 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			&testRun.KafkaSummaryGenerated,
 			&processRateSummary,
 			&ingestionSummary,
-			&testRun.TraefikMemAllocated,
 			&podsCpu,
 			&podsMemory,
 			&podRestarts,
