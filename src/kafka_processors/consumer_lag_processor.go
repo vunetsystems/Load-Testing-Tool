@@ -36,8 +36,10 @@ func fetchConsumerLagMetrics(chClient *clickhouse.ClickHouseClient, topics []str
 	query := fmt.Sprintf(`
 		SELECT "records-lag"
 		FROM monitoring.kafka_consumer_Fetch_Manager_LagMetrics
-		WHERE "records-lag" > 0
-		  AND topic IN (%s)
+		WHERE 
+		--"records-lag" > 0
+		--AND 
+		  topic IN (%s)
 		  AND timestamp >= toDateTime('%s')
 		  AND timestamp <= toDateTime('%s')
 	`, topicStr, start.Format("2006-01-02 15:04:05"), end.Format("2006-01-02 15:04:05"))

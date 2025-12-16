@@ -69,17 +69,18 @@ func GetK6Run(testID string) (*models.K6Run, error) {
 
 	var k6Run models.K6Run
 	var sourcesJSON string
+	var startTimeStr string
+	var endTimeStr sql.NullString
 	var metricsJSON sql.NullString
 	var dashboardLoadTimesJSON sql.NullString
 	var panelPerformanceJSON sql.NullString
-	var endTime sql.NullTime
 	var duration sql.NullString
 
 	err := DB.QueryRow(query, testID).Scan(
 		&k6Run.TestID,
 		&k6Run.TestName,
-		&k6Run.StartTime,
-		&endTime,
+		&startTimeStr,
+		&endTimeStr,
 		&k6Run.TimeRange,
 		&duration,
 		&k6Run.VUs,
@@ -98,8 +99,26 @@ func GetK6Run(testID string) (*models.K6Run, error) {
 		return nil, fmt.Errorf("failed to query K6 run: %w", err)
 	}
 
-	if endTime.Valid {
-		k6Run.EndTime = &endTime.Time
+	// Parse start_time
+	k6Run.StartTime, err = time.Parse(time.RFC3339Nano, startTimeStr)
+	if err != nil {
+		// Try alternative format if RFC3339Nano fails
+		k6Run.StartTime, err = time.Parse("2006-01-02 15:04:05.999999999-07:00", startTimeStr)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse start_time '%s': %w", startTimeStr, err)
+		}
+	}
+
+	if endTimeStr.Valid {
+		endTime, err := time.Parse(time.RFC3339Nano, endTimeStr.String)
+		if err != nil {
+			// Try alternative format if RFC3339Nano fails
+			endTime, err = time.Parse("2006-01-02 15:04:05.999999999-07:00", endTimeStr.String)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse end_time '%s': %w", endTimeStr.String, err)
+			}
+		}
+		k6Run.EndTime = &endTime
 	}
 
 	if duration.Valid {
@@ -161,17 +180,18 @@ func GetAllK6Runs() ([]*models.K6Run, error) {
 	for rows.Next() {
 		var k6Run models.K6Run
 		var sourcesJSON string
+		var startTimeStr string
+		var endTimeStr sql.NullString
 		var metricsJSON sql.NullString
 		var dashboardLoadTimesJSON sql.NullString
 		var panelPerformanceJSON sql.NullString
-		var endTime sql.NullTime
 		var duration sql.NullString
 
 		err := rows.Scan(
 			&k6Run.TestID,
 			&k6Run.TestName,
-			&k6Run.StartTime,
-			&endTime,
+			&startTimeStr,
+			&endTimeStr,
 			&k6Run.TimeRange,
 			&duration,
 			&k6Run.VUs,
@@ -187,8 +207,26 @@ func GetAllK6Runs() ([]*models.K6Run, error) {
 			return nil, fmt.Errorf("failed to scan K6 run: %w", err)
 		}
 
-		if endTime.Valid {
-			k6Run.EndTime = &endTime.Time
+		// Parse start_time
+		k6Run.StartTime, err = time.Parse(time.RFC3339Nano, startTimeStr)
+		if err != nil {
+			// Try alternative format if RFC3339Nano fails
+			k6Run.StartTime, err = time.Parse("2006-01-02 15:04:05.999999999-07:00", startTimeStr)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse start_time '%s': %w", startTimeStr, err)
+			}
+		}
+
+		if endTimeStr.Valid {
+			endTime, err := time.Parse(time.RFC3339Nano, endTimeStr.String)
+			if err != nil {
+				// Try alternative format if RFC3339Nano fails
+				endTime, err = time.Parse("2006-01-02 15:04:05.999999999-07:00", endTimeStr.String)
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse end_time '%s': %w", endTimeStr.String, err)
+				}
+			}
+			k6Run.EndTime = &endTime
 		}
 
 		if duration.Valid {

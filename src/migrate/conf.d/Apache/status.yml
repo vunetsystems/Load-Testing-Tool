@@ -217,6 +217,10 @@ group:
     DataType: String
     ValueType: Constant
     Value: e2e-97-241
+  - name: agent,hostname
+    DataType: String
+    ValueType: FromLocal
+    Value: UniqueKey
   - name: agent,type
     DataType: String
     ValueType: Constant

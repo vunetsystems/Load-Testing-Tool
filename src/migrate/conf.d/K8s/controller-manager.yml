@@ -339,7 +339,7 @@ group:
   - name: metricset,name
     DataType: String
     ValueType: Constant
-    Value: container
+    Value: controllermanager
   - name: service,address
     DataType: String
     ValueType: Constant
