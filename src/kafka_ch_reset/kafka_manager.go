@@ -571,8 +571,90 @@ func (km *KafkaManager) RecreateTopicsForEnabledSourcesUsingClient(confPath stri
 		return fmt.Errorf("failed to create topics: %v", err)
 	}
 
+	// Delete pipeline pods immediately after Kafka topics are recreated
+	logger.Info().Msg("Kafka topics recreated successfully, proceeding to delete pipeline pods")
+
+	if err := km.DeletePipelinePodsImmediate(enabledSources); err != nil {
+		// Log warning but don't fail the entire operation
+		// Pods might not exist yet or kubectl might have issues
+		logger.Warn().Err(err).Msg("Failed to delete pipeline pods, but Kafka recreation succeeded")
+		// Continue execution - don't return error
+	} else {
+		logger.Info().Msg("Pipeline pods deleted successfully after Kafka recreation")
+	}
+
 	logger.Info().Int("sources", len(enabledSources)).Int("topics", len(allTopics)).Msg("Successfully recreated topics for enabled o11y sources using client")
 	return nil
+}
+
+// DeletePipelinePodsImmediate deletes pods for given o11y sources immediately (no scheduling)
+func (km *KafkaManager) DeletePipelinePodsImmediate(o11ySources []string) error {
+	// Load topics config to get pipeline names
+	if err := km.LoadConfig(); err != nil {
+		return fmt.Errorf("failed to load topics config: %v", err)
+	}
+
+	// Extract pipeline names from o11y sources
+	pipelineNames := make(map[string]bool)
+	for _, source := range o11ySources {
+		for _, topicGroup := range km.topics {
+			if topicGroup.Name == source {
+				for _, pipeline := range topicGroup.Pipeline {
+					pipelineNames[pipeline] = true
+				}
+				break
+			}
+		}
+	}
+
+	if len(pipelineNames) == 0 {
+		logger.Info().Strs("o11y_sources", o11ySources).Msg("No pipelines found for enabled sources, skipping pod deletion")
+		return nil // Not an error - just means no pods to delete
+	}
+
+	// Generate pod name patterns for grep
+	var podPatterns []string
+	for pipeline := range pipelineNames {
+		podPatterns = append(podPatterns, fmt.Sprintf("%s-", pipeline))
+	}
+	grepPattern := strings.Join(podPatterns, "|")
+
+	logger.Info().Strs("pipelines", keys(pipelineNames)).Str("pattern", grepPattern).Msg("Attempting to delete pipeline pods")
+
+	// Execute kubectl command directly (no scheduling)
+	namespace := "vsmaps"
+	cmdStr := fmt.Sprintf(
+		"kubectl get pods -n %s --no-headers -o custom-columns=NAME:.metadata.name | grep -E '%s' | xargs -r kubectl delete pod -n %s",
+		namespace,
+		grepPattern,
+		namespace,
+	)
+
+	cmd := exec.Command("bash", "-c", cmdStr)
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		// Check if error is because no pods were found (which is acceptable)
+		outputStr := string(output)
+		if strings.Contains(outputStr, "No resources found") || len(strings.TrimSpace(outputStr)) == 0 {
+			logger.Info().Msg("No pipeline pods found to delete")
+			return nil
+		}
+		logger.Error().Err(err).Str("output", outputStr).Str("command", cmdStr).Msg("Failed to delete pipeline pods")
+		return fmt.Errorf("failed to delete pods: %v, output: %s", err, outputStr)
+	}
+
+	logger.Info().Str("output", string(output)).Msg("Successfully deleted pipeline pods")
+	return nil
+}
+
+// keys is a helper function to extract keys from a map[string]bool
+func keys(m map[string]bool) []string {
+	result := make([]string, 0, len(m))
+	for k := range m {
+		result = append(result, k)
+	}
+	return result
 }
 
 // DescribeTopicsBulkUsingClient describes multiple topics using kafka-go client
