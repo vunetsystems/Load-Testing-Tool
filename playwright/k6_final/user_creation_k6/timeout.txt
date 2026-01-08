@@ -1,0 +1,5 @@
+Script started at: 2026-01-07 19:25:47
+Target users: 15
+
+
+🎉 15/15 users created with attributes and added to 'load_test' at 2026-01-07 19:26:43

@@ -5,6 +5,8 @@ include_module_dirs:
     enabled: false
   Apache:
     enabled: false
+  Apache_logs:
+    enabled: false
   Azure_API_Management:
     enabled: false
   Azure_Firewall:
@@ -12,7 +14,7 @@ include_module_dirs:
   Azure_Redis_Cache:
     enabled: false
   AzureStorageBlob:
-    enabled: false
+    enabled: true
   BRUM:
     enabled: false
   CiscoIoSSwitch:
@@ -26,7 +28,7 @@ include_module_dirs:
   LinuxMonitor:
     enabled: false
   MongoDB:
-    enabled: true
+    enabled: false
   Mssql:
     enabled: false
   ServiceMonitor:
