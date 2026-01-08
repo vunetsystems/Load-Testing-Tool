@@ -350,21 +350,36 @@ def format_process_rate_table(row):
     except Exception:
         return html_section("⚙️ Process Rate Metrics", "<p>⚠️ JSON parsing failed.</p>")
 
-    # Expecting only one key e.g: "K8s"
-    key = list(pr.keys())[0]
-    values = pr[key]
+    if len(pr.keys()) == 1:
+        # Single source - retain existing table
+        key = list(pr.keys())[0]
+        values = pr[key]
 
-    min_rate = smart_format(values.get("min_process_rate", ""))
-    avg_rate = smart_format(values.get("avg_process_rate", ""))
-    max_rate = smart_format(values.get("max_process_rate", ""))
+        min_rate = smart_format(values.get("min_process_rate", ""))
+        avg_rate = smart_format(values.get("avg_process_rate", ""))
+        max_rate = smart_format(values.get("max_process_rate", ""))
 
-    html = (
-        "<table><thead>"
-        "<tr><th>Type</th><th>Min (msg/s)</th><th>Avg (msg/s)</th><th>Max (msg/s)</th></tr>"
-        "</thead><tbody>"
-        f"<tr><td>Process Rate</td><td>{min_rate}</td><td>{avg_rate}</td><td>{max_rate}</td></tr>"
-        "</tbody></table>"
-    )
+        html = (
+            "<table><thead>"
+            "<tr><th>Type</th><th>Min (msg/s)</th><th>Avg (msg/s)</th><th>Max (msg/s)</th></tr>"
+            "</thead><tbody>"
+            f"<tr><td>Process Rate</td><td>{min_rate}</td><td>{avg_rate}</td><td>{max_rate}</td></tr>"
+            "</tbody></table>"
+        )
+    else:
+        # Multiple sources - table with Source column
+        html = (
+            "<table><thead>"
+            "<tr><th>Source</th><th>Min (msg/s)</th><th>Avg (msg/s)</th><th>Max (msg/s)</th></tr>"
+            "</thead><tbody>"
+        )
+        for key, values in pr.items():
+            min_rate = smart_format(values.get("min_process_rate", ""))
+            avg_rate = smart_format(values.get("avg_process_rate", ""))
+            max_rate = smart_format(values.get("max_process_rate", ""))
+
+            html += f"<tr><td>{key}</td><td>{min_rate}</td><td>{avg_rate}</td><td>{max_rate}</td></tr>"
+        html += "</tbody></table>"
 
     return html_section("⚙️ Process Rate Metrics", html)
 
@@ -415,39 +430,53 @@ def format_pipeline_info(row):
     except Exception:
         return html_section("🔧 Pipeline Info", f"<p>⚠️ Could not parse JSON: {info_data}</p>"), None
 
-def format_pipeline_pods_from_json(title, pipeline_name, row):
-    if not pipeline_name:
-        return ""  # No pipeline found
+def format_pipeline_pods_from_json(title, pipeline_info_data, row):
+    if not pipeline_info_data:
+        return ""  # No pipeline info found
+
+    try:
+        pipeline_info = json.loads(pipeline_info_data)
+    except Exception:
+        return html_section(title, "<p>⚠️ Pipeline info JSON parsing failed.</p>")
+
+    # Extract all pipeline names
+    all_pipeline_names = [details.get('name', '') for details in pipeline_info.values() if details.get('name')]
+
+    if not all_pipeline_names:
+        return html_section(title, "<p>⚠️ No pipeline names found.</p>")
 
     try:
         pods_cpu = json.loads(safe_get(row, "pods_cpu"))
         pods_mem = json.loads(safe_get(row, "pods_memory"))
     except Exception:
-        return html_section(title, "<p>⚠️ JSON parsing failed.</p>")
+        return html_section(title, "<p>⚠️ Pods JSON parsing failed.</p>")
     try:
         pod_restarts = json.loads(safe_get(row, "pod_restarts"))
     except Exception:
         pod_restarts = {}   # fallback
 
+    # Collect all matched pods with their pipeline
+    all_matched_pods = []
+    for pipeline_name in all_pipeline_names:
+        matched_pods = [
+            pod_name for pod_name in pods_cpu.keys()
+            if pod_name.startswith(pipeline_name)
+        ]
+        for pod in matched_pods:
+            all_matched_pods.append((pipeline_name, pod))
 
-    # Identify matching pods using partial match
-    matched_pods = [
-        pod_name for pod_name in pods_cpu.keys()
-        if pod_name.startswith(pipeline_name)
-    ]
-
-    if not matched_pods:
+    if not all_matched_pods:
         return html_section(title, "<p>⚠️ No matching pipeline pods found.</p>")
 
-    # Build table
+    # Build table with Pipeline column
     html = (
         f"<table><thead><tr>"
-        f"<th>Pod</th><th>CPU Allocated</th><th>CPU Min</th><th>CPU Avg</th><th>CPU Max</th>"
+        f"<th>Pipeline</th><th>Pod</th><th>CPU Allocated</th><th>CPU Min</th><th>CPU Avg</th><th>CPU Max</th>"
         f"<th>MEM Allocated</th><th>MEM Min</th><th>MEM Avg</th><th>MEM Max</th><th>Restarts</th>"
         f"</tr></thead><tbody>"
     )
 
-    for pod in matched_pods:
+    for pipeline_name, pod in all_matched_pods:
         cpu = pods_cpu.get(pod, {})
         mem = pods_mem.get(pod, {})
 
@@ -455,6 +484,7 @@ def format_pipeline_pods_from_json(title, pipeline_name, row):
 
         html += (
             f"<tr>"
+            f"<td>{pipeline_name}</td>"
             f"<td>{pod}</td>"
             f"<td>{smart_format(cpu.get('allocated', ''))} cores</td>"
             f"<td>{smart_format(cpu.get('min', ''))}</td>"
@@ -467,8 +497,6 @@ def format_pipeline_pods_from_json(title, pipeline_name, row):
             f"<td>{restarts}</td>"
             f"</tr>"
         )
-
-
 
     return html_section(title, html + "</tbody></table>")
 
@@ -522,28 +550,181 @@ def format_pod_group_from_json(title, pod_list, row):
     return html_section(title, html)
 
 
-def format_combined_topic_table(row):
-    html = (
-        "<table><thead><tr><th>Type</th><th>Min (msg/s)</th><th>Avg (msg/s)</th><th>Max (msg/s)</th></tr></thead><tbody>"
-        f"<tr><td>Input</td><td>{smart_format(safe_get(row,'min_input_msgs_per_sec'))}</td>"
-        f"<td>{smart_format(safe_get(row,'avg_input_msgs_per_sec'))}</td>"
-        f"<td>{smart_format(safe_get(row,'max_input_msgs_per_sec'))}</td></tr>"
-        f"<tr><td>Output</td><td>{smart_format(safe_get(row,'min_output_msgs_per_sec'))}</td>"
-        f"<td>{smart_format(safe_get(row,'avg_output_msgs_per_sec'))}</td>"
-        f"<td>{smart_format(safe_get(row,'max_output_msgs_per_sec'))}</td></tr>"
-        "</tbody></table>"
-    )
-    return html_section("📈 Input/Output Topic Metrics", html)
+def format_topic_metrics_tables(row):
+    topic_metrics_data = safe_get(row, "topic_metrics_json")
+    o11y_sources = json.loads(safe_get(row, "o11y_sources"))
+
+    if not topic_metrics_data or len(o11y_sources) <= 1:
+        # Single source or no data - use existing combined table
+        html = (
+            "<table><thead><tr><th>Type</th><th>Min (msg/s)</th><th>Avg (msg/s)</th><th>Max (msg/s)</th></tr></thead><tbody>"
+            f"<tr><td>Input</td><td>{smart_format(safe_get(row,'min_input_msgs_per_sec'))}</td>"
+            f"<td>{smart_format(safe_get(row,'avg_input_msgs_per_sec'))}</td>"
+            f"<td>{smart_format(safe_get(row,'max_input_msgs_per_sec'))}</td></tr>"
+            f"<tr><td>Output</td><td>{smart_format(safe_get(row,'min_output_msgs_per_sec'))}</td>"
+            f"<td>{smart_format(safe_get(row,'avg_output_msgs_per_sec'))}</td>"
+            f"<td>{smart_format(safe_get(row,'max_output_msgs_per_sec'))}</td></tr>"
+            "</tbody></table>"
+        )
+        return html_section("📈 Input/Output Topic Metrics", html)
+    else:
+        # Multiple sources - separate tables per source
+        html = "<section><h2>📈 Input/Output Topic Metrics</h2>"
+
+        try:
+            metrics = json.loads(topic_metrics_data)
+
+            for source in o11y_sources:
+                source_data = metrics.get(source, {})
+                if not source_data:
+                    continue
+
+                html += f"<h3>{source} Topic Metrics</h3>"
+
+                # Separate input metrics and output topic metrics
+                input_metrics = []
+                output_topic_metrics = {}
+
+                for topic_name, topic_data in source_data.items():
+                    if topic_data.get("topic_type") == "input":
+                        input_metrics.append(topic_data)
+                    elif topic_data.get("topic_type") == "output":
+                        output_topic_metrics[topic_name] = topic_data
+
+                # Generate separate tables for this source
+                html += generate_source_input_table(input_metrics)
+                html += generate_source_output_table(output_topic_metrics)
+
+        except Exception as e:
+            html += f"<p>⚠️ Error parsing topic metrics: {e}</p>"
+
+        html += "</section>"
+        return html
+
+def generate_source_input_table(input_metrics):
+    """Generate separate table for input topic metrics (aggregated)"""
+
+    def aggregate_metrics(topic_list):
+        if not topic_list:
+            return {"min": "", "avg": "", "max": ""}
+
+        mins = [t.get("min", 0) for t in topic_list if t.get("min") is not None]
+        avgs = [t.get("avg", 0) for t in topic_list if t.get("avg") is not None]
+        maxs = [t.get("max", 0) for t in topic_list if t.get("max") is not None]
+
+        return {
+            "min": smart_format(min(mins)) if mins else "",
+            "avg": smart_format(sum(avgs)/len(avgs)) if avgs else "",
+            "max": smart_format(max(maxs)) if maxs else ""
+        }
+
+    # Aggregate input metrics
+    input_agg = aggregate_metrics(input_metrics) if input_metrics else {"min": "", "avg": "", "max": ""}
+
+    table_html = f"""
+    <h4>Input Topic Message Rates</h4>
+    <table>
+        <thead><tr><th>Topic/Type</th><th>Min (msg/s)</th><th>Avg (msg/s)</th><th>Max (msg/s)</th></tr></thead>
+        <tbody>
+            <tr><td>Input</td><td>{input_agg['min']}</td><td>{input_agg['avg']}</td><td>{input_agg['max']}</td></tr>
+        </tbody>
+    </table>
+    """
+    return table_html
+
+def generate_source_output_table(output_topic_metrics):
+    """Generate separate table for output topic metrics (individual + total)"""
+
+    if not output_topic_metrics:
+        return ""
+
+    table_html = f"""
+    <h4>Output Topic Message Rates</h4>
+    <table>
+        <thead><tr><th>Topic</th><th>Min (msg/s)</th><th>Avg (msg/s)</th><th>Max (msg/s)</th></tr></thead>
+        <tbody>
+    """
+
+    total_min = 0
+    total_avg = 0
+    total_max = 0
+    count = 0
+
+    # Add individual output topic rows and accumulate totals
+    for topic_name, metrics in output_topic_metrics.items():
+        min_val = metrics.get('min', 0) or 0
+        avg_val = metrics.get('avg', 0) or 0
+        max_val = metrics.get('max', 0) or 0
+
+        total_min += min_val
+        total_avg += avg_val
+        total_max += max_val
+        count += 1
+
+        table_html += f"<tr><td>{topic_name}</td><td>{smart_format(min_val)}</td><td>{smart_format(avg_val)}</td><td>{smart_format(max_val)}</td></tr>"
+
+    # Add total row
+    if count > 1:
+        table_html += f"<tr style='font-weight: bold; border-top: 2px solid #333;'><td>Total</td><td>{smart_format(total_min)}</td><td>{smart_format(total_avg)}</td><td>{smart_format(total_max)}</td></tr>"
+
+    table_html += "</tbody></table>"
+    return table_html
 
 def format_lag_table(row):
-    html = (
-        "<p><strong>Note:</strong> Lag is in terms of offsets with respect Kafka and ContextStream Pipeline.</p>"  # 👈 NEW LINE
-        "<table><thead><tr><th>Min Lag</th><th>Avg Lag</th><th>Max Lag</th></tr></thead><tbody>"
-        f"<tr><td>{smart_format(safe_get(row,'min_lag'))}</td>"
-        f"<td>{smart_format(safe_get(row,'avg_lag'))}</td>"
-        f"<td>{smart_format(safe_get(row,'max_lag'))}</td></tr>"
-        "</tbody></table>"
-    )
+    o11y_sources = []
+    try:
+        o11y_sources = json.loads(safe_get(row, "o11y_sources")) or []
+    except Exception:
+        pass
+
+    lag_data = safe_get(row, "lag_per_source")
+    if not lag_data:
+        # Fallback to original logic if no lag_per_source
+        html = (
+            "<p><strong>Note:</strong> Lag is in terms of offsets with respect Kafka and ContextStream Pipeline.</p>"
+            "<table><thead><tr><th>Min Lag</th><th>Avg Lag</th><th>Max Lag</th></tr></thead><tbody>"
+            f"<tr><td>{smart_format(safe_get(row,'min_lag'))}</td>"
+            f"<td>{smart_format(safe_get(row,'avg_lag'))}</td>"
+            f"<td>{smart_format(safe_get(row,'max_lag'))}</td></tr>"
+            "</tbody></table>"
+        )
+        return html_section("⏱️ Lag Metrics", html)
+
+    try:
+        lag_per_source = json.loads(lag_data)
+    except Exception:
+        return html_section("⏱️ Lag Metrics", "<p>⚠️ JSON parsing failed for lag data.</p>")
+
+    html = "<p><strong>Note:</strong> Lag is in terms of offsets with respect Kafka and ContextStream Pipeline.</p>"
+
+    if len(o11y_sources) == 1:
+        # Single source: Retain same table structure (no O11y Source column)
+        source = o11y_sources[0]
+        metrics = lag_per_source.get(source, {})
+        min_lag = smart_format(metrics.get("min", ""))
+        avg_lag = smart_format(metrics.get("avg", ""))
+        max_lag = smart_format(metrics.get("max", ""))
+
+        html += (
+            "<table><thead><tr><th>Min Lag</th><th>Avg Lag</th><th>Max Lag</th></tr></thead><tbody>"
+            f"<tr><td>{min_lag}</td><td>{avg_lag}</td><td>{max_lag}</td></tr>"
+            "</tbody></table>"
+        )
+    else:
+        # Multiple sources: Single table with O11y Source column, rows for each source
+        html += (
+            "<table><thead><tr><th>O11y Source</th><th>Min Lag</th><th>Avg Lag</th><th>Max Lag</th></tr></thead><tbody>"
+        )
+
+        for source, metrics in lag_per_source.items():
+            min_lag = smart_format(metrics.get("min", ""))
+            avg_lag = smart_format(metrics.get("avg", ""))
+            max_lag = smart_format(metrics.get("max", ""))
+
+            html += f"<tr><td>{source}</td><td>{min_lag}</td><td>{avg_lag}</td><td>{max_lag}</td></tr>"
+
+        html += "</tbody></table>"
+
     return html_section("⏱️ Lag Metrics", html)
 
 
@@ -585,96 +766,273 @@ def format_grouped_table(title, group_def, row):
 
 def format_clickhouse_ingestion_table(row):
     """
-    Parses the `ingestion_summary` column and creates a table:
-    Table Name | Min EPS | Avg EPS | Max EPS
+    Parses the `ingestion_summary` column and creates tables:
+    - Single source: One table with Table | Min EPS | Avg EPS | Max EPS
+    - Multiple sources: Separate tables per o11y_source
     """
     data = safe_get(row, "ingestion_summary")
     if not data:
         return html_section("🏭 ClickHouse Ingestion Summary", "<p>⚠️ No ingestion data found.</p>")
 
     try:
-        ingestion = json.loads(data)   # Expecting list of dicts or dict
+        ingestion = json.loads(data)
     except Exception:
         return html_section("🏭 ClickHouse Ingestion Summary", "<p>⚠️ JSON parsing failed.</p>")
 
-    # Normalize format → ALWAYS list of objects
+    # Normalize to list of dicts
     if isinstance(ingestion, dict):
         ingestion = [ingestion]
 
     if not isinstance(ingestion, list):
         return html_section("🏭 ClickHouse Ingestion Summary", "<p>⚠️ Unexpected data format.</p>")
 
-    html = (
-        "<table><thead><tr>"
-        "<th>Table</th><th>Min EPS</th><th>Avg EPS</th><th>Max EPS</th>"
-        "</tr></thead><tbody>"
-    )
-
+    # Collect unique o11y sources
+    unique_sources = set()
     for item in ingestion:
-        table = item.get("table", "unknown")
-        min_eps = smart_format(item.get("min_eps", ""))
-        avg_eps = smart_format(item.get("avg_eps", ""))
-        max_eps = smart_format(item.get("max_eps", ""))
+        source = item.get("o11y_source", "unknown")
+        unique_sources.add(source)
 
+    if len(unique_sources) <= 1:
+        # Single source - use existing table format
+        html = (
+            "<table><thead><tr>"
+            "<th>Table</th><th>Min EPS</th><th>Avg EPS</th><th>Max EPS</th>"
+            "</tr></thead><tbody>"
+        )
+
+        total_min = 0
+        total_avg = 0
+        total_max = 0
+
+        for item in ingestion:
+            table = item.get("table", "unknown")
+            min_eps = smart_format(item.get("min_eps", ""))
+            avg_eps = smart_format(item.get("avg_eps", ""))
+            max_eps = smart_format(item.get("max_eps", ""))
+
+            # Accumulate totals
+            try:
+                total_min += float(item.get("min_eps", 0) or 0)
+            except:
+                pass
+            try:
+                total_avg += float(item.get("avg_eps", 0) or 0)
+            except:
+                pass
+            try:
+                total_max += float(item.get("max_eps", 0) or 0)
+            except:
+                pass
+
+            html += (
+                f"<tr>"
+                f"<td>{table}</td>"
+                f"<td>{min_eps}</td>"
+                f"<td>{avg_eps}</td>"
+                f"<td>{max_eps}</td>"
+                f"</tr>"
+            )
+
+        # Add total row
         html += (
-            f"<tr>"
-            f"<td>{table}</td>"
-            f"<td>{min_eps}</td>"
-            f"<td>{avg_eps}</td>"
-            f"<td>{max_eps}</td>"
+            f"<tr style='font-weight: bold; border-top: 2px solid #333;'>"
+            f"<td>Total</td>"
+            f"<td>{smart_format(total_min)}</td>"
+            f"<td>{smart_format(total_avg)}</td>"
+            f"<td>{smart_format(total_max)}</td>"
             f"</tr>"
         )
 
-    html += "</tbody></table>"
-    return html_section("🏭 ClickHouse Ingestion Summary", html)
+        html += "</tbody></table>"
+        return html_section("🏭 ClickHouse Ingestion Summary", html)
+    else:
+        # Multiple sources - separate tables per source
+        html = "<section><h2>🏭 ClickHouse Ingestion Summary</h2>"
 
+        # Group data by source
+        source_data = {}
+        for item in ingestion:
+            source = item.get("o11y_source", "unknown")
+            if source not in source_data:
+                source_data[source] = []
+            source_data[source].append(item)
+
+        # Create table for each source
+        for source, items in source_data.items():
+            html += f"<h3>{source}</h3>"
+            html += (
+                "<table><thead><tr>"
+                "<th>Table</th><th>Min EPS</th><th>Avg EPS</th><th>Max EPS</th>"
+                "</tr></thead><tbody>"
+            )
+
+            total_min = 0
+            total_avg = 0
+            total_max = 0
+
+            for item in items:
+                table = item.get("table", "unknown")
+                min_eps = smart_format(item.get("min_eps", ""))
+                avg_eps = smart_format(item.get("avg_eps", ""))
+                max_eps = smart_format(item.get("max_eps", ""))
+
+                # Accumulate totals
+                try:
+                    total_min += float(item.get("min_eps", 0) or 0)
+                except:
+                    pass
+                try:
+                    total_avg += float(item.get("avg_eps", 0) or 0)
+                except:
+                    pass
+                try:
+                    total_max += float(item.get("max_eps", 0) or 0)
+                except:
+                    pass
+
+                html += (
+                    f"<tr>"
+                    f"<td>{table}</td>"
+                    f"<td>{min_eps}</td>"
+                    f"<td>{avg_eps}</td>"
+                    f"<td>{max_eps}</td>"
+                    f"</tr>"
+                )
+
+            # Add total row
+            html += (
+                f"<tr style='font-weight: bold; border-top: 2px solid #333;'>"
+                f"<td>Total</td>"
+                f"<td>{smart_format(total_min)}</td>"
+                f"<td>{smart_format(total_avg)}</td>"
+                f"<td>{smart_format(total_max)}</td>"
+                f"</tr>"
+            )
+
+            html += "</tbody></table>"
+
+        html += "</section>"
+        return html
+
+
+def get_topics_by_source(topic_metrics_json):
+    """Extract topic names grouped by o11y source from topic_metrics_json"""
+    try:
+        metrics = json.loads(topic_metrics_json)
+        topics_by_source = {}
+        for source, topics in metrics.items():
+            topics_by_source[source] = list(topics.keys())
+        return topics_by_source
+    except:
+        return {}
+
+def generate_combined_topic_table(input_topics, output_topics):
+    """Generate combined table for both input and output topics with Topic Type column"""
+    all_topics = []
+
+    # Add input topics
+    for topic in input_topics:
+        all_topics.append({
+            'name': topic.get('name', ''),
+            'type': 'input',
+            'partitions': topic.get('partitions', ''),
+            'replication': topic.get('replication_factor', '')
+        })
+
+    # Add output topics
+    for topic in output_topics:
+        all_topics.append({
+            'name': topic.get('name', ''),
+            'type': 'output',
+            'partitions': topic.get('partitions', ''),
+            'replication': topic.get('replication_factor', '')
+        })
+
+    if not all_topics:
+        return ""
+
+    html = "<table><thead><tr><th>Topic Name</th><th>Topic Type</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody>"
+    for topic in all_topics:
+        html += f"<tr><td>{topic['name']}</td><td>{topic['type']}</td><td>{smart_format(topic['partitions'])}</td><td>{smart_format(topic['replication'])}</td></tr>"
+    html += "</tbody></table>"
+    return html
 
 def format_kafka_specs(row):
     """Parse and format kafka_specs JSON into separate Input and Output topic tables (HTML)."""
     specs_data = safe_get(row, "kafka_specs")
+    topic_metrics_data = safe_get(row, "topic_metrics_json")
+
     if not specs_data:
         return ""
 
     html = "<section><h2>🪣 Kafka Specs</h2>"
     try:
         specs = json.loads(specs_data)
+        o11y_sources = json.loads(safe_get(row, "o11y_sources"))
 
-        # --- Input Topics ---
-        if "input_topics" in specs and isinstance(specs["input_topics"], list):
-            html += (
-                "<h3>📥 Input Topics</h3>"
-                "<table><thead><tr><th>Topic Name</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody>"
-            )
-            for topic in specs["input_topics"]:
-                name = topic.get("name", "")
-                partitions = topic.get("partitions", "")
-                replication = topic.get("replication_factor", "")
+        if len(o11y_sources) <= 1:
+            # Single source - use existing logic
+            # --- Input Topics ---
+            if "input_topics" in specs and isinstance(specs["input_topics"], list):
                 html += (
-                    f"<tr><td>{name}</td>"
-                    f"<td>{smart_format(partitions)}</td>"
-                    f"<td>{smart_format(replication)}</td></tr>"
+                    "<h3>📥 Input Topics</h3>"
+                    "<table><thead><tr><th>Topic Name</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody>"
                 )
-            html += "</tbody></table>"
+                for topic in specs["input_topics"]:
+                    name = topic.get("name", "")
+                    partitions = topic.get("partitions", "")
+                    replication = topic.get("replication_factor", "")
+                    html += (
+                        f"<tr><td>{name}</td>"
+                        f"<td>{smart_format(partitions)}</td>"
+                        f"<td>{smart_format(replication)}</td></tr>"
+                    )
+                html += "</tbody></table>"
 
-        # --- Output Topics ---
-        if "output_topics" in specs and isinstance(specs["output_topics"], list):
-            html += (
-                "<h3>📤 Output Topics</h3>"
-                "<table><thead><tr><th>Topic Name</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody>"
-            )
-            for topic in specs["output_topics"]:
-                name = topic.get("name", "")
-                partitions = topic.get("partitions", "")
-                replication = topic.get("replication_factor", "")
+            # --- Output Topics ---
+            if "output_topics" in specs and isinstance(specs["output_topics"], list):
                 html += (
-                    f"<tr><td>{name}</td>"
-                    f"<td>{smart_format(partitions)}</td>"
-                    f"<td>{smart_format(replication)}</td></tr>"
+                    "<h3>📤 Output Topics</h3>"
+                    "<table><thead><tr><th>Topic Name</th><th>Partitions</th><th>Replication Factor</th></tr></thead><tbody>"
                 )
-            html += "</tbody></table>"
+                for topic in specs["output_topics"]:
+                    name = topic.get("name", "")
+                    partitions = topic.get("partitions", "")
+                    replication = topic.get("replication_factor", "")
+                    html += (
+                        f"<tr><td>{name}</td>"
+                        f"<td>{smart_format(partitions)}</td>"
+                        f"<td>{smart_format(replication)}</td></tr>"
+                    )
+                html += "</tbody></table>"
 
-        html += "</section>"
-        return html
+            html += "</section>"
+            return html
+        else:
+            # Multiple sources - separate tables per source
+            topics_by_source = get_topics_by_source(topic_metrics_data)
+
+            for source in o11y_sources:
+                html += f"<h3>{source}</h3>"
+                source_topics = topics_by_source.get(source, [])
+
+                # Filter input topics for this source
+                input_topics = [
+                    t for t in specs.get("input_topics", [])
+                    if t.get("name") in source_topics
+                ]
+
+                # Filter output topics for this source
+                output_topics = [
+                    t for t in specs.get("output_topics", [])
+                    if t.get("name") in source_topics
+                ]
+
+                # Generate combined table
+                html += generate_combined_topic_table(input_topics, output_topics)
+
+            html += "</section>"
+            return html
 
     except Exception:
         return html_section("🪣 Kafka Specs", f"<p>⚠️ Could not parse JSON: {specs_data}</p>")
@@ -760,7 +1118,7 @@ def generate_html_report(row):
         format_summary(row)
         + format_node_pod_table(row)
         + format_kafka_specs(row)
-        + format_combined_topic_table(row)
+        + format_topic_metrics_tables(row)
         + format_process_rate_table(row)   # 👈 NEWLY ADDED
         + format_lag_table(row)
         + format_clickhouse_ingestion_table(row)
@@ -779,10 +1137,11 @@ def generate_html_report(row):
         row
     )
 
-    pipeline_table, pipeline_name = format_pipeline_info(row)
+    pipeline_info_data = safe_get(row, "pipeline_info")
+    pipeline_table, _ = format_pipeline_info(row)
     html_content += pipeline_table
     html_content += format_pipeline_pods_from_json(
-        "Pipeline Pods", pipeline_name, row
+        "Pipeline Pods", pipeline_info_data, row
     )
 
     html_content += "<h2>💻 Node Metrics</h2>"
