@@ -162,26 +162,27 @@ func runSchemaUpdates() error {
 
 	// Define columns to add with their definitions
 	columnsToAdd := map[string]string{
-		"test_name":              "TEXT",
-		"avg_input_msgs_per_sec": "REAL DEFAULT 0.0",
+		"test_name":               "TEXT",
+		"avg_input_msgs_per_sec":  "REAL DEFAULT 0.0",
 		"avg_output_msgs_per_sec": "REAL DEFAULT 0.0",
-		"max_input_msgs_per_sec": "REAL DEFAULT 0.0",
+		"max_input_msgs_per_sec":  "REAL DEFAULT 0.0",
 		"max_output_msgs_per_sec": "REAL DEFAULT 0.0",
-		"min_input_msgs_per_sec": "REAL DEFAULT 0.0",
+		"min_input_msgs_per_sec":  "REAL DEFAULT 0.0",
 		"min_output_msgs_per_sec": "REAL DEFAULT 0.0",
 		"kafka_summary_generated": "BOOLEAN DEFAULT FALSE",
-		"process_rate_summary":   "TEXT", // JSON summary of process rates per o11y source
-		"ingestion_summary":      "TEXT", // JSON summary of hyperscale ingestion table-wise EPS data
-		"pipeline_info":          "TEXT", // JSON mapping of o11y sources to pipeline details
-		"min_lag":                "REAL DEFAULT 0.0",
-		"avg_lag":                "REAL DEFAULT 0.0",
-		"max_lag":                "REAL DEFAULT 0.0",
-		"kafka_specs":            "TEXT", // JSON specs of input/output topic partitions and replication factors
-		"pods_cpu":               "TEXT", // JSON string for pod CPU metrics with node_name
-		"pods_memory":            "TEXT", // JSON string for pod memory metrics with node_name
-		"pod_restarts":           "TEXT", // JSON string for pod restart metrics
-		"nodes_cpu":              "JSON", // JSON data for node CPU metrics
-		"nodes_memory":           "JSON", // JSON data for node memory metrics
+		"process_rate_summary":    "TEXT", // JSON summary of process rates per o11y source
+		"ingestion_summary":       "TEXT", // JSON summary of hyperscale ingestion table-wise EPS data
+		"pipeline_info":           "TEXT", // JSON mapping of o11y sources to pipeline details
+		"min_lag":                 "REAL DEFAULT 0.0",
+		"avg_lag":                 "REAL DEFAULT 0.0",
+		"max_lag":                 "REAL DEFAULT 0.0",
+		"lag_per_source":          "TEXT", // JSON mapping of o11y sources to lag metrics
+		"kafka_specs":             "TEXT", // JSON specs of input/output topic partitions and replication factors
+		"pods_cpu":                "TEXT", // JSON string for pod CPU metrics with node_name
+		"pods_memory":             "TEXT", // JSON string for pod memory metrics with node_name
+		"pod_restarts":            "TEXT", // JSON string for pod restart metrics
+		"nodes_cpu":               "JSON", // JSON data for node CPU metrics
+		"nodes_memory":            "JSON", // JSON data for node memory metrics
 	}
 
 	for name, def := range columnsToAdd {

@@ -61,14 +61,22 @@ sources:
     inputTopic:
       - name: "apache-metrics-input"
     outputTopic:
-      - name: "apache-logs"
       - name: "apache-metrics"
     clickhouseTables:
-      - "vlogs_apachelogs_data"
       - "vmetrics_apachemetrics_data"
     pipeline:
       - "apache-metrics"
 
+  - name: "Apache_logs"
+    inputTopic:
+      - name: "apache-logs-input"
+    outputTopic:
+      - name: "apache-logs"
+    clickhouseTables:
+      - "vlogs_apachelogs_data"
+    pipeline:
+      - "apache-logs"
+      
   - name: "LinuxMonitor"
     inputTopic:
       - name: "linux-monitor-input"

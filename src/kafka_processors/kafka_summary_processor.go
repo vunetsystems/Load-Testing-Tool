@@ -190,11 +190,15 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 	// 5. Collect ClickHouse tables for ingestion EPS calculation
 	// Added for ingestion summary - collect all clickhouse tables from o11y sources
 	var allClickHouseTables []string
+	tableToSource := make(map[string]string)
 	for _, src := range o11ySources {
 		for _, s := range cfg.Sources {
 			if strings.ToLower(strings.ReplaceAll(s.Name, " ", "")) == strings.ToLower(strings.ReplaceAll(src, " ", "")) {
 				if len(s.ClickHouseTables) > 0 {
-					allClickHouseTables = append(allClickHouseTables, s.ClickHouseTables...)
+					for _, table := range s.ClickHouseTables {
+						tableToSource[table] = src
+						allClickHouseTables = append(allClickHouseTables, table)
+					}
 				}
 				break
 			}
@@ -209,6 +213,13 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		if err != nil {
 			logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to fetch ingestion EPS: %v", err))
 			ingestionEntries = []IngestionEPSEntry{}
+		}
+	}
+
+	// Populate O11ySource for each ingestion entry
+	for i := range ingestionEntries {
+		if source, exists := tableToSource[ingestionEntries[i].Table]; exists {
+			ingestionEntries[i].O11ySource = source
 		}
 	}
 
@@ -319,6 +330,16 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		minLag, avgLag, maxLag = 0.0, 0.0, 0.0
 	}
 
+	// 5.1. Fetch and compute consumer lag metrics per source (NEW)
+	logger.LogWithNode("System", "KafkaSummaryProcessor", "About to call ProcessPerSourceLagSummary", "info")
+	err = ProcessPerSourceLagSummary(db, chClient, testID, o11ySources, startTime, endTime)
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process per-source lag: %v", err))
+		// Continue with summarization even if per-source lag fails
+	} else {
+		logger.LogWithNode("System", "KafkaSummaryProcessor", "Per-source lag processing completed successfully", "info")
+	}
+
 	// 7. Fetch and compute node JSON metrics
 	nodesCpuMap, nodesMemoryMap, _, err := ProcessNodeResourceSummaryJSON(chClient, startTime, endTime)
 	var nodesCpuJSON, nodesMemoryJSON string
@@ -333,7 +354,15 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		nodesMemoryJSON = string(nodesMemoryBytes)
 	}
 
-	// 8. Store the summary back to the database
+	// 8. Compute detailed topic metrics
+	detailedTopicMetrics, err := computeDetailedTopicMetrics(o11ySources, cfg, chClient, startTime, endTime)
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to compute detailed topic metrics: %v", err))
+		detailedTopicMetrics = make(map[string]map[string]map[string]interface{})
+	}
+	topicMetricsJSON, _ := json.Marshal(detailedTopicMetrics)
+
+	// 9. Store the summary back to the database
 	processRateSummaryJSON, _ := json.Marshal(processRateSummary) // Added for process rate summary - store in separate column
 	ingestionSummaryJSON, _ := json.Marshal(ingestionEntries)     // Added for ingestion summary - store EPS data for ClickHouse tables
 
@@ -382,14 +411,14 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		    process_rate_summary = ?, ingestion_summary = ?, pipeline_info = ?,
 		    pods_cpu = ?, pods_memory = ?, pod_restarts = ?,
 		    nodes_cpu = ?, nodes_memory = ?,
-		    min_lag = ?, avg_lag = ?, max_lag = ?
+		    min_lag = ?, avg_lag = ?, max_lag = ?, topic_metrics_json = ?
 		WHERE test_id = ?;
 	`, avgInputRate, avgOutputRate,
 		peakInputRate, peakOutputRate, minInputRate, minOutputRate,
 		string(processRateSummaryJSON), string(ingestionSummaryJSON), pipelineInfoJSON,
 		podsCpuJSON, podsMemoryJSON, podRestartsJSON,
 		nodesCpuJSON, nodesMemoryJSON,
-		minLag, avgLag, maxLag,
+		minLag, avgLag, maxLag, string(topicMetricsJSON),
 		testID)
 	if err != nil {
 		return fmt.Errorf("failed to update test run with summary: %w", err)
@@ -492,10 +521,11 @@ func fetchKafkaMetrics(chClient *clickhouse.ClickHouseClient, topics []string, s
 // IngestionEPSEntry represents a single ingestion EPS entry for a table
 // Added for ingestion summary functionality
 type IngestionEPSEntry struct {
-	Table  string  `json:"table"`
-	AvgEPS float64 `json:"avg_eps"`
-	MinEPS float64 `json:"min_eps"`
-	MaxEPS float64 `json:"max_eps"`
+	Table      string  `json:"table"`
+	O11ySource string  `json:"o11y_source"`
+	AvgEPS     float64 `json:"avg_eps"`
+	MinEPS     float64 `json:"min_eps"`
+	MaxEPS     float64 `json:"max_eps"`
 }
 
 // fetchIngestionEPS fetches ingestion EPS metrics from ClickHouse system.part_log for given tables and time range
@@ -829,6 +859,68 @@ func ifaceToFloat64(v interface{}) float64 {
 	}
 }
 
+// computeDetailedTopicMetrics computes per-topic avg/min/max message rates for all topics across all o11y sources
+// Returns a nested map structure: source -> topic -> {avg, min, max, topic_type}
+func computeDetailedTopicMetrics(o11ySources []string, cfg TopicsConfig, chClient *clickhouse.ClickHouseClient, start, end time.Time) (map[string]map[string]map[string]interface{}, error) {
+	detailedMetrics := make(map[string]map[string]map[string]interface{})
+
+	for _, src := range o11ySources {
+		sourceMetrics := make(map[string]map[string]interface{})
+
+		// Find the source config
+		var sourceConfig TopicConfig
+		found := false
+		for _, s := range cfg.Sources {
+			if strings.ToLower(strings.ReplaceAll(s.Name, " ", "")) == strings.ToLower(strings.ReplaceAll(src, " ", "")) {
+				sourceConfig = s
+				found = true
+				break
+			}
+		}
+		if !found {
+			continue
+		}
+
+		// Process input topics
+		for _, inputTopic := range sourceConfig.InputTopic {
+			stats, err := fetchKafkaMetrics(chClient, []string{inputTopic.Name}, start, end)
+			if err != nil {
+				logger.LogWarning("System", "DetailedTopicMetrics", fmt.Sprintf("Failed to fetch input metrics for %s topic %s: %v", src, inputTopic.Name, err))
+				continue
+			}
+			summary := computeKafkaStats(stats, inputTopic.Name)
+			sourceMetrics[inputTopic.Name] = map[string]interface{}{
+				"avg":        summary["avg_msgs_per_sec"].(float64),
+				"min":        summary["min_msgs_per_sec"].(float64),
+				"max":        summary["max_msgs_per_sec"].(float64),
+				"topic_type": "input",
+			}
+		}
+
+		// Process output topics
+		for _, outputTopic := range sourceConfig.OutputTopic {
+			stats, err := fetchKafkaMetrics(chClient, []string{outputTopic.Name}, start, end)
+			if err != nil {
+				logger.LogWarning("System", "DetailedTopicMetrics", fmt.Sprintf("Failed to fetch output metrics for %s topic %s: %v", src, outputTopic.Name, err))
+				continue
+			}
+			summary := computeKafkaStats(stats, outputTopic.Name)
+			sourceMetrics[outputTopic.Name] = map[string]interface{}{
+				"avg":        summary["avg_msgs_per_sec"].(float64),
+				"min":        summary["min_msgs_per_sec"].(float64),
+				"max":        summary["max_msgs_per_sec"].(float64),
+				"topic_type": "output",
+			}
+		}
+
+		if len(sourceMetrics) > 0 {
+			detailedMetrics[src] = sourceMetrics
+		}
+	}
+
+	return detailedMetrics, nil
+}
+
 // RunKafkaSummaryProcessor runs the Kafka summary processor as a standalone script
 // This is an update for Kafka summarization functionality
 func RunKafkaSummaryProcessor() {
@@ -861,4 +953,45 @@ func RunKafkaSummaryProcessor() {
 		// Wait before checking again
 		time.Sleep(30 * time.Second)
 	}
+}
+
+// ProcessPerSourceLagSummary processes lag metrics per source for a test run
+func ProcessPerSourceLagSummary(db *sql.DB, chClient *clickhouse.ClickHouseClient, testID string, o11ySources []string, startTime, endTime time.Time) error {
+	logger.LogWithNode("System", "PerSourceLagProcessor", fmt.Sprintf("Starting per-source lag processing for test %s", testID), "info")
+	logger.LogWithNode("System", "PerSourceLagProcessor", fmt.Sprintf("Processing time range: %s to %s", startTime, endTime), "info")
+	logger.LogWithNode("System", "PerSourceLagProcessor", fmt.Sprintf("Processing sources: %v", o11ySources), "info")
+
+	// Load config
+	cfg, err := LoadTopicsConfigForLag()
+	if err != nil {
+		logger.LogError("System", "PerSourceLagProcessor", fmt.Sprintf("Failed to load topics config: %v", err))
+		return fmt.Errorf("failed to load topics config: %w", err)
+	}
+
+	// Compute per-source lag
+	lagPerSource, err := ProcessConsumerLagSummaryPerSource(chClient, o11ySources, cfg, startTime, endTime)
+	if err != nil {
+		logger.LogError("System", "PerSourceLagProcessor", fmt.Sprintf("Failed to process per-source lag: %v", err))
+		return fmt.Errorf("failed to process per-source lag: %w", err)
+	}
+
+	logger.LogWithNode("System", "PerSourceLagProcessor", fmt.Sprintf("Computed lag data: %+v", lagPerSource), "info")
+
+	// Convert to JSON and update database
+	lagPerSourceJSON, _ := json.Marshal(lagPerSource)
+	logger.LogWithNode("System", "PerSourceLagProcessor", fmt.Sprintf("Storing JSON: %s", string(lagPerSourceJSON)), "info")
+
+	_, err = db.Exec(`
+		UPDATE test_runs
+		SET lag_per_source = ?
+		WHERE test_id = ?`,
+		string(lagPerSourceJSON), testID)
+
+	if err != nil {
+		logger.LogError("System", "PerSourceLagProcessor", fmt.Sprintf("Failed to update database: %v", err))
+		return fmt.Errorf("failed to update lag_per_source: %w", err)
+	}
+
+	logger.LogSuccess("System", "PerSourceLagProcessor", fmt.Sprintf("Successfully processed per-source lag for test %s", testID))
+	return nil
 }

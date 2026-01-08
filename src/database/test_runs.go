@@ -68,7 +68,7 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 			   min_lag, avg_lag, max_lag,
 			   kafka_summary_generated,
 			   process_rate_summary, ingestion_summary,
-			   pods_cpu, pods_memory, pod_restarts
+			   pods_cpu, pods_memory, pod_restarts, topic_metrics_json
 		FROM test_runs WHERE test_id = ?`
 
 	var testRun models.TestRun
@@ -77,6 +77,7 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 	var endTimeStr sql.NullString
 	var processRateSummary sql.NullString // Process rate summary JSON
 	var ingestionSummary sql.NullString   // Ingestion summary JSON
+	var topicMetricsJSON sql.NullString   // Topic metrics JSON
 
 	err := DB.QueryRow(query, testID).Scan(
 		&testRun.TestID,
@@ -102,6 +103,7 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 		&testRun.PodsCpu,
 		&testRun.PodsMemory,
 		&testRun.PodRestarts,
+		&topicMetricsJSON,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -137,6 +139,9 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 	if ingestionSummary.Valid {
 		testRun.IngestionSummary = ingestionSummary.String // Assign ingestion summary JSON
 	}
+	if topicMetricsJSON.Valid {
+		testRun.TopicMetricsJSON = topicMetricsJSON.String // Assign topic metrics JSON
+	}
 
 	// Parse JSON sources
 	err = json.Unmarshal([]byte(sourcesJSON), &testRun.O11ySources)
@@ -156,7 +161,7 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			   min_lag, avg_lag, max_lag,
 			   kafka_summary_generated,
 			   process_rate_summary, ingestion_summary,
-			   pods_cpu, pods_memory, pod_restarts
+			   pods_cpu, pods_memory, pod_restarts, topic_metrics_json
 		FROM test_runs ORDER BY start_time DESC`
 
 	rows, err := DB.Query(query)
@@ -176,6 +181,7 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		var podsCpu sql.NullString
 		var podsMemory sql.NullString
 		var podRestarts sql.NullString
+		var topicMetricsJSON sql.NullString // Topic metrics JSON
 
 		err := rows.Scan(
 			&testRun.TestID,
@@ -201,6 +207,7 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			&podsCpu,
 			&podsMemory,
 			&podRestarts,
+			&topicMetricsJSON,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan test run: %w", err)
@@ -241,6 +248,9 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		}
 		if podRestarts.Valid {
 			testRun.PodRestarts = podRestarts.String
+		}
+		if topicMetricsJSON.Valid {
+			testRun.TopicMetricsJSON = topicMetricsJSON.String
 		}
 
 		// Parse JSON sources
@@ -357,4 +367,28 @@ func GetTestRunO11ySources(testID string) ([]string, error) {
 	}
 
 	return o11ySources, nil
+}
+
+// UpdateLagPerSource updates only the lag_per_source column
+func UpdateLagPerSource(testID string, lagPerSourceJSON string) error {
+	query := `UPDATE test_runs SET lag_per_source = ? WHERE test_id = ?`
+	_, err := DB.Exec(query, lagPerSourceJSON, testID)
+	if err != nil {
+		return fmt.Errorf("failed to update lag_per_source: %w", err)
+	}
+	return nil
+}
+
+// GetLagPerSource retrieves only the lag_per_source data
+func GetLagPerSource(testID string) (sql.NullString, error) {
+	query := `SELECT lag_per_source FROM test_runs WHERE test_id = ?`
+	var lagPerSource sql.NullString
+	err := DB.QueryRow(query, testID).Scan(&lagPerSource)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return lagPerSource, fmt.Errorf("test run with ID %s not found", testID)
+		}
+		return lagPerSource, fmt.Errorf("failed to query lag_per_source: %w", err)
+	}
+	return lagPerSource, nil
 }
