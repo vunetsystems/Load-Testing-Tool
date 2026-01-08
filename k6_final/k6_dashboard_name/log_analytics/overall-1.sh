@@ -11,8 +11,8 @@ VUS=$1
 ITERATIONS=$2
 TIME_RANGE=$3
 
-FILTER_FILE="/home/vunet/k6_dashboard_name/log_analytics/filters.txt"
-K6_SCRIPT="/home/vunet/k6_dashboard_name/log_analytics/log_analytics.js"
+FILTER_FILE="/home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/log_analytics/filters.txt"
+K6_SCRIPT="/home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/log_analytics/log_analytics.js"
 CSV_FILE="./results/log_analytics_results.csv"
 SUMMARY_FILE="./results/log_analytics_summary.txt"
 
@@ -71,7 +71,7 @@ while IFS= read -r FILTER_LINE || [[ -n "$FILTER_LINE" ]]; do
 
   # Extract avg response time in ms (strip trailing ms if exists)
   avg_response_time=$(grep 'http_req_duration' "$OUTPUT_FILE" | grep -Eo 'avg=[0-9.]+ms' | head -1 | sed 's/avg=//' | sed 's/ms//')
-  [ -z "$avg_response_time" ] && avg_response_time="N/A"
+  [ -z "$avg_response_time" ] && avg_response_time="0"
 
   # Extract last HTTP status code seen in user output
   status_code=$(grep -o 'Status: [0-9]\+' "$OUTPUT_FILE" | tail -1 | awk '{print $2}')
@@ -88,12 +88,16 @@ echo -e "\n✅ Test completed. Results saved to $CSV_FILE"
 
 echo -e "\n🚀 Inserting data into ClickHouse..."
 
-sed -e 's/\([,]\)NaN\([,]\)/\10.0\2/g' \
-    -e 's/\([,]\)nan\([,]\)/\10.0\2/g' \
-    -e 's/,\([,]\)/,0.0\1/g' "$CSV_FILE" | \
+sed -E \
+  -e 's/,NaN,/,0,/g' \
+  -e 's/,nan,/,0,/g' \
+  -e 's/,N\/A,/,0,/g' \
+  -e 's/,,/,0,/g' \
+  "$CSV_FILE" | \
 kubectl exec -i chi-clickhouse-vusmart-0-0-0 -n vsmaps -- \
 clickhouse-client -d vusmart --user vusmartmanager --password 'Vunet#1234' \
 -q "INSERT INTO monitoring.k6_log_analytics FORMAT CSVWithNames"
+
 
 echo "✅ Data inserted into ClickHouse table: monitoring.k6_log_analytics"
 

@@ -4,7 +4,7 @@ uniquekey:
   DataType: IPv4
   ValueType: "RandomFixed"
   Value: "192.168.1.1"
-  NumUniqKey: 3333
+  NumUniqKey: 689
 period: 1s
 #LogsPerSec: 600
 #MBPerDay: 100

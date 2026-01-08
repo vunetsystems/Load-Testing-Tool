@@ -1,0 +1,102 @@
+[
+  {
+    "name": "AUTH_SESSION_ID",
+    "value": "b7d35fd5-64fd-4896-8aa6-da88509803b3",
+    "domain": "216.48.191.10",
+    "path": "/realms/vunet/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "KEYCLOAK_SESSION",
+    "value": "\"vunet/0ac69a04-fcf8-4bfa-b0fd-8dbe5ddf0904/b7d35fd5-64fd-4896-8aa6-da88509803b3\"",
+    "domain": "216.48.191.10",
+    "path": "/realms/vunet/",
+    "expires": 1767611168.723822,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "KC_RESTART",
+    "value": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..2qsgc1Up8pc8GuGAYaNuAQ.Y_l3p6wyZEWtkbvb0jMYgv-KSHfyXHGgQb03thKF8LqbZFfsXYBKv97--89JLd_NC-aMMVu7RCix4lFcsrPM3Gzcq-bWyPf-KWNhvADDZT1BeisTy0AbX_x5dyQ8uDyPAi0RLPQKPidap9EoLiShS-MIo4m78REM1BSF1XrnwY-wux3TjSjP0nFjD5v8xRfu6SVie2M7E6pNlfG7f0F7wRV1IysJiC-kxrMB_3T46LLYtUaAxLL3_uqfIz-9RlcGnKu0WvVQ-InPSP76CEBFwEwnxInZK6YOyP1EF86OH_YMFSvvJvOOLAnD-0-WBaqe3bIC86Lu1fcw5uUXuj7BxG7S0_MzDRWanQ0lJvhIPKncvI5bjVnWM7Mb_t3CQ_LuwdT9UGQ9Y0l7fQ1XiHOZW7eooDnEKaqCJcSeQDMiWIDnGbYvWjWKc8ZgH8annLP1J1zUHSE_eEG_h6IfHucbP6pLoLrt-pCIEu-WcPaMGbVHe634jkyOGaCGj2fupTrXdZniTCJpjFupe2aqYh6FQyFvxlLyIb7aFeFcbcj48qBhO8hSY7LAYddmOf22z4JBSNdnR_LtsMWaN1g8_0-eITmcnpFPP94PV8oHfxBYUjBFAvbeEav9eRiSiEqnz7hAVRl3Re0cDPKXna-llAvEJdoS9n8UiUn_NqJGXvbLTJECUgT0A5o_UINXmYnzyOw-fnZf15IXqxFnV53vv553ixkQ33lcFwE7Fn046yT4zaxXSK9L_nVZE8qnz_OEHxNW0rShlD7mXReZaKNeYUm6U_ewD3GITP74VznOKhV4k7Fgboq7zBKOaMDGtTzM1r2MYV7DGNOAG1K7hYV2sxHjBmX33MwHq6VQUF4E2KAPsgYiSLSCFam0rH8AHzp3AKpp4VmUBzDVTMbyJyCKxyO3sEjib236XHrFkMR7QaJPtlKr3tlLFQtz0lT0YL4HDmhgI0UkNe62siRWyYC--ZTTl_W5MjsLLS1gRaScf2t_kWKg-Mqu2CWhRifI5OTAVyYKZvjaV1bPRwFxocxXamAwSQ.fXFgKUamQjaMjOcKozpSpQ",
+    "domain": "216.48.191.10",
+    "path": "/realms/vunet/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "KEYCLOAK_IDENTITY",
+    "value": "eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIzZDY1YzY3Mi1jYTVmLTRhYzYtYjY1Zi05ZTdkMzUyZDlmNjgifQ.eyJleHAiOjE3Njc2MTExNjgsImlhdCI6MTc2NzAwNjM2OCwianRpIjoiODc1NjZmNGYtMWRmNC00NTM0LWEyYzItMmM1ZDQ4OGEyOTFmIiwiaXNzIjoiaHR0cHM6Ly8yMTYuNDguMTkxLjEwL3JlYWxtcy92dW5ldCIsInN1YiI6IjBhYzY5YTA0LWZjZjgtNGJmYS1iMGZkLThkYmU1ZGRmMDkwNCIsInR5cCI6IlNlcmlhbGl6ZWQtSUQiLCJzaWQiOiJiN2QzNWZkNS02NGZkLTQ4OTYtOGFhNi1kYTg4NTA5ODAzYjMiLCJzdGF0ZV9jaGVja2VyIjoiR1N6bFdMbGdSTmVTd1MxQkhPaFljWXJHZVR6RXNtNnVCZGlJSktHQUxXTSJ9.7gtrNRB6ZS_wtXPN4q6bZWNpzjlqiZu6l88IpIkzAJV7Fe4Bs9OIk2yAlCiHZnIIMqVAtwhg81xI0eOm7omgfA",
+    "domain": "216.48.191.10",
+    "path": "/realms/vunet/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "vunet_session",
+    "value": "82c46669537c5f282f4d84407a65e70d",
+    "domain": "216.48.191.10",
+    "path": "/vui",
+    "expires": 1767092768.808934,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "X-VuNet-HTTP-Info",
+    "value": "iSz79kwX8NObvqslr+gjj4WzfouENRGbyEvweR8ryhA=",
+    "domain": "216.48.191.10",
+    "path": "/vui",
+    "expires": 1767092768.808949,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "grafana_session_expiry",
+    "value": "1767092763",
+    "domain": "216.48.191.10",
+    "path": "/vui",
+    "expires": 1767092768.808963,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "vunet_session",
+    "value": "b0ad17e75db9062385bc65e117105ccd",
+    "domain": "216.48.191.10",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "X-VuNet-HTTP-Info",
+    "value": "dprCcbvhI1G8x7d4/VjokyFHH2y0IpvddaBzVCP7pOE=",
+    "domain": "216.48.191.10",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "grafana_session_expiry",
+    "value": "1767090571",
+    "domain": "216.48.191.10",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  }
+]

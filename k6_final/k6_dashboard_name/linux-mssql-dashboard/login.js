@@ -1,125 +1,156 @@
 import http from "k6/http";
 import { check } from "k6";
-import { Trend, Rate } from "k6/metrics";
+import { Trend, Rate, Counter } from "k6/metrics";
 
-// ------------------------------
-// Load users file
-// ------------------------------
+/* =========================================================
+   USER DATA
+========================================================= */
 const RAW = open("/home/vunet/Load-Testing-Tool/k6_final/user_creation_k6/user_cookies.txt", "utf-8");
-const usersRaw = RAW
+
+const users = RAW
   .split("\n")
-  .map((l) => l.trim())
-  .filter((l) => l && !l.startsWith("#"));
+  .map(l => l.trim())
+  .filter(l => l && !l.startsWith("#"))
+  .map(line => {
+    const [username, password] = line.split(",");
+    return { username: username?.trim(), password: password?.trim() };
+  });
 
-const users = usersRaw.map((line) => {
-  // support both "username,password" and "username,password,..." lines
-  const parts = line.split(",");
-  return { username: parts[0] ? parts[0].trim() : "", password: parts[1] ? parts[1].trim() : "" };
-});
+/* =========================================================
+   ENV VARIABLES (FROM SHELL)
+========================================================= */
+const TEST_NAME = __ENV.TEST_NAME || "login_batch_test";
+const TEST_ID = __ENV.TEST_ID || "";
+const VUS = parseInt(__ENV.VUS || "1", 10);
+const BATCH_ID = parseInt(__ENV.BATCH_ID || "1", 10);
 
-// simple guard
-if (users.length === 0) {
-  console.error("🚨 No valid users found in user_cookies.txt — aborting test.");
-  // k6 won't gracefully stop here, but this prevents later null access
-}
-
-// ------------------------------
-// Options: duration-based login
-// ------------------------------
+/* =========================================================
+   K6 OPTIONS (NO DURATION)
+========================================================= */
 export let options = {
-  scenarios: {
-    default: {
-      executor: 'constant-vus',
-      vus: __ENV.VUS ? parseInt(__ENV.VUS) : 1,       // Controlled by shell
-      duration: __ENV.DURATION || '1m',           // Controlled by shell
-      gracefulStop: '30s',
-    },
-  },
+  vus: VUS,
+  iterations: VUS,            // EXACTLY one login per VU
   insecureSkipTLSVerify: true,
 };
 
-// ------------------------------
-// Endpoints & metrics
-// ------------------------------
+/* =========================================================
+   ENDPOINT
+========================================================= */
 const BASE_URL = "https://216.48.191.10";
 const LOGIN_ENDPOINT = `${BASE_URL}/vui/a/vusmartmaps-app?redirect=dashboard&lte=now&gte=now-15m`;
 
-const loginSuccessRate = new Rate("login_success_rate");
-const loginResponseTime = new Trend("login_response_time");
+/* =========================================================
+   METRICS
+========================================================= */
+const loginRT = new Trend("login_response_time", true);
+const successRate = new Rate("login_success_rate");
+const error4xx = new Counter("error_4xx");
+const error5xx = new Counter("error_5xx");
+const errorConn = new Counter("error_connection");
+const bytesReceived = new Trend("response_size_bytes");
 
-// ------------------------------
-// Helper to safely get user for this VU
-// ------------------------------
-function getUserForVU(vuIndex) {
-  if (!users || users.length === 0) return null;
-  const idx = Math.max(0, Math.min(vuIndex - 1, users.length - 1));
-  return users[idx];
+/* =========================================================
+   HELPERS
+========================================================= */
+function getUser(vu) {
+  return users[Math.min(vu - 1, users.length - 1)];
 }
 
-// ------------------------------
-// Default: attempt login once per VU
-// ------------------------------
+/* =========================================================
+   DEFAULT FUNCTION
+========================================================= */
 export default function () {
-  const user = getUserForVU(__VU);
-  const timestamp = new Date().toISOString();
+  const user = getUser(__VU);
+  const ts = new Date().toISOString();
 
   if (!user) {
-    console.error(`[${timestamp}] ❌ No user mapped to VU ${__VU}. Skipping login.`);
+    console.error(`[${ts}] ❌ No user mapped to VU ${__VU}`);
     return;
   }
 
-  console.log(`[${timestamp}] 🔹 VU ${__VU} attempting login for: ${user.username}`);
-
-  const payload = JSON.stringify({ username: user.username, password: user.password });
-  const params = {
-    headers: { "Content-Type": "application/json" },
-    tags: { name: "LoginRequest", username: user.username },
-    timeout: "60s",
-  };
-
-  let loginRes;
-  try {
-    loginRes = http.post(LOGIN_ENDPOINT, payload, params);
-  } catch (err) {
-    console.error(`[${timestamp}] ❌ VU ${__VU} network/error: ${err}`);
-    loginSuccessRate.add(false, { username: user.username });
-    return;
-  }
-
-  const responseTime = loginRes.timings ? loginRes.timings.duration : -1;
-  const ok = check(loginRes, {
-    "status is 200": (r) => r.status === 200,
+  const payload = JSON.stringify({
+    username: user.username,
+    password: user.password,
   });
 
-  // metrics
-  loginSuccessRate.add(ok ? 1 : 0, { username: user.username });
-  loginResponseTime.add(responseTime, { username: user.username });
+  const params = {
+    headers: { "Content-Type": "application/json" },
+    timeout: "60s",
+    tags: {
+      test_name: TEST_NAME,
+      username: user.username,
+      batch_id: BATCH_ID,
+    },
+  };
 
-  // Structured log lines for downstream parsing
-  console.log(`[K6-METRIC] status_code=${loginRes.status}`);
-  console.log(`[K6-METRIC] response_time=${responseTime}`);
-
-  // Print cookies returned by server (if any) so you can capture them in pipeline
+  let res;
   try {
-    const cookieNames = Object.keys(loginRes.cookies || {});
-    if (cookieNames.length > 0) {
-      cookieNames.forEach((name) => {
-        // log cookie name and first value; do not leak secrets if you don't want to
-        const cookieVal = (loginRes.cookies[name] && loginRes.cookies[name][0] && loginRes.cookies[name][0].value) || "";
-        // OPTIONAL: If you want to export cookies to external store, avoid printing raw cookie values in logs in prod.
-        console.log(`[K6-COOKIE] user=${user.username} | cookie=${name} | value_snippet=${cookieVal.substring(0, 32)}`);
-      });
-    } else {
-      console.log(`[K6-COOKIE] user=${user.username} | no-cookies-returned`);
-    }
+    res = http.post(LOGIN_ENDPOINT, payload, params);
   } catch (e) {
-    // non-fatal
+    errorConn.add(1);
+    successRate.add(0);
+
+    console.error(`[${ts}] ❌ CONNECTION ERROR | User=${user.username}`);
+    console.log(
+      `[K6-ROW] timestamp=${ts} test_name=${TEST_NAME} username=${user.username} `
+      + `avg_response_time=0 status_code=0 success_rate=0 `
+      + `vus=${VUS} vus_max=${VUS} iterations=1 segment_number=${BATCH_ID} `
+      + `duration=0s throughput_rps=0 error_4xx=0 error_5xx=0 `
+      + `error_connection=1 response_size_bytes=0 concurrent_users=${VUS} `
+      + `error_rate=1 request_rate=0 p95_response_time=0 p99_response_time=0 `
+      + `test_id=${TEST_ID}`
+    );
+    return;
   }
 
-  // Human-friendly success / failure messages (kept for existing parser)
-  if (!ok) {
-    console.error(`[${timestamp}] ❌ Login failed | User: ${user.username} | Status: ${loginRes.status} | Response Time: ${responseTime} ms | Body: ${loginRes.body ? loginRes.body.substring(0, 300) : "<empty>"}`);
+  const rt = res.timings.duration;
+  const size = res.body ? res.body.length : 0;
+
+  loginRT.add(rt);
+  bytesReceived.add(size);
+
+  const ok = check(res, { "status is 200": r => r.status === 200 });
+  successRate.add(ok ? 1 : 0);
+
+  if (res.status >= 400 && res.status < 500) error4xx.add(1);
+  if (res.status >= 500) error5xx.add(1);
+
+  /* =========================================================
+     STRUCTURED ROW LOG (FOR SHELL → CSV → CLICKHOUSE)
+  ========================================================= */
+  console.log(
+    `[K6-ROW] `
+    + `timestamp=${ts} `
+    + `test_name=${TEST_NAME} `
+    + `username=${user.username} `
+    + `avg_response_time=${rt} `
+    + `status_code=${res.status} `
+    + `success_rate=${ok ? 100 : 0} `
+    + `vus=${VUS} `
+    + `vus_max=${VUS} `
+    + `iterations=1 `
+    + `segment_number=${BATCH_ID} `
+    + `duration=0s `
+    + `throughput_rps=${VUS} `
+    + `error_4xx=${res.status >= 400 && res.status < 500 ? 1 : 0} `
+    + `error_5xx=${res.status >= 500 ? 1 : 0} `
+    + `error_connection=0 `
+    + `response_size_bytes=${size} `
+    + `concurrent_users=${VUS} `
+    + `error_rate=${ok ? 0 : 1} `
+    + `request_rate=${VUS} `
+    + `p95_response_time=${rt} `
+    + `p99_response_time=${rt} `
+    + `test_id=${TEST_ID}`
+  );
+
+  /* =========================================================
+     HUMAN LOG
+  ========================================================= */
+  if (ok) {
+    console.log(`[${ts}] ✅ Login successful | ${user.username} | ${rt} ms`);
   } else {
-    console.log(`[${timestamp}] ✅ Login successful | User: ${user.username} | Response Time: ${responseTime} ms`);
+    console.error(`[${ts}] ❌ Login failed | ${user.username} | ${res.status} | ${rt} ms`);
   }
 }
+
