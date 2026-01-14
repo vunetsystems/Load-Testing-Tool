@@ -2,6 +2,7 @@ package kafka_ch_reset
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,15 +10,14 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	ch "vuDataSim/src/clickhouse"
 	"vuDataSim/src/logger"
-	"crypto/tls"
+
 	"github.com/segmentio/kafka-go"
 	"gopkg.in/yaml.v3"
-	ch "vuDataSim/src/clickhouse"
 )
 
 var ErrNoPipelinesFound = fmt.Errorf("no pipelines found for provided o11y sources")
-
 
 // TopicName represents a topic name structure
 type TopicName struct {
@@ -33,12 +33,10 @@ type TopicConfig struct {
 	Pipeline         []string    `yaml:"pipeline"`
 }
 
-
-
 // TopicMetadata stores partition and replication factor for a topic
 type TopicMetadata struct {
-	TopicName        string
-	PartitionCount   int
+	TopicName         string
+	PartitionCount    int
 	ReplicationFactor int
 }
 
@@ -58,7 +56,6 @@ type O11ySourceConfig struct {
 		Enabled bool `yaml:"enabled"`
 	} `yaml:"include_module_dirs"`
 }
-
 
 // getKafkaNodeName retrieves the node name where the Kafka pod is running
 func getKafkaNodeName() (string, error) {
@@ -85,16 +82,16 @@ func NewKafkaManager(configPath string) (*KafkaManager, error) {
 	}
 
 	// Configure TLS to resolve the "broker appears to be expecting TLS" error on port 9094
-    tlsConfig := &tls.Config{
-        // WARNING: InsecureSkipVerify is ONLY for E2E/testing where broker certs are self-signed.
-        // For production, you would configure RootCAs.
-        InsecureSkipVerify: true,
-    }
+	tlsConfig := &tls.Config{
+		// WARNING: InsecureSkipVerify is ONLY for E2E/testing where broker certs are self-signed.
+		// For production, you would configure RootCAs.
+		InsecureSkipVerify: true,
+	}
 	admin := &kafka.Client{
 		Addr: kafka.TCP(nodeName + ":9094"),
 		Transport: &kafka.Transport{
-            TLS: tlsConfig,
-        },
+			TLS: tlsConfig,
+		},
 	}
 	return &KafkaManager{
 		configPath: configPath,
@@ -136,7 +133,6 @@ func (km *KafkaManager) LoadConfig() error {
 func (km *KafkaManager) GetAllTopics() []TopicConfig {
 	return km.topics
 }
-
 
 // DescribeTopic describes a single topic and returns its metadata
 func (km *KafkaManager) DescribeTopic(topicName string) (*TopicMetadata, error) {
@@ -220,8 +216,6 @@ func (km *KafkaManager) LoadO11yConfig(confPath string) (*O11ySourceConfig, erro
 	return &config, nil
 }
 
-
-
 // parseTopicDescription parses the output of kafka-topics --describe command
 func (km *KafkaManager) parseTopicDescription(output string) (*TopicMetadata, error) {
 	lines := strings.Split(output, "\n")
@@ -267,8 +261,6 @@ func (km *KafkaManager) parseTopicDescription(output string) (*TopicMetadata, er
 
 	return metadata, nil
 }
-
-
 
 // GetTopicStatus returns the status of all topics
 func (km *KafkaManager) GetTopicStatus() (map[string]interface{}, error) {
@@ -748,7 +740,7 @@ func (km *KafkaManager) CreateTopicsBulkUsingClient(topicMetadatas map[string]*T
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		
+
 		var topics []kafka.TopicConfig
 		for topicName, meta := range topicMetadatas {
 			topics = append(topics, kafka.TopicConfig{
@@ -776,14 +768,14 @@ func (km *KafkaManager) CreateTopicsBulkUsingClient(topicMetadatas map[string]*T
 		// Check for errors in individual topic creation
 		hasErrors := false
 		retriableErrors := make(map[string]error)
-		
+
 		for topicName, topicErr := range res.Errors {
 			if topicErr != nil {
 				errorStr := topicErr.Error()
-				
+
 				// Check if error is "topic already exists" - this is retriable
 				if strings.Contains(strings.ToLower(errorStr), "already exists") ||
-				   strings.Contains(strings.ToLower(errorStr), "topicexistsexception") {
+					strings.Contains(strings.ToLower(errorStr), "topicexistsexception") {
 					logger.Warn().Str("topic", topicName).Err(topicErr).Msg("Topic already exists during creation")
 					retriableErrors[topicName] = topicErr
 					hasErrors = true
@@ -849,17 +841,17 @@ func (km *KafkaManager) waitForTopicsDeletion(topics []string) error {
 						allDeleted = false
 						break
 					}
-					
+
 					// Check the error type - only consider deleted if it's specifically "unknown"
 					// You may need to adjust this based on your Kafka version's error types
 					errorStr := topicMeta.Error.Error()
 					if !strings.Contains(strings.ToLower(errorStr), "unknown") &&
-					   !strings.Contains(strings.ToLower(errorStr), "not exist") {
+						!strings.Contains(strings.ToLower(errorStr), "not exist") {
 						logger.Debug().Str("topic", topic).Str("error", errorStr).Msg("Topic in transition state")
 						allDeleted = false
 						break
 					}
-					
+
 					// If we get here, the error indicates topic doesn't exist
 					logger.Debug().Str("topic", topic).Msg("Topic confirmed deleted")
 					break
@@ -911,7 +903,6 @@ func (km *KafkaManager) TruncateTable(tableName string) error {
 	logger.Info().Str("table", tableName).Msg("Successfully truncated ClickHouse table")
 	return nil
 }
-
 
 // GetTablesForEnabledSources returns ClickHouse tables for all enabled o11y sources
 func (km *KafkaManager) GetTablesForEnabledSources(confPath string) ([]string, error) {
@@ -999,7 +990,6 @@ func (km *KafkaManager) SchedulePodDeletion(timeoutSeconds int, o11ySources []st
 		return scheduledTime, ErrNoPipelinesFound
 	}
 
-
 	// Calculate the scheduled time
 	scheduledTime := time.Now().Add(time.Duration(timeoutSeconds) * time.Second)
 
@@ -1012,7 +1002,7 @@ func (km *KafkaManager) SchedulePodDeletion(timeoutSeconds int, o11ySources []st
 
 	// Step 4: Schedule the script using 'at' command
 	if err := km.scheduleWithAt(scriptPath, timeoutSeconds); err != nil {
-		os.Remove(scriptPath)  // Clean up on failure
+		os.Remove(scriptPath) // Clean up on failure
 		return time.Time{}, fmt.Errorf("failed to schedule script: %v", err)
 	}
 
@@ -1052,7 +1042,7 @@ echo "Deleted pods: $PODS"
 
 // writeTempScript writes the script to a temporary file and makes it executable
 func (km *KafkaManager) writeTempScript(content string) (string, error) {
-	tmpDir := "/tmp"  // Or use os.TempDir()
+	tmpDir := "/tmp" // Or use os.TempDir()
 	file, err := os.CreateTemp(tmpDir, "pod_deletion_*.sh")
 	if err != nil {
 		return "", err
@@ -1064,7 +1054,7 @@ func (km *KafkaManager) writeTempScript(content string) (string, error) {
 	}
 
 	scriptPath := file.Name()
-	if err := os.Chmod(scriptPath, 0755); err != nil {  // Make executable
+	if err := os.Chmod(scriptPath, 0755); err != nil { // Make executable
 		return "", err
 	}
 
@@ -1074,9 +1064,9 @@ func (km *KafkaManager) writeTempScript(content string) (string, error) {
 // scheduleWithAt schedules the script using the 'at' command
 func (km *KafkaManager) scheduleWithAt(scriptPath string, timeoutSeconds int) error {
 	// Calculate future time: current time + timeout
-	timeoutSeconds=timeoutSeconds+60 // add buffer to avoid early execution
+	timeoutSeconds = timeoutSeconds + 60 // add buffer to avoid early execution
 	futureTime := time.Now().Add(time.Duration(timeoutSeconds) * time.Second)
-	timeStr := futureTime.Format("15:04 2006-01-02")  // 'at' format: HH:MM YYYY-MM-DD
+	timeStr := futureTime.Format("15:04 2006-01-02") // 'at' format: HH:MM YYYY-MM-DD
 
 	// Schedule with 'at': echo "/path/to/script.sh" | at <time>
 	cmd := exec.Command("bash", "-c", fmt.Sprintf("echo '%s' | at '%s'", scriptPath, timeStr))
@@ -1086,4 +1076,3 @@ func (km *KafkaManager) scheduleWithAt(scriptPath string, timeoutSeconds int) er
 
 	return nil
 }
-

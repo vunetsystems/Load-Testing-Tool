@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -23,7 +24,8 @@ import (
 
 // Kafka summarization functionality is now handled via API
 
-var kafkaHandler, _ = handlers.NewKafkaHandler()
+// kafkaHandler is initialized in main() to ensure proper error handling
+var kafkaHandler *handlers.KafkaHandler
 
 // startTestRunCompletionChecker starts a background goroutine that periodically
 // checks for and completes timed-out test runs
@@ -114,11 +116,16 @@ func main() {
 		log.Printf("Warning: Error loading .env file: %v", err)
 	}
 
+	// Load config
+	err = clickhouse.LoadConfig("src/configs/config.yaml")
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
+
 	// Debug: Log environment variables
 	log.Printf("DEBUG: OAUTH_CLIENT_ID loaded: %s", maskSecret(os.Getenv("OAUTH_CLIENT_ID")))
 	log.Printf("DEBUG: OAUTH_CLIENT_SECRET loaded: %s", maskSecret(os.Getenv("OAUTH_CLIENT_SECRET")))
 	log.Printf("DEBUG: SESSION_SECRET loaded: %s", maskSecret(os.Getenv("SESSION_SECRET")))
-	log.Printf("DEBUG: APP_PORT: %s", os.Getenv("APP_PORT"))
 	log.Printf("DEBUG: STATIC_DIR: %s", os.Getenv("STATIC_DIR"))
 	log.Printf("DEBUG: DISABLE_AUTH: %s", os.Getenv("DISABLE_AUTH"))
 
@@ -133,15 +140,10 @@ func main() {
 		Secure:   false,
 	}
 
-	// Set env-based configs
-	handlers.Port = os.Getenv("APP_PORT")
-	if handlers.Port == "" {
-		handlers.Port = "216.48.191.10:8086"
-	}
-	handlers.StaticDir = os.Getenv("STATIC_DIR")
-	if handlers.StaticDir == "" {
-		handlers.StaticDir = "./static"
-	}
+	// Set port from config
+	handlers.Port = fmt.Sprintf("%s:%d", clickhouse.NetworkCfg.CurrentNodeIP, clickhouse.NetworkCfg.Port)
+	handlers.AppVersion = clickhouse.AppVersion
+	handlers.StaticDir = clickhouse.PathsCfg.StaticDir
 
 	// Initialize logger
 	logFilePath := os.Getenv("LOG_FILE")
@@ -177,6 +179,12 @@ func main() {
 
 	logger.Info().Str("version", handlers.AppVersion).Msg("Starting vuDataSim Cluster Manager")
 	logger.Info().Str("static_dir", handlers.StaticDir).Msg("Serving static files")
+
+	// Initialize Kafka handler
+	kafkaHandler, err = handlers.NewKafkaHandler()
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to initialize Kafka handler - Kafka API endpoints will not be available")
+	}
 
 	// Create router
 	router := mux.NewRouter()

@@ -1,0 +1,563 @@
+group:
+- name: good
+  fields:
+  - name: name
+    DataType: String
+    ValueType: Constant
+    Value: thread_info
+  - name: tags,host
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,application
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,url
+    DataType: String
+    ValueType: Constant
+    Value: e2e-92-21.ssdcloudindia.net/actuator/prometheus
+  - name: fields,threads_0_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_0_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1-10
+  - name: fields,threads_0_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_0_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_10_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 28458-284580
+  - name: fields,threads_10_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_10_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 2-20
+  - name: fields,threads_10_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 892037-8920370
+  - name: fields,threads_11_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 28551-285510
+  - name: fields,threads_11_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_11_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 2-20
+  - name: fields,threads_11_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 892016-8920160
+  - name: fields,threads_12_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 28357-283570
+  - name: fields,threads_12_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_12_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 2-20
+  - name: fields,threads_12_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 892026-8920260
+  - name: fields,threads_13_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 28870-288700
+  - name: fields,threads_13_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_13_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 2-20
+  - name: fields,threads_13_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 892019-8920190
+  - name: fields,threads_14_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 28503-285030
+  - name: fields,threads_14_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_14_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 2-20
+  - name: fields,threads_14_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 892031-8920310
+  - name: fields,threads_15_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 27905-279050
+  - name: fields,threads_15_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_15_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 3-30
+  - name: fields,threads_15_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 892013-8920130
+  - name: fields,threads_16_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 28810-288100
+  - name: fields,threads_16_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_16_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 3-30
+  - name: fields,threads_16_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 892045-8920450
+  - name: fields,threads_17_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 28936-289360
+  - name: fields,threads_17_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_17_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 3-30
+  - name: fields,threads_17_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 892027-8920270
+  - name: fields,threads_18_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 28136-281360
+  - name: fields,threads_18_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_18_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 3-30
+  - name: fields,threads_18_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 892013-8920130
+  - name: fields,threads_19_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 27989-279890
+  - name: fields,threads_19_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_19_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 3-30
+  - name: fields,threads_19_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 892000-8920000
+  - name: fields,threads_1_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_1_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_1_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_1_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_20_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 567985-5679850
+  - name: fields,threads_20_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_20_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 3-30
+  - name: fields,threads_20_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 93-930
+  - name: fields,threads_21_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 7-70
+  - name: fields,threads_21_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_21_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 3-30
+  - name: fields,threads_21_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_22_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_22_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_22_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 3-30
+  - name: fields,threads_22_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_23_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 8235-82350
+  - name: fields,threads_23_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_23_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 995-9950
+  - name: fields,threads_23_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 224894-2248940
+  - name: fields,threads_24_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 2122-21220
+  - name: fields,threads_24_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_24_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1305-13050
+  - name: fields,threads_24_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 33471-334710
+  - name: fields,threads_25_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 2013-20130
+  - name: fields,threads_25_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_25_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1306-13060
+  - name: fields,threads_25_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 33470-334700
+  - name: fields,threads_26_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1798-17980
+  - name: fields,threads_26_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_26_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1306-13060
+  - name: fields,threads_26_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 33474-334740
+  - name: fields,threads_27_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 2119-21190
+  - name: fields,threads_27_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_27_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1306-13060
+  - name: fields,threads_27_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 33474-334740
+  - name: fields,threads_28_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1167-11670
+  - name: fields,threads_28_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_28_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1314-13140
+  - name: fields,threads_28_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 30078-300780
+  - name: fields,threads_29_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1284-12840
+  - name: fields,threads_29_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_29_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1314-13140
+  - name: fields,threads_29_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 30075-300750
+  - name: fields,threads_2_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_2_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_2_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_2_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_30_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1262-12620
+  - name: fields,threads_30_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_30_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1314-13140
+  - name: fields,threads_30_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 30078-300780
+  - name: fields,threads_31_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1239-12390
+  - name: fields,threads_31_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_31_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1315-13150
+  - name: fields,threads_31_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 30075-300750
+  - name: fields,threads_32_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1262-12620
+  - name: fields,threads_32_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_32_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1315-13150
+  - name: fields,threads_32_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 30076-300760
+  - name: fields,threads_33_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1033-10330
+  - name: fields,threads_33_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_33_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1315-13150
+  - name: fields,threads_33_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 29933-299330
+  - name: fields,threads_3_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_3_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_3_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1-10
+  - name: fields,threads_3_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_4_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 2-20
+  - name: fields,threads_4_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_4_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1-10
+  - name: fields,threads_4_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1888-18880
+  - name: fields,threads_5_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_5_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_5_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1-10
+  - name: fields,threads_5_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 140764-1407640
+  - name: fields,threads_6_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_6_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_6_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1-10
+  - name: fields,threads_6_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 140751-1407510
+  - name: fields,threads_7_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_7_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_7_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 2-20
+  - name: fields,threads_7_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 11319-113190
+  - name: fields,threads_8_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 2-20
+  - name: fields,threads_8_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_8_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 2-20
+  - name: fields,threads_8_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 22638-226380
+  - name: fields,threads_9_blockedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_9_priority
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,threads_9_threadId
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 2-20
+  - name: fields,threads_9_waitedCount
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 14665-146650

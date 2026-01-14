@@ -256,4 +256,17 @@ sources:
       - "vtraces_apm_span_data"
       - "vmetrics_apm_span_data"
     pipeline:
-      - "traces-pipeline"
+      - ""
+      
+  
+  - name: "SpringBoot"
+    inputTopic:
+      - name: "spring-boot-metrics-input"
+    outputTopic:
+      - name: "spring-boot-prometheus-metrics"
+      - name: "spring-boot-threads-metrics"
+    clickhouseTables:
+      - "vmetrics_spring_boot_prometheus_metrics_data"
+      - "vmetrics_spring_boot_threads_metrics_data"
+    pipeline:
+      - "spring-boot-metrics"

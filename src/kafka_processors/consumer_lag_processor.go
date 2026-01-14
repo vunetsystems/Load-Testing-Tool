@@ -112,8 +112,6 @@ func ProcessConsumerLagSummary(chClient *clickhouse.ClickHouseClient, topics []s
 		return 0.0, 0.0, 0.0, fmt.Errorf("failed to fetch consumer lag metrics: %w", err)
 	}
 
-	logger.LogWithNode("System", "ConsumerLagProcessor", fmt.Sprintf("Fetched %d lag values: %v", len(lagValues), lagValues), "debug")
-
 	minLag, avgLag, maxLag = computeLagStats(lagValues)
 
 	logger.LogWithNode("System", "ConsumerLagProcessor", fmt.Sprintf("Computed stats: min=%.2f, avg=%.2f, max=%.2f", minLag, avgLag, maxLag), "info")

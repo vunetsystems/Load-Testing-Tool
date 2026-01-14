@@ -1,0 +1,51 @@
+group:
+- name: good
+  fields:
+  - name: name
+    DataType: String
+    ValueType: Constant
+    Value: prometheus
+  - name: tags,environment
+    DataType: String
+    ValueType: Constant
+    Value: local
+  - name: tags,exception
+    DataType: String
+    ValueType: Constant
+    Value: None
+  - name: tags,host
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,application
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,url
+    DataType: String
+    ValueType: Constant
+    Value: e2e-92-21.ssdcloudindia.net/actuator/prometheus
+  - name: tags,state
+    DataType: String
+    ValueType: Constant
+    Value: SUCCESS
+  - name: tags,method
+    DataType: String
+    ValueType: Constant
+    Value: findByLastNameStartingWith
+  - name: tags,repository
+    DataType: String
+    ValueType: Constant
+    Value: OwnerRepository
+  - name: fields,spring_data_repository_invocations_seconds_count
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 630121-6301210
+  - name: fields,spring_data_repository_invocations_seconds_sum
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 1262-12620
+  - name: fields,spring_data_repository_invocations_seconds_max
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-100

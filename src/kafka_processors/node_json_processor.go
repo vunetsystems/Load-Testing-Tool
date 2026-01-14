@@ -15,30 +15,30 @@ import (
 
 // NodeStat represents aggregated node resource metrics
 type NodeStat struct {
-	NodeName       string
-	MaxCPUUsed     float64
-	MinCPUUsed     float64
-	AvgCPUUsed     float64
-	TotalCPUCores  int64
-	MaxMemoryUsed  float64
-	MinMemoryUsed  float64
-	AvgMemoryUsed  float64
-	TotalMemoryGB  float64
+	NodeName      string
+	MaxCPUUsed    float64
+	MinCPUUsed    float64
+	AvgCPUUsed    float64
+	TotalCPUCores int64
+	MaxMemoryUsed float64
+	MinMemoryUsed float64
+	AvgMemoryUsed float64
+	TotalMemoryGB float64
 }
 
 // NodeCPUStatJSON represents a single node CPU metric data point from ClickHouse for JSON processing
 type NodeCPUStatJSON struct {
-	NodeName            string
-	MaxCPUUsedPercent   float64
-	MinCPUUsedPercent   float64
-	AvgCPUUsedPercent   float64
-	TotalCapacityCores  int64
-	AvgUsedCores        float64
+	NodeName           string
+	MaxCPUUsedPercent  float64
+	MinCPUUsedPercent  float64
+	AvgCPUUsedPercent  float64
+	TotalCapacityCores int64
+	AvgUsedCores       float64
 }
 
 // NodeMemoryStatJSON represents a single node memory metric data point from ClickHouse for JSON processing
 type NodeMemoryStatJSON struct {
-	NodeName            string
+	NodeName             string
 	MaxMemoryUsedPercent float64
 	MinMemoryUsedPercent float64
 	AvgMemoryUsedPercent float64
@@ -93,7 +93,6 @@ func GetDistinctNodeNames(chClient *clickhouse.ClickHouseClient, start, end time
 	return nodeNames, nil
 }
 
-
 // FetchNodeCPUMetricsForNodes fetches node CPU metrics from ClickHouse for the specified node names
 func FetchNodeCPUMetricsForNodes(chClient *clickhouse.ClickHouseClient, nodeNames []string, start, end time.Time) ([]NodeCPUStatJSON, error) {
 	if len(nodeNames) == 0 {
@@ -113,8 +112,8 @@ func FetchNodeCPUMetricsForNodes(chClient *clickhouse.ClickHouseClient, nodeName
 		    ROUND(MAX((total_nanocores / (capacity_cpu_cores * 1000000000)) * 100), 2) AS max_cpu_used_percent,
 		    ROUND(MIN((total_nanocores / (capacity_cpu_cores * 1000000000)) * 100), 2) AS min_cpu_used_percent,
 		    ROUND(AVG((total_nanocores / (capacity_cpu_cores * 1000000000)) * 100), 2) AS avg_cpu_used_percent,
-		    MAX(capacity_cpu_cores) AS total_capacity_cores,
-		    ROUND((AVG((total_nanocores / (capacity_cpu_cores * 1000000000)) * 100) / 100) * MAX(capacity_cpu_cores), 2) AS avg_used_cores
+		    any(capacity_cpu_cores) AS total_capacity_cores,
+		    ROUND((AVG((total_nanocores / (capacity_cpu_cores * 1000000000)) * 100) / 100) * any(capacity_cpu_cores), 2) AS avg_used_cores
 		FROM
 		(
 		    SELECT
@@ -127,6 +126,7 @@ func FetchNodeCPUMetricsForNodes(chClient *clickhouse.ClickHouseClient, nodeName
 		      AND (timestamp <= toDateTime('%s'))
 		      AND (node_name IN (%s))
 		    GROUP BY node_name, ts_bucket
+		    HAVING capacity_cpu_cores > 0
 		) AS node_usage
 		GROUP BY node_name
 		ORDER BY node_name ASC
@@ -164,6 +164,7 @@ func FetchNodeCPUMetricsForNodes(chClient *clickhouse.ClickHouseClient, nodeName
 
 	if len(stats) == 0 {
 		logger.LogWithNode("System", "NodeCPUProcessor", "No node CPU data found for given time range", "warn")
+		logger.LogWithNode("System", "NodeCPUProcessor", fmt.Sprintf("Query executed for nodes: %v", nodeNames), "debug")
 	} else {
 		logger.LogSuccess("System", "NodeCPUProcessor", fmt.Sprintf("Fetched node CPU stats for %d nodes", len(stats)))
 		// Log the actual results for debugging
@@ -335,11 +336,16 @@ func ComputeNodeJSONMetrics(stats []NodeStat) (map[string]interface{}, map[strin
 
 // ProcessNodeResourceSummaryJSON processes node resource metrics and returns JSON columns
 func ProcessNodeResourceSummaryJSON(chClient *clickhouse.ClickHouseClient, start, end time.Time) (map[string]interface{}, map[string]interface{}, bool, error) {
+	logger.LogWithNode("System", "NodeProcessor", fmt.Sprintf("Starting node resource processing for time range %s to %s", start, end), "info")
+
 	// Step 1: Get distinct node names
 	nodeNames, err := GetDistinctNodeNames(chClient, start, end)
 	if err != nil {
+		logger.LogError("System", "NodeProcessor", fmt.Sprintf("Failed to get distinct node names: %v", err))
 		return nil, nil, false, fmt.Errorf("failed to get distinct node names: %w", err)
 	}
+
+	logger.LogWithNode("System", "NodeProcessor", fmt.Sprintf("Found %d distinct nodes: %v", len(nodeNames), nodeNames), "info")
 
 	if len(nodeNames) == 0 {
 		logger.LogWithNode("System", "NodeProcessor", "No nodes found in cluster", "warn")
@@ -347,23 +353,35 @@ func ProcessNodeResourceSummaryJSON(chClient *clickhouse.ClickHouseClient, start
 	}
 
 	// Step 2: Fetch CPU metrics
+	logger.LogWithNode("System", "NodeProcessor", "Fetching CPU metrics", "info")
 	cpuStats, err := FetchNodeCPUMetricsForNodes(chClient, nodeNames, start, end)
 	if err != nil {
+		logger.LogError("System", "NodeProcessor", fmt.Sprintf("Failed to fetch node CPU metrics: %v", err))
 		return nil, nil, false, fmt.Errorf("failed to fetch node CPU metrics: %w", err)
 	}
 
+	logger.LogWithNode("System", "NodeProcessor", fmt.Sprintf("Fetched CPU stats for %d nodes", len(cpuStats)), "info")
+
 	// Step 3: Fetch memory metrics
+	logger.LogWithNode("System", "NodeProcessor", "Fetching memory metrics", "info")
 	memoryStats, err := FetchNodeMemoryMetricsForNodes(chClient, nodeNames, start, end)
 	if err != nil {
+		logger.LogError("System", "NodeProcessor", fmt.Sprintf("Failed to fetch node memory metrics: %v", err))
 		return nil, nil, false, fmt.Errorf("failed to fetch node memory metrics: %w", err)
 	}
 
+	logger.LogWithNode("System", "NodeProcessor", fmt.Sprintf("Fetched memory stats for %d nodes", len(memoryStats)), "info")
+
 	// Step 4: Combine into NodeStat structs
 	stats := combineCPUAndMemoryStats(cpuStats, memoryStats)
+	logger.LogWithNode("System", "NodeProcessor", fmt.Sprintf("Combined into %d NodeStat structs", len(stats)), "info")
 
 	// Step 5: Compute JSON metrics
 	nodesCPU, nodesMemory, found := ComputeNodeJSONMetrics(stats)
+	logger.LogWithNode("System", "NodeProcessor", fmt.Sprintf("Computed JSON metrics - CPU keys: %d, Memory keys: %d, found: %t", len(nodesCPU), len(nodesMemory), found), "info")
+
 	if !found {
+		logger.LogWithNode("System", "NodeProcessor", "No node metrics found", "warn")
 		return nil, nil, false, nil
 	}
 

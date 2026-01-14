@@ -32,9 +32,9 @@ func NewKafkaHandler() (*KafkaHandler, error) {
 		return nil, fmt.Errorf("failed to create Kafka manager: %v", err)
 	}
 
-	// Load configuration
+	// Load configuration - this is required for topic operations
 	if err := kafkaManager.LoadConfig(); err != nil {
-		logger.Error().Err(err).Msg("Failed to load Kafka configuration")
+		return nil, fmt.Errorf("failed to load Kafka topic configuration: %v", err)
 	}
 
 	return &KafkaHandler{

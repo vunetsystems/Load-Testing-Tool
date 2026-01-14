@@ -27,6 +27,7 @@ max_eps_config:
   WebLogic: 35000
 #  Nginx: 42000
   K8s: 100000
+  SpringBoot: 50000
 #  exampleLogs: 15000
 #  ibm_was: 35000
 #  Azure_App_Gateway: 58000

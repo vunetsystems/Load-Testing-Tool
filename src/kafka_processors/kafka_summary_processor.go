@@ -348,10 +348,23 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		nodesCpuJSON = ""
 		nodesMemoryJSON = ""
 	} else {
-		nodesCpuBytes, _ := json.Marshal(nodesCpuMap)
-		nodesMemoryBytes, _ := json.Marshal(nodesMemoryMap)
-		nodesCpuJSON = string(nodesCpuBytes)
-		nodesMemoryJSON = string(nodesMemoryBytes)
+		nodesCpuBytes, marshalErr := json.Marshal(nodesCpuMap)
+		if marshalErr != nil {
+			logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to marshal nodesCpuMap: %v", marshalErr))
+			nodesCpuJSON = ""
+		} else {
+			nodesCpuJSON = string(nodesCpuBytes)
+			logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("nodesCpuJSON length: %d, content: %s", len(nodesCpuJSON), nodesCpuJSON), "info")
+		}
+
+		nodesMemoryBytes, marshalErr := json.Marshal(nodesMemoryMap)
+		if marshalErr != nil {
+			logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to marshal nodesMemoryMap: %v", marshalErr))
+			nodesMemoryJSON = ""
+		} else {
+			nodesMemoryJSON = string(nodesMemoryBytes)
+			logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("nodesMemoryJSON length: %d, content: %s", len(nodesMemoryJSON), nodesMemoryJSON), "info")
+		}
 	}
 
 	// 8. Compute detailed topic metrics
@@ -421,8 +434,11 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		minLag, avgLag, maxLag, string(topicMetricsJSON),
 		testID)
 	if err != nil {
+		logger.LogError("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to update test run with summary: %v", err))
 		return fmt.Errorf("failed to update test run with summary: %w", err)
 	}
+
+	logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("Successfully updated test_runs table for test_id %s with nodes_cpu length %d, nodes_memory length %d", testID, len(nodesCpuJSON), len(nodesMemoryJSON)), "info")
 
 	logger.LogSuccess("System", "KafkaSummaryProcessor", fmt.Sprintf("Successfully processed Kafka summary for test %s", testID))
 

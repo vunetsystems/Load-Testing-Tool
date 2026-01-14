@@ -1,33 +1,19 @@
-# backup:
-#   retention_days: 7
-# binaries:
-#   primary_binary: finalvudatasim
-#   supported_binaries:
-#   - vuDataSim
-#   - RakvuDataSim
-#   - finalvudatasim
-#   - gvudatsim
-# eps:
-  # default_unique_key: 1
-  # max_unique_key: 1000000000
 
-# logging:
-#   log_backup_count: 5
-#   log_file: node-manager.log
-#   log_max_size: 10485760
+app_version: "1.0.0"
+
 network:
   remote_host: 127.0.0.1
   remote_user: vunet
-  streamlit_address: 0.0.0.0
-  streamlit_port: 8501
   current_node_ip: "216.48.191.10"
+  port: 8086
  
 paths:
   local_backups_dir: backups
   local_logs_dir: logs
-  remote_binary_dir: /home/vunet/OCT_29_DELETE_THIS/bin
-  remote_conf_dir: /home/vunet/OCT_29_DELETE_THIS
+  remote_binary_dir: /home/vunet/vuDataSim_bin/bin
+  remote_conf_dir: /home/vunet/vuDataSim_bin
   remote_ssh_key: ~/.ssh/id_rsa
+  static_dir: "./static"
 process:
   default_timeout: 300
   graceful_shutdown_timeout: 10
@@ -51,22 +37,17 @@ truncate_db:
   username: "truncate_db"
   password: "StrongP@assword123"
 
-# monitored_pods:
-#   - "linuxmonitor-8d545644d-wv77v"
-#   - "apache-metrics-6d7f45d5d8-vbmcf"
-#   - "mssql-telegraf-pipeline-dcffcd5f6-kqmch"
-#   - "apache-metrics-6d7f45d5d8-gdzlv"
-# monitored_nodes:
-#   - "164.52.214.212"
-#   - "164.52.214.184"
-#   - "164.52.214.134"
-#   - "164.52.213.234"
-#   - "164.52.213.181"
-#   - "164.52.213.158"
-#   - "216.48.191.10"
+
 kubernetes:
   default_namespace: "vsmaps"
 
 database:
   path: "./data/vudatasim.db"
   max_connections: 10
+
+postgres:
+  host: "10.96.1.65"
+  port: 5432
+  user: "Load_Testing_Tool_read_user"
+  password: "StrongPassword123"
+  dbname: "multicore"

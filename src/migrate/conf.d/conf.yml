@@ -14,7 +14,7 @@ include_module_dirs:
   Azure_Redis_Cache:
     enabled: false
   AzureStorageBlob:
-    enabled: true
+    enabled: false
   BRUM:
     enabled: false
   CiscoIoSSwitch:
@@ -26,12 +26,14 @@ include_module_dirs:
   K8s:
     enabled: false
   LinuxMonitor:
-    enabled: false
+    enabled: true
   MongoDB:
     enabled: false
   Mssql:
     enabled: false
   ServiceMonitor:
+    enabled: false
+  SpringBoot:
     enabled: false
   SyntheticBrowserMonitoring:
     enabled: false
