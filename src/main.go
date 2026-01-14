@@ -16,6 +16,7 @@ import (
 	"vuDataSim/src/handlers"
 	"vuDataSim/src/logger"
 	"vuDataSim/src/node_control"
+	_ "vuDataSim/src/traces" // Import traces package for initialization
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -334,6 +335,11 @@ func main() {
 
 	// Kubernetes monitoring API endpoints
 	api.HandleFunc("/monitoring/k8/pod-yaml", handlers.HandleAPIMonitoringK8PodYAML).Methods("GET")
+
+	// Traces Simulation API endpoints
+	api.HandleFunc("/traces/start", handlers.HandleAPIStartTracesSimulation).Methods("POST")
+	api.HandleFunc("/traces/stop", handlers.HandleAPIStopTracesSimulation).Methods("POST")
+	api.HandleFunc("/traces/status", handlers.HandleAPIGetTracesStatus).Methods("GET")
 
 	// Initialize ClickHouse client
 	if err := clickhouse.InitClickHouse("src/configs/config.yaml"); err != nil {
