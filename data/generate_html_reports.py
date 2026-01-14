@@ -398,11 +398,37 @@ def format_summary(row):
                 pass
             label = "Duration"
         html += f"<li><strong>{label}</strong>: <code>{value}</code></li>"
-    avg_in = smart_format(safe_get(row, "avg_input_msgs_per_sec"))
-    avg_out = smart_format(safe_get(row, "avg_output_msgs_per_sec"))
 
-    html += f"<li><strong>Observed Avg Input Topic EPS</strong>: <code>{avg_in}</code></li>"
-    html += f"<li><strong>Observed Avg Output Topic EPS</strong>: <code>{avg_out}</code></li>"
+    # Check if traces is the o11y source
+    try:
+        o11y_sources = json.loads(safe_get(row, "o11y_sources")) or []
+    except:
+        o11y_sources = []
+    is_traces = "traces" in o11y_sources
+
+    if is_traces:
+        # For traces, get observed avg input from topic_metrics_json
+        topic_metrics_data = safe_get(row, "topic_metrics_json")
+        avg_in = "N/A"
+        if topic_metrics_data:
+            try:
+                metrics = json.loads(topic_metrics_data)
+                traces_data = metrics.get("traces", {})
+                input_avgs = []
+                for topic, data in traces_data.items():
+                    if data.get("topic_type") == "input" and data.get("avg"):
+                        input_avgs.append(data["avg"])
+                if input_avgs:
+                    avg_in = smart_format(sum(input_avgs) / len(input_avgs))
+            except:
+                pass
+        html += f"<li><strong>Observed Avg Input Topic EPS</strong>: <code>{avg_in}</code></li>"
+    else:
+        avg_in = smart_format(safe_get(row, "avg_input_msgs_per_sec"))
+        avg_out = smart_format(safe_get(row, "avg_output_msgs_per_sec"))
+        html += f"<li><strong>Observed Avg Input Topic EPS</strong>: <code>{avg_in}</code></li>"
+        html += f"<li><strong>Observed Avg Output Topic EPS</strong>: <code>{avg_out}</code></li>"
+
     html += "</ul>"
     return html_section("🧾 Test Summary", html)
 
@@ -435,17 +461,6 @@ def format_pipeline_pods_from_json(title, pipeline_info_data, row):
         return ""  # No pipeline info found
 
     try:
-        pipeline_info = json.loads(pipeline_info_data)
-    except Exception:
-        return html_section(title, "<p>⚠️ Pipeline info JSON parsing failed.</p>")
-
-    # Extract all pipeline names
-    all_pipeline_names = [details.get('name', '') for details in pipeline_info.values() if details.get('name')]
-
-    if not all_pipeline_names:
-        return html_section(title, "<p>⚠️ No pipeline names found.</p>")
-
-    try:
         pods_cpu = json.loads(safe_get(row, "pods_cpu"))
         pods_mem = json.loads(safe_get(row, "pods_memory"))
     except Exception:
@@ -455,15 +470,36 @@ def format_pipeline_pods_from_json(title, pipeline_info_data, row):
     except Exception:
         pod_restarts = {}   # fallback
 
-    # Collect all matched pods with their pipeline
-    all_matched_pods = []
-    for pipeline_name in all_pipeline_names:
+    # Check if pipeline_info_data is a string (for traces prefix)
+    if isinstance(pipeline_info_data, str):
+        # For traces, use the string as prefix
+        pipeline_name = pipeline_info_data
         matched_pods = [
             pod_name for pod_name in pods_cpu.keys()
             if pod_name.startswith(pipeline_name)
         ]
-        for pod in matched_pods:
-            all_matched_pods.append((pipeline_name, pod))
+        all_matched_pods = [(pipeline_name, pod) for pod in matched_pods]
+    else:
+        try:
+            pipeline_info = json.loads(pipeline_info_data)
+        except Exception:
+            return html_section(title, "<p>⚠️ Pipeline info JSON parsing failed.</p>")
+
+        # Extract all pipeline names
+        all_pipeline_names = [details.get('name', '') for details in pipeline_info.values() if details.get('name')]
+
+        if not all_pipeline_names:
+            return html_section(title, "<p>⚠️ No pipeline names found.</p>")
+
+        # Collect all matched pods with their pipeline
+        all_matched_pods = []
+        for pipeline_name in all_pipeline_names:
+            matched_pods = [
+                pod_name for pod_name in pods_cpu.keys()
+                if pod_name.startswith(pipeline_name)
+            ]
+            for pod in matched_pods:
+                all_matched_pods.append((pipeline_name, pod))
 
     if not all_matched_pods:
         return html_section(title, "<p>⚠️ No matching pipeline pods found.</p>")
@@ -552,9 +588,26 @@ def format_pod_group_from_json(title, pod_list, row):
 
 def format_topic_metrics_tables(row):
     topic_metrics_data = safe_get(row, "topic_metrics_json")
-    o11y_sources = json.loads(safe_get(row, "o11y_sources"))
+    try:
+        o11y_sources = json.loads(safe_get(row, "o11y_sources")) or []
+    except:
+        o11y_sources = []
+    is_traces = "traces" in o11y_sources
 
-    if not topic_metrics_data or len(o11y_sources) <= 1:
+    if is_traces:
+        # For traces, only show input topics from topic_metrics_json
+        html = "<section><h2>📈 Input/Output Topic Metrics</h2>"
+        if topic_metrics_data:
+            try:
+                metrics = json.loads(topic_metrics_data)
+                traces_data = metrics.get("traces", {})
+                input_metrics = [data for data in traces_data.values() if data.get("topic_type") == "input"]
+                html += generate_source_input_table(input_metrics)
+            except Exception as e:
+                html += f"<p>⚠️ Error parsing topic metrics: {e}</p>"
+        html += "</section>"
+        return html
+    elif not topic_metrics_data or len(o11y_sources) <= 1:
         # Single source or no data - use existing combined table
         html = (
             "<table><thead><tr><th>Type</th><th>Min (msg/s)</th><th>Avg (msg/s)</th><th>Max (msg/s)</th></tr></thead><tbody>"
@@ -1114,16 +1167,24 @@ border-radius: 4px;
 """
 
 def generate_html_report(row):
+    try:
+        o11y_sources = json.loads(safe_get(row, "o11y_sources")) or []
+    except:
+        o11y_sources = []
+    is_traces = "traces" in o11y_sources
+
     html_content = (
         format_summary(row)
         + format_node_pod_table(row)
         + format_kafka_specs(row)
         + format_topic_metrics_tables(row)
-        + format_process_rate_table(row)   # 👈 NEWLY ADDED
-        + format_lag_table(row)
-        + format_clickhouse_ingestion_table(row)
-
     )
+
+    if not is_traces:
+        html_content += format_process_rate_table(row)
+        html_content += format_lag_table(row)
+
+    html_content += format_clickhouse_ingestion_table(row)
 
     html_content += "<h2>🖥️ Pod Metrics</h2>"
     html_content += format_pod_group_from_json(
@@ -1137,16 +1198,20 @@ def generate_html_report(row):
         row
     )
 
-    pipeline_info_data = safe_get(row, "pipeline_info")
-    pipeline_table, _ = format_pipeline_info(row)
-    html_content += pipeline_table
-    html_content += format_pipeline_pods_from_json(
-        "Pipeline Pods", pipeline_info_data, row
-    )
+    if is_traces:
+        html_content += format_pipeline_pods_from_json(
+            "Otel Collector", "traces-1-1-1-1", row
+        )
+    else:
+        pipeline_info_data = safe_get(row, "pipeline_info")
+        pipeline_table, _ = format_pipeline_info(row)
+        html_content += pipeline_table
+        html_content += format_pipeline_pods_from_json(
+            "Pipeline Pods", pipeline_info_data, row
+        )
 
     html_content += "<h2>💻 Node Metrics</h2>"
     html_content += format_node_tables(row)
-
 
     # 👉 APPLY CHANGES HERE – AUTOMATICALLY
     html_content = add_percent_to_headers(html_content)

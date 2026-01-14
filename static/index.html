@@ -571,6 +571,75 @@
                     </div>
                 </div>
 
+                <!-- Traces Simulation Panel -->
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <h3 class="text-lg font-semibold text-slate-900 p-6 border-b border-slate-200">Traces Simulation</h3>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="material-symbols-outlined text-indigo-600">label</span>
+                                    <span class="font-medium text-slate-700">Test Name</span>
+                                </div>
+                                <input id="traces-test-name" type="text"
+                                    class="w-full rounded-lg border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2"
+                                    placeholder="Enter test name">
+                                <p class="text-xs text-slate-500 mt-1">Required name for this traces test</p>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="material-symbols-outlined text-indigo-600">speed</span>
+                                    <span class="font-medium text-slate-700">EPS</span>
+                                </div>
+                                <input id="traces-eps" type="number" min="1"
+                                    class="w-full rounded-lg border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2"
+                                    placeholder="e.g., 5000" value="5000">
+                                <p class="text-xs text-slate-500 mt-1">Events per second to generate</p>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="material-symbols-outlined text-indigo-600">timer</span>
+                                    <span class="font-medium text-slate-700">Duration (minutes)</span>
+                                </div>
+                                <input id="traces-minutes" type="number" min="1"
+                                    class="w-full rounded-lg border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2"
+                                    placeholder="e.g., 10" value="10">
+                                <p class="text-xs text-slate-500 mt-1">How long to run the simulation</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4 mb-4">
+                            <button id="start-traces-btn"
+                                class="group flex items-center justify-center gap-2 rounded-lg bg-green-500 px-6 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                                <span class="material-symbols-outlined">play_arrow</span>
+                                <span>Start Traces Test</span>
+                            </button>
+                            <button id="stop-traces-btn"
+                                class="group flex items-center justify-center gap-2 rounded-lg bg-red-500 px-6 py-3 text-white font-semibold transition-transform hover:scale-105 active:scale-100 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                disabled>
+                                <span class="material-symbols-outlined">stop</span>
+                                <span>Stop</span>
+                            </button>
+                            <button id="refresh-traces-status-btn"
+                                class="group flex items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 py-3 text-slate-700 font-semibold transition-colors hover:bg-slate-50">
+                                <span class="material-symbols-outlined">refresh</span>
+                            </button>
+                        </div>
+
+                        <div id="traces-status-container" class="p-4 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex items-center gap-3">
+                                <div id="traces-status-indicator" class="w-3 h-3 rounded-full bg-slate-400"></div>
+                                <span id="traces-status-text" class="text-sm font-medium text-slate-600">Status: Idle</span>
+                            </div>
+                            <div id="traces-status-details" class="mt-2 text-xs text-slate-500 hidden">
+                                <span>Test: <span id="traces-running-name">-</span></span>
+                                <span class="ml-4">EPS: <span id="traces-running-eps">-</span></span>
+                                <span class="ml-4">Started: <span id="traces-running-time">-</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                     <h3 class="text-lg font-semibold text-slate-900 p-6 border-b border-slate-200">Live Node Metrics
                     </h3>
@@ -1028,7 +1097,8 @@
     <script src="/static/clickhouse-metrics.js"></script>
     <script src="/static/o11y-sources.js"></script>
     <script src="/static/logs.js"></script>
-    <script src="/static/monitoring-js/monitoring.js"></script>></script>
+    <script src="/static/monitoring-js/monitoring.js"></script>
+    <script src="/static/traces.js"></script>
     <script src="/static/main.js"></script>
 </body>
 

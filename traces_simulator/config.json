@@ -1,0 +1,33 @@
+{
+  "application": "App1",
+  "collectorEndpoint": "10.32.4.51:4317",
+  "environment": "production",
+  "eps": 5000,
+  "errorRate": 50,
+  "hostName": "e2e-95-237",
+  "host_ip": "10.32.4.45",
+  "latencyRanges": {
+    "default": [
+      10,
+      20
+    ],
+    "high": [
+      60,
+      60
+    ]
+  },
+  "latencyServices": [],
+  "rates": [
+    0.1,
+    0.4,
+    0.3,
+    0.2
+  ],
+  "services": [
+    "SERVICE 1",
+    "SERVICE 2",
+    "SERVICE 3",
+    "SERVICE 4"
+  ],
+  "spansPerTrace": 10
+}
