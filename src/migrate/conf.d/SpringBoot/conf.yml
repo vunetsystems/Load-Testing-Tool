@@ -1,0 +1,28 @@
+enabled: true
+uniquekey:
+  name: "host"
+  DataType: IPv4
+  ValueType: RandomFixed
+  Value: 164.52.223.21
+  NumUniqKey: 62
+period: 1s
+
+# Add the timestamp field name and type. Type could be epoch_in_seconds, epoch_in_ms or datetime_rfc3339
+timestamp:
+  name: timestamp
+  type: epoch_in_seconds
+
+output.kafka:
+  enabled: true
+  topic: "spring-boot-metrics-input"
+
+
+output.file:
+    enabled: true
+    path: "../outputs/"
+    filename: springboot.json
+    rotate_every_mb: 100
+    max_files: 5
+
+Include_sub_modules: [ application, disk, executor, hikaricp, http, jdbc_jvm, jvm_buffer, jvm_gc, jvm_memory, jvm_thread, logback, process, spring_data, system, thread_info, tomcat_session ]
+

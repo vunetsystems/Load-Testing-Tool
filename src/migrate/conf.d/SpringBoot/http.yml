@@ -1,0 +1,71 @@
+group:
+- name: good
+  fields:
+  - name: name
+    DataType: String
+    ValueType: Constant
+    Value: prometheus
+  - name: tags,host
+    DataType: String
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,application
+    DataType: String
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,url
+    DataType: String
+    ValueType: Constant
+    Value: e2e-92-21.ssdcloudindia.net/actuator/prometheus
+  - name: tags,environment
+    DataType: String
+    ValueType: Constant
+    Value: local
+  - name: tags,status
+    DataType: String
+    ValueType: Enumeration
+    Value: 200:10,404:25,500:25,405:20,502:10,503:10
+  - name: tags,outcome
+    DataType: String
+    ValueType: MappedValue
+    Value: tags,status:[SUCCESS,CLIENT_ERROR,SERVER_ERROR,CLIENT_ERROR,SERVER_ERROR,SERVER_ERROR]
+  - name: tags,exception
+    DataType: String
+    ValueType: MappedValue
+    Value: tags,status:[none,none,RuntimeException,none,BadGatewayException,ServiceUnavailableException]
+  - name: tags,method
+    DataType: String
+    ValueType: Constant
+    Value: POST
+  - name: tags,uri
+    DataType: String
+    ValueType: Enumeration
+    Value: UNKNOWN:20,/**:15,/actuator/prometheus:10,/owners:10,/vets:10,/actuator:3,/actuator/env:4,/actuator/mappings:4,/actuator/metrics:4,/webjars/**:4,/oups:4,/actuator/threaddump:4,/actuator/metrics/{requiredMetricName}:4
+  - name: tags,error
+    DataType: String
+    ValueType: MappedValue
+    Value: tags,status:[none,none,RuntimeException,none,BadGatewayException,ServiceUnavailableException]
+  - name: fields,http_server_requests_active_seconds_count
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-10
+  - name: fields,http_server_requests_active_seconds_sum
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-1
+  - name: fields,http_server_requests_active_seconds_max
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-0.2
+  - name: fields,http_server_requests_seconds_count
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1-20000000
+  - name: fields,http_server_requests_seconds_sum
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-10000000
+  - name: fields,http_server_requests_seconds_max
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-0.1

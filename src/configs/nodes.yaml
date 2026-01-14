@@ -9,26 +9,26 @@ nodes:
         host: 164.52.213.158
         user: vunet
         key_path: ~/.ssh/id_rsa
-        conf_dir: /home/vunet/OCT_29_DELETE_THIS
-        binary_dir: /home/vunet/OCT_29_DELETE_THIS/bin
+        conf_dir: /home/vunet/vuDataSim_bin
+        binary_dir: /home/vunet/vuDataSim_bin/bin
         metrics_port: 0
         description: control-plane,master
-        enabled: true
+        enabled: false
     e2e-82-181:
         host: 164.52.213.181
         user: vunet
         key_path: ~/.ssh/id_rsa
-        conf_dir: /home/vunet/OCT_29_DELETE_THIS
-        binary_dir: /home/vunet/OCT_29_DELETE_THIS/bin
+        conf_dir: /home/vunet/vuDataSim_bin
+        binary_dir: /home/vunet/vuDataSim_bin/bin
         metrics_port: 0
         description: control-plane,master
-        enabled: true
+        enabled: false
     e2e-82-234:
         host: 164.52.213.234
         user: vunet
         key_path: ~/.ssh/id_rsa
-        conf_dir: /home/vunet/OCT_29_DELETE_THIS
-        binary_dir: /home/vunet/OCT_29_DELETE_THIS/bin
+        conf_dir: /home/vunet/vuDataSim_bin
+        binary_dir: /home/vunet/vuDataSim_bin/bin
         metrics_port: 0
         description: <none>
         enabled: true
@@ -36,17 +36,17 @@ nodes:
         host: 164.52.214.134
         user: vunet
         key_path: ~/.ssh/id_rsa
-        conf_dir: /home/vunet/OCT_29_DELETE_THIS
-        binary_dir: /home/vunet/OCT_29_DELETE_THIS/bin
+        conf_dir: /home/vunet/vuDataSim_bin
+        binary_dir: /home/vunet/vuDataSim_bin/bin
         metrics_port: 0
         description: <none>
-        enabled: true
+        enabled: false
     e2e-83-184:
         host: 164.52.214.184
         user: vunet
         key_path: ~/.ssh/id_rsa
-        conf_dir: /home/vunet/OCT_29_DELETE_THIS
-        binary_dir: /home/vunet/OCT_29_DELETE_THIS/bin
+        conf_dir: /home/vunet/vuDataSim_bin
+        binary_dir: /home/vunet/vuDataSim_bin/bin
         metrics_port: 0
         description: <none>
         enabled: false
@@ -54,8 +54,8 @@ nodes:
         host: 164.52.214.212
         user: vunet
         key_path: ~/.ssh/id_rsa
-        conf_dir: /home/vunet/OCT_29_DELETE_THIS
-        binary_dir: /home/vunet/OCT_29_DELETE_THIS/bin
+        conf_dir: /home/vunet/vuDataSim_bin
+        binary_dir: /home/vunet/vuDataSim_bin/bin
         metrics_port: 0
         description: <none>
         enabled: false

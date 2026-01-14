@@ -1,0 +1,94 @@
+group:
+- name: good
+  fields:
+  - name: name
+    DataType: String
+    ValueType: Constant
+    Value: prometheus
+  - name: tags,host
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,application
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,url
+    DataType: String
+    ValueType: Constant
+    Value: e2e-92-21.ssdcloudindia.net/actuator/prometheus
+  - name: tags,environment
+    DataType: String
+    ValueType: Constant
+    Value: local
+  - name: tags,pool
+    DataType: String
+    ValueType: Constant
+    Value: HikariPool-1
+  - name: fields,hikaricp_connections
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 5-15
+  - name: fields,hikaricp_connections_acquire_seconds_count
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 8000000-13000000
+  - name: fields,hikaricp_connections_acquire_seconds_sum
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 20-50
+  - name: fields,hikaricp_connections_acquire_seconds_max
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-0.0001
+  - name: fields,hikaricp_connections_active
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-5
+  - name: fields,hikaricp_connections_creation_seconds_count
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 4000-8000
+  - name: fields,hikaricp_connections_creation_seconds_sum
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-1
+  - name: fields,hikaricp_connections_creation_seconds_max
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-1
+  - name: fields,hikaricp_connections_idle
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 5-15
+  - name: fields,hikaricp_connections_max
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 10-20
+  - name: fields,hikaricp_connections_min
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 5-15
+  - name: fields,hikaricp_connections_pending
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-2
+  - name: fields,hikaricp_connections_timeout_total
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-10
+  - name: fields,hikaricp_connections_usage_seconds_count
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 8000000-13000000
+  - name: fields,hikaricp_connections_usage_seconds_sum
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 700-1200
+  - name: fields,hikaricp_connections_usage_seconds_max
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-0.01
+
+
+

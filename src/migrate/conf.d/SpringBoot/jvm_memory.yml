@@ -1,0 +1,51 @@
+group:
+- name: good
+  fields:
+  - name: name
+    DataType: String
+    ValueType: Constant
+    Value: prometheus
+  - name: tags,environment
+    DataType: String
+    ValueType: Constant
+    Value: local
+  - name: tags,host
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,application
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,url
+    DataType: String
+    ValueType: Constant
+    Value: e2e-92-21.ssdcloudindia.net/actuator/prometheus
+  - name: tags,id
+    DataType: String
+    ValueType: Enumeration
+    Value: G1 Old Gen:17,G1 Survivor Space:17,G1 Eden Space:17,CodeCache:17,Compressed Class Space:17,Metaspace:15
+  - name: tags,area
+    DataType: String
+    ValueType: MappedValue
+    Value: tags,id:[heap,heap,heap,nonheap,nonheap,nonheap]
+  - name: tags,pool
+    DataType: String
+    ValueType: Constant
+    Value: long-lived
+  - name: fields,jvm_memory_committed_bytes
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100000000
+  - name: fields,jvm_memory_max_bytes
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 100000000-130000000
+  - name: fields,jvm_memory_usage_after_gc
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,jvm_memory_used_bytes
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100000000

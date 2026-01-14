@@ -1,0 +1,47 @@
+group:
+- name: good
+  fields:
+  - name: name
+    DataType: String
+    ValueType: Constant
+    Value: prometheus
+  - name: tags,environment
+    DataType: String
+    ValueType: Constant
+    Value: local
+  - name: tags,host
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,application
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,url
+    DataType: String
+    ValueType: Constant
+    Value: e2e-92-21.ssdcloudindia.net/actuator/prometheus
+  - name: fields,process_cpu_time_ns_total
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 14806521000000-148065210000000
+  - name: fields,process_cpu_usage
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,process_files_max_files
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 104857-1048570
+  - name: fields,process_files_open_files
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 10-100
+  - name: fields,process_start_time_seconds
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 176469867-1764698670
+  - name: fields,process_uptime_seconds
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 113198-1131980

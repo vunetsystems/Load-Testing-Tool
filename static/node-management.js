@@ -108,8 +108,12 @@ class NodeManagement {
 
     async refreshNodesTable() {
         try {
-            const response = await this.manager.callAPI('/api/nodes');
+            // Add timestamp to prevent caching
+            const timestamp = new Date().getTime();
+            const response = await this.manager.callAPI(`/api/nodes?t=${timestamp}`);
+            console.log('Refresh nodes response:', response);
             if (response.success && response.data) {
+                console.log('Displaying nodes:', response.data);
                 this.displayNodesTable(response.data);
             }
         } catch (error) {
@@ -119,7 +123,11 @@ class NodeManagement {
 
     displayNodesTable(nodes) {
         const tbody = this.manager.elements.nodesTableBody;
-        tbody.innerHTML = '';
+
+        // Force clear the table
+        while (tbody.firstChild) {
+            tbody.removeChild(tbody.firstChild);
+        }
 
         if (nodes.length === 0) {
             const row = document.createElement('tr');
@@ -129,6 +137,7 @@ class NodeManagement {
         }
 
         nodes.forEach(node => {
+            console.log(`Rendering node ${node.name}, enabled: ${node.enabled}`);
             const row = document.createElement('tr');
             row.className = 'hover:bg-subtle-light/50 dark:hover:bg-subtle-dark/50 transition-colors duration-200';
 
@@ -147,7 +156,7 @@ class NodeManagement {
                             <span class="material-symbols-outlined text-sm mr-1">edit</span>
                             Edit
                         </button>
-                        <button onclick="window.vuDataSimManager.nodeManagement.toggleNode('${node.name}', ${!node.enabled})" class="px-3 py-1 text-xs rounded ${node.enabled ? 'bg-danger/20 text-danger hover:bg-danger/30' : 'bg-success/20 text-success hover:bg-success/30'} transition-colors">
+                        <button id="toggle-btn-${node.name.replace(/[^a-zA-Z0-9]/g, '-')}" onclick="window.vuDataSimManager.nodeManagement.toggleNode('${node.name}', ${!node.enabled})" class="px-3 py-1 text-xs rounded ${node.enabled ? 'bg-danger/20 text-danger hover:bg-danger/30' : 'bg-success/20 text-success hover:bg-success/30'} transition-colors">
                             ${node.enabled ? 'Disable' : 'Enable'}
                         </button>
                         <button onclick="window.vuDataSimManager.nodeManagement.removeNode('${node.name}')" class="px-3 py-1 text-xs rounded bg-danger/20 text-danger hover:bg-danger/30 transition-colors">
@@ -162,19 +171,74 @@ class NodeManagement {
     }
 
     async toggleNode(nodeName, enable) {
+        console.log(`=== toggleNode called: ${nodeName}, enable: ${enable} ===`);
+
+        // Get the button element
+        const buttonId = `toggle-btn-${nodeName.replace(/[^a-zA-Z0-9]/g, '-')}`;
+        const button = document.getElementById(buttonId);
+        console.log(`Button found:`, button);
+
+        // Store original button content
+        const originalContent = button ? button.innerHTML : '';
+
+        // Show loading state
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">sync</span> Loading...';
+            console.log('Loading state applied to button');
+        }
+
         try {
+            console.log(`Making API call to /api/nodes/${nodeName} with enabled=${enable}`);
             const response = await this.manager.callAPI(`/api/nodes/${nodeName}`, 'PUT', { enabled: enable });
+            console.log('API response received:', response);
 
             if (response.success) {
                 this.manager.showNotification(`Node ${nodeName} ${enable ? 'enabled' : 'disabled'} successfully`, 'success');
-                this.refreshNodesTable();
+
+                // Poll the API until the state is updated correctly
+                console.log(`Waiting for node ${nodeName} to be ${enable ? 'enabled' : 'disabled'}...`);
+                let attempts = 0;
+                const maxAttempts = 30; // 30 attempts × 300ms = 9 seconds max wait
+                let stateUpdated = false;
+
+                while (attempts < maxAttempts && !stateUpdated) {
+                    await new Promise(resolve => setTimeout(resolve, 300)); // Wait 300ms between checks
+
+                    const checkResponse = await this.manager.callAPI(`/api/nodes?t=${new Date().getTime()}`);
+                    if (checkResponse.success && checkResponse.data) {
+                        const node = checkResponse.data.find(n => n.name === nodeName);
+                        if (node && node.enabled === enable) {
+                            console.log(`✅ Node ${nodeName} state confirmed as ${enable ? 'enabled' : 'disabled'}`);
+                            stateUpdated = true;
+                            this.displayNodesTable(checkResponse.data);
+                        } else {
+                            console.log(`⏳ Attempt ${attempts + 1}/${maxAttempts}: Waiting for state update... (current: ${node?.enabled}, expected: ${enable})`);
+                        }
+                    }
+                    attempts++;
+                }
+
+                if (!stateUpdated) {
+                    console.warn(`⚠️ Node state verification timed out after ${maxAttempts} attempts (${maxAttempts * 0.3}s)`);
+                    // Refresh anyway to show current state
+                    await this.refreshNodesTable();
+                }
+
                 this.manager.dashboard.loadNodes(); // Refresh the dashboard nodes too
+                console.log(`✅ Toggle operation completed for ${nodeName}`);
             } else {
                 throw new Error(response.message || 'Failed to update node');
             }
         } catch (error) {
             console.error('Error toggling node:', error);
             this.manager.showNotification('Failed to update node: ' + error.message, 'error');
+
+            // Restore button state on error
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = originalContent;
+            }
         }
     }
 

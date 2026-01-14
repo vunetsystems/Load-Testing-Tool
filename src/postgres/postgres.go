@@ -4,8 +4,10 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	_ "github.com/lib/pq"
+	"go.yaml.in/yaml/v3"
 )
 
 // Config holds PostgreSQL connection configuration
@@ -20,6 +22,20 @@ type Config struct {
 // Client wraps the PostgreSQL database connection
 type Client struct {
 	DB *sql.DB
+}
+
+// PostgresConfig holds the postgres configuration from yaml
+type PostgresConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	DBName   string `yaml:"dbname"`
+}
+
+// AppConfig holds the entire application configuration
+type AppConfig struct {
+	Postgres PostgresConfig `yaml:"postgres"`
 }
 
 // NewClient creates a new PostgreSQL client with the given configuration
@@ -50,11 +66,22 @@ func (c *Client) Close() error {
 
 // GetDefaultConfig returns the default PostgreSQL configuration for the pipeline database
 func GetDefaultConfig() Config {
+	data, err := os.ReadFile("src/configs/config.yaml")
+	if err != nil {
+		panic(fmt.Sprintf("failed to read config file: %v", err))
+	}
+
+	var cfg AppConfig
+	err = yaml.Unmarshal(data, &cfg)
+	if err != nil {
+		panic(fmt.Sprintf("failed to unmarshal config: %v", err))
+	}
+
 	return Config{
-		Host:     "10.96.1.65", // Using IP address for reliable connection
-		Port:     5432,
-		User:     "Load_Testing_Tool_read_user",
-		Password: "StrongPassword123",
-		DBName:   "multicore",
+		Host:     cfg.Postgres.Host,
+		Port:     cfg.Postgres.Port,
+		User:     cfg.Postgres.User,
+		Password: cfg.Postgres.Password,
+		DBName:   cfg.Postgres.DBName,
 	}
 }
