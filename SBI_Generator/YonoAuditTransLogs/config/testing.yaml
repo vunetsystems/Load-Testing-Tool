@@ -1,0 +1,85 @@
+# Testing Configuration
+# Target: 1,000 messages at 10 EPS
+# Use case: Development, testing, validation
+
+execution:
+  mode: "count"                    # Count-based mode
+  duration: "5m"
+  count: 1000                      # Generate exactly 1000 messages
+  eps: 10                          # Slow rate for testing
+
+distribution:
+  error_only_percent: 10
+  trans_only_percent: 60
+  both_percent: 30
+
+session:
+  rotation_interval: "10s"         # Faster rotation for testing
+  session_id_prefix: "TESTPREFIX"
+
+templates:
+  error:
+    error_codes: ["TEST001", "TEST002"]
+    error_types: ["BUSINESS_EXCEPTION"]
+    error_descriptions:
+      - '{"TEST001":{"message":"Test error 1"}}'
+      - '{"TEST002":{"message":"Test error 2"}}'
+    error_details: ["BUSINESS_EXCEPTION"]
+    created_by: "TestSystem"
+    
+  transaction:
+    statuses:
+      - weight: 80
+        value: "success"
+      - weight: 20
+        value: "error"
+    user_types: ["ETB_CUSTOMER"]
+    command_ids: ["test_command"]
+    channel_ids: [22]
+    user_relationship_numbers: ["12345678901234567"]
+    biz_req_inputs: ['{}']
+    biz_resp_outputs: ['{}']
+    created_by: "TestSystem"
+
+user_ids:
+  mode: "fixed"
+  fixed_list: [1234567890123456789]
+  range_min: 1000000000000000000
+  range_max: 9999999999999999999
+
+id_generation:
+  transaction_id_pattern: "TEST"
+  request_no_length: 20
+  trace_id_format: "uuid"          # Use UUID for testing
+  trace_id_length: 32
+
+kafka:
+  brokers: ["localhost:9092"]
+  topic: "yono-audit-test"         # Separate test topic
+  producer:
+    num_producers: 2               # Minimal producers
+    required_acks: 1
+    compression: "none"            # No compression for testing
+    max_message_bytes: 1000000
+    flush_frequency: "100ms"
+    flush_messages: 10
+    idempotent: false
+    retry_max: 3
+    retry_backoff: "100ms"
+  connection:
+    timeout: "10s"
+    keep_alive: "30s"
+
+concurrency:
+  worker_pool_size: 5              # Minimal workers
+  buffer_size: 100
+  rate_limiter_burst: 10
+
+logging:
+  level: "debug"                   # Debug logging for testing
+  format: "text"                   # Human-readable format
+  metrics_interval: "5s"
+
+monitoring:
+  enable_metrics: true
+  metrics_port: 9090

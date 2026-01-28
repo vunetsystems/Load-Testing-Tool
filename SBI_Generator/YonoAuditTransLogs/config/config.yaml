@@ -1,0 +1,129 @@
+# Execution Control
+execution:
+  mode: "duration"              # "duration" or "count"
+  duration: "5m"                # Duration string (e.g., "30s", "5m", "1h")
+  count: 10000                  # Total messages to generate (if mode=count)
+  eps: 2                     # Events per second target
+  
+# Message Distribution
+distribution:
+  error_only_percent: 0         # % of messages with only yono_adt_error
+  trans_only_percent: 70        # % of messages with only yono_adt_trans
+  both_percent: 30              # % of messages with both fields
+  
+# Session Management
+session:
+  rotation_interval: "30s"      # How often to generate new session ID
+  session_id_prefix: "DSASLX6BkBafb"
+  
+# Message Templates
+templates:
+  error:
+    error_codes:
+      - "BSee0e01"
+      - "BSeeeee1"
+      - "TEACS206"
+      - "TEACS207"
+    error_types:
+      - "BUSINESS_EXCEPTION"
+      - "TECHNICAL_EXCEPTION"
+    error_descriptions:
+      - '{"TEACS206":{"message":"Input provided is invalid"}}'
+      - '{"TEACS207":{"message":"Account not found"}}'
+      - '{"BSee0e01":{"message":"Service temporarily unavailable"}}'
+    error_details:
+      - "BUSINESS_EXCEPTION"
+      - "TECHNICAL_EXCEPTION"
+    created_by: "System"
+    
+  transaction:
+    statuses:
+      - weight: 90
+        value: "success"
+      - weight: 10
+        value: "error"
+    user_types:
+      - "ETB_CUSTOMER"
+      - "NTB_CUSTOMER"
+    command_ids:
+      - "statement_view"
+      - "home_dashboard_cards_getAllCBSAccountSummary"
+      - "home_dashboard_notification_getAllNotifications"
+      - "fund_transfer_initiate"
+      - "bill_payment_process"
+    channel_ids:
+      - 22
+      - 23
+    user_relationship_numbers:
+      - "02111764664914472"
+      - "82111764664914472"
+      - "12345678901234567"
+    biz_req_inputs:
+      - '{"viewAccountStatementRequest":{"fromDate":null,"accountNo":"30096060714","toDate":null}}'
+      - '{}'
+      - '{"accountNo":"30096060714"}'
+    biz_resp_outputs:
+      - '{}'
+      - '{"response":"{\"ITERATE\":\"Y\",\"STATUS\":\"Y\"}"}'
+      - '{"status":"success","data":[]}'
+    created_by: "System"
+    
+# User ID Configuration
+user_ids:
+  mode: "fixed"                 # "fixed" or "range"
+  fixed_list:
+    - 1212301889885902848
+    - 1090951129735557800
+    - 1234567890123456789
+  range_min: 1000000000000000000
+  range_max: 9223372036854775807
+  
+# ID Generation
+id_generation:
+  transaction_id_pattern: "cRhKTOYInnV"  # Part of generated trnsId
+  request_no_length: 27
+  trace_id_format: "hex"        # "hex" or "uuid"
+  trace_id_length: 32
+  
+# Kafka Producer Configuration
+kafka:
+  brokers:
+    - "e2e-83-134:9094"
+  topic: "yono-adt-trans"
+  
+  # Producer settings
+  producer:
+    num_producers: 20           # Number of concurrent Kafka producers
+    required_acks: 1            # 0=NoResponse, 1=WaitForLocal, -1=WaitForAll
+    compression: "snappy"       # "none", "gzip", "snappy", "lz4", "zstd"
+    max_message_bytes: 1000000
+    flush_frequency: "100ms"
+    flush_messages: 100
+    idempotent: false
+    retry_max: 3
+    retry_backoff: "100ms"
+    enable_key: true
+    
+  # Connection settings
+  connection:
+    timeout: "10s"
+    keep_alive: "30s"
+    enable_tls: true
+    insecure_skip_verify: true
+    
+# Concurrency Control
+concurrency:
+  worker_pool_size: 100         # Number of goroutines generating messages
+  buffer_size: 1000             # Channel buffer size between generators and producers
+  rate_limiter_burst: 100       # Token bucket burst size
+  
+# Logging
+logging:
+  level: "info"                 # "debug", "info", "warn", "error"
+  format: "json"                # "json" or "text"
+  metrics_interval: "10s"       # How often to log metrics
+  
+# Monitoring
+monitoring:
+  enable_metrics: true
+  metrics_port: 9090            # Prometheus metrics port
