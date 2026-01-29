@@ -2,6 +2,8 @@ package generator
 
 import (
 	"crypto/rand"
+	"encoding/json"
+	"fmt"
 	"math/big"
 	"time"
 
@@ -34,10 +36,35 @@ func NewMessageGenerator(cfg *config.Config, sessionMgr *SessionManager) *Messag
 	}
 }
 
-// GenerateMessage generates a message based on distribution
-func (mg *MessageGenerator) GenerateMessage() (*models.MessageWrapper, error) {
-	msgType := mg.selectMessageType()
+// GenerateMessage generates messages based on configuration
+func (mg *MessageGenerator) GenerateMessage() ([]*models.MessageWrapper, error) {
+	if mg.config.MessageType == "joint" {
+		return mg.generateJointMessages()
+	}
 
+	if mg.config.MessageType == "access_log" {
+		trnsID := GenerateTransactionID(mg.config.IDGeneration.TransactionIDPattern)
+		raw := mg.generateAccessLogContent(
+			trnsID,
+			mg.sessionManager.GetCurrentSession(),
+			GenerateRequestNo(mg.config.IDGeneration.RequestNoLength),
+			GenerateTraceID("hex", 32),
+		)
+
+		wrapper := &models.MessageWrapper{
+			Key:   trnsID,
+			Topic: mg.config.Kafka.AccessLogTopic,
+		}
+
+		if mg.config.AccessLog.WrapInMessage {
+			wrapper.Message = raw
+		} else {
+			wrapper.RawMessage = raw
+		}
+		return []*models.MessageWrapper{wrapper}, nil
+	}
+
+	msgType := mg.selectMessageType()
 	var wrapper models.MessageWrapper
 
 	// Generate shared fields
@@ -45,6 +72,8 @@ func (mg *MessageGenerator) GenerateMessage() (*models.MessageWrapper, error) {
 	sessnTknID := mg.sessionManager.GetCurrentSession()
 	usrID := mg.templateSelector.SelectUserID()
 	currentTime := time.Now().UnixMilli()
+
+	shouldWrap := false
 
 	switch msgType {
 	case ErrorOnly:
@@ -54,18 +83,26 @@ func (mg *MessageGenerator) GenerateMessage() (*models.MessageWrapper, error) {
 			return nil, err
 		}
 		wrapper.YonoAdtError = &errorJSON
+		shouldWrap = mg.config.Templates.Error.WrapInMessage
 
 	case TransOnly:
-		transMsg := mg.generateTransactionMessage(trnsID, sessnTknID, usrID, currentTime)
+		transMsg := mg.generateTransactionMessage(trnsID, sessnTknID, usrID, currentTime,
+			GenerateRequestNo(mg.config.IDGeneration.RequestNoLength),
+			GenerateTraceID(mg.config.IDGeneration.TraceIDFormat, mg.config.IDGeneration.TraceIDLength),
+			"success")
 		transJSON, err := transMsg.ToJSONString()
 		if err != nil {
 			return nil, err
 		}
 		wrapper.YonoAdtTrans = &transJSON
+		shouldWrap = mg.config.Templates.Transaction.WrapInMessage
 
 	case Both:
 		errorMsg := mg.generateErrorMessage(trnsID, sessnTknID, usrID, currentTime)
-		transMsg := mg.generateTransactionMessage(trnsID, sessnTknID, usrID, currentTime)
+		transMsg := mg.generateTransactionMessage(trnsID, sessnTknID, usrID, currentTime,
+			GenerateRequestNo(mg.config.IDGeneration.RequestNoLength),
+			GenerateTraceID(mg.config.IDGeneration.TraceIDFormat, mg.config.IDGeneration.TraceIDLength),
+			"error")
 
 		errorJSON, err := errorMsg.ToJSONString()
 		if err != nil {
@@ -78,9 +115,104 @@ func (mg *MessageGenerator) GenerateMessage() (*models.MessageWrapper, error) {
 
 		wrapper.YonoAdtError = &errorJSON
 		wrapper.YonoAdtTrans = &transJSON
+		shouldWrap = mg.config.Templates.Error.WrapInMessage || mg.config.Templates.Transaction.WrapInMessage
 	}
 
-	return &wrapper, nil
+	wrapper.Key = trnsID
+	wrapper.Topic = mg.config.Kafka.Topic
+
+	if shouldWrap {
+		jsonBytes, _ := json.Marshal(wrapper)
+		finalWrapper := &models.MessageWrapper{
+			Message: string(jsonBytes),
+			Key:     trnsID,
+			Topic:   mg.config.Kafka.Topic,
+		}
+		return []*models.MessageWrapper{finalWrapper}, nil
+	}
+
+	return []*models.MessageWrapper{&wrapper}, nil
+}
+
+// generateJointMessages generates both audit/transaction and access log messages with shared IDs
+func (mg *MessageGenerator) generateJointMessages() ([]*models.MessageWrapper, error) {
+	// 1. Generate core shared identifiers
+	trnsID := GenerateTransactionID(mg.config.IDGeneration.TransactionIDPattern)
+	sessnTknID := mg.sessionManager.GetCurrentSession()
+	reqNo := GenerateRequestNo(mg.config.IDGeneration.RequestNoLength)
+	traceID := GenerateTraceID("hex", 32)
+	usrID := mg.templateSelector.SelectUserID()
+	currentTime := time.Now().UnixMilli()
+
+	// 2. Generate Audit/Transaction Message
+	var auditWrapper models.MessageWrapper
+	msgType := mg.selectMessageType()
+	shouldWrapAudit := false
+
+	switch msgType {
+	case ErrorOnly:
+		errorMsg := mg.generateErrorMessage(trnsID, sessnTknID, usrID, currentTime)
+		errorJSON, err := errorMsg.ToJSONString()
+		if err != nil {
+			return nil, err
+		}
+		auditWrapper.YonoAdtError = &errorJSON
+		shouldWrapAudit = mg.config.Templates.Error.WrapInMessage
+
+	case TransOnly:
+		transMsg := mg.generateTransactionMessage(trnsID, sessnTknID, usrID, currentTime, reqNo, traceID, "success")
+		transJSON, err := transMsg.ToJSONString()
+		if err != nil {
+			return nil, err
+		}
+		auditWrapper.YonoAdtTrans = &transJSON
+		shouldWrapAudit = mg.config.Templates.Transaction.WrapInMessage
+
+	case Both:
+		errorMsg := mg.generateErrorMessage(trnsID, sessnTknID, usrID, currentTime)
+		transMsg := mg.generateTransactionMessage(trnsID, sessnTknID, usrID, currentTime, reqNo, traceID, "error")
+
+		errorJSON, err := errorMsg.ToJSONString()
+		if err != nil {
+			return nil, err
+		}
+		transJSON, err := transMsg.ToJSONString()
+		if err != nil {
+			return nil, err
+		}
+
+		auditWrapper.YonoAdtError = &errorJSON
+		auditWrapper.YonoAdtTrans = &transJSON
+		shouldWrapAudit = mg.config.Templates.Error.WrapInMessage || mg.config.Templates.Transaction.WrapInMessage
+	}
+	auditWrapper.Key = trnsID
+	auditWrapper.Topic = mg.config.Kafka.Topic
+
+	var finalAuditWrapper *models.MessageWrapper
+	if shouldWrapAudit {
+		jsonBytes, _ := json.Marshal(auditWrapper)
+		finalAuditWrapper = &models.MessageWrapper{
+			Message: string(jsonBytes),
+			Key:     trnsID,
+			Topic:   mg.config.Kafka.Topic,
+		}
+	} else {
+		finalAuditWrapper = &auditWrapper
+	}
+
+	// 3. Generate Access Log Message
+	accessRaw := mg.generateAccessLogContent(trnsID, sessnTknID, reqNo, traceID)
+	accessWrapper := &models.MessageWrapper{
+		Key:   trnsID,
+		Topic: mg.config.Kafka.AccessLogTopic,
+	}
+	if mg.config.AccessLog.WrapInMessage {
+		accessWrapper.Message = accessRaw
+	} else {
+		accessWrapper.RawMessage = accessRaw
+	}
+
+	return []*models.MessageWrapper{finalAuditWrapper, accessWrapper}, nil
 }
 
 // selectMessageType selects message type based on distribution
@@ -114,7 +246,7 @@ func (mg *MessageGenerator) generateErrorMessage(trnsID, sessnTknID string, usrI
 }
 
 // generateTransactionMessage generates a transaction message
-func (mg *MessageGenerator) generateTransactionMessage(trnsID, sessnTknID string, usrID, currentTime int64) *models.TransactionMessage {
+func (mg *MessageGenerator) generateTransactionMessage(trnsID, sessnTknID string, usrID, currentTime int64, reqNo, traceID, status string) *models.TransactionMessage {
 	// Generate strtTime slightly before endTime (10-200ms)
 	n, _ := rand.Int(rand.Reader, big.NewInt(191))
 	offset := 10 + n.Int64()
@@ -125,9 +257,9 @@ func (mg *MessageGenerator) generateTransactionMessage(trnsID, sessnTknID string
 		TrnsID:         trnsID,
 		SessnTknID:     sessnTknID,
 		ClntIPAddress:  nil,
-		ReqNo:          GenerateRequestNo(mg.config.IDGeneration.RequestNoLength),
+		ReqNo:          reqNo,
 		UsrRltnshpNo:   mg.templateSelector.SelectUserRelationshipNumber(),
-		TrnsStts:       mg.templateSelector.SelectTransactionStatus(),
+		TrnsStts:       status,
 		StrtTime:       strtTime,
 		EndTime:        currentTime,
 		BizReqInput:    mg.templateSelector.SelectBizReqInput(),
@@ -139,6 +271,28 @@ func (mg *MessageGenerator) generateTransactionMessage(trnsID, sessnTknID string
 		CrtdBy:         mg.config.Templates.Transaction.CreatedBy,
 		Crtdon:         currentTime,
 		ChnlID:         mg.templateSelector.SelectChannelID(),
-		TraceID:        GenerateTraceID(mg.config.IDGeneration.TraceIDFormat, mg.config.IDGeneration.TraceIDLength),
+		TraceID:        traceID,
 	}
+}
+
+// generateAccessLogContent generates a JSON formatted access log message string
+func (mg *MessageGenerator) generateAccessLogContent(trnsID, sessnTknID, reqNo, traceID string) string {
+	currentTime := time.Now()
+	timestamp := currentTime.Format("02/Jan/2006 15:04:05") + " IST"
+
+	// Span ID remains random per message even in joint mode as it represents a specific hop
+	spanID := GenerateTraceID("hex", 16)
+
+	n, _ := rand.Int(rand.Reader, big.NewInt(191))
+	execTime := 10 + n.Int64()
+
+	podName := mg.templateSelector.SelectPodName()
+	logPath := mg.templateSelector.SelectLogPath()
+	logName := mg.templateSelector.SelectLogName()
+	chnlID := mg.templateSelector.SelectAccessLogChannelID()
+	apiURL := mg.templateSelector.SelectAPIUrl()
+	status := mg.templateSelector.SelectHttpStatus()
+
+	return fmt.Sprintf("%s trace_id=%s span_id=%s dt.trace_id= dt.span_id= dt.entity.process_group_instance= journey_id= pod_name=%s log_path=%s INFO %s: -, session-token-id: %s, request-no: %s, transaction-id: %s, channel-id: %d, channel-version: %s, api-url: %s, execution-time: %d, http-status: %s",
+		timestamp, traceID, spanID, podName, logPath, logName, sessnTknID, reqNo, trnsID, chnlID, mg.config.AccessLog.ChannelVersion, apiURL, execTime, status)
 }

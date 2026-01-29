@@ -111,6 +111,57 @@ func (ts *TemplateSelector) SelectUserID() int64 {
 	return ts.config.UserIDs.RangeMin + n.Int64()
 }
 
+// SelectPodName randomly selects a pod name
+func (ts *TemplateSelector) SelectPodName() string {
+	return selectRandom(ts.config.AccessLog.PodNames)
+}
+
+// SelectLogPath randomly selects a log path
+func (ts *TemplateSelector) SelectLogPath() string {
+	return selectRandom(ts.config.AccessLog.LogPaths)
+}
+
+// SelectLogName randomly selects a log name
+func (ts *TemplateSelector) SelectLogName() string {
+	return selectRandom(ts.config.AccessLog.LogNames)
+}
+
+// SelectAccessLogChannelID randomly selects a channel ID for access logs
+func (ts *TemplateSelector) SelectAccessLogChannelID() int {
+	return selectRandomInt(ts.config.AccessLog.ChannelIDs)
+}
+
+// SelectAPIUrl randomly selects an API URL
+func (ts *TemplateSelector) SelectAPIUrl() string {
+	return selectRandom(ts.config.AccessLog.APIUrls)
+}
+
+// SelectHttpStatus randomly selects an HTTP status with weighting
+func (ts *TemplateSelector) SelectHttpStatus() string {
+	statuses := ts.config.AccessLog.HttpStatuses
+	if len(statuses) == 0 {
+		return "200"
+	}
+
+	totalWeight := 0
+	for _, status := range statuses {
+		totalWeight += status.Weight
+	}
+
+	n, _ := rand.Int(rand.Reader, big.NewInt(int64(totalWeight)))
+	randomWeight := int(n.Int64())
+
+	currentWeight := 0
+	for _, status := range statuses {
+		currentWeight += status.Weight
+		if randomWeight < currentWeight {
+			return status.Value
+		}
+	}
+
+	return statuses[0].Value
+}
+
 // selectRandom selects a random string from a slice
 func selectRandom(items []string) string {
 	if len(items) == 0 {

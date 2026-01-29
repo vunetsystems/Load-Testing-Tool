@@ -9,10 +9,12 @@ import (
 
 // Config represents the complete YAML configuration
 type Config struct {
+	MessageType  string             `yaml:"message_type"` // "json_yono" or "access_log"
 	Execution    ExecutionConfig    `yaml:"execution"`
 	Distribution DistributionConfig `yaml:"distribution"`
 	Session      SessionConfig      `yaml:"session"`
 	Templates    TemplatesConfig    `yaml:"templates"`
+	AccessLog    AccessLogConfig    `yaml:"access_log"`
 	UserIDs      UserIDsConfig      `yaml:"user_ids"`
 	IDGeneration IDGenerationConfig `yaml:"id_generation"`
 	Kafka        KafkaConfig        `yaml:"kafka"`
@@ -55,6 +57,7 @@ type ErrorTemplateConfig struct {
 	ErrorDescriptions  []string `yaml:"error_descriptions"`
 	ErrorDetails       []string `yaml:"error_details"`
 	CreatedBy          string   `yaml:"created_by"`
+	WrapInMessage      bool     `yaml:"wrap_in_message"`
 }
 
 // TransactionTemplateConfig contains transaction message templates
@@ -67,6 +70,19 @@ type TransactionTemplateConfig struct {
 	BizReqInputs            []string       `yaml:"biz_req_inputs"`
 	BizRespOutputs          []string       `yaml:"biz_resp_outputs"`
 	CreatedBy               string         `yaml:"created_by"`
+	WrapInMessage           bool           `yaml:"wrap_in_message"`
+}
+
+// AccessLogConfig contains access log message templates
+type AccessLogConfig struct {
+	PodNames       []string       `yaml:"pod_names"`
+	LogPaths       []string       `yaml:"log_paths"`
+	LogNames       []string       `yaml:"log_names"`
+	ChannelIDs     []int          `yaml:"channel_ids"`
+	ChannelVersion string         `yaml:"channel_version"`
+	APIUrls        []string       `yaml:"api_urls"`
+	HttpStatuses   []StatusWeight `yaml:"http_statuses"`
+	WrapInMessage  bool           `yaml:"wrap_in_message"`
 }
 
 // StatusWeight represents weighted transaction status
@@ -93,10 +109,11 @@ type IDGenerationConfig struct {
 
 // KafkaConfig contains Kafka producer settings
 type KafkaConfig struct {
-	Brokers    []string         `yaml:"brokers"`
-	Topic      string           `yaml:"topic"`
-	Producer   ProducerConfig   `yaml:"producer"`
-	Connection ConnectionConfig `yaml:"connection"`
+	Brokers        []string         `yaml:"brokers"`
+	Topic          string           `yaml:"topic"`
+	AccessLogTopic string           `yaml:"access_log_topic"`
+	Producer       ProducerConfig   `yaml:"producer"`
+	Connection     ConnectionConfig `yaml:"connection"`
 }
 
 // ProducerConfig contains Kafka producer settings

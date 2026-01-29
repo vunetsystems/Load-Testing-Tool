@@ -11,11 +11,12 @@ type Collector struct {
 	mu sync.RWMutex
 	
 	// Counters
-	generatedError int64
-	generatedTrans int64
-	generatedBoth  int64
-	sent           int64
-	failed         int64
+	generatedError     int64
+	generatedTrans     int64
+	generatedBoth      int64
+	generatedAccessLog int64
+	sent               int64
+	failed             int64
 	
 	// Latency tracking
 	latencies []time.Duration
@@ -46,6 +47,8 @@ func (c *Collector) IncrementGenerated(msgType string) {
 		atomic.AddInt64(&c.generatedTrans, 1)
 	case "both":
 		atomic.AddInt64(&c.generatedBoth, 1)
+	case "access_log":
+		atomic.AddInt64(&c.generatedAccessLog, 1)
 	}
 }
 
@@ -95,11 +98,12 @@ func (c *Collector) GetStats() Stats {
 	defer c.mu.RUnlock()
 	
 	return Stats{
-		GeneratedError: atomic.LoadInt64(&c.generatedError),
-		GeneratedTrans: atomic.LoadInt64(&c.generatedTrans),
-		GeneratedBoth:  atomic.LoadInt64(&c.generatedBoth),
-		Sent:           atomic.LoadInt64(&c.sent),
-		Failed:         atomic.LoadInt64(&c.failed),
+		GeneratedError:     atomic.LoadInt64(&c.generatedError),
+		GeneratedTrans:     atomic.LoadInt64(&c.generatedTrans),
+		GeneratedBoth:      atomic.LoadInt64(&c.generatedBoth),
+		GeneratedAccessLog: atomic.LoadInt64(&c.generatedAccessLog),
+		Sent:               atomic.LoadInt64(&c.sent),
+		Failed:             atomic.LoadInt64(&c.failed),
 		CurrentEPS:     c.currentEPS,
 		Uptime:         time.Since(c.startTime),
 	}
@@ -107,16 +111,17 @@ func (c *Collector) GetStats() Stats {
 
 // Stats represents collected statistics
 type Stats struct {
-	GeneratedError int64
-	GeneratedTrans int64
-	GeneratedBoth  int64
-	Sent           int64
-	Failed         int64
+	GeneratedError     int64
+	GeneratedTrans     int64
+	GeneratedBoth      int64
+	GeneratedAccessLog int64
+	Sent               int64
+	Failed             int64
 	CurrentEPS     float64
 	Uptime         time.Duration
 }
 
 // TotalGenerated returns total messages generated
 func (s *Stats) TotalGenerated() int64 {
-	return s.GeneratedError + s.GeneratedTrans + s.GeneratedBoth
+	return s.GeneratedError + s.GeneratedTrans + s.GeneratedBoth + s.GeneratedAccessLog
 }

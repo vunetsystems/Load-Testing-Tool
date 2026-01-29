@@ -6,10 +6,17 @@ import (
 
 // Validate validates the configuration
 func (c *Config) Validate() error {
-	// Validate distribution percentages
-	total := c.Distribution.ErrorOnlyPercent + c.Distribution.TransOnlyPercent + c.Distribution.BothPercent
-	if total != 100 {
-		return fmt.Errorf("distribution percentages must sum to 100, got %d", total)
+	// Validate message type
+	if c.MessageType != "" && c.MessageType != "json_yono" && c.MessageType != "access_log" && c.MessageType != "joint" {
+		return fmt.Errorf("message_type must be 'json_yono', 'access_log' or 'joint', got '%s'", c.MessageType)
+	}
+
+	// Validate distribution percentages (only relevant for json_yono or joint)
+	if c.MessageType == "json_yono" || c.MessageType == "joint" || c.MessageType == "" {
+		total := c.Distribution.ErrorOnlyPercent + c.Distribution.TransOnlyPercent + c.Distribution.BothPercent
+		if total != 100 {
+			return fmt.Errorf("distribution percentages must sum to 100, got %d", total)
+		}
 	}
 
 	// Validate execution mode
@@ -88,25 +95,48 @@ func (c *Config) Validate() error {
 	}
 
 	// Validate templates
-	if len(c.Templates.Error.ErrorCodes) == 0 {
-		return fmt.Errorf("at least one error code must be specified")
+	if c.MessageType == "access_log" || c.MessageType == "joint" {
+		if len(c.AccessLog.PodNames) == 0 {
+			return fmt.Errorf("at least one pod name must be specified for access_log")
+		}
+		if len(c.AccessLog.APIUrls) == 0 {
+			return fmt.Errorf("at least one API URL must be specified for access_log")
+		}
 	}
 
-	if len(c.Templates.Transaction.CommandIDs) == 0 {
-		return fmt.Errorf("at least one command ID must be specified")
+	if c.MessageType == "json_yono" || c.MessageType == "joint" || c.MessageType == "" {
+		if len(c.Templates.Error.ErrorCodes) == 0 {
+			return fmt.Errorf("at least one error code must be specified")
+		}
+
+		if len(c.Templates.Transaction.CommandIDs) == 0 {
+			return fmt.Errorf("at least one command ID must be specified")
+		}
+
+		// Validate status weights
+		if len(c.Templates.Transaction.Statuses) == 0 {
+			return fmt.Errorf("at least one transaction status must be specified")
+		}
 	}
 
-	// Validate status weights
-	if len(c.Templates.Transaction.Statuses) == 0 {
-		return fmt.Errorf("at least one transaction status must be specified")
+	if c.MessageType == "access_log" || c.MessageType == "joint" {
+		totalAccessLogWeight := 0
+		for _, status := range c.AccessLog.HttpStatuses {
+			totalAccessLogWeight += status.Weight
+		}
+		if totalAccessLogWeight == 0 {
+			return fmt.Errorf("total access log status weight must be greater than 0")
+		}
 	}
 
-	totalWeight := 0
-	for _, status := range c.Templates.Transaction.Statuses {
-		totalWeight += status.Weight
-	}
-	if totalWeight == 0 {
-		return fmt.Errorf("total status weight must be greater than 0")
+	if c.MessageType == "json_yono" || c.MessageType == "joint" || c.MessageType == "" {
+		totalTransWeight := 0
+		for _, status := range c.Templates.Transaction.Statuses {
+			totalTransWeight += status.Weight
+		}
+		if totalTransWeight == 0 {
+			return fmt.Errorf("total transaction status weight must be greater than 0")
+		}
 	}
 
 	// Validate concurrency settings

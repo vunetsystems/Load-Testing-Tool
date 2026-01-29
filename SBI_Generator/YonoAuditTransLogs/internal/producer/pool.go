@@ -52,9 +52,9 @@ func (pp *ProducerPool) GetProducer() *KafkaProducer {
 }
 
 // SendMessage sends a message using round-robin producer selection
-func (pp *ProducerPool) SendMessage(key string, value []byte) {
+func (pp *ProducerPool) SendMessage(topic, key string, value []byte) {
 	producer := pp.GetProducer()
-	producer.SendMessage(key, value)
+	producer.SendMessage(topic, key, value)
 }
 
 // aggregateErrors aggregates errors from a producer

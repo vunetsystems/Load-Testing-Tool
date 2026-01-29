@@ -120,6 +120,7 @@ func main() {
 		zap.Int64("error_only", stats.GeneratedError),
 		zap.Int64("trans_only", stats.GeneratedTrans),
 		zap.Int64("both", stats.GeneratedBoth),
+		zap.Int64("access_log", stats.GeneratedAccessLog),
 		zap.Int64("sent", stats.Sent),
 		zap.Int64("failed", stats.Failed),
 		zap.Duration("elapsed", elapsed),

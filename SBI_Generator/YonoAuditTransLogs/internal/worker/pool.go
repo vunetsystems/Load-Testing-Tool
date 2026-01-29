@@ -99,47 +99,50 @@ func (wp *WorkerPool) worker(totalMessages int64, duration time.Duration) {
 			return
 		}
 		
-		// Generate message
+		// Generate messages
 		startTime := time.Now()
-		msg, err := wp.msgGenerator.GenerateMessage()
+		messages, err := wp.msgGenerator.GenerateMessage()
 		if err != nil {
 			wp.metricsCol.IncrementFailed()
 			continue
 		}
-		
-		// Convert to JSON
-		msgBytes, err := msg.ToJSON()
-		if err != nil {
-			wp.metricsCol.IncrementFailed()
-			continue
-		}
-		
-		// Determine message type for metrics
-		msgType := "both"
-		if msg.YonoAdtError != nil && msg.YonoAdtTrans == nil {
-			msgType = "error"
-		} else if msg.YonoAdtError == nil && msg.YonoAdtTrans != nil {
-			msgType = "trans"
-		}
-		
-		// Extract transaction ID for key (from either error or trans) if enabled
-		var key string
-		if wp.config.Kafka.Producer.EnableKey {
-			if msg.YonoAdtError != nil {
-				// Parse to get trnsId - for simplicity, use timestamp
-				key = string(msgBytes[:20]) // Use first 20 bytes as key
-			} else if msg.YonoAdtTrans != nil {
-				key = string(msgBytes[:20])
+
+		for _, msg := range messages {
+			// Convert to JSON
+			msgBytes, err := msg.ToJSON()
+			if err != nil {
+				wp.metricsCol.IncrementFailed()
+				continue
 			}
+
+			// Determine message type for metrics
+			msgType := "both"
+			if wp.config.MessageType == "access_log" {
+				msgType = "access_log"
+			} else if msg.YonoAdtError != nil && msg.YonoAdtTrans == nil {
+				msgType = "error"
+			} else if msg.YonoAdtError == nil && msg.YonoAdtTrans != nil {
+				msgType = "trans"
+			} else if msg.Message != "" {
+				msgType = "access_log"
+			}
+
+			// Extract transaction ID for key if enabled
+			var key string
+			if wp.config.Kafka.Producer.EnableKey {
+				key = msg.Key
+			}
+
+			// Send to Kafka
+			wp.producerPool.SendMessage(msg.Topic, key, msgBytes)
+
+			// Update metrics
+			wp.metricsCol.IncrementGenerated(msgType)
 		}
-		
-		// Send to Kafka
-		wp.producerPool.SendMessage(key, msgBytes)
-		
-		// Update metrics
-		wp.metricsCol.IncrementGenerated(msgType)
+
+		// Update latency metrics based on the whole operation
 		wp.metricsCol.RecordLatency(time.Since(startTime))
-		
+
 		messageCount++
 	}
 }

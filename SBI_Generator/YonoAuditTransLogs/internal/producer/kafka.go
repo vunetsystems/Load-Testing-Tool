@@ -116,9 +116,14 @@ func NewKafkaProducer(cfg *config.Config) (*KafkaProducer, error) {
 }
 
 // SendMessage sends a message to Kafka
-func (kp *KafkaProducer) SendMessage(key string, value []byte) {
+func (kp *KafkaProducer) SendMessage(topic, key string, value []byte) {
+	targetTopic := kp.topic
+	if topic != "" {
+		targetTopic = topic
+	}
+
 	msg := &sarama.ProducerMessage{
-		Topic:     kp.topic,
+		Topic:     targetTopic,
 		Value:     sarama.ByteEncoder(value),
 		Timestamp: time.Now(),
 	}

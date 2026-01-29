@@ -1,0 +1,96 @@
+# Message Type Configuration
+message_type: "access_log"
+
+# Execution Control
+execution:
+  mode: "duration"              # "duration" or "count"
+  duration: "1h"                # Duration string
+  count: 10000                  
+  eps: 7500                      # Events per second target
+  
+# Session Management
+session:
+  rotation_interval: "30s"      
+  session_id_prefix: "DSaASLX68kBafb"
+  
+# Access Log Templates
+access_log:
+  pod_names:
+    - "gateway-6d9c98bdc7-4w5x2"
+    - "homems-7f459887c7-8zqlc"
+  log_paths:
+    - "/opt/yono_logs/gateway/gateway_access_gateway-6d9c98bdc7-4w5x2.log"
+    - "/opt/yono_logs/gateway/gateway_outbound_access_gateway-6d9c98bdc7-4w5x2.log"
+    - "/opt/yono_logs/homems/2026-01/apiaccess_homems-7f459887c7-8zqlc.log"
+  log_names:
+    - "gateway-access-log"
+    - "outbound-access-log"
+    - "api-access-log"
+  channel_ids:
+    - 22
+    - 23
+  channel_version: "v1.0"
+  api_urls:
+    - "home/dashboard/cards/getAllCBSAccountSummary"
+    - "https://istio-ingressgateway.istio-system.svc.cluster.local/HomeMS/APIServices/home_dashboard_cards_getAllCBSAccountSummary"
+    - "home/dashboard/notification/getAllNotifications"
+  http_statuses:
+    - weight: 95
+      value: "200"
+    - weight: 5
+      value: "500"
+
+# User ID Configuration (Not directly used in access_log but needed for struct)
+user_ids:
+  mode: "fixed"
+  fixed_list: [1212301889885902848]
+  range_min: 1000000000000000000
+  range_max: 9223372036854775807
+  
+# ID Generation parameters
+id_generation:
+  transaction_id_pattern: "EZ509e202T"
+  request_no_length: 27
+  trace_id_format: "hex"
+  trace_id_length: 32
+  
+# Kafka Producer Configuration
+kafka:
+  brokers:
+    - "e2e-83-134:9094"
+  topic: "ms-logs"
+  
+  producer:
+    num_producers: 10
+    required_acks: 1
+    compression: "none"
+    max_message_bytes: 1000000
+    flush_frequency: "100ms"
+    flush_messages: 100
+    idempotent: false
+    retry_max: 3
+    retry_backoff: "100ms"
+    enable_key: true
+    
+  connection:
+    timeout: "10s"
+    keep_alive: "30s"
+    enable_tls: true
+    insecure_skip_verify: true
+    
+# Concurrency Control
+concurrency:
+  worker_pool_size: 100
+  buffer_size: 1000
+  rate_limiter_burst: 100
+  
+# Logging
+logging:
+  level: "info"
+  format: "text"
+  metrics_interval: "10s"
+  
+# Monitoring
+monitoring:
+  enable_metrics: true
+  metrics_port: 9091
