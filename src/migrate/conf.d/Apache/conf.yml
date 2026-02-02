@@ -4,7 +4,7 @@ uniquekey:
   DataType: IPv4
   ValueType: "RandomFixed"
   Value: "10.10.10.1"
-  NumUniqKey: 5000
+  NumUniqKey: 333
 period: 1s
 #LogsPerSec: 600
 #MBPerDay: 100
@@ -12,7 +12,7 @@ period: 1s
 # Add the timestamp field name and type. Type could be epoch_in_seconds, epoch_in_ms or datetime_rfc3339
 timestamp:
   name: "@timestamp"
-  type: datetime_rfc3339
+  type: ISO_8601
 
 # Include following yml files from this directory.. To include all, please use ‘*’
 #Include_sub_modules: [status, logs]

@@ -61,14 +61,22 @@ sources:
     inputTopic:
       - name: "apache-metrics-input"
     outputTopic:
-      - name: "apache-logs"
       - name: "apache-metrics"
     clickhouseTables:
-      - "vlogs_apachelogs_data"
       - "vmetrics_apachemetrics_data"
     pipeline:
       - "apache-metrics"
 
+  - name: "Apache_logs"
+    inputTopic:
+      - name: "apache-logs-input"
+    outputTopic:
+      - name: "apache-logs"
+    clickhouseTables:
+      - "vlogs_apachelogs_data"
+    pipeline:
+      - "apache-logs"
+      
   - name: "LinuxMonitor"
     inputTopic:
       - name: "linux-monitor-input"
@@ -244,8 +252,28 @@ sources:
       - name: "traces-input"
     outputTopic: []
     clickhouseTables:
-      - "vtraces_metadata_data"
-      - "vtraces_apm_span_data"
-      - "vmetrics_apm_span_data"
+    - "vtraces_apm_span_data"
+    - "vtraces_metadata_data"
+    - "vtraces_metadata_data_v1"
+    - "vtraces_rum_json_data"
+    - "vtraces_rum_transactions_1min_table_data"
+    - "vtraces_rum_transactions_1min_table_data_data"
+    - "vtraces_service_node_map_1min_table_data"
+    - "vtraces_service_request_metrics_table_data_filters_data"
+    - "vtraces_service_request_metrics_transactions_1min_table_data"
+    - "vtraces_service_request_metrics_transactions_1min_table_data_quantile_data"
     pipeline:
-      - "traces-pipeline"
+      - "traces"
+      
+  
+  - name: "SpringBoot"
+    inputTopic:
+      - name: "spring-boot-metrics-input"
+    outputTopic:
+      - name: "spring-boot-prometheus-metrics"
+      - name: "spring-boot-threads-metrics"
+    clickhouseTables:
+      - "vmetrics_spring_boot_prometheus_metrics_data"
+      - "vmetrics_spring_boot_threads_metrics_data"
+    pipeline:
+      - "spring-boot-metrics"

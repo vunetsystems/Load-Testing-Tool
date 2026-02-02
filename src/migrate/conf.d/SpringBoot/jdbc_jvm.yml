@@ -1,0 +1,59 @@
+group:
+- name: good
+  fields:
+  - name: name
+    DataType: String
+    ValueType: Constant
+    Value: prometheus
+  - name: tags,environment
+    DataType: String
+    ValueType: Constant
+    Value: local
+  - name: tags,host
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,application
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,url
+    DataType: String
+    ValueType: Constant
+    Value: e2e-92-21.ssdcloudindia.net/actuator/prometheus
+  - name: tags,name
+    DataType: String
+    ValueType: Constant
+    Value: dataSource
+  - name: tags,compiler
+    DataType: String
+    ValueType: Constant
+    Value: HotSpot 64-Bit Tiered Compilers
+  - name: fields,jdbc_connections_active
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 18-20
+  - name: fields,jdbc_connections_idle
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-1
+  - name: fields,jdbc_connections_max
+    DataType: Uint64
+    ValueType: Constant
+    Value: 21
+  - name: fields,jdbc_connections_min
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 8-12
+  - name: fields,jvm_classes_loaded_classes
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 18000-20000
+  - name: fields,jvm_classes_unloaded_classes_total
+    DataType: Uint64
+    ValueType: RandomEverIncreasing
+    Value: 100-200
+  - name: fields,jvm_compilation_time_ms_total
+    DataType: Uint64
+    ValueType: RandomEverIncreasing
+    Value: 6000-8000

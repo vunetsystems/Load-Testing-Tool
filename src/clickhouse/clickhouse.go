@@ -26,13 +26,32 @@ type KubernetesConfig struct {
 	DefaultNamespace string `yaml:"default_namespace"`
 }
 
+// NetworkConfig holds network-related configuration
+type NetworkConfig struct {
+	CurrentNodeIP string `yaml:"current_node_ip"`
+	Port          int    `yaml:"port"`
+}
+
+// PathsConfig holds paths-related configuration
+type PathsConfig struct {
+	LocalBackupsDir string `yaml:"local_backups_dir"`
+	LocalLogsDir    string `yaml:"local_logs_dir"`
+	RemoteBinaryDir string `yaml:"remote_binary_dir"`
+	RemoteConfDir   string `yaml:"remote_conf_dir"`
+	RemoteSSHKey    string `yaml:"remote_ssh_key"`
+	StaticDir       string `yaml:"static_dir"`
+}
+
 // AppConfig holds the entire application configuration
 type AppConfig struct {
+	AppVersion      string           `yaml:"app_version"`
 	ClickHouse      ClickHouseConfig `yaml:"clickhouse"`
 	MonitoredNodes  []string         `yaml:"monitored_nodes"`
 	MonitoringDB    ClickHouseConfig `yaml:"monitoring_db"`
 	ClickHouseAdmin ClickHouseConfig `yaml:"truncate_db"`
 	Kubernetes      KubernetesConfig `yaml:"kubernetes"`
+	Network         NetworkConfig    `yaml:"network"`
+	Paths           PathsConfig      `yaml:"paths"`
 }
 
 // ClickHouseClient wraps the ClickHouse connection and config
@@ -104,6 +123,9 @@ var clickHouseAdminClient *ClickHouseClient
 var clickHouseAdminConfig ClickHouseConfig
 var monitoredNodes []string
 var kubernetesConfig KubernetesConfig
+var NetworkCfg NetworkConfig
+var AppVersion string
+var PathsCfg PathsConfig
 
 // LoadConfig loads configuration from YAML file
 func LoadConfig(configPath string) error {
@@ -123,6 +145,9 @@ func LoadConfig(configPath string) error {
 	clickHouseAdminConfig = config.ClickHouseAdmin
 	monitoredNodes = config.MonitoredNodes
 	kubernetesConfig = config.Kubernetes
+	NetworkCfg = config.Network
+	AppVersion = config.AppVersion
+	PathsCfg = config.Paths
 
 	logger.LogWithNode("System", "ClickHouse", "Configuration loaded successfully", "info")
 	return nil

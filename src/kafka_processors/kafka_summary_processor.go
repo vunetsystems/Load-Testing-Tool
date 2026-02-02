@@ -12,6 +12,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -70,9 +71,43 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 	`)
 
 	var testID, o11ySourcesStr string
-	var startTime, endTime time.Time
+	var startTimeStr string
+	var endTimeNull sql.NullString
 	var targetEPS int
-	err := row.Scan(&testID, &startTime, &endTime, &o11ySourcesStr, &targetEPS)
+	err := row.Scan(&testID, &startTimeStr, &endTimeNull, &o11ySourcesStr, &targetEPS)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			logger.LogWithNode("System", "KafkaSummaryProcessor", "No unsummarized completed tests found", "info")
+			return nil
+		}
+		return fmt.Errorf("failed to query pending test: %w", err)
+	}
+
+	// Parse start_time
+	startTime, err := time.Parse(time.RFC3339Nano, startTimeStr)
+	if err != nil {
+		// Try alternative format if RFC3339Nano fails
+		startTime, err = time.Parse("2006-01-02 15:04:05.999999999-07:00", startTimeStr)
+		if err != nil {
+			return fmt.Errorf("failed to parse start_time '%s': %w", startTimeStr, err)
+		}
+	}
+
+	// Parse end_time if not null
+	var endTime time.Time
+	if endTimeNull.Valid {
+		endTime, err = time.Parse(time.RFC3339Nano, endTimeNull.String)
+		if err != nil {
+			// Try alternative format if RFC3339Nano fails
+			endTime, err = time.Parse("2006-01-02 15:04:05.999999999-07:00", endTimeNull.String)
+			if err != nil {
+				return fmt.Errorf("failed to parse end_time '%s': %w", endTimeNull.String, err)
+			}
+		}
+	} else {
+		// If end_time is null, use start_time + timeout or something, but for now, set to start_time
+		endTime = startTime
+	}
 	if err != nil {
 		if err == sql.ErrNoRows {
 			logger.LogWithNode("System", "KafkaSummaryProcessor", "No unsummarized completed tests found", "info")
@@ -155,11 +190,15 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 	// 5. Collect ClickHouse tables for ingestion EPS calculation
 	// Added for ingestion summary - collect all clickhouse tables from o11y sources
 	var allClickHouseTables []string
+	tableToSource := make(map[string]string)
 	for _, src := range o11ySources {
 		for _, s := range cfg.Sources {
 			if strings.ToLower(strings.ReplaceAll(s.Name, " ", "")) == strings.ToLower(strings.ReplaceAll(src, " ", "")) {
 				if len(s.ClickHouseTables) > 0 {
-					allClickHouseTables = append(allClickHouseTables, s.ClickHouseTables...)
+					for _, table := range s.ClickHouseTables {
+						tableToSource[table] = src
+						allClickHouseTables = append(allClickHouseTables, table)
+					}
 				}
 				break
 			}
@@ -174,6 +213,13 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		if err != nil {
 			logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to fetch ingestion EPS: %v", err))
 			ingestionEntries = []IngestionEPSEntry{}
+		}
+	}
+
+	// Populate O11ySource for each ingestion entry
+	for i := range ingestionEntries {
+		if source, exists := tableToSource[ingestionEntries[i].Table]; exists {
+			ingestionEntries[i].O11ySource = source
 		}
 	}
 
@@ -239,16 +285,12 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		}
 	}
 
-	// 4. Fetch and compute pod resource metrics
-	podMetrics, podDataFound, err := pod_processors.ProcessPodResourceSummary(chClient, testID, startTime, endTime)
-	if err != nil {
-		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process pod metrics: %v", err))
-		podMetrics = pod_processors.PodMetrics{}
-		podDataFound = false
-	}
+	// 4. Fetch and compute pod JSON metrics with node
+	podsCpuMap, podsMemoryMap, podRestartsMap, found, err := pod_processors.ProcessPodResourceSummaryWithNode(chClient, testID, startTime, endTime)
+	logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("ProcessPodResourceSummaryWithNode returned: found=%t, err=%v", found, err), "info")
+	logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("podsCpuMap is nil: %t, len: %d", podsCpuMap == nil, len(podsCpuMap)), "info")
+	logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("podsMemoryMap is nil: %t, len: %d", podsMemoryMap == nil, len(podsMemoryMap)), "info")
 
-	// 5. Fetch and compute pod JSON metrics with node
-	podsCpuMap, podsMemoryMap, podRestartsMap, _, err := pod_processors.ProcessPodResourceSummaryWithNode(chClient, testID, startTime, endTime)
 	var podsCpuJSON, podsMemoryJSON, podRestartsJSON string
 	if err != nil {
 		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process pod JSON metrics: %v", err))
@@ -256,36 +298,49 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		podsMemoryJSON = ""
 		podRestartsJSON = ""
 	} else {
-		podsCpuBytes, _ := json.Marshal(podsCpuMap)
-		podsMemoryBytes, _ := json.Marshal(podsMemoryMap)
-		podRestartsBytes, _ := json.Marshal(podRestartsMap)
+		logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("About to marshal maps - CPU map: %v", podsCpuMap), "debug")
+		podsCpuBytes, marshalErr := json.Marshal(podsCpuMap)
+		if marshalErr != nil {
+			logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to marshal podsCpuMap: %v", marshalErr))
+		}
+		logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("Marshaled podsCpuBytes length: %d, content: %s", len(podsCpuBytes), string(podsCpuBytes)), "info")
+
+		podsMemoryBytes, marshalErr := json.Marshal(podsMemoryMap)
+		if marshalErr != nil {
+			logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to marshal podsMemoryMap: %v", marshalErr))
+		}
+		logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("Marshaled podsMemoryBytes length: %d, content: %s", len(podsMemoryBytes), string(podsMemoryBytes)), "info")
+
+		podRestartsBytes, marshalErr := json.Marshal(podRestartsMap)
+		if marshalErr != nil {
+			logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to marshal podRestartsMap: %v", marshalErr))
+		}
+
 		podsCpuJSON = string(podsCpuBytes)
 		podsMemoryJSON = string(podsMemoryBytes)
 		podRestartsJSON = string(podRestartsBytes)
+
+		logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("Final JSON strings - CPU len: %d, Memory len: %d, Restarts len: %d", len(podsCpuJSON), len(podsMemoryJSON), len(podRestartsJSON)), "info")
 	}
 
-	// 6. Fetch and compute node memory metrics
-	nodeMemoryResult, err := ProcessNodeMemorySummary(chClient, startTime, endTime)
-	if err != nil {
-		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process node memory metrics: %v", err))
-		nodeMemoryResult = NodeMemoryResult{} // default to zeros
-	}
-
-	// 7. Fetch and compute node CPU metrics
-	nodeCPUResult, err := ProcessNodeCPUSummary(chClient, startTime, endTime)
-	if err != nil {
-		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process node CPU metrics: %v", err))
-		nodeCPUResult = NodeCPUResult{} // default to zeros
-	}
-
-	// 8. Fetch and compute consumer lag metrics
+	// 5. Fetch and compute consumer lag metrics
 	minLag, avgLag, maxLag, err := ProcessConsumerLagSummary(chClient, inputTopics, startTime, endTime)
 	if err != nil {
 		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process consumer lag metrics: %v", err))
 		minLag, avgLag, maxLag = 0.0, 0.0, 0.0
 	}
 
-	// 9. Fetch and compute node JSON metrics
+	// 5.1. Fetch and compute consumer lag metrics per source (NEW)
+	logger.LogWithNode("System", "KafkaSummaryProcessor", "About to call ProcessPerSourceLagSummary", "info")
+	err = ProcessPerSourceLagSummary(db, chClient, testID, o11ySources, startTime, endTime)
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to process per-source lag: %v", err))
+		// Continue with summarization even if per-source lag fails
+	} else {
+		logger.LogWithNode("System", "KafkaSummaryProcessor", "Per-source lag processing completed successfully", "info")
+	}
+
+	// 7. Fetch and compute node JSON metrics
 	nodesCpuMap, nodesMemoryMap, _, err := ProcessNodeResourceSummaryJSON(chClient, startTime, endTime)
 	var nodesCpuJSON, nodesMemoryJSON string
 	if err != nil {
@@ -293,11 +348,32 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		nodesCpuJSON = ""
 		nodesMemoryJSON = ""
 	} else {
-		nodesCpuBytes, _ := json.Marshal(nodesCpuMap)
-		nodesMemoryBytes, _ := json.Marshal(nodesMemoryMap)
-		nodesCpuJSON = string(nodesCpuBytes)
-		nodesMemoryJSON = string(nodesMemoryBytes)
+		nodesCpuBytes, marshalErr := json.Marshal(nodesCpuMap)
+		if marshalErr != nil {
+			logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to marshal nodesCpuMap: %v", marshalErr))
+			nodesCpuJSON = ""
+		} else {
+			nodesCpuJSON = string(nodesCpuBytes)
+			logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("nodesCpuJSON length: %d, content: %s", len(nodesCpuJSON), nodesCpuJSON), "info")
+		}
+
+		nodesMemoryBytes, marshalErr := json.Marshal(nodesMemoryMap)
+		if marshalErr != nil {
+			logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to marshal nodesMemoryMap: %v", marshalErr))
+			nodesMemoryJSON = ""
+		} else {
+			nodesMemoryJSON = string(nodesMemoryBytes)
+			logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("nodesMemoryJSON length: %d, content: %s", len(nodesMemoryJSON), nodesMemoryJSON), "info")
+		}
 	}
+
+	// 8. Compute detailed topic metrics
+	detailedTopicMetrics, err := computeDetailedTopicMetrics(o11ySources, cfg, chClient, startTime, endTime)
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to compute detailed topic metrics: %v", err))
+		detailedTopicMetrics = make(map[string]map[string]map[string]interface{})
+	}
+	topicMetricsJSON, _ := json.Marshal(detailedTopicMetrics)
 
 	// 9. Store the summary back to the database
 	processRateSummaryJSON, _ := json.Marshal(processRateSummary) // Added for process rate summary - store in separate column
@@ -339,94 +415,51 @@ func ProcessKafkaSummaries(db *sql.DB, chClient *clickhouse.ClickHouseClient) er
 		minOutputRate = 0.0
 	}
 
-	// Calculate data loss percentage (placeholder, since totals are removed)
-	var dataLossPct float64 = 0.0
-
 	_, err = db.Exec(`
 		UPDATE test_runs
 		SET avg_input_msgs_per_sec = ?, avg_output_msgs_per_sec = ?,
 		    max_input_msgs_per_sec = ?, max_output_msgs_per_sec = ?,
 		    min_input_msgs_per_sec = ?, min_output_msgs_per_sec = ?,
-		    data_loss_pct = ?, kafka_summary_generated = 1,
-		    pod_resource_check = ?,
-		    kafka_cluster_cp_kafka_0_cpu_min = ?, kafka_cluster_cp_kafka_0_cpu_avg = ?, kafka_cluster_cp_kafka_0_cpu_max = ?,
-		    kafka_cluster_cp_kafka_0_mem_min = ?, kafka_cluster_cp_kafka_0_mem_avg = ?, kafka_cluster_cp_kafka_0_mem_max = ?,
-		    kafka_cluster_cp_kafka_0_cpu_allocated = ?, kafka_cluster_cp_kafka_0_mem_allocated = ?,
-		    kafka_cluster_cp_kafka_1_cpu_min = ?, kafka_cluster_cp_kafka_1_cpu_avg = ?, kafka_cluster_cp_kafka_1_cpu_max = ?,
-		    kafka_cluster_cp_kafka_1_mem_min = ?, kafka_cluster_cp_kafka_1_mem_avg = ?, kafka_cluster_cp_kafka_1_mem_max = ?,
-		    kafka_cluster_cp_kafka_1_cpu_allocated = ?, kafka_cluster_cp_kafka_1_mem_allocated = ?,
-		    kafka_cluster_cp_kafka_2_cpu_min = ?, kafka_cluster_cp_kafka_2_cpu_avg = ?, kafka_cluster_cp_kafka_2_cpu_max = ?,
-		    kafka_cluster_cp_kafka_2_mem_min = ?, kafka_cluster_cp_kafka_2_mem_avg = ?, kafka_cluster_cp_kafka_2_mem_max = ?,
-		    kafka_cluster_cp_kafka_2_cpu_allocated = ?, kafka_cluster_cp_kafka_2_mem_allocated = ?,
-		    chi_clickhouse_vusmart_0_0_0_cpu_min = ?, chi_clickhouse_vusmart_0_0_0_cpu_avg = ?, chi_clickhouse_vusmart_0_0_0_cpu_max = ?,
-		    chi_clickhouse_vusmart_0_0_0_mem_min = ?, chi_clickhouse_vusmart_0_0_0_mem_avg = ?, chi_clickhouse_vusmart_0_0_0_mem_max = ?,
-		    chi_clickhouse_vusmart_0_0_0_cpu_allocated = ?, chi_clickhouse_vusmart_0_0_0_mem_allocated = ?,
-		    chi_clickhouse_vusmart_0_1_0_cpu_min = ?, chi_clickhouse_vusmart_0_1_0_cpu_avg = ?, chi_clickhouse_vusmart_0_1_0_cpu_max = ?,
-		    chi_clickhouse_vusmart_0_1_0_mem_min = ?, chi_clickhouse_vusmart_0_1_0_mem_avg = ?, chi_clickhouse_vusmart_0_1_0_mem_max = ?,
-		    chi_clickhouse_vusmart_0_1_0_cpu_allocated = ?, chi_clickhouse_vusmart_0_1_0_mem_allocated = ?,
-		    pipeline_pod_cpu_min = ?, pipeline_pod_cpu_avg = ?, pipeline_pod_cpu_max = ?,
-		    pipeline_pod_mem_min = ?, pipeline_pod_mem_avg = ?, pipeline_pod_mem_max = ?,
-		    pipeline_pod_cpu_allocated = ?, pipeline_pod_mem_allocated = ?,
-		    process_rate_summary = ?, ingestion_summary = ?, pipeline_info = ?, pods_cpu = ?, pods_memory = ?, pod_restarts = ?, nodes_cpu = ?, nodes_memory = ?, -- Added for pod and node JSON metrics
-		    kafka_1_node_mem_min = ?, kafka_1_node_mem_avg = ?, kafka_1_node_mem_max = ?,
-		    kafka_2_node_mem_min = ?, kafka_2_node_mem_avg = ?, kafka_2_node_mem_max = ?,
-		    kafka_3_node_mem_min = ?, kafka_3_node_mem_avg = ?, kafka_3_node_mem_max = ?,
-		    ch1_node_mem_min = ?, ch1_node_mem_avg = ?, ch1_node_mem_max = ?,
-		    ch2_node_mem_min = ?, ch2_node_mem_avg = ?, ch2_node_mem_max = ?,
-		    kafka_1_node_cpu_min = ?, kafka_1_node_cpu_avg = ?, kafka_1_node_cpu_max = ?,
-		    kafka_2_node_cpu_min = ?, kafka_2_node_cpu_avg = ?, kafka_2_node_cpu_max = ?,
-		    kafka_3_node_cpu_min = ?, kafka_3_node_cpu_avg = ?, kafka_3_node_cpu_max = ?,
-		    ch1_node_cpu_min = ?, ch1_node_cpu_avg = ?, ch1_node_cpu_max = ?,
-		    ch2_node_cpu_min = ?, ch2_node_cpu_avg = ?, ch2_node_cpu_max = ?,
-		    kafka_1_node_cpu_total = ?, kafka_2_node_cpu_total = ?, kafka_3_node_cpu_total = ?,
-		    ch1_node_cpu_total = ?, ch2_node_cpu_total = ?,
-		    kafka_1_node_mem_total = ?, kafka_2_node_mem_total = ?, kafka_3_node_mem_total = ?,
-		    ch1_node_mem_total = ?, ch2_node_mem_total = ?,
-		    min_lag = ?, avg_lag = ?, max_lag = ?
+		    kafka_summary_generated = 1,
+		    process_rate_summary = ?, ingestion_summary = ?, pipeline_info = ?,
+		    pods_cpu = ?, pods_memory = ?, pod_restarts = ?,
+		    nodes_cpu = ?, nodes_memory = ?,
+		    min_lag = ?, avg_lag = ?, max_lag = ?, topic_metrics_json = ?
 		WHERE test_id = ?;
 	`, avgInputRate, avgOutputRate,
 		peakInputRate, peakOutputRate, minInputRate, minOutputRate,
-		dataLossPct, podDataFound,
-		podMetrics.KafkaClusterCpKafka0CpuMin, podMetrics.KafkaClusterCpKafka0CpuAvg, podMetrics.KafkaClusterCpKafka0CpuMax,
-		podMetrics.KafkaClusterCpKafka0MemMin, podMetrics.KafkaClusterCpKafka0MemAvg, podMetrics.KafkaClusterCpKafka0MemMax,
-		podMetrics.KafkaClusterCpKafka0CpuAllocated, podMetrics.KafkaClusterCpKafka0MemAllocated,
-		podMetrics.KafkaClusterCpKafka1CpuMin, podMetrics.KafkaClusterCpKafka1CpuAvg, podMetrics.KafkaClusterCpKafka1CpuMax,
-		podMetrics.KafkaClusterCpKafka1MemMin, podMetrics.KafkaClusterCpKafka1MemAvg, podMetrics.KafkaClusterCpKafka1MemMax,
-		podMetrics.KafkaClusterCpKafka1CpuAllocated, podMetrics.KafkaClusterCpKafka1MemAllocated,
-		podMetrics.KafkaClusterCpKafka2CpuMin, podMetrics.KafkaClusterCpKafka2CpuAvg, podMetrics.KafkaClusterCpKafka2CpuMax,
-		podMetrics.KafkaClusterCpKafka2MemMin, podMetrics.KafkaClusterCpKafka2MemAvg, podMetrics.KafkaClusterCpKafka2MemMax,
-		podMetrics.KafkaClusterCpKafka2CpuAllocated, podMetrics.KafkaClusterCpKafka2MemAllocated,
-		podMetrics.ChiClickhouseVusmart000CpuMin, podMetrics.ChiClickhouseVusmart000CpuAvg, podMetrics.ChiClickhouseVusmart000CpuMax,
-		podMetrics.ChiClickhouseVusmart000MemMin, podMetrics.ChiClickhouseVusmart000MemAvg, podMetrics.ChiClickhouseVusmart000MemMax,
-		podMetrics.ChiClickhouseVusmart000CpuAllocated, podMetrics.ChiClickhouseVusmart000MemAllocated,
-		podMetrics.ChiClickhouseVusmart010CpuMin, podMetrics.ChiClickhouseVusmart010CpuAvg, podMetrics.ChiClickhouseVusmart010CpuMax,
-		podMetrics.ChiClickhouseVusmart010MemMin, podMetrics.ChiClickhouseVusmart010MemAvg, podMetrics.ChiClickhouseVusmart010MemMax,
-		podMetrics.ChiClickhouseVusmart010CpuAllocated, podMetrics.ChiClickhouseVusmart010MemAllocated,
-		podMetrics.PipelinePodCpuMin, podMetrics.PipelinePodCpuAvg, podMetrics.PipelinePodCpuMax,
-		podMetrics.PipelinePodMemMin, podMetrics.PipelinePodMemAvg, podMetrics.PipelinePodMemMax,
-		podMetrics.PipelinePodCpuAllocated, podMetrics.PipelinePodMemAllocated,
-		string(processRateSummaryJSON), string(ingestionSummaryJSON), pipelineInfoJSON, podsCpuJSON, podsMemoryJSON, podRestartsJSON, nodesCpuJSON, nodesMemoryJSON,
-		nodeMemoryResult.Kafka1Min, nodeMemoryResult.Kafka1Avg, nodeMemoryResult.Kafka1Max,
-		nodeMemoryResult.Kafka2Min, nodeMemoryResult.Kafka2Avg, nodeMemoryResult.Kafka2Max,
-		nodeMemoryResult.Kafka3Min, nodeMemoryResult.Kafka3Avg, nodeMemoryResult.Kafka3Max,
-		nodeMemoryResult.Ch1Min, nodeMemoryResult.Ch1Avg, nodeMemoryResult.Ch1Max,
-		nodeMemoryResult.Ch2Min, nodeMemoryResult.Ch2Avg, nodeMemoryResult.Ch2Max,
-		nodeCPUResult.Kafka1Min, nodeCPUResult.Kafka1Avg, nodeCPUResult.Kafka1Max,
-		nodeCPUResult.Kafka2Min, nodeCPUResult.Kafka2Avg, nodeCPUResult.Kafka2Max,
-		nodeCPUResult.Kafka3Min, nodeCPUResult.Kafka3Avg, nodeCPUResult.Kafka3Max,
-		nodeCPUResult.Ch1Min, nodeCPUResult.Ch1Avg, nodeCPUResult.Ch1Max,
-		nodeCPUResult.Ch2Min, nodeCPUResult.Ch2Avg, nodeCPUResult.Ch2Max,
-		nodeCPUResult.Kafka1Total, nodeCPUResult.Kafka2Total, nodeCPUResult.Kafka3Total,
-		nodeCPUResult.Ch1Total, nodeCPUResult.Ch2Total,
-		nodeMemoryResult.Kafka1Total, nodeMemoryResult.Kafka2Total, nodeMemoryResult.Kafka3Total,
-		nodeMemoryResult.Ch1Total, nodeMemoryResult.Ch2Total,
-		minLag, avgLag, maxLag,
+		string(processRateSummaryJSON), string(ingestionSummaryJSON), pipelineInfoJSON,
+		podsCpuJSON, podsMemoryJSON, podRestartsJSON,
+		nodesCpuJSON, nodesMemoryJSON,
+		minLag, avgLag, maxLag, string(topicMetricsJSON),
 		testID)
 	if err != nil {
+		logger.LogError("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to update test run with summary: %v", err))
 		return fmt.Errorf("failed to update test run with summary: %w", err)
 	}
 
+	logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("Successfully updated test_runs table for test_id %s with nodes_cpu length %d, nodes_memory length %d", testID, len(nodesCpuJSON), len(nodesMemoryJSON)), "info")
+
 	logger.LogSuccess("System", "KafkaSummaryProcessor", fmt.Sprintf("Successfully processed Kafka summary for test %s", testID))
+
+	// Run the combined report generator script for this specific test
+	logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("Attempting to execute generate_combined_report.py for test %s", testID), "info")
+	cmd := exec.Command("python3", "generate_combined_report.py", "--test-id", testID, "--table", "test_runs")
+	cmd.Dir = "data" // Set working directory to 'data' since the script and its dependencies are located there
+
+	logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("Script working directory: %s", cmd.Dir), "debug")
+	logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("Script command: python3 generate_combined_report.py --test-id %s --table test_runs", testID), "debug")
+
+	// Capture both stdout and stderr
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to execute generate_combined_report.py: %v", err))
+		logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("Script output: %s", string(output)), "debug")
+	} else {
+		logger.LogSuccess("System", "KafkaSummaryProcessor", "Successfully executed generate_combined_report.py")
+		logger.LogWithNode("System", "KafkaSummaryProcessor", fmt.Sprintf("Script output: %s", string(output)), "info")
+	}
+
 	return nil
 }
 
@@ -445,17 +478,19 @@ func fetchKafkaMetrics(chClient *clickhouse.ClickHouseClient, topics []string, s
 	topicStr := strings.Join(topicList, ",")
 
 	query := fmt.Sprintf(`
-		SELECT 
-			timestamp,
-			topic,
-			OneMinuteRate,
-			Count
-		FROM monitoring.kafka_Broker_Topic_Metrics
-		WHERE topic IN (%s)
-		  AND name = 'MessagesInPerSec'
-		  AND timestamp >= toDateTime('%s')
-		  AND timestamp <= toDateTime('%s')
-		ORDER BY timestamp ASC
+		WITH per_second AS (
+			SELECT
+				toStartOfInterval(timestamp, toIntervalSecond(1)) AS ts,
+				topic,
+				sum(OneMinuteRate) AS eps_per_sec
+			FROM monitoring.kafka_Broker_Topic_Metrics
+			WHERE topic IN (%s)
+			  AND name = 'MessagesInPerSec'
+			  AND timestamp >= toDateTime('%s')
+			  AND timestamp <= toDateTime('%s')
+			GROUP BY ts, topic
+		)
+		SELECT ts, topic, eps_per_sec FROM per_second ORDER BY ts ASC
 	`, topicStr, start.Format("2006-01-02 15:04:05"), end.Format("2006-01-02 15:04:05"))
 
 	// debug log to confirm the query and topic list
@@ -472,17 +507,17 @@ func fetchKafkaMetrics(chClient *clickhouse.ClickHouseClient, topics []string, s
 
 	for rows.Next() {
 		var stat KafkaStat
-		// Important: Count and OneMinuteRate are Float64 in ClickHouse!
-		var count, oneMinuteRate float64
+		// Important: eps_per_sec is Float64 in ClickHouse!
+		var oneMinuteRate float64
 
-		if err := rows.Scan(&stat.Timestamp, &stat.Topic, &oneMinuteRate, &count); err != nil {
+		if err := rows.Scan(&stat.Timestamp, &stat.Topic, &oneMinuteRate); err != nil {
 			// log and continue so a single bad row doesn't stop processing
 			logger.LogWarning("System", "KafkaSummaryProcessor", fmt.Sprintf("Failed to scan metric row: %v", err))
 			continue
 		}
 
 		stat.OneMinuteRate = oneMinuteRate
-		stat.Count = count
+		stat.Count = 0 // Not available in per-second aggregation
 		stats = append(stats, stat)
 	}
 
@@ -502,10 +537,11 @@ func fetchKafkaMetrics(chClient *clickhouse.ClickHouseClient, topics []string, s
 // IngestionEPSEntry represents a single ingestion EPS entry for a table
 // Added for ingestion summary functionality
 type IngestionEPSEntry struct {
-	Table  string  `json:"table"`
-	AvgEPS float64 `json:"avg_eps"`
-	MinEPS float64 `json:"min_eps"`
-	MaxEPS float64 `json:"max_eps"`
+	Table      string  `json:"table"`
+	O11ySource string  `json:"o11y_source"`
+	AvgEPS     float64 `json:"avg_eps"`
+	MinEPS     float64 `json:"min_eps"`
+	MaxEPS     float64 `json:"max_eps"`
 }
 
 // fetchIngestionEPS fetches ingestion EPS metrics from ClickHouse system.part_log for given tables and time range
@@ -839,6 +875,68 @@ func ifaceToFloat64(v interface{}) float64 {
 	}
 }
 
+// computeDetailedTopicMetrics computes per-topic avg/min/max message rates for all topics across all o11y sources
+// Returns a nested map structure: source -> topic -> {avg, min, max, topic_type}
+func computeDetailedTopicMetrics(o11ySources []string, cfg TopicsConfig, chClient *clickhouse.ClickHouseClient, start, end time.Time) (map[string]map[string]map[string]interface{}, error) {
+	detailedMetrics := make(map[string]map[string]map[string]interface{})
+
+	for _, src := range o11ySources {
+		sourceMetrics := make(map[string]map[string]interface{})
+
+		// Find the source config
+		var sourceConfig TopicConfig
+		found := false
+		for _, s := range cfg.Sources {
+			if strings.ToLower(strings.ReplaceAll(s.Name, " ", "")) == strings.ToLower(strings.ReplaceAll(src, " ", "")) {
+				sourceConfig = s
+				found = true
+				break
+			}
+		}
+		if !found {
+			continue
+		}
+
+		// Process input topics
+		for _, inputTopic := range sourceConfig.InputTopic {
+			stats, err := fetchKafkaMetrics(chClient, []string{inputTopic.Name}, start, end)
+			if err != nil {
+				logger.LogWarning("System", "DetailedTopicMetrics", fmt.Sprintf("Failed to fetch input metrics for %s topic %s: %v", src, inputTopic.Name, err))
+				continue
+			}
+			summary := computeKafkaStats(stats, inputTopic.Name)
+			sourceMetrics[inputTopic.Name] = map[string]interface{}{
+				"avg":        summary["avg_msgs_per_sec"].(float64),
+				"min":        summary["min_msgs_per_sec"].(float64),
+				"max":        summary["max_msgs_per_sec"].(float64),
+				"topic_type": "input",
+			}
+		}
+
+		// Process output topics
+		for _, outputTopic := range sourceConfig.OutputTopic {
+			stats, err := fetchKafkaMetrics(chClient, []string{outputTopic.Name}, start, end)
+			if err != nil {
+				logger.LogWarning("System", "DetailedTopicMetrics", fmt.Sprintf("Failed to fetch output metrics for %s topic %s: %v", src, outputTopic.Name, err))
+				continue
+			}
+			summary := computeKafkaStats(stats, outputTopic.Name)
+			sourceMetrics[outputTopic.Name] = map[string]interface{}{
+				"avg":        summary["avg_msgs_per_sec"].(float64),
+				"min":        summary["min_msgs_per_sec"].(float64),
+				"max":        summary["max_msgs_per_sec"].(float64),
+				"topic_type": "output",
+			}
+		}
+
+		if len(sourceMetrics) > 0 {
+			detailedMetrics[src] = sourceMetrics
+		}
+	}
+
+	return detailedMetrics, nil
+}
+
 // RunKafkaSummaryProcessor runs the Kafka summary processor as a standalone script
 // This is an update for Kafka summarization functionality
 func RunKafkaSummaryProcessor() {
@@ -871,4 +969,45 @@ func RunKafkaSummaryProcessor() {
 		// Wait before checking again
 		time.Sleep(30 * time.Second)
 	}
+}
+
+// ProcessPerSourceLagSummary processes lag metrics per source for a test run
+func ProcessPerSourceLagSummary(db *sql.DB, chClient *clickhouse.ClickHouseClient, testID string, o11ySources []string, startTime, endTime time.Time) error {
+	logger.LogWithNode("System", "PerSourceLagProcessor", fmt.Sprintf("Starting per-source lag processing for test %s", testID), "info")
+	logger.LogWithNode("System", "PerSourceLagProcessor", fmt.Sprintf("Processing time range: %s to %s", startTime, endTime), "info")
+	logger.LogWithNode("System", "PerSourceLagProcessor", fmt.Sprintf("Processing sources: %v", o11ySources), "info")
+
+	// Load config
+	cfg, err := LoadTopicsConfigForLag()
+	if err != nil {
+		logger.LogError("System", "PerSourceLagProcessor", fmt.Sprintf("Failed to load topics config: %v", err))
+		return fmt.Errorf("failed to load topics config: %w", err)
+	}
+
+	// Compute per-source lag
+	lagPerSource, err := ProcessConsumerLagSummaryPerSource(chClient, o11ySources, cfg, startTime, endTime)
+	if err != nil {
+		logger.LogError("System", "PerSourceLagProcessor", fmt.Sprintf("Failed to process per-source lag: %v", err))
+		return fmt.Errorf("failed to process per-source lag: %w", err)
+	}
+
+	logger.LogWithNode("System", "PerSourceLagProcessor", fmt.Sprintf("Computed lag data: %+v", lagPerSource), "info")
+
+	// Convert to JSON and update database
+	lagPerSourceJSON, _ := json.Marshal(lagPerSource)
+	logger.LogWithNode("System", "PerSourceLagProcessor", fmt.Sprintf("Storing JSON: %s", string(lagPerSourceJSON)), "info")
+
+	_, err = db.Exec(`
+		UPDATE test_runs
+		SET lag_per_source = ?
+		WHERE test_id = ?`,
+		string(lagPerSourceJSON), testID)
+
+	if err != nil {
+		logger.LogError("System", "PerSourceLagProcessor", fmt.Sprintf("Failed to update database: %v", err))
+		return fmt.Errorf("failed to update lag_per_source: %w", err)
+	}
+
+	logger.LogSuccess("System", "PerSourceLagProcessor", fmt.Sprintf("Successfully processed per-source lag for test %s", testID))
+	return nil
 }

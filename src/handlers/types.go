@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"os"
 	"sync"
 	"time"
 	"vuDataSim/src/bin_control"
@@ -70,12 +71,18 @@ var AppState = &AppStates{
 	Broadcast:           make(chan []byte, 256),
 }
 
-const (
+var (
 	AppVersion = "1.0.0"
-	StaticDir  = "./static"
-	// Port       = "164.52.213.158:8086"
-	Port = "216.48.191.10:8086"
+	StaticDir  = getEnv("STATIC_DIR", "./static")
+	Port       = getEnv("APP_PORT", "216.48.191.10:8086")
 )
+
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
 
 var NodeManager = node_control.NewNodeManager()
 var O11yManager = o11y_source_manager.NewO11ySourceManager()

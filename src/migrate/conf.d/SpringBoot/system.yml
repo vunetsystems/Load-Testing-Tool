@@ -1,0 +1,35 @@
+group:
+- name: good
+  fields:
+  - name: name
+    DataType: String
+    ValueType: Constant
+    Value: prometheus
+  - name: tags,environment
+    DataType: String
+    ValueType: Constant
+    Value: local
+  - name: tags,host
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,application
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,url
+    DataType: String
+    ValueType: Constant
+    Value: e2e-92-21.ssdcloudindia.net/actuator/prometheus
+  - name: fields,system_cpu_count
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1-10
+  - name: fields,system_cpu_usage
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,system_load_average_1m
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-100

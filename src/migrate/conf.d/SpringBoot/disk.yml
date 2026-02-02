@@ -1,0 +1,36 @@
+group:
+- name: good
+  fields:
+  - name: name
+    DataType: String
+    ValueType: Constant
+    Value: prometheus
+  - name: tags,environment
+    DataType: String
+    ValueType: Constant
+    Value: local
+  - name: tags,path
+    DataType: String
+    ValueType: Constant
+    Value: /home/vunet/spring-petclinic/.
+  - name: tags,host
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,application
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,url
+    DataType: String
+    ValueType: Constant
+    Value: e2e-92-21.ssdcloudindia.net/actuator/prometheus
+  - name: fields,disk_free_bytes
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 165748559872-165753311232
+  - name: fields,disk_total_bytes
+    DataType: Uint64
+    ValueType: Constant
+    Value: 435933122560
+

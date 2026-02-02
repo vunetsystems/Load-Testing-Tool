@@ -7,11 +7,14 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"os"
 	"strings"
 	"time"
 
 	"vuDataSim/src/clickhouse"
 	"vuDataSim/src/logger"
+
+	"gopkg.in/yaml.v3"
 )
 
 // ConsumerLagStat represents a single consumer lag data point from ClickHouse
@@ -36,8 +39,10 @@ func fetchConsumerLagMetrics(chClient *clickhouse.ClickHouseClient, topics []str
 	query := fmt.Sprintf(`
 		SELECT "records-lag"
 		FROM monitoring.kafka_consumer_Fetch_Manager_LagMetrics
-		WHERE "records-lag" > 0
-		  AND topic IN (%s)
+		WHERE 
+		--"records-lag" > 0
+		--AND 
+		  topic IN (%s)
 		  AND timestamp >= toDateTime('%s')
 		  AND timestamp <= toDateTime('%s')
 	`, topicStr, start.Format("2006-01-02 15:04:05"), end.Format("2006-01-02 15:04:05"))
@@ -100,7 +105,7 @@ func computeLagStats(lagValues []float64) (minLag, avgLag, maxLag float64) {
 
 // ProcessConsumerLagSummary fetches and computes consumer lag statistics for a test run
 func ProcessConsumerLagSummary(chClient *clickhouse.ClickHouseClient, topics []string, startTime, endTime time.Time) (minLag, avgLag, maxLag float64, err error) {
-	logger.LogWithNode("System", "ConsumerLagProcessor", "Starting consumer lag summary processing", "info")
+	logger.LogWithNode("System", "ConsumerLagProcessor", fmt.Sprintf("Starting consumer lag summary for topics: %v", topics), "info")
 
 	lagValues, err := fetchConsumerLagMetrics(chClient, topics, startTime, endTime)
 	if err != nil {
@@ -109,6 +114,63 @@ func ProcessConsumerLagSummary(chClient *clickhouse.ClickHouseClient, topics []s
 
 	minLag, avgLag, maxLag = computeLagStats(lagValues)
 
+	logger.LogWithNode("System", "ConsumerLagProcessor", fmt.Sprintf("Computed stats: min=%.2f, avg=%.2f, max=%.2f", minLag, avgLag, maxLag), "info")
 	logger.LogSuccess("System", "ConsumerLagProcessor", "Successfully processed consumer lag summary")
 	return minLag, avgLag, maxLag, nil
+}
+
+// ProcessConsumerLagSummaryPerSource computes lag statistics for each source individually
+func ProcessConsumerLagSummaryPerSource(chClient *clickhouse.ClickHouseClient, o11ySources []string, cfg TopicsConfig, startTime, endTime time.Time) (map[string]map[string]float64, error) {
+	logger.LogWithNode("System", "ConsumerLagProcessor", fmt.Sprintf("Processing lag for sources: %v", o11ySources), "info")
+	lagPerSource := make(map[string]map[string]float64)
+
+	for _, src := range o11ySources {
+		logger.LogWithNode("System", "ConsumerLagProcessor", fmt.Sprintf("Processing source: %s", src), "info")
+
+		// Find input topics for this source
+		var inputTopics []string
+		for _, s := range cfg.Sources {
+			logger.LogWithNode("System", "ConsumerLagProcessor", fmt.Sprintf("Checking config source: %s", s.Name), "debug")
+			if strings.ToLower(strings.ReplaceAll(s.Name, " ", "")) == strings.ToLower(strings.ReplaceAll(src, " ", "")) {
+				for _, inputTopic := range s.InputTopic {
+					inputTopics = append(inputTopics, inputTopic.Name)
+				}
+				break
+			}
+		}
+
+		logger.LogWithNode("System", "ConsumerLagProcessor", fmt.Sprintf("Found topics for %s: %v", src, inputTopics), "info")
+
+		// Use existing ProcessConsumerLagSummary function
+		minLag, avgLag, maxLag, err := ProcessConsumerLagSummary(chClient, inputTopics, startTime, endTime)
+		if err != nil {
+			logger.LogWarning("System", "ConsumerLagProcessor", fmt.Sprintf("Failed to process lag for source %s: %v", src, err))
+			continue
+		}
+
+		logger.LogWithNode("System", "ConsumerLagProcessor", fmt.Sprintf("Lag stats for %s: min=%.2f, avg=%.2f, max=%.2f", src, minLag, avgLag, maxLag), "info")
+
+		lagPerSource[src] = map[string]float64{
+			"min": minLag,
+			"avg": avgLag,
+			"max": maxLag,
+		}
+	}
+
+	logger.LogWithNode("System", "ConsumerLagProcessor", fmt.Sprintf("Final lag per source: %+v", lagPerSource), "info")
+	return lagPerSource, nil
+}
+
+// LoadTopicsConfigForLag loads the YAML configuration for lag processing
+func LoadTopicsConfigForLag() (TopicsConfig, error) {
+	yamlData, err := os.ReadFile("src/configs/topics_tables.yaml")
+	if err != nil {
+		return TopicsConfig{}, fmt.Errorf("failed to read topics_tables.yaml: %w", err)
+	}
+	var cfg TopicsConfig
+	err = yaml.Unmarshal(yamlData, &cfg)
+	if err != nil {
+		return TopicsConfig{}, fmt.Errorf("failed to parse YAML: %w", err)
+	}
+	return cfg, nil
 }

@@ -1,0 +1,67 @@
+group:
+- name: good
+  fields:
+  - name: name
+    DataType: String
+    ValueType: Constant
+    Value: prometheus
+  - name: tags,environment
+    DataType: String
+    ValueType: Constant
+    Value: local
+  - name: tags,host
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,application
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,url
+    DataType: String
+    ValueType: Constant
+    Value: e2e-92-21.ssdcloudindia.net/actuator/prometheus
+  - name: tags,action
+    DataType: String
+    ValueType: Constant
+    Value: end of minor GC
+  - name: tags,cause
+    DataType: String
+    ValueType: Enumeration
+    Value: GCLocker Initiated GC:33,G1 Evacuation Pause:33,G1 Preventive Collection:34
+  - name: tags,gc
+    DataType: String
+    ValueType: Constant
+    Value: G1 Young Generation
+  - name: fields,jvm_gc_live_data_size_bytes
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 5152358-51523580
+  - name: fields,jvm_gc_max_data_size_bytes
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1543503872-15435038720
+  - name: fields,jvm_gc_memory_allocated_bytes_total
+    DataType: Uint64
+    ValueType: RandomEverIncreasing
+    Value: 100000-2000000000
+  - name: fields,jvm_gc_memory_promoted_bytes_total
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 20860979-208609790
+  - name: fields,jvm_gc_overhead
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,jvm_gc_pause_seconds_count
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 1-10
+  - name: fields,jvm_gc_pause_seconds_sum
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0.2-1.0
+  - name: fields,jvm_gc_pause_seconds_max
+    DataType: Float64
+    ValueType: RandomRange
+    Value: 0.2-0.5

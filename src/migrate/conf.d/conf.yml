@@ -5,6 +5,8 @@ include_module_dirs:
     enabled: false
   Apache:
     enabled: false
+  Apache_logs:
+    enabled: false
   Azure_API_Management:
     enabled: false
   Azure_Firewall:
@@ -24,12 +26,14 @@ include_module_dirs:
   K8s:
     enabled: false
   LinuxMonitor:
-    enabled: false
+    enabled: true
   MongoDB:
     enabled: false
   Mssql:
     enabled: false
   ServiceMonitor:
+    enabled: false
+  SpringBoot:
     enabled: false
   SyntheticBrowserMonitoring:
     enabled: false
@@ -38,7 +42,7 @@ include_module_dirs:
   Traces:
     enabled: false
   WebLogic:
-    enabled: true
+    enabled: false
 logging:
   console: false
   directory: /home/vunet/vuDataSim/vuDataSim/logs/

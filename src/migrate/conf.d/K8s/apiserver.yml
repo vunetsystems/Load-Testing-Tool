@@ -80,7 +80,7 @@ group:
   - name: metricset,name
     DataType: String
     ValueType: Constant
-    Value: state_service
+    Value: apiserver
   - name: service,address
     DataType: String
     ValueType: Constant
@@ -89,10 +89,10 @@ group:
     DataType: String
     ValueType: Constant
     Value: kubernetes
-  - name: component
-    DataType: String
-    ValueType: Constant
-    Value: kube-state-metrics
+  # - name: component
+  #   DataType: String
+  #   ValueType: Constant
+  #   Value: kube-state-metrics
   - name: agent,type
     DataType: String
     ValueType: Constant

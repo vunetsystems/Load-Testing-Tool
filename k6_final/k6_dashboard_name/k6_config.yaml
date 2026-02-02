@@ -37,7 +37,7 @@ dashboards:
     - id: e3b2c52e-ac2b-4b19-910b-0bd6089e6028
       name: Azure API Management Overview
       slug: azure-api-management-overview
-      enabled: false
+      enabled: true
     - id: ddedcdda-1c23-4b37-9dae-85ae78354157
       name: BRUM Overview
       slug: brum-overview
@@ -69,4 +69,4 @@ dashboards:
     - id: f02b8bd5-a68a-4ec7-9a52-b34725534827
       name: WebLogic Overview
       slug: weblogic-overview
-      enabled: true
+      enabled: false

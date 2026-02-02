@@ -1,0 +1,39 @@
+group:
+- name: good
+  fields:
+  - name: name
+    DataType: String
+    ValueType: Constant
+    Value: prometheus
+  - name: tags,environment
+    DataType: String
+    ValueType: Constant
+    Value: local
+  - name: tags,host
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,application
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,url
+    DataType: String
+    ValueType: Constant
+    Value: e2e-92-21.ssdcloudindia.net/actuator/prometheus
+  - name: tags,id
+    DataType: String
+    ValueType: Enumeration
+    Value: mapped - 'non-volatile memory':33, direct:33, mapped:34
+  - name: fields,jvm_buffer_count_buffers
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,jvm_buffer_memory_used_bytes
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,jvm_buffer_total_capacity_bytes
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100

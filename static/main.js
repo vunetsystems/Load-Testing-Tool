@@ -20,6 +20,7 @@ class VuDataSimManager {
 
         this.initializeComponents();
         this.bindEvents();
+        this.checkAuth(); // Check authentication status
         this.dashboard.loadNodes(); // Load nodes from API
         this.startRealTimeUpdates();
         this.logsManager.populateNodeFilters(); // Populate filter dropdowns with real node names
@@ -239,6 +240,10 @@ class VuDataSimManager {
 
     bindEvents() {
         // Button event listeners
+
+        // Auth button event listeners
+        document.getElementById('login-btn')?.addEventListener('click', () => this.login());
+        document.getElementById('logout-btn')?.addEventListener('click', () => this.logout());
 
         // Add All Cluster Nodes button event listener
         this.elements.addAllClusterNodesBtn?.addEventListener('click', () => this.addAllClusterNodes());
@@ -833,34 +838,35 @@ class VuDataSimManager {
             await this.o11ySources.syncConfigs(timeoutSeconds,selectedEPS, skipChTruncate);
 
             // Schedule pod deletion
-            let podDeletionSuccess = false;
-            try {
-                const podDeletionResponse = await this.callAPI('/api/schedule-pod-deletion', 'POST', {
-                    timeout_seconds: timeoutSeconds,
-                    o11y_sources: selectedSources
-                });
-                console.log('Pod deletion scheduled:', podDeletionResponse);
-                podDeletionSuccess = true;
-            } catch (error) {
-                console.error('Error scheduling pod deletion:', error);
-                this.showNotification('Scheduled pod deletion failed', 'error');
-                // Stop all binaries to cancel the running process
-                try {
-                    await this.callAPI('/api/binary/stop-all', 'POST');
-                    console.log('All binaries stopped due to pod deletion failure');
-                } catch (stopError) {
-                    console.error('Error stopping binaries:', stopError);
-                }
-            }
+            // let podDeletionSuccess = false;
+            // try {
+            //     const podDeletionResponse = await this.callAPI('/api/schedule-pod-deletion', 'POST', {
+            //         timeout_seconds: timeoutSeconds,
+            //         o11y_sources: selectedSources
+            //     });
+            //     console.log('Pod deletion scheduled:', podDeletionResponse);
+            //     podDeletionSuccess = true;
+            // } catch (error) {
+            //     console.error('Error scheduling pod deletion:', error);
+            //     this.showNotification('Scheduled pod deletion failed', 'error');
+            //     // Stop all binaries to cancel the running process
+            //     try {
+            //         await this.callAPI('/api/binary/stop-all', 'POST');
+            //         console.log('All binaries stopped due to pod deletion failure');
+            //     } catch (stopError) {
+            //         console.error('Error stopping binaries:', stopError);
+            //     }
+            // }
 
             // Show success notification only if pod deletion succeeded
-            if (podDeletionSuccess) {
-                this.showNotification('vuDataSim started successfully!', 'success');
-            }
+            // if (podDeletionSuccess) {
+            //     this.showNotification('vuDataSim started successfully!', 'success');
+            // }
 
 
-            // // Show success notification only if syncConfigs completed without throwing an error
-            // this.showNotification('vuDataSim started successfully!', 'success');
+
+            // Show success notification only if syncConfigs completed without throwing an error
+            this.showNotification('vuDataSim started successfully!', 'success');
 
         } catch (error) {
             console.error('Error starting vuDataSim:', error);
@@ -1208,6 +1214,37 @@ class VuDataSimManager {
                 this.elements.k6TestIdDisplay.value = fallbackUUID;
             }
         }
+    }
+
+    // Authentication methods
+    async checkAuth() {
+        try {
+            const response = await this.callAPI('/api/auth/user', 'GET');
+            if (response.authenticated) {
+                document.getElementById('login-btn').style.display = 'none';
+                document.getElementById('logout-btn').style.display = 'inline';
+                document.getElementById('user-info').innerText = response.name;
+                document.getElementById('user-info').style.display = 'inline';
+            } else {
+                document.getElementById('login-btn').style.display = 'inline';
+                document.getElementById('logout-btn').style.display = 'none';
+                document.getElementById('user-info').style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error checking auth:', error);
+            // If auth check fails, show login
+            document.getElementById('login-btn').style.display = 'inline';
+            document.getElementById('logout-btn').style.display = 'none';
+            document.getElementById('user-info').style.display = 'none';
+        }
+    }
+
+    login() {
+        window.location = '/auth/login';
+    }
+
+    logout() {
+        window.location = '/auth/logout';
     }
 }
 

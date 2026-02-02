@@ -50,7 +50,7 @@ LOGIN_OUTPUT="${RESULT_DIR}/login_${TIME_RANGE}_result.txt"
 K6_INSECURE_SKIP_TLS_VERIFY=true k6 run \
   --vus "$VUS" \
   --duration "$DURATION" \
-  "$BASE_DIR/login.js" 2>&1 | tee "$LOGIN_OUTPUT"
+  "$BASE_DIR/debug.js" 2>&1 | tee "$LOGIN_OUTPUT"
 
 echo -e "\n📊 Parsing login results..."
 TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
@@ -110,7 +110,7 @@ K6_INSECURE_SKIP_TLS_VERIFY=true k6 run \
   -e TIME_TO="now" \
   --vus "$VUS" \
   --duration "$DURATION" \
-  "$BASE_DIR/multi_dashboard_test.js" 2>&1 | tee "$DASHBOARD_OUTPUT"
+  "$BASE_DIR/debug.js" 2>&1 | tee "$DASHBOARD_OUTPUT"
 
 # ======================================
 # Parse Dashboard & Panel results

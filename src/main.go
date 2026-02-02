@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -15,20 +16,27 @@ import (
 	"vuDataSim/src/handlers"
 	"vuDataSim/src/logger"
 	"vuDataSim/src/node_control"
+	_ "vuDataSim/src/traces" // Import traces package for initialization
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
+	"github.com/joho/godotenv"
 )
 
 // Kafka summarization functionality is now handled via API
 
-var kafkaHandler, _ = handlers.NewKafkaHandler()
+// kafkaHandler is initialized in main() to ensure proper error handling
+var kafkaHandler *handlers.KafkaHandler
 
 // startTestRunCompletionChecker starts a background goroutine that periodically
 // checks for and completes timed-out test runs
 func startTestRunCompletionChecker() {
 	logger.Info().Msg("Starting test run completion checker")
 
-	ticker := time.NewTicker(10 * time.Second) // Check every 30 seconds
+	// Delay the first check by 30 seconds to allow binaries to start properly
+	time.Sleep(30 * time.Second)
+
+	ticker := time.NewTicker(10 * time.Second) // Check every 10 seconds
 	defer ticker.Stop()
 
 	for {
@@ -82,6 +90,14 @@ func initDatabase() error {
 	return nil
 }
 
+// maskSecret masks a secret for logging (shows first 4 and last 4 chars)
+func maskSecret(secret string) string {
+	if len(secret) <= 8 {
+		return strings.Repeat("*", len(secret))
+	}
+	return secret[:4] + strings.Repeat("*", len(secret)-8) + secret[len(secret)-4:]
+}
+
 func init() {
 	// Initialize node data using the node_control package
 	node_control.InitNodeData(handlers.NodeManager, handlers.AppState)
@@ -95,8 +111,46 @@ func init() {
 }
 
 func main() {
+	// Load .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Printf("Warning: Error loading .env file: %v", err)
+	}
+
+	// Load config
+	err = clickhouse.LoadConfig("src/configs/config.yaml")
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
+
+	// Debug: Log environment variables
+	log.Printf("DEBUG: OAUTH_CLIENT_ID loaded: %s", maskSecret(os.Getenv("OAUTH_CLIENT_ID")))
+	log.Printf("DEBUG: OAUTH_CLIENT_SECRET loaded: %s", maskSecret(os.Getenv("OAUTH_CLIENT_SECRET")))
+	log.Printf("DEBUG: SESSION_SECRET loaded: %s", maskSecret(os.Getenv("SESSION_SECRET")))
+	log.Printf("DEBUG: STATIC_DIR: %s", os.Getenv("STATIC_DIR"))
+	log.Printf("DEBUG: DISABLE_AUTH: %s", os.Getenv("DISABLE_AUTH"))
+
+	// Initialize session store after loading env
+	sessionStore = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
+	host := strings.Split(os.Getenv("APP_PORT"), ":")[0]
+	sessionStore.Options = &sessions.Options{
+		Path:     "/",
+		Domain:   host,
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+		Secure:   false,
+	}
+
+	// Set port from config
+	handlers.Port = fmt.Sprintf("%s:%d", clickhouse.NetworkCfg.CurrentNodeIP, clickhouse.NetworkCfg.Port)
+	handlers.AppVersion = clickhouse.AppVersion
+	handlers.StaticDir = clickhouse.PathsCfg.StaticDir
+
 	// Initialize logger
-	logFilePath := "logs/vuDataSim.log"
+	logFilePath := os.Getenv("LOG_FILE")
+	if logFilePath == "" {
+		logFilePath = "logs/vuDataSim.log"
+	}
 	if err := logger.InitLogger(logFilePath); err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
@@ -105,7 +159,7 @@ func main() {
 	handlers.AppState.StartTime = time.Now()
 
 	// Initialize node manager
-	err := handlers.NodeManager.LoadNodesConfig()
+	err = handlers.NodeManager.LoadNodesConfig()
 	if err != nil {
 		logger.Warn().Err(err).Msg("Failed to load nodes config")
 		logger.Warn().Msg("Node management features may not be available")
@@ -127,6 +181,12 @@ func main() {
 	logger.Info().Str("version", handlers.AppVersion).Msg("Starting vuDataSim Cluster Manager")
 	logger.Info().Str("static_dir", handlers.StaticDir).Msg("Serving static files")
 
+	// Initialize Kafka handler
+	kafkaHandler, err = handlers.NewKafkaHandler()
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to initialize Kafka handler - Kafka API endpoints will not be available")
+	}
+
 	// Create router
 	router := mux.NewRouter()
 
@@ -134,8 +194,19 @@ func main() {
 	router.Use(loggingMiddleware)
 	router.Use(corsMiddleware)
 
+	// Public routes
+	router.HandleFunc("/login", serveLoginPage).Methods("GET")
+	router.HandleFunc("/auth/login", handleAuthLogin).Methods("GET")
+	router.HandleFunc("/auth/callback", handleAuthCallback).Methods("GET")
+	router.HandleFunc("/auth/logout", handleAuthLogout).Methods("GET")
+	router.HandleFunc("/api/auth/user", handleAuthUser).Methods("GET")
+
+	// Protected routes (apply authMiddleware)
+	protected := router.PathPrefix("/").Subrouter()
+	protected.Use(authMiddleware)
+
 	// Static file serving with proper MIME types
-	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	protected.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Set proper MIME types for static files
 		if strings.HasSuffix(r.URL.Path, ".css") {
 			w.Header().Set("Content-Type", "text/css")
@@ -148,14 +219,14 @@ func main() {
 		http.ServeFile(w, r, handlers.StaticDir+"/"+r.URL.Path)
 	})))
 	// Data file serving
-	router.PathPrefix("/data/").Handler(http.StripPrefix("/data/", http.FileServer(http.Dir("./data/"))))
-	router.HandleFunc("/", serveStatic)
+	protected.PathPrefix("/data/").Handler(http.StripPrefix("/data/", http.FileServer(http.Dir("./data/"))))
+	protected.HandleFunc("/", serveStatic)
 
 	// WebSocket endpoint
-	router.HandleFunc("/ws", handleWebSocket)
+	protected.HandleFunc("/ws", handleWebSocket)
 
 	// API endpoints
-	api := router.PathPrefix("/api").Subrouter()
+	api := protected.PathPrefix("/api").Subrouter()
 	api.HandleFunc("/dashboard", handlers.GetDashboardData).Methods("GET")
 	api.HandleFunc("/simulation/start", handlers.StartSimulation).Methods("POST")
 	api.HandleFunc("/simulation/stop", handlers.StopSimulation).Methods("POST")
@@ -256,11 +327,19 @@ func main() {
 	// Reports API endpoints
 	api.HandleFunc("/reports/combined", handlers.HandleAPIListCombinedReports).Methods("GET")
 
+	// Single API endpoint for starting vuDataSim
+	api.HandleFunc("/start-vudatasim", handlers.HandleAPIStartVuDataSim).Methods("POST")
+
 	// Proxy endpoint for node metrics API - now includes both system and process metrics
 	api.HandleFunc("/proxy/metrics/{name}", handlers.HandleProxyMetrics).Methods("GET")
 
 	// Kubernetes monitoring API endpoints
 	api.HandleFunc("/monitoring/k8/pod-yaml", handlers.HandleAPIMonitoringK8PodYAML).Methods("GET")
+
+	// Traces Simulation API endpoints
+	api.HandleFunc("/traces/start", handlers.HandleAPIStartTracesSimulation).Methods("POST")
+	api.HandleFunc("/traces/stop", handlers.HandleAPIStopTracesSimulation).Methods("POST")
+	api.HandleFunc("/traces/status", handlers.HandleAPIGetTracesStatus).Methods("GET")
 
 	// Initialize ClickHouse client
 	if err := clickhouse.InitClickHouse("src/configs/config.yaml"); err != nil {

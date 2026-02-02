@@ -63,117 +63,31 @@ func StopTestRun(testID string) error {
 func GetTestRun(testID string) (*models.TestRun, error) {
 	query := `
 		SELECT test_id, test_name, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
-			   kafka_1_node_cpu_min, kafka_1_node_cpu_avg, kafka_1_node_cpu_max,
-			   kafka_1_node_mem_min, kafka_1_node_mem_avg, kafka_1_node_mem_max,
-			   kafka_2_node_cpu_min, kafka_2_node_cpu_avg, kafka_2_node_cpu_max,
-			   kafka_2_node_mem_min, kafka_2_node_mem_avg, kafka_2_node_mem_max,
-			   kafka_3_node_cpu_min, kafka_3_node_cpu_avg, kafka_3_node_cpu_max,
-			   kafka_3_node_mem_min, kafka_3_node_mem_avg, kafka_3_node_mem_max,
-			   ch1_node_cpu_min, ch1_node_cpu_avg, ch1_node_cpu_max,
-			   ch1_node_mem_min, ch1_node_mem_avg, ch1_node_mem_max,
-			   ch2_node_cpu_min, ch2_node_cpu_avg, ch2_node_cpu_max,
-			   ch2_node_mem_min, ch2_node_mem_avg, ch2_node_mem_max,
-			   kafka_cluster_cp_kafka_0_cpu_min, kafka_cluster_cp_kafka_0_cpu_avg, kafka_cluster_cp_kafka_0_cpu_max,
-			   kafka_cluster_cp_kafka_0_mem_min, kafka_cluster_cp_kafka_0_mem_avg, kafka_cluster_cp_kafka_0_mem_max,
-			   kafka_cluster_cp_kafka_1_cpu_min, kafka_cluster_cp_kafka_1_cpu_avg, kafka_cluster_cp_kafka_1_cpu_max,
-			   kafka_cluster_cp_kafka_1_mem_min, kafka_cluster_cp_kafka_1_mem_avg, kafka_cluster_cp_kafka_1_mem_max,
-			   kafka_cluster_cp_kafka_2_cpu_min, kafka_cluster_cp_kafka_2_cpu_avg, kafka_cluster_cp_kafka_2_cpu_max,
-			   kafka_cluster_cp_kafka_2_mem_min, kafka_cluster_cp_kafka_2_mem_avg, kafka_cluster_cp_kafka_2_mem_max,
-			   chi_clickhouse_vusmart_0_0_0_cpu_min, chi_clickhouse_vusmart_0_0_0_cpu_avg, chi_clickhouse_vusmart_0_0_0_cpu_max,
-			   chi_clickhouse_vusmart_0_0_0_mem_min, chi_clickhouse_vusmart_0_0_0_mem_avg, chi_clickhouse_vusmart_0_0_0_mem_max,
-			   chi_clickhouse_vusmart_0_1_0_cpu_min, chi_clickhouse_vusmart_0_1_0_cpu_avg, chi_clickhouse_vusmart_0_1_0_cpu_max,
-			   chi_clickhouse_vusmart_0_1_0_mem_min, chi_clickhouse_vusmart_0_1_0_mem_avg, chi_clickhouse_vusmart_0_1_0_mem_max,
-			   pipeline_pod_cpu_min, pipeline_pod_cpu_avg, pipeline_pod_cpu_max,
-			   pipeline_pod_mem_min, pipeline_pod_mem_avg, pipeline_pod_mem_max,
 			   min_input_msgs_per_sec, avg_input_msgs_per_sec, max_input_msgs_per_sec,
 			   min_output_msgs_per_sec, avg_output_msgs_per_sec, max_output_msgs_per_sec,
 			   min_lag, avg_lag, max_lag,
-			   data_loss_pct, kafka_summary_generated, pod_resource_check,
-			   process_rate_summary, ingestion_summary, traefik_cpu_allocated, traefik_mem_allocated,
-			   pods_cpu, pods_memory, pod_restarts
+			   kafka_summary_generated,
+			   process_rate_summary, ingestion_summary,
+			   pods_cpu, pods_memory, pod_restarts, topic_metrics_json
 		FROM test_runs WHERE test_id = ?`
 
 	var testRun models.TestRun
 	var sourcesJSON string
-	var endTime sql.NullTime
+	var startTimeStr string
+	var endTimeStr sql.NullString
 	var processRateSummary sql.NullString // Process rate summary JSON
 	var ingestionSummary sql.NullString   // Ingestion summary JSON
+	var topicMetricsJSON sql.NullString   // Topic metrics JSON
 
 	err := DB.QueryRow(query, testID).Scan(
 		&testRun.TestID,
 		&testRun.TestName,
 		&testRun.TargetEPS,
-		&testRun.StartTime,
-		&endTime,
+		&startTimeStr,
+		&endTimeStr,
 		&sourcesJSON,
 		&testRun.TimeoutSeconds,
 		&testRun.Status,
-		&testRun.Kafka1NodeCpuMin,
-		&testRun.Kafka1NodeCpuAvg,
-		&testRun.Kafka1NodeCpuMax,
-		&testRun.Kafka1NodeMemMin,
-		&testRun.Kafka1NodeMemAvg,
-		&testRun.Kafka1NodeMemMax,
-		&testRun.Kafka2NodeCpuMin,
-		&testRun.Kafka2NodeCpuAvg,
-		&testRun.Kafka2NodeCpuMax,
-		&testRun.Kafka2NodeMemMin,
-		&testRun.Kafka2NodeMemAvg,
-		&testRun.Kafka2NodeMemMax,
-		&testRun.Kafka3NodeCpuMin,
-		&testRun.Kafka3NodeCpuAvg,
-		&testRun.Kafka3NodeCpuMax,
-		&testRun.Kafka3NodeMemMin,
-		&testRun.Kafka3NodeMemAvg,
-		&testRun.Kafka3NodeMemMax,
-		&testRun.Ch1NodeCpuMin,
-		&testRun.Ch1NodeCpuAvg,
-		&testRun.Ch1NodeCpuMax,
-		&testRun.Ch1NodeMemMin,
-		&testRun.Ch1NodeMemAvg,
-		&testRun.Ch1NodeMemMax,
-		&testRun.Ch2NodeCpuMin,
-		&testRun.Ch2NodeCpuAvg,
-		&testRun.Ch2NodeCpuMax,
-		&testRun.Ch2NodeMemMin,
-		&testRun.Ch2NodeMemAvg,
-		&testRun.Ch2NodeMemMax,
-		&testRun.KafkaClusterCpKafka0CpuMin,
-		&testRun.KafkaClusterCpKafka0CpuAvg,
-		&testRun.KafkaClusterCpKafka0CpuMax,
-		&testRun.KafkaClusterCpKafka0MemMin,
-		&testRun.KafkaClusterCpKafka0MemAvg,
-		&testRun.KafkaClusterCpKafka0MemMax,
-		&testRun.KafkaClusterCpKafka1CpuMin,
-		&testRun.KafkaClusterCpKafka1CpuAvg,
-		&testRun.KafkaClusterCpKafka1CpuMax,
-		&testRun.KafkaClusterCpKafka1MemMin,
-		&testRun.KafkaClusterCpKafka1MemAvg,
-		&testRun.KafkaClusterCpKafka1MemMax,
-		&testRun.KafkaClusterCpKafka2CpuMin,
-		&testRun.KafkaClusterCpKafka2CpuAvg,
-		&testRun.KafkaClusterCpKafka2CpuMax,
-		&testRun.KafkaClusterCpKafka2MemMin,
-		&testRun.KafkaClusterCpKafka2MemAvg,
-		&testRun.KafkaClusterCpKafka2MemMax,
-		&testRun.ChiClickhouseVusmart000CpuMin,
-		&testRun.ChiClickhouseVusmart000CpuAvg,
-		&testRun.ChiClickhouseVusmart000CpuMax,
-		&testRun.ChiClickhouseVusmart000MemMin,
-		&testRun.ChiClickhouseVusmart000MemAvg,
-		&testRun.ChiClickhouseVusmart000MemMax,
-		&testRun.ChiClickhouseVusmart010CpuMin,
-		&testRun.ChiClickhouseVusmart010CpuAvg,
-		&testRun.ChiClickhouseVusmart010CpuMax,
-		&testRun.ChiClickhouseVusmart010MemMin,
-		&testRun.ChiClickhouseVusmart010MemAvg,
-		&testRun.ChiClickhouseVusmart010MemMax,
-		&testRun.PipelinePodCpuMin,
-		&testRun.PipelinePodCpuAvg,
-		&testRun.PipelinePodCpuMax,
-		&testRun.PipelinePodMemMin,
-		&testRun.PipelinePodMemAvg,
-		&testRun.PipelinePodMemMax,
 		&testRun.MinInputMsgsPerSec,
 		&testRun.AvgInputMsgsPerSec,
 		&testRun.MaxInputMsgsPerSec,
@@ -183,16 +97,13 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 		&testRun.MinLag,
 		&testRun.AvgLag,
 		&testRun.MaxLag,
-		&testRun.DataLossPct,
 		&testRun.KafkaSummaryGenerated,
-		&testRun.PodResourceCheck,
 		&processRateSummary,
 		&ingestionSummary,
-		&testRun.TraefikCpuAllocated,
-		&testRun.TraefikMemAllocated,
 		&testRun.PodsCpu,
 		&testRun.PodsMemory,
 		&testRun.PodRestarts,
+		&topicMetricsJSON,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -201,14 +112,35 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 		return nil, fmt.Errorf("failed to query test run: %w", err)
 	}
 
-	if endTime.Valid {
-		testRun.EndTime = &endTime.Time
+	// Parse start_time
+	testRun.StartTime, err = time.Parse(time.RFC3339Nano, startTimeStr)
+	if err != nil {
+		// Try alternative format if RFC3339Nano fails
+		testRun.StartTime, err = time.Parse("2006-01-02 15:04:05.999999999-07:00", startTimeStr)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse start_time '%s': %w", startTimeStr, err)
+		}
+	}
+
+	if endTimeStr.Valid {
+		endTime, err := time.Parse(time.RFC3339Nano, endTimeStr.String)
+		if err != nil {
+			// Try alternative format if RFC3339Nano fails
+			endTime, err = time.Parse("2006-01-02 15:04:05.999999999-07:00", endTimeStr.String)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse end_time '%s': %w", endTimeStr.String, err)
+			}
+		}
+		testRun.EndTime = &endTime
 	}
 	if processRateSummary.Valid {
 		testRun.ProcessRateSummary = processRateSummary.String // Assign process rate summary JSON
 	}
 	if ingestionSummary.Valid {
 		testRun.IngestionSummary = ingestionSummary.String // Assign ingestion summary JSON
+	}
+	if topicMetricsJSON.Valid {
+		testRun.TopicMetricsJSON = topicMetricsJSON.String // Assign topic metrics JSON
 	}
 
 	// Parse JSON sources
@@ -224,34 +156,12 @@ func GetTestRun(testID string) (*models.TestRun, error) {
 func GetAllTestRuns() ([]*models.TestRun, error) {
 	query := `
 		SELECT test_id, test_name, target_eps, start_time, end_time, o11y_sources, timeout_seconds, status,
-			   kafka_1_node_cpu_min, kafka_1_node_cpu_avg, kafka_1_node_cpu_max,
-			   kafka_1_node_mem_min, kafka_1_node_mem_avg, kafka_1_node_mem_max,
-			   kafka_2_node_cpu_min, kafka_2_node_cpu_avg, kafka_2_node_cpu_max,
-			   kafka_2_node_mem_min, kafka_2_node_mem_avg, kafka_2_node_mem_max,
-			   kafka_3_node_cpu_min, kafka_3_node_cpu_avg, kafka_3_node_cpu_max,
-			   kafka_3_node_mem_min, kafka_3_node_mem_avg, kafka_3_node_mem_max,
-			   ch1_node_cpu_min, ch1_node_cpu_avg, ch1_node_cpu_max,
-			   ch1_node_mem_min, ch1_node_mem_avg, ch1_node_mem_max,
-			   ch2_node_cpu_min, ch2_node_cpu_avg, ch2_node_cpu_max,
-			   ch2_node_mem_min, ch2_node_mem_avg, ch2_node_mem_max,
-			   kafka_cluster_cp_kafka_0_cpu_min, kafka_cluster_cp_kafka_0_cpu_avg, kafka_cluster_cp_kafka_0_cpu_max,
-			   kafka_cluster_cp_kafka_0_mem_min, kafka_cluster_cp_kafka_0_mem_avg, kafka_cluster_cp_kafka_0_mem_max,
-			   kafka_cluster_cp_kafka_1_cpu_min, kafka_cluster_cp_kafka_1_cpu_avg, kafka_cluster_cp_kafka_1_cpu_max,
-			   kafka_cluster_cp_kafka_1_mem_min, kafka_cluster_cp_kafka_1_mem_avg, kafka_cluster_cp_kafka_1_mem_max,
-			   kafka_cluster_cp_kafka_2_cpu_min, kafka_cluster_cp_kafka_2_cpu_avg, kafka_cluster_cp_kafka_2_cpu_max,
-			   kafka_cluster_cp_kafka_2_mem_min, kafka_cluster_cp_kafka_2_mem_avg, kafka_cluster_cp_kafka_2_mem_max,
-			   chi_clickhouse_vusmart_0_0_0_cpu_min, chi_clickhouse_vusmart_0_0_0_cpu_avg, chi_clickhouse_vusmart_0_0_0_cpu_max,
-			   chi_clickhouse_vusmart_0_0_0_mem_min, chi_clickhouse_vusmart_0_0_0_mem_avg, chi_clickhouse_vusmart_0_0_0_mem_max,
-			   chi_clickhouse_vusmart_0_1_0_cpu_min, chi_clickhouse_vusmart_0_1_0_cpu_avg, chi_clickhouse_vusmart_0_1_0_cpu_max,
-			   chi_clickhouse_vusmart_0_1_0_mem_min, chi_clickhouse_vusmart_0_1_0_mem_avg, chi_clickhouse_vusmart_0_1_0_mem_max,
-			   pipeline_pod_cpu_min, pipeline_pod_cpu_avg, pipeline_pod_cpu_max,
-			   pipeline_pod_mem_min, pipeline_pod_mem_avg, pipeline_pod_mem_max,
 			   min_input_msgs_per_sec, avg_input_msgs_per_sec, max_input_msgs_per_sec,
 			   min_output_msgs_per_sec, avg_output_msgs_per_sec, max_output_msgs_per_sec,
 			   min_lag, avg_lag, max_lag,
-			   data_loss_pct, kafka_summary_generated, pod_resource_check,
-			   process_rate_summary, ingestion_summary, traefik_cpu_allocated, traefik_mem_allocated,
-			   pods_cpu, pods_memory, pod_restarts
+			   kafka_summary_generated,
+			   process_rate_summary, ingestion_summary,
+			   pods_cpu, pods_memory, pod_restarts, topic_metrics_json
 		FROM test_runs ORDER BY start_time DESC`
 
 	rows, err := DB.Query(query)
@@ -264,88 +174,24 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 	for rows.Next() {
 		var testRun models.TestRun
 		var sourcesJSON string
-		var endTime sql.NullTime
+		var startTimeStr string
+		var endTimeStr sql.NullString
 		var processRateSummary sql.NullString // Process rate summary JSON
 		var ingestionSummary sql.NullString   // Ingestion summary JSON
 		var podsCpu sql.NullString
 		var podsMemory sql.NullString
 		var podRestarts sql.NullString
+		var topicMetricsJSON sql.NullString // Topic metrics JSON
 
 		err := rows.Scan(
 			&testRun.TestID,
 			&testRun.TestName,
 			&testRun.TargetEPS,
-			&testRun.StartTime,
-			&endTime,
+			&startTimeStr,
+			&endTimeStr,
 			&sourcesJSON,
 			&testRun.TimeoutSeconds,
 			&testRun.Status,
-			&testRun.Kafka1NodeCpuMin,
-			&testRun.Kafka1NodeCpuAvg,
-			&testRun.Kafka1NodeCpuMax,
-			&testRun.Kafka1NodeMemMin,
-			&testRun.Kafka1NodeMemAvg,
-			&testRun.Kafka1NodeMemMax,
-			&testRun.Kafka2NodeCpuMin,
-			&testRun.Kafka2NodeCpuAvg,
-			&testRun.Kafka2NodeCpuMax,
-			&testRun.Kafka2NodeMemMin,
-			&testRun.Kafka2NodeMemAvg,
-			&testRun.Kafka2NodeMemMax,
-			&testRun.Kafka3NodeCpuMin,
-			&testRun.Kafka3NodeCpuAvg,
-			&testRun.Kafka3NodeCpuMax,
-			&testRun.Kafka3NodeMemMin,
-			&testRun.Kafka3NodeMemAvg,
-			&testRun.Kafka3NodeMemMax,
-			&testRun.Ch1NodeCpuMin,
-			&testRun.Ch1NodeCpuAvg,
-			&testRun.Ch1NodeCpuMax,
-			&testRun.Ch1NodeMemMin,
-			&testRun.Ch1NodeMemAvg,
-			&testRun.Ch1NodeMemMax,
-			&testRun.Ch2NodeCpuMin,
-			&testRun.Ch2NodeCpuAvg,
-			&testRun.Ch2NodeCpuMax,
-			&testRun.Ch2NodeMemMin,
-			&testRun.Ch2NodeMemAvg,
-			&testRun.Ch2NodeMemMax,
-			&testRun.KafkaClusterCpKafka0CpuMin,
-			&testRun.KafkaClusterCpKafka0CpuAvg,
-			&testRun.KafkaClusterCpKafka0CpuMax,
-			&testRun.KafkaClusterCpKafka0MemMin,
-			&testRun.KafkaClusterCpKafka0MemAvg,
-			&testRun.KafkaClusterCpKafka0MemMax,
-			&testRun.KafkaClusterCpKafka1CpuMin,
-			&testRun.KafkaClusterCpKafka1CpuAvg,
-			&testRun.KafkaClusterCpKafka1CpuMax,
-			&testRun.KafkaClusterCpKafka1MemMin,
-			&testRun.KafkaClusterCpKafka1MemAvg,
-			&testRun.KafkaClusterCpKafka1MemMax,
-			&testRun.KafkaClusterCpKafka2CpuMin,
-			&testRun.KafkaClusterCpKafka2CpuAvg,
-			&testRun.KafkaClusterCpKafka2CpuMax,
-			&testRun.KafkaClusterCpKafka2MemMin,
-			&testRun.KafkaClusterCpKafka2MemAvg,
-			&testRun.KafkaClusterCpKafka2MemMax,
-			&testRun.ChiClickhouseVusmart000CpuMin,
-			&testRun.ChiClickhouseVusmart000CpuAvg,
-			&testRun.ChiClickhouseVusmart000CpuMax,
-			&testRun.ChiClickhouseVusmart000MemMin,
-			&testRun.ChiClickhouseVusmart000MemAvg,
-			&testRun.ChiClickhouseVusmart000MemMax,
-			&testRun.ChiClickhouseVusmart010CpuMin,
-			&testRun.ChiClickhouseVusmart010CpuAvg,
-			&testRun.ChiClickhouseVusmart010CpuMax,
-			&testRun.ChiClickhouseVusmart010MemMin,
-			&testRun.ChiClickhouseVusmart010MemAvg,
-			&testRun.ChiClickhouseVusmart010MemMax,
-			&testRun.PipelinePodCpuMin,
-			&testRun.PipelinePodCpuAvg,
-			&testRun.PipelinePodCpuMax,
-			&testRun.PipelinePodMemMin,
-			&testRun.PipelinePodMemAvg,
-			&testRun.PipelinePodMemMax,
 			&testRun.MinInputMsgsPerSec,
 			&testRun.AvgInputMsgsPerSec,
 			&testRun.MaxInputMsgsPerSec,
@@ -355,23 +201,38 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 			&testRun.MinLag,
 			&testRun.AvgLag,
 			&testRun.MaxLag,
-			&testRun.DataLossPct,
 			&testRun.KafkaSummaryGenerated,
-			&testRun.PodResourceCheck,
 			&processRateSummary,
 			&ingestionSummary,
-			&testRun.TraefikCpuAllocated,
-			&testRun.TraefikMemAllocated,
 			&podsCpu,
 			&podsMemory,
 			&podRestarts,
+			&topicMetricsJSON,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan test run: %w", err)
 		}
 
-		if endTime.Valid {
-			testRun.EndTime = &endTime.Time
+		// Parse start_time
+		testRun.StartTime, err = time.Parse(time.RFC3339Nano, startTimeStr)
+		if err != nil {
+			// Try alternative format if RFC3339Nano fails
+			testRun.StartTime, err = time.Parse("2006-01-02 15:04:05.999999999-07:00", startTimeStr)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse start_time '%s': %w", startTimeStr, err)
+			}
+		}
+
+		if endTimeStr.Valid {
+			endTime, err := time.Parse(time.RFC3339Nano, endTimeStr.String)
+			if err != nil {
+				// Try alternative format if RFC3339Nano fails
+				endTime, err = time.Parse("2006-01-02 15:04:05.999999999-07:00", endTimeStr.String)
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse end_time '%s': %w", endTimeStr.String, err)
+				}
+			}
+			testRun.EndTime = &endTime
 		}
 		if processRateSummary.Valid {
 			testRun.ProcessRateSummary = processRateSummary.String // Assign process rate summary JSON
@@ -387,6 +248,9 @@ func GetAllTestRuns() ([]*models.TestRun, error) {
 		}
 		if podRestarts.Valid {
 			testRun.PodRestarts = podRestarts.String
+		}
+		if topicMetricsJSON.Valid {
+			testRun.TopicMetricsJSON = topicMetricsJSON.String
 		}
 
 		// Parse JSON sources
@@ -451,9 +315,9 @@ func CompleteTimedOutTestRuns(bc *bin_control.BinaryControl) error {
 	var args []interface{}
 
 	if !anyBinaryRunning {
-		// No binaries running - complete ALL running test runs
-		query = `UPDATE test_runs SET end_time = ?, status = 'completed' WHERE status = 'running'`
-		args = []interface{}{currentTime}
+		// No binaries running - complete ALL running test runs that have been running for at least 30 seconds
+		query = `UPDATE test_runs SET end_time = ?, status = 'completed' WHERE status = 'running' AND datetime(start_time, '+30 seconds') <= ?`
+		args = []interface{}{currentTime, currentTime}
 	} else {
 		// Binaries running - complete only timed-out runs
 		query = `
@@ -481,4 +345,50 @@ func UpdateTestRunPodMetrics(testID string, podsCpu, podsMemory, podRestarts str
 		return fmt.Errorf("failed to update test run pod metrics: %w", err)
 	}
 	return nil
+}
+
+// GetTestRunO11ySources retrieves only the o11y_sources for a test run by ID
+func GetTestRunO11ySources(testID string) ([]string, error) {
+	query := `SELECT o11y_sources FROM test_runs WHERE test_id = ?`
+
+	var sourcesJSON string
+	err := DB.QueryRow(query, testID).Scan(&sourcesJSON)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("test run with ID %s not found", testID)
+		}
+		return nil, fmt.Errorf("failed to query o11y_sources: %w", err)
+	}
+
+	var o11ySources []string
+	err = json.Unmarshal([]byte(sourcesJSON), &o11ySources)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal o11y sources: %w", err)
+	}
+
+	return o11ySources, nil
+}
+
+// UpdateLagPerSource updates only the lag_per_source column
+func UpdateLagPerSource(testID string, lagPerSourceJSON string) error {
+	query := `UPDATE test_runs SET lag_per_source = ? WHERE test_id = ?`
+	_, err := DB.Exec(query, lagPerSourceJSON, testID)
+	if err != nil {
+		return fmt.Errorf("failed to update lag_per_source: %w", err)
+	}
+	return nil
+}
+
+// GetLagPerSource retrieves only the lag_per_source data
+func GetLagPerSource(testID string) (sql.NullString, error) {
+	query := `SELECT lag_per_source FROM test_runs WHERE test_id = ?`
+	var lagPerSource sql.NullString
+	err := DB.QueryRow(query, testID).Scan(&lagPerSource)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return lagPerSource, fmt.Errorf("test run with ID %s not found", testID)
+		}
+		return lagPerSource, fmt.Errorf("failed to query lag_per_source: %w", err)
+	}
+	return lagPerSource, nil
 }

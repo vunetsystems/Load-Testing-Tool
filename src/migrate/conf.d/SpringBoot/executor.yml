@@ -1,0 +1,55 @@
+group:
+- name: good
+  fields:
+  - name: name
+    DataType: String
+    ValueType: Constant
+    Value: prometheus
+  - name: tags,host
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,application
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,url
+    DataType: String
+    ValueType: Constant
+    Value: e2e-92-21.ssdcloudindia.net/actuator/prometheus
+  - name: tags,environment
+    DataType: String
+    ValueType: Constant
+    Value: local
+  - name: tags,name
+    DataType: String
+    ValueType: Constant
+    Value: applicationTaskExecutor
+  - name: fields,executor_completed_tasks_total
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,executor_pool_core_threads
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,executor_pool_size_threads
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,executor_active_threads
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 90-100
+  - name: fields,executor_pool_max_threads
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 100-130
+  - name: fields,executor_queue_remaining_tasks
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100
+  - name: fields,executor_queued_tasks
+    DataType: Uint64
+    ValueType: RandomRange
+    Value: 0-100

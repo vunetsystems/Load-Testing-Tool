@@ -2,6 +2,7 @@ package kafka_ch_reset
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,15 +10,14 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	ch "vuDataSim/src/clickhouse"
 	"vuDataSim/src/logger"
-	"crypto/tls"
+
 	"github.com/segmentio/kafka-go"
 	"gopkg.in/yaml.v3"
-	ch "vuDataSim/src/clickhouse"
 )
 
 var ErrNoPipelinesFound = fmt.Errorf("no pipelines found for provided o11y sources")
-
 
 // TopicName represents a topic name structure
 type TopicName struct {
@@ -33,12 +33,10 @@ type TopicConfig struct {
 	Pipeline         []string    `yaml:"pipeline"`
 }
 
-
-
 // TopicMetadata stores partition and replication factor for a topic
 type TopicMetadata struct {
-	TopicName        string
-	PartitionCount   int
+	TopicName         string
+	PartitionCount    int
 	ReplicationFactor int
 }
 
@@ -58,7 +56,6 @@ type O11ySourceConfig struct {
 		Enabled bool `yaml:"enabled"`
 	} `yaml:"include_module_dirs"`
 }
-
 
 // getKafkaNodeName retrieves the node name where the Kafka pod is running
 func getKafkaNodeName() (string, error) {
@@ -85,16 +82,16 @@ func NewKafkaManager(configPath string) (*KafkaManager, error) {
 	}
 
 	// Configure TLS to resolve the "broker appears to be expecting TLS" error on port 9094
-    tlsConfig := &tls.Config{
-        // WARNING: InsecureSkipVerify is ONLY for E2E/testing where broker certs are self-signed.
-        // For production, you would configure RootCAs.
-        InsecureSkipVerify: true,
-    }
+	tlsConfig := &tls.Config{
+		// WARNING: InsecureSkipVerify is ONLY for E2E/testing where broker certs are self-signed.
+		// For production, you would configure RootCAs.
+		InsecureSkipVerify: true,
+	}
 	admin := &kafka.Client{
 		Addr: kafka.TCP(nodeName + ":9094"),
 		Transport: &kafka.Transport{
-            TLS: tlsConfig,
-        },
+			TLS: tlsConfig,
+		},
 	}
 	return &KafkaManager{
 		configPath: configPath,
@@ -136,7 +133,6 @@ func (km *KafkaManager) LoadConfig() error {
 func (km *KafkaManager) GetAllTopics() []TopicConfig {
 	return km.topics
 }
-
 
 // DescribeTopic describes a single topic and returns its metadata
 func (km *KafkaManager) DescribeTopic(topicName string) (*TopicMetadata, error) {
@@ -220,8 +216,6 @@ func (km *KafkaManager) LoadO11yConfig(confPath string) (*O11ySourceConfig, erro
 	return &config, nil
 }
 
-
-
 // parseTopicDescription parses the output of kafka-topics --describe command
 func (km *KafkaManager) parseTopicDescription(output string) (*TopicMetadata, error) {
 	lines := strings.Split(output, "\n")
@@ -267,8 +261,6 @@ func (km *KafkaManager) parseTopicDescription(output string) (*TopicMetadata, er
 
 	return metadata, nil
 }
-
-
 
 // GetTopicStatus returns the status of all topics
 func (km *KafkaManager) GetTopicStatus() (map[string]interface{}, error) {
@@ -571,8 +563,90 @@ func (km *KafkaManager) RecreateTopicsForEnabledSourcesUsingClient(confPath stri
 		return fmt.Errorf("failed to create topics: %v", err)
 	}
 
+	// Delete pipeline pods immediately after Kafka topics are recreated
+	logger.Info().Msg("Kafka topics recreated successfully, proceeding to delete pipeline pods")
+
+	if err := km.DeletePipelinePodsImmediate(enabledSources); err != nil {
+		// Log warning but don't fail the entire operation
+		// Pods might not exist yet or kubectl might have issues
+		logger.Warn().Err(err).Msg("Failed to delete pipeline pods, but Kafka recreation succeeded")
+		// Continue execution - don't return error
+	} else {
+		logger.Info().Msg("Pipeline pods deleted successfully after Kafka recreation")
+	}
+
 	logger.Info().Int("sources", len(enabledSources)).Int("topics", len(allTopics)).Msg("Successfully recreated topics for enabled o11y sources using client")
 	return nil
+}
+
+// DeletePipelinePodsImmediate deletes pods for given o11y sources immediately (no scheduling)
+func (km *KafkaManager) DeletePipelinePodsImmediate(o11ySources []string) error {
+	// Load topics config to get pipeline names
+	if err := km.LoadConfig(); err != nil {
+		return fmt.Errorf("failed to load topics config: %v", err)
+	}
+
+	// Extract pipeline names from o11y sources
+	pipelineNames := make(map[string]bool)
+	for _, source := range o11ySources {
+		for _, topicGroup := range km.topics {
+			if topicGroup.Name == source {
+				for _, pipeline := range topicGroup.Pipeline {
+					pipelineNames[pipeline] = true
+				}
+				break
+			}
+		}
+	}
+
+	if len(pipelineNames) == 0 {
+		logger.Info().Strs("o11y_sources", o11ySources).Msg("No pipelines found for enabled sources, skipping pod deletion")
+		return nil // Not an error - just means no pods to delete
+	}
+
+	// Generate pod name patterns for grep
+	var podPatterns []string
+	for pipeline := range pipelineNames {
+		podPatterns = append(podPatterns, fmt.Sprintf("%s-", pipeline))
+	}
+	grepPattern := strings.Join(podPatterns, "|")
+
+	logger.Info().Strs("pipelines", keys(pipelineNames)).Str("pattern", grepPattern).Msg("Attempting to delete pipeline pods")
+
+	// Execute kubectl command directly (no scheduling)
+	namespace := "vsmaps"
+	cmdStr := fmt.Sprintf(
+		"kubectl get pods -n %s --no-headers -o custom-columns=NAME:.metadata.name | grep -E '%s' | xargs -r kubectl delete pod -n %s",
+		namespace,
+		grepPattern,
+		namespace,
+	)
+
+	cmd := exec.Command("bash", "-c", cmdStr)
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		// Check if error is because no pods were found (which is acceptable)
+		outputStr := string(output)
+		if strings.Contains(outputStr, "No resources found") || len(strings.TrimSpace(outputStr)) == 0 {
+			logger.Info().Msg("No pipeline pods found to delete")
+			return nil
+		}
+		logger.Error().Err(err).Str("output", outputStr).Str("command", cmdStr).Msg("Failed to delete pipeline pods")
+		return fmt.Errorf("failed to delete pods: %v, output: %s", err, outputStr)
+	}
+
+	logger.Info().Str("output", string(output)).Msg("Successfully deleted pipeline pods")
+	return nil
+}
+
+// keys is a helper function to extract keys from a map[string]bool
+func keys(m map[string]bool) []string {
+	result := make([]string, 0, len(m))
+	for k := range m {
+		result = append(result, k)
+	}
+	return result
 }
 
 // DescribeTopicsBulkUsingClient describes multiple topics using kafka-go client
@@ -666,7 +740,7 @@ func (km *KafkaManager) CreateTopicsBulkUsingClient(topicMetadatas map[string]*T
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		
+
 		var topics []kafka.TopicConfig
 		for topicName, meta := range topicMetadatas {
 			topics = append(topics, kafka.TopicConfig{
@@ -694,14 +768,14 @@ func (km *KafkaManager) CreateTopicsBulkUsingClient(topicMetadatas map[string]*T
 		// Check for errors in individual topic creation
 		hasErrors := false
 		retriableErrors := make(map[string]error)
-		
+
 		for topicName, topicErr := range res.Errors {
 			if topicErr != nil {
 				errorStr := topicErr.Error()
-				
+
 				// Check if error is "topic already exists" - this is retriable
 				if strings.Contains(strings.ToLower(errorStr), "already exists") ||
-				   strings.Contains(strings.ToLower(errorStr), "topicexistsexception") {
+					strings.Contains(strings.ToLower(errorStr), "topicexistsexception") {
 					logger.Warn().Str("topic", topicName).Err(topicErr).Msg("Topic already exists during creation")
 					retriableErrors[topicName] = topicErr
 					hasErrors = true
@@ -767,17 +841,17 @@ func (km *KafkaManager) waitForTopicsDeletion(topics []string) error {
 						allDeleted = false
 						break
 					}
-					
+
 					// Check the error type - only consider deleted if it's specifically "unknown"
 					// You may need to adjust this based on your Kafka version's error types
 					errorStr := topicMeta.Error.Error()
 					if !strings.Contains(strings.ToLower(errorStr), "unknown") &&
-					   !strings.Contains(strings.ToLower(errorStr), "not exist") {
+						!strings.Contains(strings.ToLower(errorStr), "not exist") {
 						logger.Debug().Str("topic", topic).Str("error", errorStr).Msg("Topic in transition state")
 						allDeleted = false
 						break
 					}
-					
+
 					// If we get here, the error indicates topic doesn't exist
 					logger.Debug().Str("topic", topic).Msg("Topic confirmed deleted")
 					break
@@ -829,7 +903,6 @@ func (km *KafkaManager) TruncateTable(tableName string) error {
 	logger.Info().Str("table", tableName).Msg("Successfully truncated ClickHouse table")
 	return nil
 }
-
 
 // GetTablesForEnabledSources returns ClickHouse tables for all enabled o11y sources
 func (km *KafkaManager) GetTablesForEnabledSources(confPath string) ([]string, error) {
@@ -917,7 +990,6 @@ func (km *KafkaManager) SchedulePodDeletion(timeoutSeconds int, o11ySources []st
 		return scheduledTime, ErrNoPipelinesFound
 	}
 
-
 	// Calculate the scheduled time
 	scheduledTime := time.Now().Add(time.Duration(timeoutSeconds) * time.Second)
 
@@ -930,7 +1002,7 @@ func (km *KafkaManager) SchedulePodDeletion(timeoutSeconds int, o11ySources []st
 
 	// Step 4: Schedule the script using 'at' command
 	if err := km.scheduleWithAt(scriptPath, timeoutSeconds); err != nil {
-		os.Remove(scriptPath)  // Clean up on failure
+		os.Remove(scriptPath) // Clean up on failure
 		return time.Time{}, fmt.Errorf("failed to schedule script: %v", err)
 	}
 
@@ -970,7 +1042,7 @@ echo "Deleted pods: $PODS"
 
 // writeTempScript writes the script to a temporary file and makes it executable
 func (km *KafkaManager) writeTempScript(content string) (string, error) {
-	tmpDir := "/tmp"  // Or use os.TempDir()
+	tmpDir := "/tmp" // Or use os.TempDir()
 	file, err := os.CreateTemp(tmpDir, "pod_deletion_*.sh")
 	if err != nil {
 		return "", err
@@ -982,7 +1054,7 @@ func (km *KafkaManager) writeTempScript(content string) (string, error) {
 	}
 
 	scriptPath := file.Name()
-	if err := os.Chmod(scriptPath, 0755); err != nil {  // Make executable
+	if err := os.Chmod(scriptPath, 0755); err != nil { // Make executable
 		return "", err
 	}
 
@@ -992,9 +1064,9 @@ func (km *KafkaManager) writeTempScript(content string) (string, error) {
 // scheduleWithAt schedules the script using the 'at' command
 func (km *KafkaManager) scheduleWithAt(scriptPath string, timeoutSeconds int) error {
 	// Calculate future time: current time + timeout
-	timeoutSeconds=timeoutSeconds+60 // add buffer to avoid early execution
+	timeoutSeconds = timeoutSeconds + 60 // add buffer to avoid early execution
 	futureTime := time.Now().Add(time.Duration(timeoutSeconds) * time.Second)
-	timeStr := futureTime.Format("15:04 2006-01-02")  // 'at' format: HH:MM YYYY-MM-DD
+	timeStr := futureTime.Format("15:04 2006-01-02") // 'at' format: HH:MM YYYY-MM-DD
 
 	// Schedule with 'at': echo "/path/to/script.sh" | at <time>
 	cmd := exec.Command("bash", "-c", fmt.Sprintf("echo '%s' | at '%s'", scriptPath, timeStr))
@@ -1004,4 +1076,3 @@ func (km *KafkaManager) scheduleWithAt(scriptPath string, timeoutSeconds int) er
 
 	return nil
 }
-

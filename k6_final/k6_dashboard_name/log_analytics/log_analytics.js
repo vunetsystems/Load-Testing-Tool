@@ -7,7 +7,7 @@ let responseTimeTrend = new Trend('response_time', true);
 
 // Load user credentials
 const users = new SharedArray('users', () =>
-  open('/home/vunet/user_creation_k6/user_cookies_module.txt')
+  open('/home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/log_analytics/user_cookies_module.txt')
     .split('\n')
     .filter(line => line.trim() !== '')
     .map(line => {
@@ -45,7 +45,7 @@ export default function () {
     table: [
       {
         label: 'Au Logs Rep',
-        table_name: 'vlogs_au_logs_rep'
+        table_name: 'vlogs_apachelogs_data'
       }
     ],
     size: 100,
@@ -88,7 +88,7 @@ export default function () {
   };
 
   try {
-    const res = http.post('https://164.52.213.158/api/vuaccel/datamodel/log_query/', JSON.stringify(payload), { headers });
+    const res = http.post('https://216.48.191.10/api/vuaccel/datamodel/log_query/', JSON.stringify(payload), { headers });
 
     if (res && res.timings && !isNaN(res.timings.duration)) {
       responseTimeTrend.add(res.timings.duration);

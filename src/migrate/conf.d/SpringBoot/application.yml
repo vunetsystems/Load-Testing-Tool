@@ -1,0 +1,35 @@
+group:
+- name: good
+  fields:
+  - name: name
+    DataType: String
+    ValueType: Constant
+    Value: prometheus
+  - name: tags,host
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,application
+    DataType: IPv4
+    ValueType: FromLocal
+    Value: UniqueKey
+  - name: tags,url
+    DataType: String
+    ValueType: Constant
+    Value: e2e-92-21.ssdcloudindia.net/actuator/prometheus
+  - name: tags,environment
+    DataType: String
+    ValueType: Constant
+    Value: local
+  - name: tags,main_application_class
+    DataType: String
+    ValueType: Constant
+    Value: org.springframework.samples.petclinic.PetClinicApplication
+  - name: fields,application_ready_time_seconds
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-6
+  - name: fields,application_started_time_seconds
+    DataType: Float32
+    ValueType: RandomRange
+    Value: 0-6
