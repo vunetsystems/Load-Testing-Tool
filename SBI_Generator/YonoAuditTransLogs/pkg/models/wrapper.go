@@ -6,6 +6,7 @@ import "encoding/json"
 type MessageWrapper struct {
 	YonoAdtError *string `json:"yono_adt_error,omitempty"` // Optional error message (JSON string)
 	YonoAdtTrans *string `json:"yono_adt_trans,omitempty"` // Optional transaction message (JSON string)
+	YonoAdtEis   *string `json:"yono_adt_eis,omitempty"`   // Optional EIS message (JSON string)
 	Message      string  `json:"message,omitempty"`        // For JSON formatted plain text messages
 	RawMessage   string  `json:"-"`                      // For plain text messages
 	Key          string  `json:"-"`                      // Optional Kafka key

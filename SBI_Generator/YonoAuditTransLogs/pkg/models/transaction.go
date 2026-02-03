@@ -20,7 +20,7 @@ type TransactionMessage struct {
 	UsrTyp         string      `json:"usrTyp"`         // User type
 	CmndID         string      `json:"cmndId"`         // Command ID
 	CrtdBy         string      `json:"crtdBy"`         // Created by
-	Crtdon         int64       `json:"crtdon"`         // Created on (epoch millis)
+	Crtdon         int64       `json:"crtdOn"`         // Created on (epoch millis)
 	ChnlID         int         `json:"chnlId"`         // Channel ID
 	TraceID        string      `json:"traceId"`        // Trace ID
 }

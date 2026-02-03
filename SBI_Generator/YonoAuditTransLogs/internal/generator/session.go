@@ -1,7 +1,9 @@
 package generator
 
 import (
+	"crypto/rand"
 	"fmt"
+	"math/big"
 	"sync"
 	"time"
 )
@@ -10,6 +12,7 @@ import (
 type SessionManager struct {
 	mu               sync.RWMutex
 	currentSessionID string
+	currentCommandID string
 	prefix           string
 	rotationInterval time.Duration
 	lastRotation     time.Time
@@ -25,13 +28,14 @@ func NewSessionManager(prefix string, rotationInterval time.Duration) *SessionMa
 	return sm
 }
 
-// GetCurrentSession returns the current session ID, rotating if necessary
-func (sm *SessionManager) GetCurrentSession() string {
+// GetCurrentSession returns the current session ID and command ID, rotating if necessary
+func (sm *SessionManager) GetCurrentSession() (string, string) {
 	sm.mu.RLock()
 	if time.Since(sm.lastRotation) < sm.rotationInterval {
 		sessionID := sm.currentSessionID
+		commandID := sm.currentCommandID
 		sm.mu.RUnlock()
-		return sessionID
+		return sessionID, commandID
 	}
 	sm.mu.RUnlock()
 
@@ -44,7 +48,7 @@ func (sm *SessionManager) GetCurrentSession() string {
 		sm.rotate()
 	}
 
-	return sm.currentSessionID
+	return sm.currentSessionID, sm.currentCommandID
 }
 
 // rotate generates a new session ID (must be called with write lock held)
@@ -52,6 +56,13 @@ func (sm *SessionManager) rotate() {
 	epochMillis := time.Now().UnixMilli()
 	randomSuffix := generateRandomAlphanumeric(10)
 	sm.currentSessionID = fmt.Sprintf("%d%s%s", epochMillis, sm.prefix, randomSuffix)
+	
+	// Select random command ID
+	if len(AllCommandIDs) > 0 {
+		n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(AllCommandIDs))))
+		sm.currentCommandID = AllCommandIDs[n.Int64()]
+	}
+	
 	sm.lastRotation = time.Now()
 }
 

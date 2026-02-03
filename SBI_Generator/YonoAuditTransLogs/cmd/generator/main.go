@@ -78,11 +78,9 @@ func main() {
 	// Initialize worker pool
 	logger.Info("Initializing worker pool", zap.Int("workers", cfg.Concurrency.WorkerPoolSize))
 	workerPool := worker.NewWorkerPool(cfg, msgGen, producerPool, metricsCol)
-
-	// Start metrics logging
 	metricsInterval, _ := cfg.Logging.GetMetricsInterval()
 	stopMetrics := make(chan struct{})
-	go logMetrics(logger, metricsCol, metricsInterval, stopMetrics)
+	go logMetrics(logger, metricsCol, promExporter, metricsInterval, stopMetrics)
 
 	// Set up signal handling for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
@@ -121,6 +119,7 @@ func main() {
 		zap.Int64("trans_only", stats.GeneratedTrans),
 		zap.Int64("both", stats.GeneratedBoth),
 		zap.Int64("access_log", stats.GeneratedAccessLog),
+		zap.Int64("eis", stats.GeneratedEIS),
 		zap.Int64("sent", stats.Sent),
 		zap.Int64("failed", stats.Failed),
 		zap.Duration("elapsed", elapsed),
@@ -165,7 +164,7 @@ func initLogger(cfg *config.Config) *zap.Logger {
 }
 
 // logMetrics periodically logs metrics
-func logMetrics(logger *zap.Logger, collector *metrics.Collector, interval time.Duration, stop <-chan struct{}) {
+func logMetrics(logger *zap.Logger, collector *metrics.Collector, prom *metrics.PrometheusExporter, interval time.Duration, stop <-chan struct{}) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
@@ -173,6 +172,9 @@ func logMetrics(logger *zap.Logger, collector *metrics.Collector, interval time.
 		select {
 		case <-ticker.C:
 			collector.UpdateEPS()
+			if prom != nil {
+				prom.UpdateMetrics()
+			}
 			stats := collector.GetStats()
 			
 			logger.Info("Metrics",

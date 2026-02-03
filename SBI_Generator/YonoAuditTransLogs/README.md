@@ -223,14 +223,14 @@ The application uses structured logging (JSON or text format). Metrics are logge
   "msgId": null,
   "trnsId": "1768397919967cRhKTOYInnV058352",
   "sessnTknId": "1768397919967DSASLX6BkBafbXyZ123",
-  "errcd": "BSee0e01",
+  "errCd": "BSee0e01",
   "usrId": 1212301889885902848,
   "errType": "BUSINESS_EXCEPTION",
   "errDscrptn": "{\"TEACS206\":{\"message\":\"Input provided is invalid\"}}",
   "errDtls": "BUSINESS_EXCEPTION",
   "errTime": 1768397920085,
   "crtdBy": "System",
-  "crtdon": 1768397920085
+  "crtdOn": 1768397920085
 }
 ```
 
@@ -253,7 +253,7 @@ The application uses structured logging (JSON or text format). Metrics are logge
   "usrTyp": "ETB_CUSTOMER",
   "cmndId": "statement_view",
   "crtdBy": "System",
-  "crtdon": 1768397920085,
+  "crtdOn": 1768397920085,
   "chnlId": 22,
   "traceId": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
 }

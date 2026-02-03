@@ -97,6 +97,8 @@ func (pe *PrometheusExporter) UpdateMetrics() {
 	messagesGenerated.WithLabelValues("error").Add(float64(stats.GeneratedError))
 	messagesGenerated.WithLabelValues("trans").Add(float64(stats.GeneratedTrans))
 	messagesGenerated.WithLabelValues("both").Add(float64(stats.GeneratedBoth))
+	messagesGenerated.WithLabelValues("access_log").Add(float64(stats.GeneratedAccessLog))
+	messagesGenerated.WithLabelValues("eis").Add(float64(stats.GeneratedEIS))
 	
 	messagesSent.Add(float64(stats.Sent))
 	messagesFailed.Add(float64(stats.Failed))

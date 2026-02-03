@@ -117,14 +117,14 @@ func (wp *WorkerPool) worker(totalMessages int64, duration time.Duration) {
 
 			// Determine message type for metrics
 			msgType := "both"
-			if wp.config.MessageType == "access_log" {
+			if msg.Topic == wp.config.Kafka.AccessLogTopic {
 				msgType = "access_log"
+			} else if msg.Topic == wp.config.Kafka.EISTopic {
+				msgType = "eis" // We need to handle this in metrics collector or just count it specially
 			} else if msg.YonoAdtError != nil && msg.YonoAdtTrans == nil {
 				msgType = "error"
 			} else if msg.YonoAdtError == nil && msg.YonoAdtTrans != nil {
 				msgType = "trans"
-			} else if msg.Message != "" {
-				msgType = "access_log"
 			}
 
 			// Extract transaction ID for key if enabled

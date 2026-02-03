@@ -15,6 +15,7 @@ type Collector struct {
 	generatedTrans     int64
 	generatedBoth      int64
 	generatedAccessLog int64
+	generatedEIS       int64
 	sent               int64
 	failed             int64
 	
@@ -49,6 +50,8 @@ func (c *Collector) IncrementGenerated(msgType string) {
 		atomic.AddInt64(&c.generatedBoth, 1)
 	case "access_log":
 		atomic.AddInt64(&c.generatedAccessLog, 1)
+	case "eis":
+		atomic.AddInt64(&c.generatedEIS, 1)
 	}
 }
 
@@ -102,6 +105,7 @@ func (c *Collector) GetStats() Stats {
 		GeneratedTrans:     atomic.LoadInt64(&c.generatedTrans),
 		GeneratedBoth:      atomic.LoadInt64(&c.generatedBoth),
 		GeneratedAccessLog: atomic.LoadInt64(&c.generatedAccessLog),
+		GeneratedEIS:       atomic.LoadInt64(&c.generatedEIS),
 		Sent:               atomic.LoadInt64(&c.sent),
 		Failed:             atomic.LoadInt64(&c.failed),
 		CurrentEPS:     c.currentEPS,
@@ -115,6 +119,7 @@ type Stats struct {
 	GeneratedTrans     int64
 	GeneratedBoth      int64
 	GeneratedAccessLog int64
+	GeneratedEIS       int64
 	Sent               int64
 	Failed             int64
 	CurrentEPS     float64
@@ -123,5 +128,5 @@ type Stats struct {
 
 // TotalGenerated returns total messages generated
 func (s *Stats) TotalGenerated() int64 {
-	return s.GeneratedError + s.GeneratedTrans + s.GeneratedBoth + s.GeneratedAccessLog
+	return s.GeneratedError + s.GeneratedTrans + s.GeneratedBoth + s.GeneratedAccessLog + s.GeneratedEIS
 }

@@ -44,9 +44,10 @@ func (mg *MessageGenerator) GenerateMessage() ([]*models.MessageWrapper, error) 
 
 	if mg.config.MessageType == "access_log" {
 		trnsID := GenerateTransactionID(mg.config.IDGeneration.TransactionIDPattern)
+		sessnTknID, _ := mg.sessionManager.GetCurrentSession()
 		raw := mg.generateAccessLogContent(
 			trnsID,
-			mg.sessionManager.GetCurrentSession(),
+			sessnTknID,
 			GenerateRequestNo(mg.config.IDGeneration.RequestNoLength),
 			GenerateTraceID("hex", 32),
 		)
@@ -69,7 +70,7 @@ func (mg *MessageGenerator) GenerateMessage() ([]*models.MessageWrapper, error) 
 
 	// Generate shared fields
 	trnsID := GenerateTransactionID(mg.config.IDGeneration.TransactionIDPattern)
-	sessnTknID := mg.sessionManager.GetCurrentSession()
+	sessnTknID, cmndID := mg.sessionManager.GetCurrentSession()
 	usrID := mg.templateSelector.SelectUserID()
 	currentTime := time.Now().UnixMilli()
 
@@ -89,7 +90,7 @@ func (mg *MessageGenerator) GenerateMessage() ([]*models.MessageWrapper, error) 
 		transMsg := mg.generateTransactionMessage(trnsID, sessnTknID, usrID, currentTime,
 			GenerateRequestNo(mg.config.IDGeneration.RequestNoLength),
 			GenerateTraceID(mg.config.IDGeneration.TraceIDFormat, mg.config.IDGeneration.TraceIDLength),
-			"success")
+			mg.templateSelector.SelectTransactionStatus(), cmndID)
 		transJSON, err := transMsg.ToJSONString()
 		if err != nil {
 			return nil, err
@@ -102,7 +103,7 @@ func (mg *MessageGenerator) GenerateMessage() ([]*models.MessageWrapper, error) 
 		transMsg := mg.generateTransactionMessage(trnsID, sessnTknID, usrID, currentTime,
 			GenerateRequestNo(mg.config.IDGeneration.RequestNoLength),
 			GenerateTraceID(mg.config.IDGeneration.TraceIDFormat, mg.config.IDGeneration.TraceIDLength),
-			"error")
+			"error", cmndID)
 
 		errorJSON, err := errorMsg.ToJSONString()
 		if err != nil {
@@ -134,11 +135,13 @@ func (mg *MessageGenerator) GenerateMessage() ([]*models.MessageWrapper, error) 
 	return []*models.MessageWrapper{&wrapper}, nil
 }
 
+
+
 // generateJointMessages generates both audit/transaction and access log messages with shared IDs
 func (mg *MessageGenerator) generateJointMessages() ([]*models.MessageWrapper, error) {
 	// 1. Generate core shared identifiers
 	trnsID := GenerateTransactionID(mg.config.IDGeneration.TransactionIDPattern)
-	sessnTknID := mg.sessionManager.GetCurrentSession()
+	sessnTknID, cmndID := mg.sessionManager.GetCurrentSession()
 	reqNo := GenerateRequestNo(mg.config.IDGeneration.RequestNoLength)
 	traceID := GenerateTraceID("hex", 32)
 	usrID := mg.templateSelector.SelectUserID()
@@ -146,31 +149,22 @@ func (mg *MessageGenerator) generateJointMessages() ([]*models.MessageWrapper, e
 
 	// 2. Generate Audit/Transaction Message
 	var auditWrapper models.MessageWrapper
-	msgType := mg.selectMessageType()
+	status := mg.templateSelector.SelectTransactionStatus()
 	shouldWrapAudit := false
 
-	switch msgType {
-	case ErrorOnly:
-		errorMsg := mg.generateErrorMessage(trnsID, sessnTknID, usrID, currentTime)
-		errorJSON, err := errorMsg.ToJSONString()
-		if err != nil {
-			return nil, err
-		}
-		auditWrapper.YonoAdtError = &errorJSON
-		shouldWrapAudit = mg.config.Templates.Error.WrapInMessage
-
-	case TransOnly:
-		transMsg := mg.generateTransactionMessage(trnsID, sessnTknID, usrID, currentTime, reqNo, traceID, "success")
+	if status == "success" {
+		// Success implies TransOnly
+		transMsg := mg.generateTransactionMessage(trnsID, sessnTknID, usrID, currentTime, reqNo, traceID, "success", cmndID)
 		transJSON, err := transMsg.ToJSONString()
 		if err != nil {
 			return nil, err
 		}
 		auditWrapper.YonoAdtTrans = &transJSON
 		shouldWrapAudit = mg.config.Templates.Transaction.WrapInMessage
-
-	case Both:
+	} else {
+		// Error implies Both (Trans + Error)
 		errorMsg := mg.generateErrorMessage(trnsID, sessnTknID, usrID, currentTime)
-		transMsg := mg.generateTransactionMessage(trnsID, sessnTknID, usrID, currentTime, reqNo, traceID, "error")
+		transMsg := mg.generateTransactionMessage(trnsID, sessnTknID, usrID, currentTime, reqNo, traceID, "error", cmndID)
 
 		errorJSON, err := errorMsg.ToJSONString()
 		if err != nil {
@@ -212,7 +206,24 @@ func (mg *MessageGenerator) generateJointMessages() ([]*models.MessageWrapper, e
 		accessWrapper.RawMessage = accessRaw
 	}
 
-	return []*models.MessageWrapper{finalAuditWrapper, accessWrapper}, nil
+	// 4. Generate EIS Message
+	eisMsg := mg.generateEISMessage(trnsID, sessnTknID, usrID, currentTime)
+	eisJSON, err := eisMsg.ToJSONString()
+	if err != nil {
+		return nil, err
+	}
+
+	eisWrapper := &models.MessageWrapper{
+		Key:   trnsID,
+		Topic: mg.config.Kafka.EISTopic,
+	}
+	if mg.config.EIS.WrapInMessage {
+		eisWrapper.Message = eisJSON
+	} else {
+		eisWrapper.RawMessage = eisJSON
+	}
+
+	return []*models.MessageWrapper{finalAuditWrapper, accessWrapper, eisWrapper}, nil
 }
 
 // selectMessageType selects message type based on distribution
@@ -246,7 +257,7 @@ func (mg *MessageGenerator) generateErrorMessage(trnsID, sessnTknID string, usrI
 }
 
 // generateTransactionMessage generates a transaction message
-func (mg *MessageGenerator) generateTransactionMessage(trnsID, sessnTknID string, usrID, currentTime int64, reqNo, traceID, status string) *models.TransactionMessage {
+func (mg *MessageGenerator) generateTransactionMessage(trnsID, sessnTknID string, usrID, currentTime int64, reqNo, traceID, status, cmndID string) *models.TransactionMessage {
 	// Generate strtTime slightly before endTime (10-200ms)
 	n, _ := rand.Int(rand.Reader, big.NewInt(191))
 	offset := 10 + n.Int64()
@@ -267,7 +278,7 @@ func (mg *MessageGenerator) generateTransactionMessage(trnsID, sessnTknID string
 		BizRespOutput:  mg.templateSelector.SelectBizRespOutput(),
 		UsrID:          usrID,
 		UsrTyp:         mg.templateSelector.SelectUserType(),
-		CmndID:         mg.templateSelector.SelectCommandID(),
+		CmndID:         cmndID,
 		CrtdBy:         mg.config.Templates.Transaction.CreatedBy,
 		Crtdon:         currentTime,
 		ChnlID:         mg.templateSelector.SelectChannelID(),
@@ -277,8 +288,9 @@ func (mg *MessageGenerator) generateTransactionMessage(trnsID, sessnTknID string
 
 // generateAccessLogContent generates a JSON formatted access log message string
 func (mg *MessageGenerator) generateAccessLogContent(trnsID, sessnTknID, reqNo, traceID string) string {
-	currentTime := time.Now()
-	timestamp := currentTime.Format("02/Jan/2006 15:04:05") + " IST"
+	loc := time.FixedZone("IST", 5*3600+30*60)
+	currentTime := time.Now().In(loc)
+	timestamp := currentTime.Format("02/Jan/2006 15:04:05") + fmt.Sprintf(":%03d", currentTime.Nanosecond()/1e6) + " IST"
 
 	// Span ID remains random per message even in joint mode as it represents a specific hop
 	spanID := GenerateTraceID("hex", 16)
@@ -295,4 +307,41 @@ func (mg *MessageGenerator) generateAccessLogContent(trnsID, sessnTknID, reqNo, 
 
 	return fmt.Sprintf("%s trace_id=%s span_id=%s dt.trace_id= dt.span_id= dt.entity.process_group_instance= journey_id= pod_name=%s log_path=%s INFO %s: -, session-token-id: %s, request-no: %s, transaction-id: %s, channel-id: %d, channel-version: %s, api-url: %s, execution-time: %d, http-status: %s",
 		timestamp, traceID, spanID, podName, logPath, logName, sessnTknID, reqNo, trnsID, chnlID, mg.config.AccessLog.ChannelVersion, apiURL, execTime, status)
+}
+
+// generateEISMessage generates an EIS message
+func (mg *MessageGenerator) generateEISMessage(trnsID, sessnTknID string, usrID int64, currentTime int64) *models.EISMessage {
+	rqstID := "SBIY" + GenerateRequestNo(20) // Approximate length from sample
+
+	var strtTime, endTime interface{}
+	// Randomly decide whether to include start/end times (approx 50% chance)
+	n, _ := rand.Int(rand.Reader, big.NewInt(100))
+	if n.Int64() < 50 {
+		// Generate start/end time
+		offset, _ := rand.Int(rand.Reader, big.NewInt(191)) // Similar to transaction logic
+		latency := 10 + offset.Int64()
+		strtTime = currentTime - latency
+		endTime = currentTime
+	}
+
+	return &models.EISMessage{
+		MsgID:          nil,
+		TrnsID:         trnsID,
+		SessnTknID:     sessnTknID,
+		ServiceID:      mg.templateSelector.SelectEISServiceID(),
+		SrvcRqst:       nil,
+		SrvcRspn:       nil,
+		TrnsSts:        "-1",
+		ErrCD:          mg.templateSelector.SelectEISErrorCode(),
+		ErrMsg:         mg.templateSelector.SelectEISErrorMessage(),
+		CrtdBy:         mg.config.EIS.CreatedBy,
+		Crtdon:         currentTime,
+		UsrID:          usrID,
+		SystemName:     mg.templateSelector.SelectEISSystemName(),
+		APIUrl:         mg.templateSelector.SelectEISAPIUrl(),
+		RqstIDSent:     rqstID,
+		RqstIDReceived: rqstID,
+		StrtTime:       strtTime,
+		EndTime:        endTime,
+	}
 }

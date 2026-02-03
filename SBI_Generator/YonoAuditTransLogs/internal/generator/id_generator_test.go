@@ -79,22 +79,28 @@ func TestSessionManager(t *testing.T) {
 	sm := NewSessionManager(prefix, interval)
 	
 	// Get initial session
-	session1 := sm.GetCurrentSession()
+	session1, cmd1 := sm.GetCurrentSession()
 	if session1 == "" {
 		t.Error("Session ID should not be empty")
 	}
+	if cmd1 == "" && len(AllCommandIDs) > 0 {
+		t.Error("Command ID should not be empty if AllCommandIDs is populated")
+	}
 	
 	// Get session again immediately (should be same)
-	session2 := sm.GetCurrentSession()
+	session2, cmd2 := sm.GetCurrentSession()
 	if session1 != session2 {
 		t.Error("Session ID should not change before rotation interval")
+	}
+	if cmd1 != cmd2 {
+		t.Error("Command ID should not change before rotation interval")
 	}
 	
 	// Wait for rotation
 	time.Sleep(150 * time.Millisecond)
 	
 	// Get session after rotation
-	session3 := sm.GetCurrentSession()
+	session3, _ := sm.GetCurrentSession()
 	if session1 == session3 {
 		t.Error("Session ID should change after rotation interval")
 	}

@@ -72,11 +72,6 @@ func (ts *TemplateSelector) SelectUserType() string {
 	return selectRandom(ts.config.Templates.Transaction.UserTypes)
 }
 
-// SelectCommandID randomly selects a command ID
-func (ts *TemplateSelector) SelectCommandID() string {
-	return selectRandom(ts.config.Templates.Transaction.CommandIDs)
-}
-
 // SelectChannelID randomly selects a channel ID
 func (ts *TemplateSelector) SelectChannelID() int {
 	return selectRandomInt(ts.config.Templates.Transaction.ChannelIDs)
@@ -160,6 +155,31 @@ func (ts *TemplateSelector) SelectHttpStatus() string {
 	}
 
 	return statuses[0].Value
+}
+
+// SelectEISServiceID randomly selects an EIS service ID
+func (ts *TemplateSelector) SelectEISServiceID() string {
+	return selectRandom(ts.config.EIS.ServiceIDs)
+}
+
+// SelectEISErrorCode randomly selects an EIS error code
+func (ts *TemplateSelector) SelectEISErrorCode() string {
+	return selectRandom(ts.config.EIS.ErrorCodes)
+}
+
+// SelectEISErrorMessage randomly selects an EIS error message
+func (ts *TemplateSelector) SelectEISErrorMessage() string {
+	return selectRandom(ts.config.EIS.ErrorMessages)
+}
+
+// SelectEISSystemName randomly selects an EIS system name
+func (ts *TemplateSelector) SelectEISSystemName() string {
+	return selectRandom(ts.config.EIS.SystemNames)
+}
+
+// SelectEISAPIUrl randomly selects an EIS API URL
+func (ts *TemplateSelector) SelectEISAPIUrl() string {
+	return selectRandom(ts.config.EIS.APIUrls)
 }
 
 // selectRandom selects a random string from a slice

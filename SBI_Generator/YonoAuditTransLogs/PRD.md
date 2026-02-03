@@ -33,14 +33,14 @@ A Go-based Kafka message generator that produces configurable YONO audit message
   "msgId": null,
   "trnsId": "string",
   "sessnTknId": "string",
-  "errcd": "string",
+  "errCd": "string",
   "usrId": 1212301889885902848,
   "errType": "string",
   "errDscrptn": "string",  // Stringified JSON, e.g., "{\"TEACS206\":{\"message\":\"Input provided is invalid\"}}"
   "errDtls": "string",
   "errTime": 1768397920085,
   "crtdBy": "string",
-  "crtdon": 1768397920085
+  "crtdOn": 1768397920085
 }
 ```
 
@@ -48,14 +48,14 @@ A Go-based Kafka message generator that produces configurable YONO audit message
 - `msgId`: Always `null`
 - `trnsId`: Auto-generated unique transaction ID
 - `sessnTknId`: Session token, should rotate periodically (configurable interval)
-- `errcd`: Configurable error code from predefined list
+- `errCd`: Configurable error code from predefined list
 - `usrId`: Configurable user ID (can be random range or fixed list)
 - `errType`: Configurable (e.g., "BUSINESS_EXCEPTION")
 - `errDscrptn`: Stringified JSON with configurable error messages
 - `errDtls`: Configurable string
 - `errTime`: Current epoch milliseconds at generation time
 - `crtdBy`: Configurable string (e.g., "System")
-- `crtdon`: Current epoch milliseconds at generation time
+- `crtdOn`: Current epoch milliseconds at generation time
 
 #### 2.1.3 yono_adt_trans Schema (Stringified JSON)
 ```json
@@ -76,7 +76,7 @@ A Go-based Kafka message generator that produces configurable YONO audit message
   "usrTyp": "string",
   "cmndId": "string",
   "crtdBy": "string",
-  "crtdon": 1768397920085,
+  "crtdOn": 1768397920085,
   "chnlId": 22,
   "traceId": "string"
 }
@@ -99,7 +99,7 @@ A Go-based Kafka message generator that produces configurable YONO audit message
 - `usrTyp`: Configurable (e.g., "ETB_CUSTOMER")
 - `cmndId`: Configurable command ID from predefined list
 - `crtdBy`: Configurable string
-- `crtdon`: Current epoch milliseconds
+- `crtdOn`: Current epoch milliseconds
 - `chnlId`: Configurable integer
 - `traceId`: Auto-generated UUID or hex string
 
@@ -282,7 +282,7 @@ For each message:
   - Should be unique per message
   
 - **Timestamps**:
-  - `errTime`, `crtdon`, `endTime`: Current epoch milliseconds
+  - `errTime`, `crtdOn`, `endTime`: Current epoch milliseconds
   - `strtTime`: `endTime - random(10, 200)` milliseconds
 
 #### 4.2.3 Template Selection

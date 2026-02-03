@@ -15,6 +15,7 @@ type Config struct {
 	Session      SessionConfig      `yaml:"session"`
 	Templates    TemplatesConfig    `yaml:"templates"`
 	AccessLog    AccessLogConfig    `yaml:"access_log"`
+	EIS          EISConfig          `yaml:"eis"`
 	UserIDs      UserIDsConfig      `yaml:"user_ids"`
 	IDGeneration IDGenerationConfig `yaml:"id_generation"`
 	Kafka        KafkaConfig        `yaml:"kafka"`
@@ -85,6 +86,17 @@ type AccessLogConfig struct {
 	WrapInMessage  bool           `yaml:"wrap_in_message"`
 }
 
+// EISConfig contains EIS message templates
+type EISConfig struct {
+	ServiceIDs    []string `yaml:"service_ids"`
+	ErrorCodes    []string `yaml:"error_codes"`
+	ErrorMessages []string `yaml:"error_messages"`
+	SystemNames   []string `yaml:"system_names"`
+	APIUrls       []string `yaml:"api_urls"`
+	CreatedBy     string   `yaml:"created_by"`
+	WrapInMessage bool     `yaml:"wrap_in_message"`
+}
+
 // StatusWeight represents weighted transaction status
 type StatusWeight struct {
 	Weight int    `yaml:"weight"`
@@ -112,6 +124,7 @@ type KafkaConfig struct {
 	Brokers        []string         `yaml:"brokers"`
 	Topic          string           `yaml:"topic"`
 	AccessLogTopic string           `yaml:"access_log_topic"`
+	EISTopic       string           `yaml:"eis_topic"`
 	Producer       ProducerConfig   `yaml:"producer"`
 	Connection     ConnectionConfig `yaml:"connection"`
 }

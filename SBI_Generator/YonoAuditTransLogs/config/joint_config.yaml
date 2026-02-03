@@ -5,7 +5,7 @@ message_type: "joint"         # Generates both audit and access log per request
 execution:
   mode: "duration"
   duration: "1h"
-  eps: 10000                  # This will result in 10k Audit + 10k Access = 20k total messages/sec
+  eps: 1000                  # This will result in 10k Audit + 10k Access = 20k total messages/sec
   
 # Message Distribution (for Audit messages)
 distribution:
@@ -29,7 +29,7 @@ templates:
       - '{"BSee0e01":{"message":"Service temporarily unavailable"}}'
     error_details: ["BUSINESS_EXCEPTION", "TECHNICAL_EXCEPTION"]
     created_by: "System"
-    wrap_in_message: false
+    wrap_in_message: true
   transaction:
     statuses:
       - weight: 90
@@ -43,7 +43,7 @@ templates:
     biz_req_inputs: ['{"accountNo":"30096060714"}']
     biz_resp_outputs: ['{"status":"success","data":[]}']
     created_by: "System"
-    wrap_in_message: false
+    wrap_in_message: true
 
 # Access Log Templates
 access_log:
@@ -58,6 +58,16 @@ access_log:
       value: "200"
     - weight: 5
       value: "500"
+  wrap_in_message: true
+  
+# EIS Message Templates
+eis:
+  service_ids: ["eis_statement_inb", "eis_home_dashboard_cards_getAccount Details2", "integration_eis_login_cust_cif information"]
+  error_codes: ["EIS_ERROR_001"]
+  error_messages: ["EIS service was not called"]
+  system_names: ["EIS"]
+  api_urls: ["http://121.185.16.101:6280/eis/v1", "http://121.185.16.101:6498", "http://121.185.16.101:6210/API"]
+  created_by: "SYSTEM"
   wrap_in_message: true
 
 # User ID Configuration
@@ -78,7 +88,9 @@ id_generation:
 kafka:
   brokers: ["e2e-83-134:9094"]
   topic: "yono-adt-trans"        # Audit topic
+
   access_log_topic: "ms-logs"    # Access log topic
+  eis_topic: "yono-adt-service"     # EIS topic
   
   producer:
     num_producers: 10
