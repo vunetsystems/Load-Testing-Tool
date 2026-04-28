@@ -73,3 +73,7 @@ group:
     DataType: String
     ValueType: Constant
     Value: snmp-cisco-l3switch
+
+output.kafka:
+  enabled: true
+  topic: "snmp-cisco-l3switch"

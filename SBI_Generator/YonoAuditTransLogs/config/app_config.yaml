@@ -1,0 +1,129 @@
+# ==============================================================================
+# Execution Control Configuration
+# ==============================================================================
+execution:
+  # Execution mode:
+  # - "duration": Run for a specified amount of time.
+  # - "count": Run until a specific number of total messages are generated.
+  mode: "duration"
+
+  # duration: Used when mode is "duration".
+  # Valid units: "s" (seconds), "m" (minutes), "h" (hours).
+  duration: "1h"
+
+  # eps (Events Per Second): The target throughput for message generation.
+  # Note: In "joint" mode, this usually refers to the number of logical transactions.
+  # If 1 transaction generates 1 Audit + 1 Access + 1 EIS message,
+  # then EPS=1000 results in 3000 messages/sec sent to Kafka.
+  eps: 1000
+
+# ==============================================================================
+# Kafka Producer Configuration
+# ==============================================================================
+kafka:
+  # brokers: List of Kafka broker addresses (host:port).
+  brokers: ["e2e-83-134:9094"]
+
+  # topic: Primary topic for YONO Audit Transaction logs.
+  topic: "yono-adt-trans"
+
+  # access_log_topic: Topic where raw access logs (Gateway/MS) are sent.
+  access_log_topic: "ms-logs"
+
+  # eis_topic: Topic where External Integration Service (EIS) transaction logs are sent.
+  eis_topic: "yono-adt-service"
+
+  # Producer-level settings for fine-tuning Kafka interactions.
+  producer:
+    # num_producers: Number of concurrent Kafka producers to maintain in the pool.
+    # Higher values can improve throughput but increase resource usage.
+    num_producers: 10
+
+    # required_acks:
+    #  0: No acknowledgment (fastest, lowest reliability).
+    #  1: Wait for leader to acknowledge (balanced).
+    # -1: Wait for all in-sync replicas to acknowledge (highest reliability).
+    required_acks: 1
+
+    # compression: Algorithm to compress messages before sending.
+    # Options: "none", "gzip", "snappy", "lz4", "zstd".
+    compression: "none"
+
+    # max_message_bytes: Maximum size of a single message in bytes.
+    max_message_bytes: 1000000
+
+    # flush_frequency: Interval between automatic flushes of the producer buffer.
+    # Set to "0ms" to disable time-based batching (constant ingestion).
+    flush_frequency: "0ms"
+
+    # flush_messages: Number of messages to buffer before a mandatory flush.
+    # Set to 1 for constant ingestion (no batching).
+    flush_messages: 1
+
+    # idempotent: If true, the producer ensures that messages are delivered
+    # exactly once and in the original order (requires required_acks=-1).
+    idempotent: false
+
+    # retry_max: Number of times to retry sending a message if Kafka returns a transient error.
+    retry_max: 1
+
+    # retry_backoff: Time to wait between retries.
+    retry_backoff: "100ms"
+
+    # enable_key: If true, uses the Transaction ID (trnsID) as the Kafka message key.
+    # This ensures all logs for a single transaction go to the same partition.
+    enable_key: true
+
+  # Connection settings for the Kafka client.
+  connection:
+    # timeout: Connection timeout for the initial handshake and metadata requests.
+    timeout: "10s"
+
+    # keep_alive: TCP keep-alive interval to maintain the connection.
+    keep_alive: "30s"
+
+    # enable_tls: Whether to use TLS for secure communication.
+    enable_tls: true
+
+    # insecure_skip_verify: If true, skips certificate verification (useful for internal/self-signed certs).
+    insecure_skip_verify: true
+
+# ==============================================================================
+# Concurrency and Performance Control
+# ==============================================================================
+concurrency:
+  # worker_pool_size: Number of concurrent workers generating messages.
+  # These workers feed the producer pool.
+  worker_pool_size: 100
+
+  # buffer_size: Size of the internal channel between workers and producers.
+  buffer_size: 1000
+
+  # rate_limiter_burst: Controls how much the generator can exceed the EPS
+  # temporarily to catch up. Set to 1 for a strict, smooth flow.
+  rate_limiter_burst: 1
+
+# ==============================================================================
+# Logging and Observability
+# ==============================================================================
+logging:
+  # level: Minimum log level for the generator's internal logs.
+  # Options: "debug", "info", "warn", "error".
+  level: "info"
+
+  # format: Format of internal logs. Options: "text" (human readable) or "json".
+  format: "text"
+
+  # metrics_interval: Frequency at which the generator logs its own performance stats
+  # (e.g., current EPS, total sent, failed messages).
+  metrics_interval: "10s"
+
+# ==============================================================================
+# Prometheus Monitoring
+# ==============================================================================
+monitoring:
+  # enable_metrics: If true, exposes a Prometheus metrics endpoint.
+  enable_metrics: false
+
+  # metrics_port: Port for the Prometheus HTTP exporter.
+  metrics_port: 9090

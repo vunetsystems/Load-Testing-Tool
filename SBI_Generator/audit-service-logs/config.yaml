@@ -1,0 +1,45 @@
+execution:
+  targetEPS: 10000        # Events per second (messages/sec)
+  duration: "1h"     # Duration: supports s (seconds), m (minutes), h (hours), e.g., "30s", "5m", "2h", "1h30m"
+  workers: 20            # Number of concurrent workers
+  nullTimestampPercent: 10  # Percentage of messages with null strtTime and endTime (0-100)
+
+messageTemplate:
+  # Static fields (same for all messages)
+  msgId: null
+  srvcRqst: null
+  srvcRspn: null
+  usrId: null
+  crtdBy: "SYSTEM"
+  
+  # Dynamic fields will be generated:
+  # - transId: timestamp + random string
+  # - sessnTknId: SHA256 hash of timestamp (rotates every 30s)
+  # - serviceId: from services list below
+  # - crtdOn: current timestamp
+  # - strtTime: current timestamp
+  # - endTime: strtTime + random 10-100ms
+  # - rqstIdSent: "SBIY" + UUID
+  # - rqstIdReceived: "SBIY" + UUID
+
+errorTemplate:
+  trnsSts: "-1"
+  errCd: "EIS_ERROR_001"
+  errMsg: "EIS service was not called"
+  systemName: "EIS"
+
+kafka:
+  namespace: "vsmaps"
+  podName: "kafka-cluster-cp-kafka-0"
+  port: "9094"
+  topic: "yono-adt-service"  # New topic without wrapper transformation
+
+services:
+  eis_statement_inb:
+    apiUrl: "http://10.188.46.111:6280/eis/v1"
+
+  eis_home_dashboard_cards_getAccountDetails2:
+    apiUrl: "http://10.188.46.111:6498"
+
+  integration_eis_login_cust_cif_enquiry:
+    apiUrl: "http://10.188.46.112:6210/API"

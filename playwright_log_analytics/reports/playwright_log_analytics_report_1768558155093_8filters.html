@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playwright Log Analytics - Comprehensive Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #1a202c;
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+
+        .report-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: #ffffff;
+        }
+
+         
+        .report-header {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            color: #ffffff;
+            padding: 48px 60px;
+            border-bottom: 4px solid #4299e1;
+        }
+
+        .report-header h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .report-header .subtitle {
+            font-size: 1.125rem;
+            color: #cbd5e0;
+            font-weight: 400;
+            margin-bottom: 4px;
+        }
+
+        .report-meta {
+            display: flex;
+            gap: 32px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.875rem;
+            color: #e2e8f0;
+        }
+
+        .report-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .report-meta-item strong {
+            color: #ffffff;
+        }
+
+         
+        .report-content {
+            padding: 48px 60px;
+        }
+
+         
+        .report-section {
+            margin-bottom: 56px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: #4299e1;
+            color: #ffffff;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+
+        .section-description {
+            color: #718096;
+            font-size: 0.9375rem;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+         
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 16px;
+        }
+
+        .kpi-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 24px;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #4299e1;
+            transform: scaleY(0);
+            transition: transform 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            border-color: #cbd5e0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .kpi-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .kpi-card.success::before {
+            background: #48bb78;
+        }
+
+        .kpi-card.warning::before {
+            background: #ed8936;
+        }
+
+        .kpi-card.info::before {
+            background: #4299e1;
+        }
+
+        .kpi-card.danger::before {
+            background: #f56565;
+        }
+
+        .kpi-label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #718096;
+            margin-bottom: 12px;
+        }
+
+        .kpi-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #1a202c;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .kpi-unit {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #a0aec0;
+            margin-left: 4px;
+        }
+
+        .kpi-subtext {
+            font-size: 0.8125rem;
+            color: #a0aec0;
+            margin-top: 8px;
+        }
+
+         
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #ffffff;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        thead {
+            background: #f7fafc;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        th {
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #4a5568;
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.15s ease;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: #f7fafc;
+        }
+
+        td {
+            padding: 16px 20px;
+            color: #2d3748;
+            vertical-align: middle;
+        }
+
+        .table-section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 24px 0 16px 0;
+        }
+
+         
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-success {
+            background-color: #c6f6d5;
+            color: #22543d;
+        }
+
+        .badge-warning {
+            background-color: #fef3c7;
+            color: #78350f;
+        }
+
+        .badge-danger {
+            background-color: #fed7d7;
+            color: #742a2a;
+        }
+
+        .badge-info {
+            background-color: #bee3f8;
+            color: #2c5282;
+        }
+
+         
+        .highlight-box {
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            color: #2c5282;
+        }
+
+        .highlight-box strong {
+            color: #2b6cb0;
+        }
+
+         
+        .emphasis-primary {
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .emphasis-secondary {
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .text-muted {
+            color: #718096;
+            font-size: 0.875rem;
+        }
+
+         
+        .report-footer {
+            background: #f7fafc;
+            padding: 32px 60px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.875rem;
+            color: #718096;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+         
+        @media (max-width: 768px) {
+            .report-header,
+            .report-content,
+            .report-footer {
+                padding: 32px 24px;
+            }
+
+            .report-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .report-meta {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            table {
+                font-size: 0.8125rem;
+            }
+
+            th, td {
+                padding: 12px 16px;
+            }
+        }
+
+         
+        @media print {
+            body {
+                background: white;
+            }
+
+            .report-container {
+                box-shadow: none;
+            }
+
+            .kpi-card,
+            .report-section {
+                break-inside: avoid;
+            }
+
+            table {
+                page-break-inside: auto;
+            }
+
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        
+        <div class="report-header">
+            <h1>1768558155093_8filters - Playwright Log Analytics Report</h1>
+            <div class="subtitle">Comprehensive UI Performance Monitoring Dashboard</div>
+            <div class="report-meta">
+                <div class="report-meta-item">
+                    <strong>Generated:</strong>
+                    <span>2026-01-16 15:40:32</span>
+                </div>
+                <div class="report-meta-item">
+                    <strong>Data Source:</strong>
+                    <span>monitoring.playwright_log_analytics</span>
+                </div>
+                <div class="report-meta-item">
+                    <strong>Test Type:</strong>
+                    <span>UI-Driven Performance Testing</span>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="report-content">
+            
+            
+            <div class="report-section">
+                <div class="section-header">
+                    <h2><span class="section-number">1</span>Overall Summary</h2>
+                </div>
+                <div class="kpi-grid">
+                    <div class="kpi-card info">
+                        <div class="kpi-label">Avg Total Time</div>
+                        <div class="kpi-value">5814.92<span class="kpi-unit">ms</span></div>
+                        <div class="kpi-subtext">Complete search execution</div>
+                    </div>
+                    <div class="kpi-card success">
+                        <div class="kpi-label">Avg Search API Time</div>
+                        <div class="kpi-value">180.17<span class="kpi-unit">ms</span></div>
+                        <div class="kpi-subtext">Backend response time</div>
+                    </div>
+                    <div class="kpi-card warning">
+                        <div class="kpi-label">Avg Results Render Time</div>
+                        <div class="kpi-value">2000.17<span class="kpi-unit">ms</span></div>
+                        <div class="kpi-subtext">UI rendering time</div>
+                    </div>
+                    <div class="kpi-card info">
+                        <div class="kpi-label">Avg Page Load Time</div>
+                        <div class="kpi-value">6587.33<span class="kpi-unit">ms</span></div>
+                        <div class="kpi-subtext">Initial navigation</div>
+                    </div>
+                    <div class="kpi-card success">
+                        <div class="kpi-label">Total Tests</div>
+                        <div class="kpi-value">12</div>
+                        <div class="kpi-subtext">Test executions</div>
+                    </div>
+                    <div class="kpi-card success">
+                        <div class="kpi-label">Successful Tests</div>
+                        <div class="kpi-value">8</div>
+                        <div class="kpi-subtext">Completed successfully</div>
+                    </div>
+                    <div class="kpi-card danger">
+                        <div class="kpi-label">Failed Tests</div>
+                        <div class="kpi-value">4</div>
+                        <div class="kpi-subtext">Error count</div>
+                    </div>
+                    <div class="kpi-card danger">
+                        <div class="kpi-label">Success Rate</div>
+                        <div class="kpi-value">66.67<span class="kpi-unit">%</span></div>
+                        <div class="kpi-subtext">Overall reliability</div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="report-section">
+                <div class="section-header">
+                    <h2><span class="section-number">2</span>Performance Bottleneck Analysis</h2>
+                </div>
+                <div class="section-description">
+                    Comparison of Search API time vs UI Rendering time to identify performance bottlenecks.
+                </div>
+                <div class="highlight-box">
+                    <strong>Key Insight:</strong> 
+                    
+                        UI Rendering (2000ms) is the primary bottleneck, significantly longer than the API (180ms).
+                    
+                </div>
+                <div class="kpi-grid">
+                    <div class="kpi-card success">
+                        <div class="kpi-label">Search API Performance</div>
+                        <div class="kpi-value">180<span class="kpi-unit">ms</span></div>
+                        <div class="kpi-subtext">Backend query execution</div>
+                    </div>
+                    <div class="kpi-card success">
+                        <div class="kpi-label">UI Rendering Performance</div>
+                        <div class="kpi-value">2000<span class="kpi-unit">ms</span></div>
+                        <div class="kpi-subtext">Frontend display time</div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="report-section">
+                <div class="section-header">
+                    <h2><span class="section-number">3</span>Filter Performance Analysis</h2>
+                </div>
+                <div class="section-description">
+                    Detailed performance breakdown by filter showing total time, API response, and rendering metrics.
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Filter</th>
+                                <th>Avg Total (ms)</th>
+                                <th>Avg API (ms)</th>
+                                <th>Avg Render (ms)</th>
+                                <th>Success Rate</th>
+                                <th>Count</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td class="emphasis-primary">apache2_access_method:GET</td>
+                                <td>18270</td>
+                                <td>108</td>
+                                <td>1500</td>
+                                <td>50.0%</td>
+                                <td>2</td>
+                                <td>
+                                    
+                                        <span class="badge badge-danger">Needs Attention</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="emphasis-primary">target:10.10.10.206</td>
+                                <td>3363</td>
+                                <td>159</td>
+                                <td>1500</td>
+                                <td>50.0%</td>
+                                <td>2</td>
+                                <td>
+                                    
+                                        <span class="badge badge-danger">Needs Attention</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="emphasis-primary">500</td>
+                                <td>3336</td>
+                                <td>291</td>
+                                <td>3001</td>
+                                <td>100.0%</td>
+                                <td>1</td>
+                                <td>
+                                    
+                                        <span class="badge badge-success">Excellent</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="emphasis-primary">apache2_access_user_agent_name:curl</td>
+                                <td>3334</td>
+                                <td>147</td>
+                                <td>1500</td>
+                                <td>50.0%</td>
+                                <td>2</td>
+                                <td>
+                                    
+                                        <span class="badge badge-danger">Needs Attention</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="emphasis-primary">vublock_name:apache</td>
+                                <td>3332</td>
+                                <td>151</td>
+                                <td>1500</td>
+                                <td>50.0%</td>
+                                <td>2</td>
+                                <td>
+                                    
+                                        <span class="badge badge-danger">Needs Attention</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="emphasis-primary">200</td>
+                                <td>3308</td>
+                                <td>274</td>
+                                <td>3000</td>
+                                <td>100.0%</td>
+                                <td>1</td>
+                                <td>
+                                    
+                                        <span class="badge badge-success">Excellent</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="emphasis-primary">220</td>
+                                <td>3292</td>
+                                <td>246</td>
+                                <td>3000</td>
+                                <td>100.0%</td>
+                                <td>1</td>
+                                <td>
+                                    
+                                        <span class="badge badge-success">Excellent</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="emphasis-primary">httpCode:404</td>
+                                <td>3246</td>
+                                <td>220</td>
+                                <td>3001</td>
+                                <td>100.0%</td>
+                                <td>1</td>
+                                <td>
+                                    
+                                        <span class="badge badge-success">Excellent</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            
+            <div class="report-section">
+                <div class="section-header">
+                    <h2><span class="section-number">4</span>User Performance Analysis</h2>
+                </div>
+                <div class="section-description">
+                    Performance metrics grouped by user showing average response times and success rates.
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Avg Total (ms)</th>
+                                <th>Avg API (ms)</th>
+                                <th>Avg Render (ms)</th>
+                                <th>Success Rate</th>
+                                <th>Tests Run</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td class="emphasis-primary">vunetadmin</td>
+                                <td>5815</td>
+                                <td>180</td>
+                                <td>2000</td>
+                                <td>
+                                    
+                                        <span class="badge badge-danger">66.7%</span>
+                                    
+                                </td>
+                                <td>12</td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            
+            <div class="report-section">
+                <div class="section-header">
+                    <h2><span class="section-number">5</span>Detailed Test Results</h2>
+                </div>
+                <div class="section-description">
+                    Complete test execution log with timestamps and individual performance metrics.
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Username</th>
+                                <th>Filter</th>
+                                <th>Total (ms)</th>
+                                <th>API (ms)</th>
+                                <th>Render (ms)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td class="text-muted">2026-01-16 10:January:27</td>
+                                <td class="emphasis-secondary">vunetadmin</td>
+                                <td class="emphasis-primary">vublock_name:apache</td>
+                                <td>3346</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>
+                                    
+                                        <span class="badge badge-danger">Failed</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="text-muted">2026-01-16 10:January:27</td>
+                                <td class="emphasis-secondary">vunetadmin</td>
+                                <td class="emphasis-primary">vublock_name:apache</td>
+                                <td>3317</td>
+                                <td>302</td>
+                                <td>3000</td>
+                                <td>
+                                    
+                                        <span class="badge badge-success">Success</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="text-muted">2026-01-16 10:January:23</td>
+                                <td class="emphasis-secondary">vunetadmin</td>
+                                <td class="emphasis-primary">apache2_access_user_agent_name:curl</td>
+                                <td>3345</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>
+                                    
+                                        <span class="badge badge-danger">Failed</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="text-muted">2026-01-16 10:January:23</td>
+                                <td class="emphasis-secondary">vunetadmin</td>
+                                <td class="emphasis-primary">apache2_access_user_agent_name:curl</td>
+                                <td>3322</td>
+                                <td>294</td>
+                                <td>2999</td>
+                                <td>
+                                    
+                                        <span class="badge badge-success">Success</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="text-muted">2026-01-16 10:January:20</td>
+                                <td class="emphasis-secondary">vunetadmin</td>
+                                <td class="emphasis-primary">target:10.10.10.206</td>
+                                <td>3379</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>
+                                    
+                                        <span class="badge badge-danger">Failed</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="text-muted">2026-01-16 10:January:20</td>
+                                <td class="emphasis-secondary">vunetadmin</td>
+                                <td class="emphasis-primary">target:10.10.10.206</td>
+                                <td>3347</td>
+                                <td>318</td>
+                                <td>3000</td>
+                                <td>
+                                    
+                                        <span class="badge badge-success">Success</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="text-muted">2026-01-16 10:January:47</td>
+                                <td class="emphasis-secondary">vunetadmin</td>
+                                <td class="emphasis-primary">apache2_access_method:GET</td>
+                                <td>33274</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>
+                                    
+                                        <span class="badge badge-danger">Failed</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="text-muted">2026-01-16 10:January:47</td>
+                                <td class="emphasis-secondary">vunetadmin</td>
+                                <td class="emphasis-primary">apache2_access_method:GET</td>
+                                <td>3267</td>
+                                <td>217</td>
+                                <td>3001</td>
+                                <td>
+                                    
+                                        <span class="badge badge-success">Success</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="text-muted">2026-01-16 10:January:42</td>
+                                <td class="emphasis-secondary">vunetadmin</td>
+                                <td class="emphasis-primary">httpCode:404</td>
+                                <td>3246</td>
+                                <td>220</td>
+                                <td>3001</td>
+                                <td>
+                                    
+                                        <span class="badge badge-success">Success</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="text-muted">2026-01-16 10:January:38</td>
+                                <td class="emphasis-secondary">vunetadmin</td>
+                                <td class="emphasis-primary">220</td>
+                                <td>3292</td>
+                                <td>246</td>
+                                <td>3000</td>
+                                <td>
+                                    
+                                        <span class="badge badge-success">Success</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="text-muted">2026-01-16 10:January:33</td>
+                                <td class="emphasis-secondary">vunetadmin</td>
+                                <td class="emphasis-primary">200</td>
+                                <td>3308</td>
+                                <td>274</td>
+                                <td>3000</td>
+                                <td>
+                                    
+                                        <span class="badge badge-success">Success</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="text-muted">2026-01-16 10:January:28</td>
+                                <td class="emphasis-secondary">vunetadmin</td>
+                                <td class="emphasis-primary">500</td>
+                                <td>3336</td>
+                                <td>291</td>
+                                <td>3001</td>
+                                <td>
+                                    
+                                        <span class="badge badge-success">Success</span>
+                                    
+                                </td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        
+        <div class="report-footer">
+            <div class="footer-content">
+                <p><strong>Playwright Log Analytics Report</strong> | UI-Driven Performance Monitoring</p>
+                <p class="text-muted">Data sourced from monitoring.playwright_log_analytics | Generated with Playwright automation</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

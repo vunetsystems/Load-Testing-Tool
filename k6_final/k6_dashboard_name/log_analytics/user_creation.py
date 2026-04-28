@@ -11,6 +11,7 @@ REALM = "vunet"
 
 TOKEN_URL = f"{KEYCLOAK_BASE}/realms/{REALM}/protocol/openid-connect/token"
 ADMIN_URL = f"{KEYCLOAK_BASE}/admin/realms/{REALM}/users"
+GROUPS_URL = f"{KEYCLOAK_BASE}/admin/realms/{REALM}/groups"
 
 CLIENT_ID = "nairobi"
 CLIENT_SECRET = "95z5sjMZLE6qQjRrVrVGtOge3r1k8p4a"
@@ -18,6 +19,8 @@ ADMIN_CLIENT_ID = "admin-cli"
 ADMIN_USERNAME = "vunetadmin"
 ADMIN_PASSWORD = "Qwerty@123"
 COMMON_PASSWORD = "Password123!"
+
+GROUP_NAME = "load_test"
 
 
 # ===== FUNCTIONS =====
@@ -36,31 +39,65 @@ def get_admin_token():
     return response.json()["access_token"]
 
 
+def get_group_id(admin_token, group_name):
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    response = requests.get(GROUPS_URL, headers=headers, verify=False)
+    response.raise_for_status()
+
+    for group in response.json():
+        if group["name"] == group_name:
+            return group["id"]
+
+    raise Exception(f"❌ Group '{group_name}' not found")
+
+
+def add_user_to_group(admin_token, user_id, group_id):
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    url = f"{ADMIN_URL}/{user_id}/groups/{group_id}"
+    response = requests.put(url, headers=headers, verify=False)
+
+    if response.status_code in (204, 201):
+        print(f"👥 User added to group '{GROUP_NAME}'")
+    else:
+        print(f"❌ Failed to add user to group: {response.status_code} - {response.text}")
+
+
 def create_user(admin_token, username):
-    """Create a new user in Keycloak."""
+    """Create a new user in Keycloak with attributes."""
     user_data = {
         "username": username,
         "email": f"{username}@vunetsystems.com",
         "enabled": True,
         "firstName": "Test",
         "lastName": "User",
+        "attributes": {
+            "tenant_id": ["1"],
+            "display_duration": ["0"],
+            "modified_by": ["vunetadmin"],
+            "data_access_role": ["175f4022-9281-4905-a027-7a25db03e782"],
+            "matching_keywords": []
+        },
         "credentials": [{
             "type": "password",
             "value": COMMON_PASSWORD,
             "temporary": False
         }]
     }
+
     headers = {
         "Authorization": f"Bearer {admin_token}",
         "Content-Type": "application/json"
     }
+
     response = requests.post(ADMIN_URL, json=user_data, headers=headers, verify=False)
+
     if response.status_code == 201:
+        user_id = response.headers["Location"].split("/")[-1]
         print(f"✅ User {username} created successfully.")
-        return True
+        return user_id
     else:
         print(f"❌ Failed to create user {username}: {response.status_code} - {response.text}")
-        return False
+        return None
 
 
 def generate_username(prefix="load_user_"):
@@ -98,7 +135,6 @@ def login_vusmartmaps_get_cookies(username):
         print(f"🔑 Logging in as {username}...")
         page.goto(f"{BASE_URL}/vui/login", wait_until="networkidle")
 
-        # Fill login form
         page.fill("input[name=username]", username)
         page.fill("input[name=password]", COMMON_PASSWORD)
         page.click("button[type=submit]")
@@ -112,47 +148,51 @@ def login_vusmartmaps_get_cookies(username):
 
         cookies = context.cookies()
         browser.close()
-        cookie_dict = {c["name"]: c["value"] for c in cookies}
-        return cookie_dict
+        return {c["name"]: c["value"] for c in cookies}
 
 
 # ===== MAIN FUNCTION =====
 
 def main(num_users):
     admin_token = get_admin_token()
+    group_id = get_group_id(admin_token, GROUP_NAME)
+
     with open("user_cookies_module.txt", "w") as file:
-        # Write header
-        file.write("username,password,auth_token,vunet_session,X-VuNet-HTTP-Info,grafana_session_expiry\n")
+        file.write(
+            "username,password,auth_token,vunet_session,"
+            "X-VuNet-HTTP-Info,grafana_session_expiry\n"
+        )
 
         for _ in range(num_users):
             username = generate_username()
-            if not create_user(admin_token, username):
+            user_id = create_user(admin_token, username)
+            if not user_id:
                 continue
 
-            # Delay to allow user creation to propagate
+            add_user_to_group(admin_token, user_id, group_id)
             time.sleep(2)
 
-            # Get user auth token
             auth_token = get_user_auth_token(username)
-
-            # Get cookies via Playwright
             cookies = login_vusmartmaps_get_cookies(username)
             if not cookies:
                 print(f"⚠️ Skipping {username}, failed to get cookies.")
                 continue
 
-            vunet_session = cookies.get("vunet_session", "")
-            X_VuNet_HTTP_Info = cookies.get("X-VuNet-HTTP-Info", "")
-            grafana_session_expiry = cookies.get("grafana_session_expiry", "")
+            file.write(
+                f"{username},{COMMON_PASSWORD},{auth_token},"
+                f"{cookies.get('vunet_session','')},"
+                f"{cookies.get('X-VuNet-HTTP-Info','')},"
+                f"{cookies.get('grafana_session_expiry','')}\n"
+            )
 
-            # Write data
-            file.write(f"{username},{COMMON_PASSWORD},{auth_token},{vunet_session},{X_VuNet_HTTP_Info},{grafana_session_expiry}\n")
             print(f"✅ Saved cookies & token for {username}")
 
 
 # ===== ENTRY POINT =====
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Create users and get vuSmartMaps cookies + auth token")
+    parser = argparse.ArgumentParser(
+        description="Create users and get vuSmartMaps cookies + auth token"
+    )
     parser.add_argument("num_users", type=int, help="Number of users to create")
     args = parser.parse_args()
     main(args.num_users)

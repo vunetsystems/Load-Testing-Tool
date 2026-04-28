@@ -18,7 +18,7 @@ include_module_dirs:
   BRUM:
     enabled: false
   CiscoIoSSwitch:
-    enabled: false
+    enabled: true
   DNS_Monitoring:
     enabled: false
   IBMMQ:
@@ -26,7 +26,7 @@ include_module_dirs:
   K8s:
     enabled: false
   LinuxMonitor:
-    enabled: true
+    enabled: false
   MongoDB:
     enabled: false
   Mssql:

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -41,7 +42,9 @@ type DistributionConfig struct {
 
 // SessionConfig controls session ID management
 type SessionConfig struct {
-	RotationInterval string `yaml:"rotation_interval"` // How often to rotate session ID
+	RotationMode     string `yaml:"rotation_mode"`     // "time" or "count"
+	RotationInterval string `yaml:"rotation_interval"` // How often to rotate session ID (for time mode)
+	RotationCount    int    `yaml:"rotation_count"`    // Number of messages before rotation (for count mode)
 	SessionIDPrefix  string `yaml:"session_id_prefix"` // Prefix for session IDs
 }
 
@@ -171,16 +174,21 @@ type MonitoringConfig struct {
 	MetricsPort   int  `yaml:"metrics_port"`
 }
 
-// LoadConfig loads configuration from a YAML file
-func LoadConfig(path string) (*Config, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
+// LoadConfig loads configuration from one or more YAML files.
+// Files are processed in the order they are provided, and later files
+// will override values from earlier files if they overlap.
+func LoadConfig(paths ...string) (*Config, error) {
 	var config Config
-	if err := yaml.Unmarshal(data, &config); err != nil {
-		return nil, err
+
+	for _, path := range paths {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read config file %s: %w", path, err)
+		}
+
+		if err := yaml.Unmarshal(data, &config); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal config file %s: %w", path, err)
+		}
 	}
 
 	return &config, nil

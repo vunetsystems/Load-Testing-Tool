@@ -4,7 +4,7 @@ uniquekey:
   DataType: IPv4
   ValueType: "RandomFixed"
   Value: "10.10.10.1"
-  NumUniqKey: 15000
+  NumUniqKey: 3334
 period: 1s
 LogsPerSec: 1
 #MBPerDay: 100

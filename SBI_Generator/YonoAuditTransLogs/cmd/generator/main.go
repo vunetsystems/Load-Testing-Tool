@@ -20,11 +20,12 @@ import (
 
 func main() {
 	// Parse command-line flags
-	configPath := flag.String("config", "config/config.yaml", "Path to configuration file")
+	appConfigPath := flag.String("app-config", "config/app_config.yaml", "Path to application/execution configuration file")
+	dataConfigPath := flag.String("data-config", "config/data_config.yaml", "Path to data/template configuration file")
 	flag.Parse()
 
-	// Load configuration
-	cfg, err := config.LoadConfig(*configPath)
+	// Load configuration from both files
+	cfg, err := config.LoadConfig(*appConfigPath, *dataConfigPath)
 	if err != nil {
 		fmt.Printf("Failed to load configuration: %v\n", err)
 		os.Exit(1)
@@ -48,7 +49,16 @@ func main() {
 
 	// Initialize session manager
 	rotationInterval, _ := cfg.Session.GetRotationInterval()
-	sessionMgr := generator.NewSessionManager(cfg.Session.SessionIDPrefix, rotationInterval)
+	rotationMode := cfg.Session.RotationMode
+	if rotationMode == "" {
+		rotationMode = "time" // Default to time-based for backward compatibility
+	}
+	sessionMgr := generator.NewSessionManager(
+		cfg.Session.SessionIDPrefix,
+		rotationMode,
+		rotationInterval,
+		cfg.Session.RotationCount,
+	)
 
 	// Initialize message generator
 	msgGen := generator.NewMessageGenerator(cfg, sessionMgr)

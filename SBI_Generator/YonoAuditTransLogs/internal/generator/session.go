@@ -14,15 +14,21 @@ type SessionManager struct {
 	currentSessionID string
 	currentCommandID string
 	prefix           string
-	rotationInterval time.Duration
+	rotationMode     string        // "time" or "count"
+	rotationInterval time.Duration // for time-based rotation
+	rotationCount    int           // threshold for count-based rotation
+	currentCount     int           // current message count
 	lastRotation     time.Time
 }
 
 // NewSessionManager creates a new session manager
-func NewSessionManager(prefix string, rotationInterval time.Duration) *SessionManager {
+func NewSessionManager(prefix string, rotationMode string, rotationInterval time.Duration, rotationCount int) *SessionManager {
 	sm := &SessionManager{
 		prefix:           prefix,
+		rotationMode:     rotationMode,
 		rotationInterval: rotationInterval,
+		rotationCount:    rotationCount,
+		currentCount:     0,
 	}
 	sm.rotate()
 	return sm
@@ -31,10 +37,19 @@ func NewSessionManager(prefix string, rotationInterval time.Duration) *SessionMa
 // GetCurrentSession returns the current session ID and command ID, rotating if necessary
 func (sm *SessionManager) GetCurrentSession() (string, string) {
 	sm.mu.RLock()
-	if time.Since(sm.lastRotation) < sm.rotationInterval {
+	needsRotation := sm.shouldRotate()
+	if !needsRotation {
 		sessionID := sm.currentSessionID
 		commandID := sm.currentCommandID
 		sm.mu.RUnlock()
+		
+		// Increment counter for count-based mode (need write lock)
+		if sm.rotationMode == "count" {
+			sm.mu.Lock()
+			sm.currentCount++
+			sm.mu.Unlock()
+		}
+		
 		return sessionID, commandID
 	}
 	sm.mu.RUnlock()
@@ -44,11 +59,25 @@ func (sm *SessionManager) GetCurrentSession() (string, string) {
 	defer sm.mu.Unlock()
 
 	// Double-check after acquiring write lock
-	if time.Since(sm.lastRotation) >= sm.rotationInterval {
+	if sm.shouldRotate() {
 		sm.rotate()
+	}
+	
+	// Increment counter for count-based mode
+	if sm.rotationMode == "count" {
+		sm.currentCount++
 	}
 
 	return sm.currentSessionID, sm.currentCommandID
+}
+
+// shouldRotate checks if rotation is needed based on mode (must be called with at least read lock)
+func (sm *SessionManager) shouldRotate() bool {
+	if sm.rotationMode == "count" {
+		return sm.currentCount >= sm.rotationCount
+	}
+	// Default to time-based rotation
+	return time.Since(sm.lastRotation) >= sm.rotationInterval
 }
 
 // rotate generates a new session ID (must be called with write lock held)
@@ -63,6 +92,8 @@ func (sm *SessionManager) rotate() {
 		sm.currentCommandID = AllCommandIDs[n.Int64()]
 	}
 	
+	// Reset counter for count-based rotation
+	sm.currentCount = 0
 	sm.lastRotation = time.Now()
 }
 

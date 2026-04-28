@@ -44,17 +44,7 @@ while IFS= read -r FILTER_LINE || [[ -n "$FILTER_LINE" ]]; do
   RAW_FILTER=$(echo "$FILTER_LINE" | xargs)
   [ -z "$RAW_FILTER" ] && continue
 
-  FILTER_LIST=$(echo "$RAW_FILTER" | awk -F '+' '{
-    print "["
-    for (i = 1; i <= NF; i++) {
-      gsub(/"/, "", $i)
-      split($i, kv, ":")
-      printf "  {\"key\": \"%s\", \"value\": \"%s\"}%s\n", kv[1], kv[2], (i<NF ? "," : "")
-    }
-    print "]"
-  }')
-
-  FILTER_JSON=$(echo "$FILTER_LIST" | jq -c .)
+  FILTER_JSON="$RAW_FILTER"
   echo -e "\n▶ Running test for filter: $RAW_FILTER"
   TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
 

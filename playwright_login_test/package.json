@@ -1,0 +1,21 @@
+{
+  "name": "playwright-login-load-test",
+  "version": "1.0.0",
+  "description": "Playwright-based login load testing for VuNet Systems",
+  "main": "login-load-test.js",
+  "scripts": {
+    "test": "node login-load-test.js",
+    "install-browsers": "npx playwright install chromium"
+  },
+  "keywords": [
+    "playwright",
+    "load-testing",
+    "login",
+    "automation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "playwright": "^1.40.0"
+  }
+}

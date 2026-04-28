@@ -5,73 +5,92 @@ import { Trend } from 'k6/metrics';
 
 let responseTimeTrend = new Trend('response_time', true);
 
-// Load user credentials
+// Load users with cookies
 const users = new SharedArray('users', () =>
   open('/home/vunet/Load-Testing-Tool/k6_final/k6_dashboard_name/log_analytics/user_cookies_module.txt')
     .split('\n')
-    .filter(line => line.trim() !== '')
+    .filter(l => l.trim())
     .map(line => {
-      const [username, password, token] = line.split(',');
-      return { username, password, token };
+      const [
+        username,
+        password,
+        token,
+        vunet_session,
+        X_VuNet_HTTP_Info,
+        grafana_session_expiry,
+        ajs_anonymous_id
+      ] = line.split(',');
+      return { username, token, vunet_session, X_VuNet_HTTP_Info, grafana_session_expiry, ajs_anonymous_id };
     })
 );
 
-// Get env vars
+// Env vars
 const filter = __ENV.FILTER;
 const startTime = __ENV.START_TIME;
 const endTime = __ENV.END_TIME;
-const vus = parseInt(__ENV.VUS);
-const iterations = parseInt(__ENV.ITERATIONS);
+const vus = Number(__ENV.VUS);
+const iterations = Number(__ENV.ITERATIONS);
 
-// Validate
-if (!filter || !startTime || !endTime || isNaN(vus) || isNaN(iterations)) {
-  throw new Error('Missing or invalid required environment variables!');
+if (!filter || !startTime || !endTime || !vus || !iterations) {
+  throw new Error('❌ Missing env vars');
 }
 
-export let options = {
-  vus,
-  iterations,
-};
+export const options = { vus, iterations };
 
 export default function () {
-  const user = users[__VU - 1];
-
-  if (!user || !user.token || user.token.trim() === '') {
-    console.error(`❌ Invalid or missing token for VU ${__VU}`);
+  if (__VU > users.length) {
+    console.error(`❌ VU ${__VU} > users ${users.length}`);
     return;
   }
 
-  const vql = {
-    table: [
-      {
-        label: 'Au Logs Rep',
-        table_name: 'vlogs_apachelogs_data'
-      }
-    ],
-    size: 100,
-    offset: 1,
-    required_cols: ['timestamp', 'message', 'log_level', 'log_uuid'],
-    timestamp_column: 'timestamp',
-    query_filters: [
-      {
-        query_format: 'VQL',
-        filter_list: filter,
-        apply_filter: true
-      }
-    ]
-  };
+  const user = users[__VU - 1];
+
+  if (!user.token || user.token.length < 100) {
+    console.error(`❌ Invalid token for VU ${__VU}`);
+    return;
+  }
+
+  // Parse filter: e.g., "message:10"
+  const [column, value] = filter.includes(':')
+    ? filter.split(':', 2)
+    : ['message', filter];
 
   const payload = {
     queries: [
       {
-        receipt_timezone: 'Asia/Kolkata',
         query_name: 'Query1',
         source_id: 1,
-        timezone: 'UTC',
         source_name: 'Hyperscale',
+        receipt_timezone: 'UTC',
+        timezone: 'UTC',
         query: {
           query_type: 'time-span',
-          vunet_lquery: vql
+          vunet_lquery: {
+            table: [
+              {
+                label: 'Apachelogs',
+                table_name: 'vlogs_apachelogs'
+              }
+            ],
+            size: 100,
+            offset: 0,
+            timestamp_column: 'timestamp',
+            required_cols: [
+              'timestamp',
+              'message',
+              'log_level',
+              'log_uuid'
+            ],
+            query_filters: {
+              filters: [
+                {
+                  column: column,
+                  operator: 'CONTAINS',
+                  value: value
+                }
+              ]
+            }
+          }
         }
       }
     ],
@@ -81,32 +100,34 @@ export default function () {
     }
   };
 
-  const headers = {
-    'Authorization': `Bearer ${user.token}`,
-    'Content-Type': 'application/json',
-    'Accept': 'application/json, text/plain, */*',
-  };
-
-  try {
-    const res = http.post('https://216.48.191.10/api/vuaccel/datamodel/log_query/', JSON.stringify(payload), { headers });
-
-    if (res && res.timings && !isNaN(res.timings.duration)) {
-      responseTimeTrend.add(res.timings.duration);
-    } else {
-      console.warn(`⚠️ No valid timing data for user: ${user.username}`);
+  // Send request with all necessary headers + cookies
+  const res = http.post(
+    'https://216.48.191.10/api/vuaccel/datamodel/log_query/',
+    JSON.stringify(payload),
+    {
+      headers: {
+        'Authorization': `Bearer ${user.token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/plain, */*',
+        'Origin': 'https://216.48.191.10',
+        'Referer': 'https://216.48.191.10/vui/a/vusmartmaps-app/observability/log_analytics/source_selection/log_analytics',
+        'Cookie': `vunet_session=${user.vunet_session}; X-VuNet-HTTP-Info=${user.X_VuNet_HTTP_Info}; grafana_session_expiry=${user.grafana_session_expiry}; ajs_anonymous_id=${user.ajs_anonymous_id}`
+      }
     }
+  );
 
-    check(res, {
-      'status is 200': (r) => r.status === 200,
-      'response time < 2s': (r) => r.timings.duration < 2000,
-    });
-
-    console.log(`User: ${user.username} | Filter: ${filter} | Status: ${res.status} | Time: ${res.timings.duration}ms`);
-
-  } catch (err) {
-    console.error(`❌ Request failed for user: ${user.username} | Error: ${err.message}`);
+  if (res.status !== 200) {
+    console.error(`❌ ${res.status} for ${user.username}`);
+    console.error(res.body);
   }
+
+  responseTimeTrend.add(res.timings.duration);
+
+  check(res, {
+    'status 200': r => r.status === 200
+  });
+
+  console.log(`User ${user.username} | Status ${res.status} | ${res.timings.duration}ms`);
 
   sleep(1);
 }
-

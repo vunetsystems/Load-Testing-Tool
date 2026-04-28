@@ -1,8 +1,8 @@
 {
   "application": "App1",
-  "collectorEndpoint": "10.32.4.51:4317",
+  "collectorEndpoint": "10.32.0.86:4317",
   "environment": "production",
-  "eps": 5000,
+  "eps": 500,
   "errorRate": 50,
   "hostName": "e2e-95-237",
   "host_ip": "10.32.4.45",

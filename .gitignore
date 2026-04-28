@@ -1,2 +1,24 @@
 .env
 .env
+node_modules/
+# Ignore reports
+data/combined_reports/
+
+# Ignore logs & runtime
+logs/
+*.log
+
+# Ignore binaries
+test1
+test2
+vudatasim-*
+vdsm-report-debug
+pod-restart-analyzer
+
+# Ignore DB
+*.db
+
+# Ignore results/cookies/temp
+**/results/
+**/*.txt
+**/__pycache__/
